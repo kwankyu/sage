@@ -742,7 +742,7 @@ class FiniteFamily(AbstractFamily):
         return self._dictionary[i]
 
     # For the pickle and copy modules
-    def __getstate__(self):
+    def _getstate_(self):
         """
         TESTS::
 
@@ -753,7 +753,7 @@ class FiniteFamily(AbstractFamily):
         """
         return {'dictionary': self._dictionary, 'keys': self._keys}
 
-    def __setstate__(self, state):
+    def _setstate_(self, state):
         """
         TESTS::
 
@@ -827,7 +827,7 @@ class FiniteFamilyWithHiddenKeys(FiniteFamily):
         """
         return self._hidden_keys
 
-    def __getstate__(self):
+    def _getstate_(self):
         """
         TESTS::
 
@@ -844,7 +844,7 @@ class FiniteFamilyWithHiddenKeys(FiniteFamily):
                 'hidden_function': f,
                 'keys': self._keys}
 
-    def __setstate__(self, d):
+    def _setstate_(self, d):
         """
         TESTS::
 
@@ -1094,7 +1094,7 @@ class LazyFamily(AbstractFamily):
         """
         return self.function(i)
 
-    def __getstate__(self):
+    def _getstate_(self):
         """
         EXAMPLES::
 
@@ -1122,7 +1122,7 @@ class LazyFamily(AbstractFamily):
         return {'set': self.set,
                 'function': f}
 
-    def __setstate__(self, d):
+    def _setstate_(self, d):
         """
         EXAMPLES::
 
@@ -1263,7 +1263,7 @@ class TrivialFamily(AbstractFamily):
         """
         return self._enumeration[i]
 
-    def __getstate__(self):
+    def _getstate_(self):
         """
         TESTS::
 
@@ -1274,7 +1274,7 @@ class TrivialFamily(AbstractFamily):
         """
         return {'_enumeration': self._enumeration}
 
-    def __setstate__(self, state):
+    def _setstate_(self, state):
         """
         TESTS::
 
@@ -1406,7 +1406,7 @@ class EnumeratedFamily(LazyFamily):
         """
         return self.enumset.unrank(i)
 
-    def __getstate__(self):
+    def _getstate_(self):
         """
         EXAMPLES::
 
@@ -1419,7 +1419,7 @@ class EnumeratedFamily(LazyFamily):
         """
         return {'enumset': self.enumset}
 
-    def __setstate__(self, state):
+    def _setstate_(self, state):
         """
         EXAMPLES::
 

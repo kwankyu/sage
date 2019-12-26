@@ -2068,7 +2068,7 @@ class RationalPolyhedralFan(IntegralRayCollection,
     # Internally we use this name for a uniform behaviour of cones and fans.
     _face_lattice_function = cone_lattice
 
-    def __getstate__(self):
+    def _getstate_(self):
         r"""
         Return the dictionary that should be pickled.
 

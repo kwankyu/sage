@@ -162,7 +162,7 @@ class CombinatorialSpecies(GenericCombinatorialSpecies):
         else:
             return (self.__class__,)
 
-    def __getstate__(self):
+    def _getstate_(self):
         """
         EXAMPLES::
 
@@ -178,7 +178,7 @@ class CombinatorialSpecies(GenericCombinatorialSpecies):
             state['reference'] = self._reference
         return state
 
-    def __setstate__(self, state):
+    def _setstate_(self, state):
         """
         EXAMPLES::
 

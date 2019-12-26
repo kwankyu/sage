@@ -176,8 +176,8 @@ class GenericCombinatorialSpecies(SageObject):
             False
         """
         return not (self == other)
-    
-    def __getstate__(self):
+
+    def _getstate_(self):
         r"""
         This is used during the pickling process and returns a dictionary
         of the data needed to create this object during the unpickling
@@ -201,7 +201,7 @@ class GenericCombinatorialSpecies(SageObject):
         except AttributeError:
             return ({}, kwds)
 
-    def __setstate__(self, state):
+    def _setstate_(self, state):
         """
         This is used during unpickling to recreate this object from the
         data provided by the __getstate__ method.

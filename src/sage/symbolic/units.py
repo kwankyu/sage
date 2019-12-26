@@ -1124,7 +1124,7 @@ class Units(ExtraTabCompletion):
             True
         """
         return not (self == other)
-    
+
     def _tab_completion(self):
         """
         Return tab completions.

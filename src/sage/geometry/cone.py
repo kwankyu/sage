@@ -1503,7 +1503,7 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection,
         """
         return self._contains(point)
 
-    def __getstate__(self):
+    def _getstate_(self):
         r"""
         Return the dictionary that should be pickled.
 

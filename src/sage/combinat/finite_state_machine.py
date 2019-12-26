@@ -1822,7 +1822,7 @@ class FSMState(SageObject):
         del self._deepcopy_relabel_
         return new
 
-    def __getstate__(self):
+    def _getstate_(self):
         """
         Return state for pickling excluding outgoing transitions.
 
@@ -3460,7 +3460,7 @@ class FiniteStateMachine(SageObject):
             for transition in other.iter_transitions():
                 self.add_transition(deepcopy(transition, memo))
 
-    def __getstate__(self):
+    def _getstate_(self):
         """
         Return state for pickling excluding outgoing transitions.
 
@@ -3488,7 +3488,7 @@ class FiniteStateMachine(SageObject):
         })
         return odict
 
-    def __setstate__(self, d):
+    def _setstate_(self, d):
         """
         Set state from pickling.
 
@@ -12235,8 +12235,8 @@ class Automaton(FiniteStateMachine):
             P.state(s.label()).color = 1/(w[states[s]] * ff)
             P.state(s.label()).initial_probability = w[states[s]] * u[states[s]]
         return P
-            
- 
+
+
     def with_output(self, word_out_function=None):
         r"""
         Construct a transducer out of this automaton.

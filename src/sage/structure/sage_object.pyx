@@ -141,7 +141,6 @@ cdef class SageObject:
         if hasattr(self, '__custom_name'):
             del self.__custom_name
 
-
     def __repr__(self):
         """
         Default method for string representation.
@@ -517,6 +516,55 @@ cdef class SageObject:
             <class 'sage.symbolic.maxima_wrapper.MaximaWrapper'>
         """
         return type(self)
+
+    #############################################################################
+    # Pickling framework
+    #############################################################################
+
+    def __getstate__(self):
+        if hasattr(self, '_getstate_'):
+            state = self._getstate_()
+        elif hasattr(self, '__dict__'):
+            state = self.__dict__.copy()
+        else:
+            state = dict()
+
+        from sage.env import SAGE_VERSION
+        v = SAGE_VERSION.split('.')
+        major = int(v[0])
+        minor = int(v[1])
+        state['sage_version'] = major * 100 + minor
+        return state
+
+    def __setstate__(self, state):
+        if 'sage_version' in state:
+            version = state['sage_version']
+            del state['sage_version']
+        else:
+            version = None
+
+        if hasattr(self, '_setstate_'):
+            self._setstate_(state)
+        elif hasattr(self, '__dict__'):
+            self.__dict__.update(state)
+        else:
+            self.__dict__ = state
+
+        if version is not None and hasattr(self, '_upgrade'):
+            self._upgrade(from_version=version)
+
+    def _upgrade(self, from_version):
+        version = from_version
+        if version < 800:
+            # upgrade to version 801
+            self._upgradable = True
+            # now self is an object of Sage version 8.1
+            version = 800
+        if version < 809:
+            # upgrade to version 902
+            del self._upgradable
+            # now self is an object of Sage version 9.2
+            version = 809
 
 
     #############################################################################
