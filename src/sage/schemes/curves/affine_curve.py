@@ -93,10 +93,12 @@ AUTHORS:
 #  the License, or (at your option) any later version.
 #                  http://www.gnu.org/licenses/
 #*****************************************************************************
-from __future__ import absolute_import
+import itertools
 
 from sage.misc.lazy_attribute import lazy_attribute
 from sage.misc.cachefunc import cached_method
+
+from sage.structure.unique_representation import UniqueRepresentation
 
 from sage.arith.misc import binomial
 from sage.interfaces.all import singular
@@ -1821,12 +1823,13 @@ class AffinePlaneCurve_finite_field(AffinePlaneCurve_field):
             raise ValueError("No algorithm '%s' known"%algorithm)
 
 
-class IntegralAffineCurve(AffineCurve_field):
+class IntegralAffineCurve(AffineCurve_field, UniqueRepresentation):
     """
     Base class for integral affine curves.
     """
     _closed_point = IntegralAffineCurveClosedPoint
 
+    @cached_method(do_pickle=True)
     def function_field(self):
         """
         Return the function field of the curve.
@@ -2157,6 +2160,7 @@ class IntegralAffineCurve_finite_field(IntegralAffineCurve):
 
         return points
 
+    @cached_method(do_pickle=True)
     def singular_closed_points(self):
         """
         Return the singular closed points of the curve.
@@ -2467,3 +2471,324 @@ class IntegralAffinePlaneCurve_finite_field(AffinePlaneCurve_finite_field, Integ
     """
     _point = IntegralAffinePlaneCurvePoint_finite_field
 
+    def hamburger_noether_expansion(self, place):
+        r"""
+        Return the Hamburger-Noether expansion of ``place`` on the curve.
+
+        INPUT:
+
+        - ``place`` -- a place on the curve
+
+        Recall that a place represents a branch of the curve. This method
+        computes the Hamburger-Noether expansion from a parametric
+        representation of the branch.
+
+        If the place is not rational, the Hamburger-Noether expansion is for a
+        representative rational place on the curve with the base field extended
+        to an algebraic closure.
+
+        EXAMPLES::
+
+            sage: A.<x,y> = AffineSpace(GF(7^2),2)
+            sage: C = Curve(x^2 - x^4 - y^4, A)
+            sage: p, = C.singular_closed_points()
+            sage: b1, b2 = p.places()
+            sage: C.hamburger_noether_expansion(b1)   # long time
+            {'x0': 'z(-1)', 'y0': 'z0', 'z(-1)': 6*z0^2 + 3*z0^6 + ...}
+            sage: C.hamburger_noether_expansion(b2)   # long time
+            {'x0': 'z(-1)', 'y0': 'z0', 'z(-1)': z0^2 + 4*z0^6 + ...}
+
+        ::
+
+            sage: A.<x,y> = AffineSpace(GF(7), 2)
+            sage: C = Curve((x^2 - y^3)^2 + x*y^6, A)
+            sage: p, = C.singular_closed_points()
+            sage: b, = p.places()
+            sage: C.hamburger_noether_expansion(b)
+            {'x0': 'z(-1)',
+             'y0': 'z0',
+             'z(-1)': z0*z1,
+             'z0': z1^3*z2 + z1^2,
+             'z1': 6*z2^2 + 4*z2^5 + 6*z2^8 + ...}
+
+        The last output shows the Hamburger-Noether expansion
+
+        .. MATH::
+
+            \begin{aligned}
+                x_0 = z_{-1} &= z_0z_1 \\
+                y_0 = z_0    &= z_1^2 + z_1^3z_2 \\
+                      z_1    &= 6z_2^2 + 4z_2^5 + 6z_2^8 + \dots
+            \end{aligned}
+
+        where the pair `x_0` and `y_0` is a parametric representation of the
+        branch shifted to the origin.
+
+        For more information on Hamburger-Noether expansions, see [Cam2006]_.
+        """
+        initialization, hn_raw = self._hamburger_noether_expansion(place)
+
+        k = initialization[initialization['z(-1)']].base_ring()
+        M = PolynomialRing(k, len(hn_raw), var_array=['z'])
+        hn = {initialization['z(-1)']: 'z(-1)' , initialization['z0']: 'z0'}
+        length = len(hn_raw)
+        for i in range(length):
+            zprev = 'z{}'.format(i-1) if i > 0 else 'z(-1)'
+            if i < length - 1:
+                hn[zprev] = k['z{}'.format(i)]([0] + hn_raw[i][0]) + M.gen(i)**len(hn_raw[i][0])*M.gen(i+1)
+            else:
+                hn[zprev]= hn_raw[i][0]
+
+        return hn
+
+    def _hamburger_noether_expansion(self, place):
+        """
+        Return the Hamburger-Noether expansion, in raw form, of ``place``.
+
+        INPUT:
+
+        - ``place`` -- a place on the curve
+
+        OUTPUT: a tuple of a dictionary and a list.
+
+        The dictionary has four keys ``x0``, ``y0``, ``z(-1)``, and ``z0``. The
+        pair of values for ``x0`` and ``y0`` is the parametric representation
+        of the branch associated with the place, that is, power series of the
+        coordinate functions at the origin, assuming the point at ``place`` is
+        shifted to the origin. The values of ``z(-1)`` and ``z0`` are either
+        ``x0``, ``y0`` or ``y0``, ``x0``.
+
+        The list consists of tuples. The i-th tuple is in turn a pair of a list
+        and an integer; the list is the coefficients of the nonconstant terms
+        of a polynomial z(i-1) in zi and the integer is the valuation of zi at
+        the place. The final tuple is exceptionally a pair of power series in
+        zi and 1, which is the valuation of the last variable zi at the place.
+
+        EXAMPLES::
+
+            sage: A.<x,y> = AffineSpace(GF(7), 2)
+            sage: C = Curve((x^2 - y^3)^2 + x*y^6, A)
+            sage: C.singular_closed_points()
+            [Point (x, y)]
+            sage: p, = C.singular_closed_points()
+            sage: p.places()
+            [Place (x, ((x + 1)/x^3)*y^4 + ((x + 6)/x)*y)]
+            sage: b, = p.places()
+            sage: C._hamburger_noether_expansion(b)
+            ({'x0': ...,
+              'y0': ...,
+              'z(-1)': 'x0',
+              'z0': 'y0'},
+             [([0], 4), ([0, 1, 0], 2), (6*z2^2 + 4*z2^5 + 6*z2^8 + ..., 1)])
+        """
+        x, y = self._coordinate_functions
+
+        xseries, yseries = self.parametric_representation(place)
+
+        # power series expansions of coordinate functions shifted to the origin
+        cx = xseries - xseries.coefficient(0)
+        cy = yseries - yseries.coefficient(0)
+
+        x0, y0 = [var + '0' for var in self.ambient_space().variable_names()]
+        initialization = {x0: cx, y0: cy}
+
+        vy = cy.valuation()
+        vx = cx.valuation()
+
+        if vy < vx:
+            cy,cx = cx,cy
+            vy,vx = vx,vy
+            initialization['z(-1)'] = x0
+            initialization['z0'] = y0
+        else:
+            initialization['z(-1)'] = y0
+            initialization['z0'] = x0
+
+        i = 0
+        hn = []
+        while vx > 1:
+            l = []
+            b = cx.coefficient(vx)
+            cxinv = ~cx
+            while vy >= vx:
+                a = cy.coefficient(vx) / b
+                cy = (cy - a*cx) * cxinv
+                vy = cy.valuation()
+                l.append(a)
+            # h = len(l)
+            hn.append((l, vx))
+
+            cy,cx = cx,cy
+            vy,vx = vx,vy
+            i += 1
+
+        assert vx == 1
+
+        l = [cy.coefficient(0)]
+        b = cx.coefficient(1)
+        cxinv = ~cx
+        def f(s, n):
+            while len(f.l) < n + 1:
+                a = f.cy.coefficient(1) / f.b
+                f.cy = (f.cy - a*f.cx) * f.cxinv
+                f.l.append(a)
+            return f.l[n]
+        f.l = l
+        f.b = b
+        f.cx = cx
+        f.cy = cy
+        f.cxinv = cxinv
+
+        from sage.rings.lazy_laurent_series_ring import LazyLaurentSeriesRing
+
+        k, from_k, to_k = place.residue_field()
+        R = LazyLaurentSeriesRing(k, 'z{}'.format(i))
+        hn.append((R.series(coefficient=f, valuation=0), vx)) # vx is 1
+
+        return (initialization, hn)
+
+    def delta_invariant(self, point):
+        """
+        Return the delta invariant of ``point``.
+
+        INPUT:
+
+        - ``point`` -- a closed point of the curve
+
+        EXAMPLES::
+
+            sage: A.<x,y> = AffineSpace(GF(7^2),2)
+            sage: C = Curve(x^2 - x^4 - y^4)
+            sage: p, = C.singular_closed_points()
+            sage: C.delta_invariant(p)
+            2
+
+        ALGORITHM:
+
+        The delta invariant of the point is computed using the
+        Hamburger-Noether expansions of the branches of the curve at the point.
+        The procedure is explained in [Cam2006]_.
+        """
+        x0, y0 = [var + '0' for var in self.ambient_space().variable_names()]
+
+        # compute the delta invariant of a branch represented by a
+        # hamburger-noether expansion hn
+        def delta_invariant_of_branch(hn):
+            d = 0
+            for row in hn[1]:
+                n = row[1]
+                if n > 1:
+                    h = len(row[0])
+                    d += h*n*(n-1) // 2
+            return d
+
+        # compute intersection multiplicity of the branches represented by
+        # hamburger-noether expansions hn1, hn2
+        def intersection_multiplicity(hn1, hn2):
+            exp1 = hn1[0]
+            exp2 = hn2[0]
+
+            vy1 = exp1[y0].valuation()
+            vx1 = exp1[x0].valuation()
+
+            vy2 = exp2[y0].valuation()
+            vx2 = exp2[x0].valuation()
+
+            if vy1 >= vx1:
+                if vy2 < vx2:
+                    return vx1*vy2
+                else:
+                    m = vx1*vx2
+            elif vy2 >= vx2:
+                return vy1*vx2
+            else:
+                m = vy1*vy2
+
+            rows1 = hn1[1]
+            rows2 = hn2[1]
+
+            r = 0
+            while True:
+                s1, n1 = rows1[r]
+                s2, n2 = rows2[r]
+
+                if n1 == 1 and n2 == 1:
+                    i = 1
+                    while s1.coefficient(i) == s2.coefficient(i):
+                        m += n1*n2
+                        i += 1
+                    return m
+                elif n1 > 1 and n2 == 1:
+                    for i in range(len(s1)):
+                        if s1[i] == s2.coefficient(i+1):
+                            m += n1*n2
+                        else:
+                            return m
+                    return m
+                elif n1 == 1 and n2 > 1:
+                    for i in range(len(s2)):
+                        if s2[i] == s1.coefficient(i+1):
+                            m += n1*n2
+                        else:
+                            return m
+                    return m
+                elif n1 > 1 and n2 > 1:
+                    if len(s1) < len(s2):
+                        for i in range(len(s1)):
+                            if s1[i] == s2[i]:
+                                m += n1*n2
+                            else:
+                                return m
+                        return m
+                    elif len(s1) > len(s2):
+                        for i in range(len(s2)):
+                            if s1[i] == s2[i]:
+                                m += n1*n2
+                            else:
+                                return m
+                        return m
+                    else:
+                        for i in range(len(s2)):
+                            if s1[i] == s2[i]:
+                                m += n1*n2
+                            else:
+                                return m
+                        r += 1
+
+        pls = point.places()
+        hns = []
+        d = 0
+        for p in pls:
+            m = p.degree() // p.degree()
+            hn = self._hamburger_noether_expansion(p)
+            d += m * delta_invariant_of_branch(hn)
+
+            # add conjugated hamburger-noether expansions
+            hns.append(hn)
+            if m > 1:
+                E = p.residue_field()[0]
+                frob = E.frobenius_endomorphism(self.base_ring().degree()*p.degree())
+                while m > 1:
+                    initialization = hn[0]
+                    x0 = initialization[x0]
+                    y0 = initialization[y0]
+
+                    new_initialization = {x0: x0.apply_coefficient_map(frob),
+                                          y0: y0.apply_coefficient_map(frob)}
+
+                    new_hn = []
+                    for row in hn[1]:
+                        s, n = row
+                        if n > 1:
+                            new_hn.append(([frob(c) for c in s], n))
+                        else:
+                            new_hn.append((s.apply_coefficient_map(frob), n))
+
+                    hns.append( (new_initialization, new_hn) )
+                    hn = new_hn
+                    m -= 1
+
+        for pair in itertools.combinations(hns, 2):
+            d += intersection_multiplicity(pair[0],pair[1])
+
+        return d

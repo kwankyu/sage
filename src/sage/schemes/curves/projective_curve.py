@@ -101,10 +101,10 @@ AUTHORS:
 #
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
-from __future__ import division, absolute_import
-
 from sage.misc.lazy_attribute import lazy_attribute
 from sage.misc.cachefunc import cached_method
+
+from sage.structure.unique_representation import UniqueRepresentation
 
 from sage.categories.all import hom
 from sage.categories.fields import Fields
@@ -2088,12 +2088,13 @@ class ProjectivePlaneCurve_finite_field(ProjectivePlaneCurve_field):
             raise ValueError("No algorithm '{}' known".format(algorithm))
 
 
-class IntegralProjectiveCurve(ProjectiveCurve_field):
+class IntegralProjectiveCurve(ProjectiveCurve_field, UniqueRepresentation):
     """
     Integral projective curve.
     """
     _closed_point = IntegralProjectiveCurveClosedPoint
 
+    @cached_method(do_pickle=True)
     def function_field(self):
         """
         Return the function field of this curve.
@@ -2583,6 +2584,35 @@ class IntegralProjectivePlaneCurve_finite_field(ProjectivePlaneCurve_finite_fiel
         Function field in y defined by y^2 + 2*x^5 + 2*x^4 + x^3 + x + 1
     """
     _point = IntegralProjectivePlaneCurvePoint_finite_field
+
+    def delta_invariant(self, point):
+        """
+        Return the delta invariant of ``point``.
+
+        INPUT:
+
+        - ``point`` -- a closed point of the curve
+
+        EXAMPLES::
+
+            sage: A.<x,y> = AffineSpace(GF(2), 2)
+            sage: C = Curve(y^3 - x^5, A)
+            sage: Cb = C.projective_closure()
+            sage: Cb.singular_closed_points()
+            [Point (x1, x2), Point (x0, x1)]
+            sage: p1, p2 = _
+            sage: Cb.delta_invariant(p1)
+            4
+            sage: Cb.delta_invariant(p2)
+            2
+            sage: Cb.arithmetic_genus()
+            6
+            sage: 6 - (4 + 2) == Cb.geometric_genus()
+            True
+        """
+        pa = point.affine()
+        Ca = pa.curve()
+        return Ca.delta_invariant(pa)
 
 def Hasse_bounds(q, genus=1):
     r"""

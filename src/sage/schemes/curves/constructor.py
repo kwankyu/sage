@@ -270,6 +270,7 @@ def Curve(F, A=None):
     if n < 1:
         raise TypeError("ambient space should be an affine or projective space of positive dimension")
 
+    F = tuple(F)
     k = A.base_ring()
 
     if is_AffineSpace(A):
