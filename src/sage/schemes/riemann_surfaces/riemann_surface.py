@@ -63,7 +63,6 @@ In fact it is an order in a number field::
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 from __future__ import division
-from six.moves import range
 
 from scipy.spatial import Voronoi
 from sage.arith.misc import GCD, algdep
@@ -647,7 +646,7 @@ class RiemannSurface(object):
                            for ak in self._aks]
             upperbounds.reverse()
             # If a0 is a constant polynomial, it is obviously bounded below.
-            if self._a0roots == []:
+            if not self._a0roots:
                 lowerbound = self._CC(self._a0) / 2
             else:
                 lowerbound = self._a0[self._a0.degree()]*prod(abs((zk - z1) - rho) for zk in self._a0roots) / 2
@@ -1147,13 +1146,13 @@ class RiemannSurface(object):
                 (7, 1), (10, 1), (3, 1)])],
              [(1, [(8, 0), (6, 0), (7, 0), (10, 0), (2, 0), (4, 0),
                 (7, 1), (10, 1), (9, 1), (8, 0)])]]
-                
+
         In order to check that the answer returned above is reasonable, we
         test some basic properties. We express the faces of the downstairs graph
         as ZZ-linear combinations of the edges and check that the projection
         of the homology basis upstairs projects down to independent linear
         combinations of an even number of faces::
-        
+
             sage: dg = S.downstairs_graph()
             sage: edges = dg.edges()
             sage: E = ZZ^len(edges)

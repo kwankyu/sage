@@ -117,7 +117,6 @@ AUTHORS:
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 from __future__ import print_function
-from six import string_types
 
 import os
 import re
@@ -161,7 +160,7 @@ def remove_output_labels(s):
         sage: remove_output_labels(output)
         'QQ [x, y]\n\nPolynomialRing\n'
     """
-    label = re.compile("^o[0-9]+ (=|:) |^ *")
+    label = re.compile(r"^o+[0-9]+ (=|:) |^ *")
     lines = s.split("\n")
     matches = [label.match(l) for l in lines if l]
     if not matches:
@@ -172,6 +171,7 @@ def remove_output_labels(s):
 
 
 PROMPT = "_EGAS_ : "
+PROMPT_LOAD = "_EGAS_LOAD_ : "
 
 
 class Macaulay2(ExtraTabCompletion, Expect):
@@ -204,8 +204,10 @@ class Macaulay2(ExtraTabCompletion, Expect):
             command = os.getenv('SAGE_MACAULAY2_COMMAND') or 'M2'
         init_str = (
             # Prompt changing commands
-            """ZZ#{Standard,Core#"private dictionary"#"InputPrompt"} = lineno -> "%s";""" % PROMPT +
-            """ZZ#{Standard,Core#"private dictionary"#"InputContinuationPrompt"} = lineno -> "%s";""" % PROMPT +
+            'sageLoadMode = false;'
+            'ZZ#{Standard,Core#"private dictionary"#"InputPrompt"} = '
+            'ZZ#{Standard,Core#"private dictionary"#"InputContinuationPrompt"} = ' +
+            'lineno -> if(sageLoadMode) then "%s" else "%s";' % (PROMPT_LOAD, PROMPT) +
             # Also prevent line wrapping in Macaulay2
             "printWidth = 0;" +
             # And make all output labels to be of the same width
@@ -254,7 +256,7 @@ class Macaulay2(ExtraTabCompletion, Expect):
         OUTPUT:
 
         Returns Macaulay2 command loading and executing commands in
-        ``filename``, that is, ``'load "filename"'``.
+        ``filename``.
         Return type: string
 
         TESTS::
@@ -263,18 +265,38 @@ class Macaulay2(ExtraTabCompletion, Expect):
             sage: f = open(filename, "w")
             sage: _ = f.write("sage_test = 7;")
             sage: f.close()
-            sage: command = macaulay2._read_in_file_command(filename)
-            sage: macaulay2.eval(command)  # optional - macaulay2
+            sage: macaulay2.read(filename)  # indirect doctest, optional - macaulay2
             sage: macaulay2.eval("sage_test")  # optional - macaulay2
             7
             sage: import os
             sage: os.unlink(filename)
-            sage: macaulay2._read_in_file_command("test")
-            'load "test"'
             sage: macaulay2(10^10000) == 10^10000  # optional - macaulay2
             True
         """
-        return 'load "%s"' % filename
+        # We use `input` because `load` does not echo the output values
+        return 'sageLoadMode=true;input "%s";sageLoadMode=false;' % filename
+
+    def _post_process_from_file(self, s):
+        r"""
+        TESTS:
+
+        Check that evaluating using a file gives the same result as without (:trac:`25903`)::
+
+            sage: from sage.interfaces.macaulay2 import remove_output_labels
+            sage: s1 = macaulay2._eval_line_using_file('ZZ^2')  # indirect doctest, optional - macaulay2
+            sage: s2 = macaulay2._eval_line('ZZ^2', allow_use_file=False)  # optional - macaulay2
+            sage: remove_output_labels(s1) == remove_output_labels(s2)  # optional - macaulay2
+            True
+
+        Test multiline input from file::
+
+            sage: (macaulay2.eval('ZZ^2\nZZ^3', allow_use_file=False) ==     # indirect doctest, optional - macaulay2
+            ....:     macaulay2.eval('ZZ^2\n%sZZ^3' % (' ' * macaulay2._eval_using_file_cutoff)))
+            True
+        """
+        s = '\n'.join(line for line in s.split('\n')
+                      if not line.startswith(PROMPT_LOAD))
+        return s
 
     def eval(self, code, strip=True, **kwds):
         """
@@ -835,7 +857,7 @@ class Macaulay2(ExtraTabCompletion, Expect):
             sage: macaulay2._macaulay2_input_ring(R.base_ring(), R.gens(), 'Lex')   # optional - macaulay2
             'sage...[symbol x, MonomialSize=>16, MonomialOrder=>Lex]'
         """
-        if not isinstance(base_ring, string_types):
+        if not isinstance(base_ring, str):
             base_ring = self(base_ring).name()
 
         varstr = str(vars)[1:-1].rstrip(',')
@@ -997,7 +1019,7 @@ class Macaulay2Element(ExtraTabCompletion, ExpectElement):
         """
         if new_name is None:
             return self._name
-        if not isinstance(new_name, string_types):
+        if not isinstance(new_name, str):
             raise TypeError("new_name must be a string")
 
         P = self.parent()
