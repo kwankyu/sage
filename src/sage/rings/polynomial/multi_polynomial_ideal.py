@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-Ideals in multivariate polynomial rings.
+Ideals in Multivariate Polynomial Rings
 
 Sage has a powerful system to compute with multivariate polynomial
 rings. Most algorithms dealing with these ideals are centered on the
@@ -8,21 +8,6 @@ computation of *Groebner bases*. Sage mainly uses Singular to
 implement this functionality. Singular is widely regarded as the best
 open-source system for Groebner basis calculation in multivariate
 polynomial rings over fields.
-
-AUTHORS:
-
-- William Stein
-
-- Kiran S. Kedlaya (2006-02-12): added Macaulay2 analogues of some
-  Singular features
-
-- Martin Albrecht (2008,2007): refactoring, many Singular related
-  functions
-
-- Martin Albrecht (2009): added Groebner basis over rings
-  functionality from Singular 3.1
-
-- John Perry (2012): bug fixing equality & containment of ideals
 
 EXAMPLES:
 
@@ -211,6 +196,21 @@ TESTS::
     ideals. Thus an ideal is not identified with a particular set of
     generators. For sequences of multivariate polynomials see
     :class:`sage.rings.polynomial.multi_polynomial_sequence.PolynomialSequence_generic`.
+
+AUTHORS:
+
+- William Stein: initial version
+
+- Kiran S. Kedlaya (2006-02-12): added Macaulay2 analogues of some Singular
+  features
+
+- Martin Albrecht (2007,2008): refactoring, many Singular related functions,
+  added plot()
+
+- Martin Albrecht (2009): added Groebner basis over rings functionality from
+  Singular 3.1
+
+- John Perry (2012): bug fixing equality & containment of ideals
 
 """
 
@@ -3842,14 +3842,14 @@ class MPolynomialIdeal( MPolynomialIdeal_singular_repr, \
         Return the reduced Groebner basis of this ideal.
 
         A Groebner basis `g_1,...,g_n` for an ideal `I` is a
-        generating set such that `<LM(g_i)> = LM(I)`, i.e., the
+        generating set such that `\ideal{LM(g_i)} = LM(I)`, i.e., the
         leading monomial ideal of `I` is spanned by the leading terms
         of `g_1,...,g_n`. Groebner bases are the key concept in
         computational ideal theory in multivariate polynomial rings
         which allows a variety of problems to be solved.
 
         Additionally, a *reduced* Groebner basis `G` is a unique
-        representation for the ideal `<G>` with respect to the chosen
+        representation for the ideal `\ideal{G}` with respect to the chosen
         monomial ordering.
 
         INPUT:
@@ -4642,14 +4642,14 @@ class MPolynomialIdeal( MPolynomialIdeal_singular_repr, \
 
         Let `\{f_1, ... , f_m\} \subset K[x_1 , ... , x_n]` be
         homogeneous polynomials of degrees `d_1,... ,d_m`
-        respectively. This sequence is semi-regular if:
+        respectively. This sequence is semi-regular if
 
          * `\{f_1, ... , f_m\} \neq K[x_1 , ... , x_n]`
 
          * for all `1 \leq i \leq m` and `g \in K[x_1,\dots,x_n]`:
-           `deg(g \cdot pi ) < D` and
-           `g \cdot f_i \in <f_1 , \dots , f_{i-1}>` implies that
-           `g \in <f_1, ..., f_{i-1}>` where `D` is the degree of regularity.
+           `\deg(g \cdot f_i ) < D` and
+           `g \cdot f_i \in\ideal{f_1, \dots, f_{i-1}}` implies that
+           `g \in \ideal{f_1, ..., f_{i-1}}` where `D` is the degree of regularity.
 
         This notion can be extended to affine polynomials by
         considering their homogeneous components of highest degree.
@@ -4741,15 +4741,15 @@ class MPolynomialIdeal( MPolynomialIdeal_singular_repr, \
 
         INPUT:
 
-        - ``self`` - a principal ideal in 2 variables
+        - ``self`` -- a principal ideal in 2 variables
 
-        - ``algorithm`` - set this to 'surf' if you want 'surf' to
-           plot the ideal (default: None)
+        - ``algorithm`` -- set this to ``'surf'`` if you want ``'surf'`` to
+           plot the ideal (default: ``None``)
 
-        - ``*args`` - optional tuples ``(variable, minimum, maximum)``
+        - ``*args`` -- optional tuples ``(variable, minimum, maximum)``
            for plotting dimensions
 
-        - ``**kwds`` - optional keyword arguments passed on to
+        - ``**kwds`` -- optional keyword arguments passed on to
            ``implicit_plot``
 
         EXAMPLES:

@@ -629,6 +629,7 @@ def latex_extra_preamble():
         \newcommand{\RIF}{\Bold{I} \Bold{R}}
         \newcommand{\RLF}{\Bold{R}}
         \newcommand{\Bold}[1]{\mathbf{#1}}
+        \newcommand{\ideal}[1]{\langle{#1}\rangle}
         <BLANKLINE>
     """
     from sage.misc.latex_macros import sage_latex_macros

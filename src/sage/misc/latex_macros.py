@@ -173,7 +173,9 @@ macros = [["ZZ"],
 
 # The following is to allow customization of typesetting of rings:
 # mathbf vs mathbb.  See latex.py for more information.
-sage_configurable_latex_macros = ["\\newcommand{\\Bold}[1]{\\mathbf{#1}}"]
+sage_configurable_latex_macros = ["\\newcommand{\\Bold}[1]{\\mathbf{#1}}",
+                                  "\\newcommand{\\ideal}[1]{\\langle{#1}\\rangle}",
+                                  ]
 
 def sage_latex_macros():
     r"""
