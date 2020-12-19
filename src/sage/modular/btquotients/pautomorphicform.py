@@ -39,7 +39,6 @@ This can then be lifted to an overconvergent `p`-adic modular form::
     sage: A.lift(a) # long time
     p-adic automorphic form of cohomological weight 0
 """
-from __future__ import print_function, division
 
 from sage.modular.btquotients.btquotient import DoubleCosetReduction
 from sage.structure.unique_representation import UniqueRepresentation
@@ -57,7 +56,7 @@ from sage.rings.laurent_series_ring import LaurentSeriesRing
 from sage.modular.hecke.all import (AmbientHeckeModule, HeckeModuleElement)
 from sage.rings.infinity import Infinity
 import sage.modular.hecke.hecke_operator
-from sage.misc.misc import verbose
+from sage.misc.verbose import verbose
 from sage.rings.real_mpfr import RR
 from sage.modular.pollack_stevens.sigma0 import Sigma0ActionAdjuster
 from sage.modular.pollack_stevens.distributions import OverconvergentDistributions, Symk

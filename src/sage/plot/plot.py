@@ -572,7 +572,6 @@ AUTHORS:
 #  the License, or (at your option) any later version.
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
-from __future__ import print_function, absolute_import
 
 from functools import reduce
 
@@ -582,15 +581,14 @@ from functools import reduce
 ## going to be used.
 
 #DEFAULT_FIGSIZE=(6, 3.70820393249937)
-EMBEDDED_MODE = False
-import sage.misc.misc
+import sage.misc.verbose
 from sage.arith.srange import srange
 
 from sage.misc.randstate import current_randstate #for plot adaptive refinement
 from math import sin, cos, pi, log, exp #for polar_plot and log scaling
 
 from sage.ext.fast_eval import fast_float, is_fast_float
-
+from sage.symbolic.expression import Expression
 from sage.misc.decorators import options
 
 from .graphics import Graphics
@@ -761,7 +759,7 @@ def SelectiveFormatter(formatter, skip_values):
 
 def xydata_from_point_list(points):
     r"""
-    Returns two lists (xdata, ydata), each coerced to a list of floats,
+    Return two lists (xdata, ydata), each coerced to a list of floats,
     which correspond to the x-coordinates and the y-coordinates of the
     points.
 
@@ -788,29 +786,41 @@ def xydata_from_point_list(points):
         sage: from builtins import zip
         sage: xydata_from_point_list(list(zip([2,3,5,7], [11, 13, 17, 19])))
         ([2.0, 3.0, 5.0, 7.0], [11.0, 13.0, 17.0, 19.0])
+
+    The code now accepts mixed lists of complex and real numbers::
+
+        sage: xydata_from_point_list(map(N,[0,1,1+I,I,I-1,-1,-1-I,-I,1-I]))
+        ([0.0, 1.0, 1.0, 0.0, -1.0, -1.0, -1.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0, 1.0, 1.0, 0.0, -1.0, -1.0, -1.0])
+        sage: point2d([0, 1., CC(0,1)])
+        Graphics object consisting of 1 graphics primitive
+        sage: point2d((x^5-1).roots(multiplicities=False))
+        Graphics object consisting of 1 graphics primitive
     """
-    from sage.rings.complex_number import ComplexNumber
+    import numbers
+    zero = float(0)
 
-    if not isinstance(points, (list, tuple)):
-        points = list(points)
-        try:
-            points = [[float(z) for z in points]]
-        except TypeError:
-            pass
-    elif len(points) == 2 and not isinstance(points[0], (list, tuple,
-                                                         ComplexNumber)):
-        try:
-            points = [[float(z) for z in points]]
-        except TypeError:
-            pass
-
-    if len(points) and len(list(points[0])) != 2:
-        raise ValueError("points must have 2 coordinates in a 2d line")
-
-    xdata = [float(z[0]) for z in points]
-    ydata = [float(z[1]) for z in points]
-
+    xdata = []
+    ydata = []
+    for xy in points:
+        if isinstance(xy, Expression):
+            xy = xy.n()
+        if isinstance(xy, numbers.Real):
+            xdata.append(float(xy))
+            ydata.append(zero)
+        elif isinstance(xy, numbers.Complex):
+            xdata.append(float(xy.real()))
+            ydata.append(float(xy.imag()))
+        else:
+            try:
+                x, y = xy
+            except TypeError:
+                raise TypeError('invalid input for 2D point')
+            else:
+                xdata.append(float(x))
+                ydata.append(float(y))
     return xdata, ydata
+
 
 @options(alpha=1, thickness=1, fill=False, fillcolor='automatic', fillalpha=0.5, plot_points=200,
          adaptive_tolerance=0.01, adaptive_recursion=5, detect_poles=False, exclude=None, legend_label=None,
@@ -1459,25 +1469,26 @@ def plot(funcs, *args, **kwds):
 
     .. PLOT::
 
-        g = plot(sin(x), (x,0,10), plot_points=20, linestyle='', marker='.')
+        g = plot(sin(x), (x, 0, 10), plot_points=20, linestyle='', marker='.')
         sphinx_plot(g)
 
     The marker can be a TeX symbol as well::
 
-        sage: plot(sin(x), (x,0,10), plot_points=20, linestyle='', marker=r'$\checkmark$')
+        sage: plot(sin(x), (x, 0, 10), plot_points=20, linestyle='', marker=r'$\checkmark$')
         Graphics object consisting of 1 graphics primitive
 
     .. PLOT::
 
-        g = plot(sin(x), (x,0,10), plot_points=20, linestyle='', marker=r'$\checkmark$')
+        g = plot(sin(x), (x, 0, 10), plot_points=20, linestyle='', marker=r'$\checkmark$')
         sphinx_plot(g)
 
     Sage currently ignores points that cannot be evaluated
 
     ::
 
+        sage: from sage.misc.verbose import set_verbose
         sage: set_verbose(-1)
-        sage: plot(-x*log(x), (x,0,1))  # this works fine since the failed endpoint is just skipped.
+        sage: plot(-x*log(x), (x, 0, 1))  # this works fine since the failed endpoint is just skipped.
         Graphics object consisting of 1 graphics primitive
         sage: set_verbose(0)
 
@@ -1487,42 +1498,42 @@ def plot(funcs, *args, **kwds):
     ::
 
         sage: set_verbose(-1)
-        sage: plot(x^(1/3), (x,-1,1))
+        sage: plot(x^(1/3), (x, -1, 1))
         Graphics object consisting of 1 graphics primitive
         sage: set_verbose(0)
 
     .. PLOT::
 
         set_verbose(-1)
-        g = plot(x**(1.0/3.0), (x,-1,1))
+        g = plot(x**(1.0/3.0), (x, -1, 1))
         sphinx_plot(g)
         set_verbose(0)
 
 
-    Plotting the real cube root function for negative input
-    requires avoiding the complex numbers one would usually get.
-    The easiest way is to use absolute value::
+    Plotting the real cube root function for negative input requires avoiding
+    the complex numbers one would usually get.  The easiest way is to use
+    :class:`real_nth_root(x, n)<sage.functions.other.Function_real_nth_root>` ::
 
-        sage: plot(sign(x)*abs(x)^(1/3), (x,-1,1))
+        sage: plot(real_nth_root(x, 3), (x, -1, 1))
         Graphics object consisting of 1 graphics primitive
 
     .. PLOT::
 
-       g = plot(sign(x)*abs(x)**(1.0/3.0), (x,-1,1))
+       g = plot(real_nth_root(x, 3), (x, -1, 1))
        sphinx_plot(g)
 
-    We can also use the following::
+    We can also get the same plot in the following way::
 
-        sage: plot(sign(x)*(x*sign(x))^(1/3), (x,-4,4))
+        sage: plot(sign(x)*abs(x)^(1/3), (x, -1, 1))
         Graphics object consisting of 1 graphics primitive
 
     .. PLOT::
 
-       g = plot(sign(x)*(x*sign(x))**(1.0/3.0), (x,-4,4))
+       g = plot(sign(x)*abs(x)**(1./3.), (x, -1, 1))
        sphinx_plot(g)
 
-    A way that points to how to plot other functions without
-    symbolic variants is using lambda functions::
+    A way to plot other functions without symbolic variants is to use lambda
+    functions::
 
         sage: plot(lambda x : RR(x).nth_root(3), (x,-1, 1))
         Graphics object consisting of 1 graphics primitive
@@ -1995,7 +2006,7 @@ def plot(funcs, *args, **kwds):
             xmax = kwds.pop('xmax', 1)
             G = _plot(funcs, (xmin, xmax), *args, **kwds)
         else:
-            sage.misc.misc.verbose("there were %s extra arguments (besides %s)" % (n, funcs), level=0)
+            sage.misc.verbose.verbose("there were %s extra arguments (besides %s)" % (n, funcs), level=0)
 
     G._set_extra_kwds(G_kwds)
     if do_show:
@@ -2249,7 +2260,6 @@ def _plot(funcs, xrange, parametric=False,
 
     exclude = options.pop('exclude')
     if exclude is not None:
-        from sage.symbolic.expression import Expression
         if isinstance(exclude, Expression) and exclude.is_relational():
             if len(exclude.variables()) > 1:
                 raise ValueError('exclude has to be an equation of only one variable')
@@ -2277,7 +2287,7 @@ def _plot(funcs, xrange, parametric=False,
                                  for x in excluded_points], [])
     else:
         initial_points = None
-    
+
     # If we are a log scale plot on the x axis, do a change of variables
     # so we sample the range in log scale
     is_log_scale = ('scale' in options.keys() and
@@ -2306,7 +2316,7 @@ def _plot(funcs, xrange, parametric=False,
         # add an exclusion point.
         if abs(data[i+1][0] - data[i][0]) > 2*average_distance_between_points:
             excluded_points.append((data[i][0] + data[i+1][0])/2)
-    
+
     # If we did a change in variables, undo it now
     if is_log_scale:
         for i,(a,fa) in enumerate(data):
@@ -2350,7 +2360,7 @@ def _plot(funcs, xrange, parametric=False,
                     else:
                         fstr = 'min'
                     msg = "WARNING: You use the built-in function %s for filling. You probably wanted the string '%s'." % (fstr, fstr)
-                    sage.misc.misc.verbose(msg, level=0)
+                    sage.misc.verbose.verbose(msg, level=0)
                 if not is_fast_float(fill):
                     fill_f = fast_float(fill, expect_one_var=True)
                 else:
@@ -2787,7 +2797,7 @@ def list_plot(data, plotjoined=False, **kwargs):
 
     ``list_plot`` will plot a list of complex numbers in the obvious
     way; any numbers for which
-    :func:`CC()<sage.rings.complex_field.ComplexField>` makes sense will
+    :func:`CC()<sage.rings.complex_mpfr.ComplexField>` makes sense will
     work.
 
     ``list_plot`` also takes a list of tuples ``(x_i, y_i)`` where ``x_i``
@@ -3022,7 +3032,7 @@ def list_plot(data, plotjoined=False, **kwargs):
                     "and 'y' against each other, use 'list_plot(list(zip(x,y)))'.")
     if isinstance(data, dict):
         if plotjoined:
-            list_data = sorted(list(data.items()))
+            list_data = sorted(data.items())
         else:
             list_data = list(data.items())
         return list_plot(list_data, plotjoined=plotjoined, **kwargs)
@@ -3051,7 +3061,7 @@ def list_plot(data, plotjoined=False, **kwargs):
         # Need to catch IndexError because if data is, say, [(0, 1), (1, I)],
         # point3d() throws an IndexError on the (0,1) before it ever
         # gets to (1, I).
-        from sage.rings.complex_field import ComplexField
+        from sage.rings.complex_mpfr import ComplexField
         CC = ComplexField()
         # if we get here, we already did "list(enumerate(data))",
         # so look at z[1] in inner list
@@ -3807,12 +3817,12 @@ def adaptive_refinement(f, p1, p2, adaptive_tolerance=0.01, adaptive_recursion=5
     try:
         y = float(f(x))
         if str(y) in ['nan', 'NaN', 'inf', '-inf']:
-            sage.misc.misc.verbose("%s\nUnable to compute f(%s)"%(msg, x),1)
+            sage.misc.verbose.verbose("%s\nUnable to compute f(%s)"%(msg, x),1)
             # give up for this branch
             return []
 
     except (ZeroDivisionError, TypeError, ValueError, OverflowError) as msg:
-        sage.misc.misc.verbose("%s\nUnable to compute f(%s)"%(msg, x), 1)
+        sage.misc.verbose.verbose("%s\nUnable to compute f(%s)"%(msg, x), 1)
         # give up for this branch
         return []
 
@@ -3935,12 +3945,12 @@ def generate_plot_points(f, xrange, plot_points=5, adaptive_tolerance=0.01, adap
             data[i] = (float(xi), float(f(xi)))
             if str(data[i][1]) in ['nan', 'NaN', 'inf', '-inf']:
                 msg = "Unable to compute f(%s)" % xi
-                sage.misc.misc.verbose(msg, 1)
+                sage.misc.verbose.verbose(msg, 1)
                 exceptions += 1
                 exception_indices.append(i)
 
         except (ArithmeticError, TypeError, ValueError) as m:
-            sage.misc.misc.verbose("%s\nUnable to compute f(%s)" % (m, xi), 1)
+            sage.misc.verbose.verbose("%s\nUnable to compute f(%s)" % (m, xi), 1)
 
             if i == 0: # Given an error for left endpoint, try to move it in slightly
                 for j in range(1, 99):
@@ -3994,7 +4004,7 @@ def generate_plot_points(f, xrange, plot_points=5, adaptive_tolerance=0.01, adap
        i += 1
 
     if (len(data) == 0 and exceptions > 0) or exceptions > 10:
-        sage.misc.misc.verbose("WARNING: When plotting, failed to evaluate function at %s points." % exceptions, level=0)
-        sage.misc.misc.verbose("Last error message: '%s'" % msg, level=0)
+        sage.misc.verbose.verbose("WARNING: When plotting, failed to evaluate function at %s points." % exceptions, level=0)
+        sage.misc.verbose.verbose("Last error message: '%s'" % msg, level=0)
 
     return data

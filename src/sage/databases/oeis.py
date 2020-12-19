@@ -90,7 +90,7 @@ related ?
 
 ::
 
-    sage: p.cross_references(fetch=True)                # optional -- internet
+    sage: p.cross_references(fetch=True)        # optional -- internet   # random
     0: A000798: Number of different quasi-orders (or topologies, or transitive digraphs) with n labeled elements.
     1: A001035: Number of partially ordered sets ("posets") with n labeled elements (or labeled acyclic transitive digraphs).
     2: A001930: Number of topologies, or transitive digraphs with n unlabeled nodes.
@@ -157,7 +157,6 @@ Classes and methods
 #  the License, or (at your option) any later version.
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
-from __future__ import print_function
 from urllib.request import urlopen
 from urllib.parse import urlencode
 
@@ -165,7 +164,7 @@ from sage.structure.sage_object import SageObject
 from sage.structure.unique_representation import UniqueRepresentation
 from sage.cpython.string import bytes_to_str
 from sage.rings.integer import Integer
-from sage.misc.misc import verbose
+from sage.misc.verbose import verbose
 from sage.misc.cachefunc import cached_method
 from sage.misc.flatten import flatten
 from sage.misc.temporary_file import tmp_filename
@@ -244,7 +243,17 @@ def _urls(html_string):
     return urls
 
 
-to_tuple = lambda string: tuple(Integer(x) for x in string.split(",") if x)
+def to_tuple(string):
+    """
+    Convert a string to a tuple of integers.
+
+    EXAMPLES::
+
+        sage: from sage.databases.oeis import to_tuple
+        sage: to_tuple('12,55,273')
+        (12, 55, 273)
+    """
+    return tuple(Integer(x) for x in string.split(",") if x)
 
 
 class OEIS:
@@ -280,9 +289,9 @@ class OEIS:
       description corresponds to the query. Those sequences can be used
       without the need to fetch the database again.
 
-    - if ``query`` is a list of integers, returns a tuple of OEIS sequences
-      containing it as a subsequence. Those sequences can be used without
-      the need to fetch the database again.
+    - if ``query`` is a list or tuple of integers, returns a tuple of
+      OEIS sequences containing it as a subsequence. Those sequences
+      can be used without the need to fetch the database again.
 
     EXAMPLES::
 
@@ -363,6 +372,11 @@ class OEIS:
 
         Indeed, due to some caching mechanism, the sequence is not re-created
         when called from its ID.
+
+    TESTS::
+
+        sage: oeis((1,2,5,16,61))    # optional -- internet
+        0: A000111: ...
     """
 
     def __call__(self, query, max_results=3, first_result=0):
@@ -475,25 +489,23 @@ class OEIS:
         EXAMPLES::
 
             sage: oeis.find_by_description('prime gap factorization') # optional -- internet
-            0: A073491: Numbers having no prime gaps in their factorization.
-            1: A073485: Product of any number of consecutive primes; squarefree numbers with no gaps in their prime factorization.
-            2: A073490: Number of prime gaps in factorization of n.
+            0: A...: ...
+            1: A...: ...
+            2: A...: ...
 
             sage: prime_gaps = _[2] ; prime_gaps        # optional -- internet
             A073490: Number of prime gaps in factorization of n.
 
-        ::
-
             sage: oeis('beaver')                        # optional -- internet
-            0: A028444: Busy Beaver sequence, or Rado's sigma function: ...
-            1: A060843: Busy Beaver problem: a(n) = maximal number of steps ...
-            2: A131956: Busy Beaver variation: maximum number of steps for ...
+            0: A...: ...eaver...
+            1: A...: ...eaver...
+            2: A...: ...eaver...
 
             sage: oeis('beaver', max_results=4, first_result=2)     # optional -- internet
-            0: A131956: Busy Beaver variation: maximum number of steps for ...
-            1: A141475: Number of Turing machines with n states following ...
-            2: A131957: Busy Beaver sigma variation: maximum number of 1's ...
-            3: A...: ...
+            0: A...: ...eaver...
+            1: A...: ...eaver...
+            2: A...: ...eaver...
+            3: A...: ...eaver...
         """
         options = {'q': description,
                    'n': str(max_results),
@@ -509,7 +521,7 @@ class OEIS:
 
         INPUT:
 
-        - ``subsequence`` -- a list of integers.
+        - ``subsequence`` -- a list or tuple of integers.
 
         - ``max_results`` -- (integer, default: 3), the maximum of results requested.
 
@@ -528,7 +540,7 @@ class OEIS:
 
             sage: oeis.find_by_subsequence([2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377]) # optional -- internet
             0: A000045: Fibonacci numbers: F(n) = F(n-1) + F(n-2) with F(0) = 0 and F(1) = 1.
-            1: A212804: Expansion of (1-x)/(1-x-x^2).
+            1: A212804: Expansion of (1 - x)/(1 - x - x^2).
             2: A177194: Fibonacci numbers whose decimal expansion does not contain any digit 0.
 
             sage: fibo = _[0] ; fibo                    # optional -- internet
@@ -975,7 +987,7 @@ class OEISSequence(SageObject, UniqueRepresentation):
             A000053: Local stops on New York City Broadway line (IRT #1) subway.
 
             sage: f.keywords()                          # optional -- internet
-            ('nonn', 'fini', 'full')
+            ('nonn', 'fini', ...)
 
         TESTS::
 
@@ -1558,7 +1570,8 @@ class OEISSequence(SageObject, UniqueRepresentation):
             sage: type(HTML)
             <class 'sage.misc.html.HtmlFragment'>
         """
-        url_absolute = lambda s: re.sub(r'\"\/', '\"' + oeis_url, s)
+        def url_absolute(s):
+            return re.sub(r'\"\/', '\"' + oeis_url, s)
         if browse is None:
             if format == 'guess':
                 if embedded():
@@ -1911,7 +1924,7 @@ class OEISSequence(SageObject, UniqueRepresentation):
                      ('mathematica', FancyTuple(self._field('t')))]
         else:
             table = []
-        
+
         def is_starting_line(line):
             """
             Help to split the big OEIS code block into blocks by language.
