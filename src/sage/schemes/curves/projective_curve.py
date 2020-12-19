@@ -2159,9 +2159,7 @@ class IntegralProjectiveCurve(ProjectiveCurve_field, UniqueRepresentation):
     _point = IntegralProjectiveCurvePoint
     _closed_point = IntegralProjectiveCurveClosedPoint
 
-<<<<<<< HEAD
     @cached_method(do_pickle=True)
-=======
     def __init__(self, A, f):
         """
         Initialize.
@@ -2185,7 +2183,6 @@ class IntegralProjectiveCurve(ProjectiveCurve_field, UniqueRepresentation):
         else:
             assert "no projective curve defined"
 
->>>>>>> picklable-1-trac28096
     def function_field(self):
         """
         Return the function field of this curve.
