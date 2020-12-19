@@ -1,4 +1,5 @@
-"""
+# -*- coding: utf-8 -*-
+r"""
 Sparse integer matrices
 
 AUTHORS:
@@ -14,7 +15,7 @@ TESTS::
     []
 """
 
-#*****************************************************************************
+# ****************************************************************************
 #       Copyright (C) 2007 William Stein <wstein@gmail.com>
 #       Copyright (C) 2018 Vincent Delecroix <20100.delecroix@gmail.com>
 #
@@ -22,13 +23,11 @@ TESTS::
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 2 of the License, or
 # (at your option) any later version.
-#                  http://www.gnu.org/licenses/
-#*****************************************************************************
+#                  https://www.gnu.org/licenses/
+# ****************************************************************************
 
 from cysignals.memory cimport check_calloc, sig_free
 from cysignals.signals cimport sig_on, sig_off
-
-from collections import Iterator, Sequence
 
 from cpython.int cimport PyInt_FromSize_t
 
@@ -118,6 +117,20 @@ cdef class Matrix_integer_sparse(Matrix_sparse):
         x = Integer()
         mpz_vector_get_entry(x.value, &self._matrix[i], j)
         return x
+
+    cdef bint get_is_zero_unsafe(self, Py_ssize_t i, Py_ssize_t j):
+        """
+        Return 1 if the entry ``(i, j)`` is zero, otherwise 0.
+
+        EXAMPLES::
+
+            sage: M = matrix(ZZ, [[0,1,0],[0,0,0]], sparse=True)
+            sage: M.zero_pattern_matrix()  # indirect doctest
+            [1 0 1]
+            [1 1 1]
+        """
+        return mpz_vector_is_entry_zero_unsafe(&self._matrix[i], j)
+
 
     ########################################################################
     # LEVEL 2 functionality

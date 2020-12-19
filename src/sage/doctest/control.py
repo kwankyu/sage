@@ -19,7 +19,6 @@ AUTHORS:
 # (at your option) any later version.
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
-from __future__ import absolute_import, division, print_function
 
 import random
 import os
@@ -30,7 +29,7 @@ import re
 import types
 import sage.misc.flatten
 from sage.structure.sage_object import SageObject
-from sage.env import DOT_SAGE, SAGE_LIB, SAGE_SRC, SAGE_LOCAL, SAGE_EXTCODE
+from sage.env import DOT_SAGE, SAGE_LIB, SAGE_SRC, SAGE_VENV, SAGE_EXTCODE
 from sage.misc.temporary_file import tmp_dir
 from cysignals.signals import AlarmInterrupt, init_cysignals
 
@@ -39,13 +38,16 @@ from .forker import DocTestDispatcher
 from .reporting import DocTestReporter
 from .util import Timer, count_noun, dict_difference
 from .external import external_software, available_software
-from sage.features import PythonModule
 
 nodoctest_regex = re.compile(r'\s*(#+|%+|r"+|"+|\.\.)\s*nodoctest')
 optionaltag_regex = re.compile(r'^\w+$')
 
 # Optional tags which are always automatically added
-auto_optional_tags = set(['py3'])
+
+from sage.libs.arb.arb_version import version as arb_vers
+arb_tag = 'arb2' + arb_vers().split('.')[1]
+
+auto_optional_tags = set(['py3', arb_tag])
 
 
 class DocTestDefaults(SageObject):
@@ -94,12 +96,13 @@ class DocTestDefaults(SageObject):
         self.memlimit = 0
         self.all = False
         self.logfile = None
-        self.sagenb = False
         self.long = False
         self.warn_long = None
         self.randorder = None
+        self.random_seed = 0
         self.global_iterations = 1  # sage-runtests default is 0
         self.file_iterations = 1    # sage-runtests default is 0
+        self.environment = "sage.repl.ipython_kernel.all_jupyter"
         self.initial = False
         self.exitfirst = False
         self.force_lib = False
@@ -326,7 +329,7 @@ class DocTestController(SageObject):
                 options.timeout *= 2
         if options.nthreads == 0:
             options.nthreads = int(os.getenv('SAGE_NUM_THREADS_PARALLEL',1))
-        if options.failed and not (args or options.new or options.sagenb):
+        if options.failed and not (args or options.new):
             # If the user doesn't specify any files then we rerun all failed files.
             options.all = True
         if options.global_iterations == 0:
@@ -362,6 +365,9 @@ class DocTestController(SageObject):
                     for pkg in list_packages('optional', local=True).values():
                         if pkg['installed'] and pkg['installed_version'] == pkg['remote_version']:
                             options.optional.add(pkg['name'])
+
+                    from sage.features import package_systems
+                    options.optional.update(system.name for system in package_systems())
 
                 # Check that all tags are valid
                 for o in options.optional:
@@ -411,6 +417,9 @@ class DocTestController(SageObject):
         self.stats = {}
         self.load_stats(options.stats_path)
         self._init_warn_long()
+
+        if self.options.random_seed is None:
+            self.options.random_seed = 0
 
     def __del__(self):
         if getattr(self, 'logfile', None) is not None:
@@ -497,6 +506,25 @@ class DocTestController(SageObject):
             'DocTest Controller'
         """
         return "DocTest Controller"
+
+    def load_environment(self):
+        """
+        Return the module that provides the global environment.
+
+        EXAMPLES::
+
+            sage: from sage.doctest.control import DocTestDefaults, DocTestController
+            sage: DC = DocTestController(DocTestDefaults(), [])
+            sage: 'BipartiteGraph' in DC.load_environment().__dict__
+            True
+            sage: DC = DocTestController(DocTestDefaults(environment='sage.doctest.all'), [])
+            sage: 'BipartiteGraph' in  DC.load_environment().__dict__
+            False
+            sage: 'run_doctests' in DC.load_environment().__dict__
+            True
+        """
+        from importlib import import_module
+        return import_module(self.options.environment)
 
     def load_stats(self, filename):
         """
@@ -656,7 +684,7 @@ class DocTestController(SageObject):
 
     def add_files(self):
         r"""
-        Checks for the flags '--all', '--new' and '--sagenb'.
+        Checks for the flags '--all' and '--new'.
 
         For each one present, this function adds the appropriate directories and files to the todo list.
 
@@ -679,15 +707,6 @@ class DocTestController(SageObject):
             sage: DC = DocTestController(DD, [])
             sage: DC.add_files()
             Doctesting ...
-
-        ::
-
-            sage: DD = DocTestDefaults(sagenb = True)
-            sage: DC = DocTestController(DD, [])
-            sage: DC.add_files()  # py2 # optional - sagenb
-            Doctesting the Sage notebook.
-            sage: DC.files[0][-6:]  # py2 # optional - sagenb
-            'sagenb'
         """
         opj = os.path.join
         from sage.env import SAGE_SRC, SAGE_DOC_SRC, SAGE_ROOT, SAGE_ROOT_GIT
@@ -706,7 +725,6 @@ class DocTestController(SageObject):
             if have_git:
                 self.files.append(opj(SAGE_SRC, 'sage_setup'))
             self.files.append(SAGE_DOC_SRC)
-            self.options.sagenb = True
 
         if self.options.all or (self.options.new and not have_git):
             self.log("Doctesting entire Sage library.")
@@ -732,18 +750,6 @@ class DocTestController(SageObject):
                          filename.endswith(".pyx") or
                          filename.endswith(".rst"))):
                     self.files.append(os.path.relpath(opj(SAGE_ROOT,filename)))
-        if self.options.sagenb:
-            if not PythonModule('sagenb').is_present():
-                if not self.options.all:
-                    self.log("Skipping doctesting of the Sage notebook: "
-                             "not installed on Python 3")
-                return
-
-            if not self.options.all:
-                self.log("Doctesting the Sage notebook.")
-            from pkg_resources import Requirement, working_set
-            sagenb_loc = working_set.find(Requirement.parse('sagenb')).location
-            self.files.append(opj(sagenb_loc, 'sagenb'))
 
     def expand_files_into_sources(self):
         r"""
@@ -771,8 +777,8 @@ class DocTestController(SageObject):
             sage: DD = DocTestDefaults(optional='magma,guava')
             sage: DC = DocTestController(DD, [dirname])
             sage: DC.expand_files_into_sources()
-            sage: sorted(DC.sources[0].options.optional)  # abs tol 1
-            ['guava', 'magma', 'py2']
+            sage: all(t in DC.sources[0].options.optional for t in ['magma','guava'])
+            True
 
         We check that files are skipped appropriately::
 
@@ -855,7 +861,7 @@ class DocTestController(SageObject):
             ....:     DC.stats[source.basename] = {'walltime': 0.1*(i+1)}
             sage: DC.sort_sources()
             Sorting sources by runtime so that slower doctests are run first....
-            sage: print("\n".join([source.basename for source in DC.sources]))
+            sage: print("\n".join(source.basename for source in DC.sources))
             sage.doctest.util
             sage.doctest.test
             sage.doctest.sources
@@ -1025,10 +1031,9 @@ class DocTestController(SageObject):
         """
         cmd = "sage-runtests --serial "
         opt = dict_difference(self.options.__dict__, DocTestDefaults().__dict__)
-        for o in ("all", "sagenb"):
-            if o in opt:
-                raise ValueError("You cannot run gdb/valgrind on the whole sage%s library"%("" if o == "all" else "nb"))
-        for o in ("all", "sagenb", "long", "force_lib", "verbose", "failed", "new"):
+        if "all" in opt:
+            raise ValueError("You cannot run gdb/valgrind on the whole sage library")
+        for o in ("all", "long", "force_lib", "verbose", "failed", "new"):
             if o in opt:
                 cmd += "--%s "%o
         for o in ("timeout", "memlimit", "randorder", "stats_path"):
@@ -1073,7 +1078,7 @@ class DocTestController(SageObject):
             return 2
         opt = self.options
         if opt.gdb:
-            cmd = '''exec gdb -x "%s" --args '''%(os.path.join(SAGE_LOCAL,"bin","sage-gdb-commands"))
+            cmd = '''exec gdb -x "%s" --args '''%(os.path.join(SAGE_VENV, "bin", "sage-gdb-commands"))
             flags = ""
             if opt.logfile:
                 sage_cmd += " --logfile %s"%(opt.logfile)
@@ -1296,15 +1301,16 @@ def run_doctests(module, options=None):
             raise ValueError("You should not try to run doctests with a debugger from within Sage: IPython objects to embedded shells")
         from IPython import get_ipython
         IP = get_ipython()
-        old_color = IP.colors
-        IP.run_line_magic('colors', 'NoColor')
-        old_config_color = IP.config.TerminalInteractiveShell.colors
-        IP.config.TerminalInteractiveShell.colors = 'NoColor'
+        if IP is not None:
+            old_color = IP.colors
+            IP.run_line_magic('colors', 'NoColor')
+            old_config_color = IP.config.TerminalInteractiveShell.colors
+            IP.config.TerminalInteractiveShell.colors = 'NoColor'
 
     try:
         DC.run()
     finally:
         sage.doctest.DOCTEST_MODE = save_dtmode
-        if not save_dtmode:
+        if not save_dtmode and IP is not None:
             IP.run_line_magic('colors', old_color)
             IP.config.TerminalInteractiveShell.colors = old_config_color

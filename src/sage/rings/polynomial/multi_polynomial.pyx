@@ -57,21 +57,6 @@ cdef class MPolynomial(CommutativeRingElement):
             return int(self.constant_coefficient())
         raise TypeError(f"unable to convert non-constant polynomial {self} to an integer")
 
-    def __long__(self):
-        """
-        TESTS::
-
-            sage: long(RR['x,y'](0)) # indirect doctest
-            0L
-            sage: long(ZZ['x,y'].gen(0))
-            Traceback (most recent call last):
-            ...
-            TypeError: unable to convert non-constant polynomial x to an integer
-        """
-        if self.degree() <= 0:
-            return long(self.constant_coefficient())
-        raise TypeError(f"unable to convert non-constant polynomial {self} to an integer")
-
     def __float__(self):
         """
         TESTS::
@@ -2248,7 +2233,7 @@ cdef class MPolynomial(CommutativeRingElement):
         Return a reduced form of this polynomial.
 
         The algorithm is from Stoll and Cremona's "On the Reduction Theory of
-        Binary Forms" [CS2003]_. This takes a two variable homogenous polynomial and
+        Binary Forms" [CS2003]_. This takes a two variable homogeneous polynomial and
         finds a reduced form. This is a `SL(2,\ZZ)`-equivalent binary form
         whose covariant in the upper half plane is in the fundamental domain.
         If the polynomial has multiple roots, they are removed and the algorithm
@@ -2405,7 +2390,7 @@ cdef class MPolynomial(CommutativeRingElement):
             Traceback (most recent call last):
             ...
             ValueError: (=-8*x^6 - 99*y^6 - 3933*x^3*y - 725085*x^2*y^2 -
-            59411592*x*y^3) must be homogenous
+            59411592*x*y^3) must be homogeneous
 
         ::
 
@@ -2439,7 +2424,7 @@ cdef class MPolynomial(CommutativeRingElement):
         if self.parent().ngens() != 2:
             raise ValueError("(=%s) must have two variables"%self)
         if not self.is_homogeneous():
-            raise ValueError("(=%s) must be homogenous"%self)
+            raise ValueError("(=%s) must be homogeneous"%self)
 
         prec = kwds.get('prec', 300)
         return_conjugation  =kwds.get('return_conjugation', True)
