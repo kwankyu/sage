@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-Common Graphs
+Common graphs
 
 All graphs in Sage can be built through the ``graphs`` object. In order to
 build a complete graph on 15 elements, one can do::
@@ -15,7 +15,6 @@ To get a path with 4 vertices, and the house graph::
 More interestingly, one can get the list of all graphs that Sage knows how to
 build by typing ``graphs.`` in Sage and then hitting tab.
 """
-from __future__ import print_function, absolute_import, division
 from sage.env import SAGE_NAUTY_BINS_PREFIX as nautyprefix
 
 import subprocess
@@ -57,8 +56,7 @@ __doc__ += """
 """
 
 __append_to_doc(
-    ["AztecDiamondGraph",
-     "BullGraph",
+    ["BullGraph",
      "ButterflyGraph",
      "CircularLadderGraph",
      "ClawGraph",
@@ -107,10 +105,14 @@ __append_to_doc(
      "Cell120",
      "ChvatalGraph",
      "ClebschGraph",
+     "cocliques_HoffmannSingleton",
+     "ConwaySmith_for_3S7",
      "CoxeterGraph",
      "DesarguesGraph",
      "DejterGraph",
+     "distance_3_doubly_truncated_Golay_code_graph",
      "DoubleStarSnark",
+     "DoublyTruncatedWittGraph",
      "DurerGraph",
      "DyckGraph",
      "EllinghamHorton54Graph",
@@ -120,12 +122,15 @@ __append_to_doc(
      "FlowerSnark",
      "FolkmanGraph",
      "FosterGraph",
+     "FosterGraph3S6",
      "FranklinGraph",
      "FruchtGraph",
      "GoldnerHararyGraph",
      "GolombGraph",
      "GossetGraph",
+     "graph_3O73",
      "GrayGraph",
+     "GritsenkoGraph",
      "GrotzschGraph",
      "HallJankoGraph",
      "HarborthGraph",
@@ -139,15 +144,21 @@ __append_to_doc(
      "HoltGraph",
      "HortonGraph",
      "IoninKharaghani765Graph",
+     "IvanovIvanovFaradjevGraph",
+     "J2Graph",
      "JankoKharaghaniGraph",
      "JankoKharaghaniTonchevGraph",
      "KittellGraph",
      "KrackhardtKiteGraph",
      "Klein3RegularGraph",
      "Klein7RegularGraph",
-     "LocalMcLaughlinGraph",
+     "LargeWittGraph",
+     "LeonardGraph",
      "LjubljanaGraph",
+     "vanLintSchrijverGraph",
      "LivingstoneGraph",
+     "locally_GQ42_distance_transitive_graph",
+     "LocalMcLaughlinGraph",
      "M22Graph",
      "MarkstroemGraph",
      "MathonStronglyRegularGraph",
@@ -163,6 +174,8 @@ __append_to_doc(
      "PetersenGraph",
      "RobertsonGraph",
      "SchlaefliGraph",
+     "shortened_00_11_binary_Golay_code_graph",
+     "shortened_000_111_extended_binary_Golay_code_graph",
      "ShrikhandeGraph",
      "SimsGewirtzGraph",
      "SousselierGraph",
@@ -172,6 +185,7 @@ __append_to_doc(
      "TietzeGraph",
      "TruncatedIcosidodecahedralGraph",
      "TruncatedTetrahedralGraph",
+     "TruncatedWittGraph",
      "Tutte12Cage",
      "TutteCoxeterGraph",
      "TutteGraph",
@@ -204,8 +218,11 @@ or a list of graphs or ...)
 """
 
 __append_to_doc(
-    ["BalancedTree",
+    ["AlternatingFormsGraph",
+     "AztecDiamondGraph",
+     "BalancedTree",
      "BarbellGraph",
+     "BilinearFormsGraph",
      "BubbleSortGraph",
      "CaiFurerImmermanGraph",
      "chang_graphs",
@@ -213,7 +230,10 @@ __append_to_doc(
      "cospectral_graphs",
      "CubeGraph",
      "CubeConnectedCycle",
+     "distance_regular_graph",
      "DorogovtsevGoltsevMendesGraph",
+     "DoubleGrassmannGraph",
+     "DoubleOddGraph",
      "EgawaGraph",
      "FibonacciTree",
      "FoldedCubeGraph",
@@ -222,11 +242,17 @@ __append_to_doc(
      "FurerGadget",
      "fusenes",
      "FuzzyBallGraph",
+     "GeneralisedDodecagonGraph",
+     "GeneralisedHexagonGraph",
+     "GeneralisedOctagonGraph",
      "GeneralizedPetersenGraph",
      "GoethalsSeidelGraph",
+     "GrassmannGraph",
+     "HalfCube",
      "HammingGraph",
      "HanoiTowerGraph",
      "HararyGraph",
+     "HermitianFormsGraph",
      "HyperStarGraph",
      "JohnsonGraph",
      "KneserGraph",
@@ -253,6 +279,7 @@ __append_to_doc(
      "trees",
      "triangulations",
      "TuranGraph",
+     "UstimenkoGraph",
      "WheelGraph",
      "WindmillGraph"])
 
@@ -269,6 +296,7 @@ __append_to_doc(
      "AhrensSzekeresGeneralizedQuadrangleGraph",
      "NonisotropicOrthogonalPolarGraph",
      "NonisotropicUnitaryPolarGraph",
+     "OrthogonalDualPolarGraph",
      "OrthogonalPolarGraph",
      "SymplecticDualPolarGraph",
      "SymplecticPolarGraph",
@@ -330,7 +358,8 @@ __append_to_doc(
      "RandomToleranceGraph",
      "RandomTree",
      "RandomTreePowerlaw",
-     "RandomTriangulation"])
+     "RandomTriangulation",
+     "RandomUnitDiskGraph"])
 
 __doc__ += """
 **Graphs with a given degree sequence**
@@ -903,7 +932,7 @@ class GraphGenerators():
         The ``debug`` switch can be used to examine ``geng``'s reaction to the
         input in the ``options`` string.  We illustrate success.  (A failure
         will be a string beginning with ">E".)  Passing the "-q" switch to
-        ``geng`` will supress the indicator of a successful initiation, and so
+        ``geng`` will suppress the indicator of a successful initiation, and so
         the first returned value might be an empty string if ``debug`` is
         ``True``::
 
@@ -1364,7 +1393,11 @@ class GraphGenerators():
 
     def planar_graphs(self, order, minimum_degree=None,
                       minimum_connectivity=None,
-                      exact_connectivity=False, only_bipartite=False,
+                      exact_connectivity=False,
+                      minimum_edges=None,
+                      maximum_edges=None,
+                      maximum_face_size=None,
+                      only_bipartite=False,
                       dual=False):
         r"""
         An iterator over connected planar graphs using the plantri generator.
@@ -1400,6 +1433,15 @@ class GraphGenerators():
           graphs with exactly the specified connectivity will be generated.
           This option cannot be used with ``minimum_connectivity=3``, or if
           the minimum connectivity is not explicitly set.
+
+        - ``minimum_edges`` -- integer (default: ``None``); lower bound on the
+          number of edges
+
+        - ``maximum_edges`` -- integer (default: ``None``); upper bound on the
+          number of edges
+
+        - ``maximum_face_size`` -- integer (default: ``None``); upper bound on
+          the size of a face and so on the maximum degree of the dual graph
 
         - ``only_bipartite`` - default: ``False`` - if ``True`` only bipartite
           graphs will be generated. This option cannot be used for graphs with
@@ -1464,6 +1506,24 @@ class GraphGenerators():
             sage: list(graphs.planar_graphs(1, minimum_degree=1))  # optional plantri
             []
 
+        Specifying lower and upper bounds on the number of edges::
+
+            sage: len(list(graphs.planar_graphs(4)))  # optional plantri
+            6
+            sage: len(list(graphs.planar_graphs(4, minimum_edges=4)))  # optional plantri
+            4
+            sage: len(list(graphs.planar_graphs(4, maximum_edges=4)))  # optional plantri
+            4
+            sage: len(list(graphs.planar_graphs(4, minimum_edges=4, maximum_edges=4)))  # optional plantri
+            2
+
+        Specifying the maximum size of a face::
+
+            sage: len(list(graphs.planar_graphs(4, maximum_face_size=3)))  # optional plantri
+            1
+            sage: len(list(graphs.planar_graphs(4, maximum_face_size=4)))  # optional plantri
+            3
+
         TESTS:
 
         The number of edges in a planar graph is equal to the number of edges in
@@ -1518,6 +1578,31 @@ class GraphGenerators():
         if only_bipartite and minimum_degree > 3:
             raise NotImplementedError("Generation of bipartite planar graphs with minimum degree 4 or 5 is not implemented.")
 
+        edges = ''
+        if minimum_edges is None:
+            if maximum_edges is not None:
+                if maximum_edges < order - 1:
+                    raise ValueError("the number of edges cannot be less than order - 1")
+                edges = '-e:{}'.format(maximum_edges)
+        else:
+            if minimum_edges > 3*order - 6:
+                raise ValueError("the number of edges cannot be more than 3*order - 6")
+            if maximum_edges is None:
+                edges = '-e{}:'.format(minimum_edges)
+            elif minimum_edges > maximum_edges:
+                raise ValueError("the maximum number of edges must be larger "
+                                 "or equal to the minimum number of edges")
+            elif minimum_edges == maximum_edges:
+                edges = '-e{}'.format(minimum_edges)
+            else:
+                edges = '-e{}:{}'.format(minimum_edges, maximum_edges)
+
+        faces = ''
+        if maximum_face_size is not None:
+            if maximum_face_size < 3:
+                raise ValueError("the upper bound on the size of a face must be at least 3")
+            faces = '-f{}'.format(maximum_face_size)
+
         if order == 0:
             return
 
@@ -1536,12 +1621,13 @@ class GraphGenerators():
         from sage.features.graph_generators import Plantri
         Plantri().require()
 
-        cmd = 'plantri -p{}m{}c{}{}{} {}'
+        cmd = 'plantri -p{}m{}c{}{}{} {} {} {}'
         command = cmd.format('b' if only_bipartite else '',
                              minimum_degree,
                              minimum_connectivity,
                              'x' if exact_connectivity else '',
                              'd' if dual else '',
+                             edges, faces,
                              order)
 
         sp = subprocess.Popen(command, shell=True,
@@ -1913,7 +1999,7 @@ class GraphGenerators():
 ###########################################################################
 # Small Graphs
 ###########################################################################
-    from .generators import smallgraphs
+    from .generators import smallgraphs, distance_regular
     Balaban10Cage            = staticmethod(smallgraphs.Balaban10Cage)
     Balaban11Cage            = staticmethod(smallgraphs.Balaban11Cage)
     BidiakisCube             = staticmethod(smallgraphs.BidiakisCube)
@@ -1928,10 +2014,14 @@ class GraphGenerators():
     Cell120                  = staticmethod(smallgraphs.Cell120)
     ChvatalGraph             = staticmethod(smallgraphs.ChvatalGraph)
     ClebschGraph             = staticmethod(smallgraphs.ClebschGraph)
+    cocliques_HoffmannSingleton = staticmethod(distance_regular.cocliques_HoffmannSingleton)
+    ConwaySmith_for_3S7      = staticmethod(distance_regular.ConwaySmith_for_3S7)
     CoxeterGraph             = staticmethod(smallgraphs.CoxeterGraph)
     DejterGraph              = staticmethod(smallgraphs.DejterGraph)
     DesarguesGraph           = staticmethod(smallgraphs.DesarguesGraph)
+    distance_3_doubly_truncated_Golay_code_graph = staticmethod(distance_regular.distance_3_doubly_truncated_Golay_code_graph)
     DoubleStarSnark          = staticmethod(smallgraphs.DoubleStarSnark)
+    DoublyTruncatedWittGraph = staticmethod(distance_regular.DoublyTruncatedWittGraph)
     DurerGraph               = staticmethod(smallgraphs.DurerGraph)
     DyckGraph                = staticmethod(smallgraphs.DyckGraph)
     EllinghamHorton54Graph   = staticmethod(smallgraphs.EllinghamHorton54Graph)
@@ -1941,12 +2031,15 @@ class GraphGenerators():
     FlowerSnark              = staticmethod(smallgraphs.FlowerSnark)
     FolkmanGraph             = staticmethod(smallgraphs.FolkmanGraph)
     FosterGraph              = staticmethod(smallgraphs.FosterGraph)
+    FosterGraph3S6           = staticmethod(distance_regular.FosterGraph3S6)
     FranklinGraph            = staticmethod(smallgraphs.FranklinGraph)
     FruchtGraph              = staticmethod(smallgraphs.FruchtGraph)
     GoldnerHararyGraph       = staticmethod(smallgraphs.GoldnerHararyGraph)
     GolombGraph              = staticmethod(smallgraphs.GolombGraph)
     GossetGraph              = staticmethod(smallgraphs.GossetGraph)
+    graph_3O73               = staticmethod(distance_regular.graph_3O73)
     GrayGraph                = staticmethod(smallgraphs.GrayGraph)
+    GritsenkoGraph           = staticmethod(smallgraphs.GritsenkoGraph)
     GrotzschGraph            = staticmethod(smallgraphs.GrotzschGraph)
     HallJankoGraph           = staticmethod(smallgraphs.HallJankoGraph)
     WellsGraph               = staticmethod(smallgraphs.WellsGraph)
@@ -1961,15 +2054,21 @@ class GraphGenerators():
     HoltGraph                = staticmethod(smallgraphs.HoltGraph)
     HortonGraph              = staticmethod(smallgraphs.HortonGraph)
     IoninKharaghani765Graph  = staticmethod(smallgraphs.IoninKharaghani765Graph)
+    IvanovIvanovFaradjevGraph = staticmethod(distance_regular.IvanovIvanovFaradjevGraph)
+    J2Graph                  = staticmethod(distance_regular.J2Graph)
     JankoKharaghaniGraph     = staticmethod(smallgraphs.JankoKharaghaniGraph)
     JankoKharaghaniTonchevGraph  = staticmethod(smallgraphs.JankoKharaghaniTonchevGraph)
     KittellGraph             = staticmethod(smallgraphs.KittellGraph)
     KrackhardtKiteGraph      = staticmethod(smallgraphs.KrackhardtKiteGraph)
     Klein3RegularGraph       = staticmethod(smallgraphs.Klein3RegularGraph)
     Klein7RegularGraph       = staticmethod(smallgraphs.Klein7RegularGraph)
-    LocalMcLaughlinGraph     = staticmethod(smallgraphs.LocalMcLaughlinGraph)
+    LargeWittGraph           = staticmethod(distance_regular.LargeWittGraph)
+    LeonardGraph             = staticmethod(distance_regular.LeonardGraph)
     LjubljanaGraph           = staticmethod(smallgraphs.LjubljanaGraph)
+    vanLintSchrijverGraph       = staticmethod(distance_regular.vanLintSchrijverGraph)
     LivingstoneGraph         = staticmethod(smallgraphs.LivingstoneGraph)
+    locally_GQ42_distance_transitive_graph = staticmethod(distance_regular.locally_GQ42_distance_transitive_graph)
+    LocalMcLaughlinGraph     = staticmethod(smallgraphs.LocalMcLaughlinGraph)
     M22Graph                 = staticmethod(smallgraphs.M22Graph)
     MarkstroemGraph          = staticmethod(smallgraphs.MarkstroemGraph)
     MathonStronglyRegularGraph = staticmethod(smallgraphs.MathonStronglyRegularGraph)
@@ -1985,6 +2084,8 @@ class GraphGenerators():
     PetersenGraph            = staticmethod(smallgraphs.PetersenGraph)
     RobertsonGraph           = staticmethod(smallgraphs.RobertsonGraph)
     SchlaefliGraph           = staticmethod(smallgraphs.SchlaefliGraph)
+    shortened_00_11_binary_Golay_code_graph = staticmethod(distance_regular.shortened_00_11_binary_Golay_code_graph)
+    shortened_000_111_extended_binary_Golay_code_graph = staticmethod(distance_regular.shortened_000_111_extended_binary_Golay_code_graph)
     ShrikhandeGraph          = staticmethod(smallgraphs.ShrikhandeGraph)
     SimsGewirtzGraph         = staticmethod(smallgraphs.SimsGewirtzGraph)
     SousselierGraph          = staticmethod(smallgraphs.SousselierGraph)
@@ -1994,7 +2095,8 @@ class GraphGenerators():
     TietzeGraph              = staticmethod(smallgraphs.TietzeGraph)
     Tutte12Cage              = staticmethod(smallgraphs.Tutte12Cage)
     TruncatedIcosidodecahedralGraph = staticmethod(smallgraphs.TruncatedIcosidodecahedralGraph)
-    TruncatedTetrahedralGraph= staticmethod(smallgraphs.TruncatedTetrahedralGraph)
+    TruncatedTetrahedralGraph = staticmethod(smallgraphs.TruncatedTetrahedralGraph)
+    TruncatedWittGraph       = staticmethod(distance_regular.TruncatedWittGraph)
     TutteCoxeterGraph        = staticmethod(smallgraphs.TutteCoxeterGraph)
     TutteGraph               = staticmethod(smallgraphs.TutteGraph)
     U42Graph216              = staticmethod(smallgraphs.U42Graph216)
@@ -2019,9 +2121,11 @@ class GraphGenerators():
 ###########################################################################
     from .generators import families
     from . import strongly_regular_db
+    AlternatingFormsGraph   = staticmethod(distance_regular.AlternatingFormsGraph)
     AztecDiamondGraph      = staticmethod(families.AztecDiamondGraph)
     BalancedTree           = staticmethod(families.BalancedTree)
     BarbellGraph           = staticmethod(families.BarbellGraph)
+    BilinearFormsGraph      = staticmethod(distance_regular.BilinearFormsGraph)
     BubbleSortGraph        = staticmethod(families.BubbleSortGraph)
     CaiFurerImmermanGraph  = staticmethod(families.CaiFurerImmermanGraph)
     chang_graphs           = staticmethod(families.chang_graphs)
@@ -2029,19 +2133,30 @@ class GraphGenerators():
     CubeGraph              = staticmethod(families.CubeGraph)
     CubeConnectedCycle     = staticmethod(families.CubeConnectedCycle)
     DipoleGraph            = staticmethod(families.DipoleGraph)
+    distance_regular_graph = staticmethod(distance_regular.distance_regular_graph)
     DorogovtsevGoltsevMendesGraph = staticmethod(families.DorogovtsevGoltsevMendesGraph)
+    DoubleGeneralizedPetersenGraph = staticmethod(families.DoubleGeneralizedPetersenGraph)
+    DoubleGrassmannGraph   = staticmethod(distance_regular.DoubleGrassmannGraph)
+    DoubleOddGraph         = staticmethod(distance_regular.DoubleOddGraph)
     EgawaGraph             = staticmethod(families.EgawaGraph)
     FibonacciTree          = staticmethod(families.FibonacciTree)
     FoldedCubeGraph        = staticmethod(families.FoldedCubeGraph)
     FriendshipGraph        = staticmethod(families.FriendshipGraph)
     FurerGadget            = staticmethod(families.FurerGadget)
     FuzzyBallGraph         = staticmethod(families.FuzzyBallGraph)
+    GeneralisedDodecagonGraph = staticmethod(distance_regular.GeneralisedDodecagonGraph)
+    GeneralisedHexagonGraph = staticmethod(distance_regular.GeneralisedHexagonGraph)
+    GeneralisedOctagonGraph = staticmethod(distance_regular.GeneralisedOctagonGraph)
     GeneralizedPetersenGraph = staticmethod(families.GeneralizedPetersenGraph)
     GoethalsSeidelGraph    = staticmethod(families.GoethalsSeidelGraph)
+    GrassmannGraph         = staticmethod(distance_regular.GrassmannGraph)
+    HalfCube               = staticmethod(distance_regular.HalfCube)
     HammingGraph           = staticmethod(families.HammingGraph)
     HanoiTowerGraph        = staticmethod(families.HanoiTowerGraph)
     HararyGraph            = staticmethod(families.HararyGraph)
+    HermitianFormsGraph     = staticmethod(distance_regular.HermitianFormsGraph)
     HyperStarGraph         = staticmethod(families.HyperStarGraph)
+    IGraph                 = staticmethod(families.IGraph)
     JohnsonGraph           = staticmethod(families.JohnsonGraph)
     KneserGraph            = staticmethod(families.KneserGraph)
     LCFGraph               = staticmethod(families.LCFGraph)
@@ -2059,13 +2174,16 @@ class GraphGenerators():
     PasechnikGraph         = staticmethod(families.PasechnikGraph)
     petersen_family        = staticmethod(families.petersen_family)
     RingedTree             = staticmethod(families.RingedTree)
+    RoseWindowGraph        = staticmethod(families.RoseWindowGraph)
     SierpinskiGasketGraph  = staticmethod(families.SierpinskiGasketGraph)
     SquaredSkewHadamardMatrixGraph = staticmethod(families.SquaredSkewHadamardMatrixGraph)
     SwitchedSquaredSkewHadamardMatrixGraph = staticmethod(families.SwitchedSquaredSkewHadamardMatrixGraph)
     strongly_regular_graph = staticmethod(strongly_regular_db.strongly_regular_graph)
+    TabacjnGraph           = staticmethod(families.TabacjnGraph)
     TadpoleGraph           = staticmethod(families.TadpoleGraph)
     trees                  = staticmethod(families.trees)
     TuranGraph             = staticmethod(families.TuranGraph)
+    UstimenkoGraph         = staticmethod(distance_regular.UstimenkoGraph)
     WheelGraph             = staticmethod(families.WheelGraph)
     WindmillGraph          = staticmethod(families.WindmillGraph)
 
@@ -2077,18 +2195,19 @@ class GraphGenerators():
     AhrensSzekeresGeneralizedQuadrangleGraph = staticmethod(classical_geometries.AhrensSzekeresGeneralizedQuadrangleGraph)
     NonisotropicOrthogonalPolarGraph = staticmethod(classical_geometries.NonisotropicOrthogonalPolarGraph)
     NonisotropicUnitaryPolarGraph = staticmethod(classical_geometries.NonisotropicUnitaryPolarGraph)
-    OrthogonalPolarGraph   = staticmethod(classical_geometries.OrthogonalPolarGraph)
+    OrthogonalDualPolarGraph = staticmethod(classical_geometries.OrthogonalDualPolarGraph)
+    OrthogonalPolarGraph = staticmethod(classical_geometries.OrthogonalPolarGraph)
     SymplecticDualPolarGraph = staticmethod(classical_geometries.SymplecticDualPolarGraph)
-    SymplecticPolarGraph   = staticmethod(classical_geometries.SymplecticPolarGraph)
+    SymplecticPolarGraph = staticmethod(classical_geometries.SymplecticPolarGraph)
     TaylorTwographDescendantSRG = \
              staticmethod(classical_geometries.TaylorTwographDescendantSRG)
-    TaylorTwographSRG      = staticmethod(classical_geometries.TaylorTwographSRG)
-    T2starGeneralizedQuadrangleGraph      = staticmethod(classical_geometries.T2starGeneralizedQuadrangleGraph)
+    TaylorTwographSRG = staticmethod(classical_geometries.TaylorTwographSRG)
+    T2starGeneralizedQuadrangleGraph = staticmethod(classical_geometries.T2starGeneralizedQuadrangleGraph)
     Nowhere0WordsTwoWeightCodeGraph = staticmethod(classical_geometries.Nowhere0WordsTwoWeightCodeGraph)
-    HaemersGraph      = staticmethod(classical_geometries.HaemersGraph)
+    HaemersGraph = staticmethod(classical_geometries.HaemersGraph)
     CossidentePenttilaGraph = staticmethod(classical_geometries.CossidentePenttilaGraph)
-    UnitaryDualPolarGraph  = staticmethod(classical_geometries.UnitaryDualPolarGraph)
-    UnitaryPolarGraph      = staticmethod(classical_geometries.UnitaryPolarGraph)
+    UnitaryDualPolarGraph = staticmethod(classical_geometries.UnitaryDualPolarGraph)
+    UnitaryPolarGraph = staticmethod(classical_geometries.UnitaryPolarGraph)
 
 ###########################################################################
 # Chessboard Graphs
@@ -2134,6 +2253,7 @@ class GraphGenerators():
     RandomTreePowerlaw       = staticmethod(random.RandomTreePowerlaw)
     RandomTree               = staticmethod(random.RandomTree)
     RandomTriangulation      = staticmethod(random.RandomTriangulation)
+    RandomUnitDiskGraph      = staticmethod(random.RandomUnitDiskGraph)
 
 ###########################################################################
 # Maps

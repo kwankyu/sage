@@ -509,8 +509,8 @@ cdef class CategoryObject(SageObject):
             [0 0]
 
         """
-        #old = self._names, self._latex_names
-        # We can not assume that self *has* _latex_variable_names.
+        # old = self._names, self._latex_names
+        # We cannot assume that self *has* _latex_variable_names.
         # But there is a method that returns them and sets
         # the attribute at the same time, if needed.
         # Simon King: It is not necessarily the case that variable
@@ -791,6 +791,7 @@ cdef class CategoryObject(SageObject):
             running ._test_cardinality() . . . pass
             running ._test_category() . . . pass
             running ._test_characteristic() . . . pass
+            running ._test_construction() . . . pass
             running ._test_distributivity() . . . pass
             running ._test_divides() . . . pass
             running ._test_elements() . . .
@@ -864,6 +865,7 @@ cdef class CategoryObject(SageObject):
             _test_cardinality
             _test_category
             _test_characteristic
+            _test_construction
             _test_distributivity
             _test_divides
             _test_elements
@@ -965,11 +967,7 @@ cpdef normalize_names(Py_ssize_t ngens, names):
         Traceback (most recent call last):
         ...
         IndexError: the number of names must equal the number of generators
-        sage: nn(None, "a")  # py2
-        Traceback (most recent call last):
-        ...
-        TypeError: 'NoneType' object cannot be interpreted as an index
-        sage: nn(None, "a")  # py3
+        sage: nn(None, "a")
         Traceback (most recent call last):
         ...
         TypeError: 'NoneType' object cannot be interpreted as an integer

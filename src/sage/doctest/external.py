@@ -25,10 +25,19 @@ AUTHORS:
 #                  http://www.gnu.org/licenses/
 #*****************************************************************************
 
-from multiprocessing import Array
+import multiprocessing
+import os
+
+# With OS X, Python 3.8 defaults to use 'spawn' instead of 'fork' in
+# multiprocessing, and Sage doctesting doesn't work with 'spawn'. See
+# trac #27754.
+if os.uname().sysname == 'Darwin':
+    multiprocessing.set_start_method('fork', force=True)
+Array = multiprocessing.Array
 
 import urllib.error
 from urllib.request import Request, urlopen
+from ssl import SSLContext
 
 # Functions in this module whose name is of the form 'has_xxx' tests if the
 # software xxx is available to Sage.
@@ -38,7 +47,7 @@ def has_internet():
     """
     Test if Internet is available.
 
-    Failure of connecting to the site "http://www.sagemath.org" within a second
+    Failure of connecting to the site "https://www.sagemath.org" within a second
     is regarded as internet being not available.
 
     EXAMPLES::
@@ -47,9 +56,9 @@ def has_internet():
         sage: has_internet() # random, optional -- internet
         True
     """
-    req = Request("http://www.sagemath.org",headers={"User-Agent":"sage-doctest"})
+    req = Request("https://www.sagemath.org",headers={"User-Agent":"sage-doctest"})
     try:
-        urlopen(req,timeout=1)
+        urlopen(req, timeout=1, context=SSLContext())
         return True
     except urllib.error.URLError:
         return False
@@ -281,6 +290,20 @@ def has_imagemagick():
     from sage.features.imagemagick import ImageMagick
     return ImageMagick().is_present()
 
+def has_rubiks():
+    """
+    Test if the rubiks package (``cu2``, ``cubex``, ``dikcube``,
+    ``mcube``, ``optimal``, and ``size222``) is available.
+
+    EXAMPLES::
+
+        sage: from sage.doctest.external import has_rubiks
+        sage: has_rubiks()   # optional -- rubiks
+        FeatureTestResult('Rubiks', True)
+    """
+    from sage.features.rubiks import Rubiks
+    return Rubiks().is_present()
+
 def external_software():
     """
     Return the alphabetical list of external software supported by this module.
@@ -337,6 +360,7 @@ class AvailableSoftware(object):
          'matlab',
          'octave',
          'pandoc',
+         'rubiks',
          'scilab']
         sage: 'internet' in available_software # random, optional - internet
         True

@@ -30,7 +30,6 @@ REFERENCES:
 #  the License, or (at your option) any later version.
 #                  http://www.gnu.org/licenses/
 #******************************************************************************
-from __future__ import absolute_import
 
 from sage.structure.unique_representation import UniqueRepresentation
 from sage.structure.sage_object import SageObject
@@ -102,7 +101,7 @@ class Basis_abstract(UniqueRepresentation, SageObject):
         g = iter(self)
         b = list(g)
         for x in b:
-            tester.assertTrue(x in self.free_module())
+            tester.assertIn(x, self.free_module())
         tester.assertEqual(len(b), len(self))
         tester.assertEqual(len(b), self.free_module().rank())
 
@@ -110,8 +109,10 @@ class Basis_abstract(UniqueRepresentation, SageObject):
         r"""
         Return the basis length, i.e. the rank of the free module.
 
-        NB: the method ``__len__()`` is required for the basis to act as a
-        "frame" in the class :class:`~sage.tensor.modules.comp.Components`.
+        .. NOTE::
+
+            the method ``__len__()`` is required for the basis to act as a
+            "frame" in the class :class:`~sage.tensor.modules.comp.Components`.
 
         EXAMPLES::
 
@@ -436,13 +437,12 @@ class FreeModuleCoBasis(Basis_abstract):
             sage: e = M.basis('e')
             sage: f = e.dual_basis()
             sage: f._test_iter_len()
-
         """
         tester = self._tester(**options)
         g = iter(self)
         b = list(g)
         for x in b:
-            tester.assertTrue(x in self.free_module().dual())
+            tester.assertIn(x, self.free_module().dual())
         tester.assertEqual(len(b), len(self))
         tester.assertEqual(len(b), self.free_module().rank())
 

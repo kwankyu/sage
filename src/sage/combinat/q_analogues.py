@@ -13,7 +13,6 @@ r"""
 #                  http://www.gnu.org/licenses/
 # ****************************************************************************
 
-from __future__ import division
 
 from sage.misc.cachefunc import cached_function
 from sage.misc.all import prod
@@ -83,7 +82,7 @@ def q_int(n, q=None):
 
 
 def q_factorial(n, q=None):
-    """
+    r"""
     Return the `q`-analogue of the factorial `n!`.
 
     This is the product
@@ -277,7 +276,7 @@ def q_binomial(n, k, q=None, algorithm='auto'):
         sage: r = q_binomial(3r, 2r, 1r); r
         3
         sage: type(r)
-        <type 'int'>
+        <class 'int'>
 
     Check that arbitrary polynomials work::
 

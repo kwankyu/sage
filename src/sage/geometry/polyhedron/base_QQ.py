@@ -1,10 +1,10 @@
 r"""
 Base class for polyhedra over `\QQ`
 """
-from __future__ import absolute_import
 
 from sage.rings.all import QQ
-from sage.misc.all import cached_method, prod
+from sage.misc.cachefunc import cached_method
+from sage.misc.all import prod
 from .base import Polyhedron_base
 
 
@@ -281,7 +281,7 @@ class Polyhedron_QQ(Polyhedron_base):
         .. SEEALSO::
 
             :mod:`~sage.interfaces.latte` the interface to LattE Integrale
-            `PyNormaliz <https://pypi.python.org/pypi/PyNormaliz/1.5>`_
+            `PyNormaliz <https://pypi.org/project/PyNormaliz>`_
 
         EXAMPLES:
 
@@ -450,7 +450,7 @@ class Polyhedron_QQ(Polyhedron_base):
         .. SEEALSO::
 
             :mod:`~sage.interfaces.latte` the interface to LattE Integrale
-            `PyNormaliz <https://pypi.python.org/pypi/PyNormaliz/1.5>`_
+            `PyNormaliz <https://pypi.org/project/PyNormaliz>`_
 
         .. WARNING::
 

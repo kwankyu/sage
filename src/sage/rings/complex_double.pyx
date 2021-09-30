@@ -95,9 +95,9 @@ from sage.structure.coerce cimport is_numpy_type
 from cypari2.gen cimport Gen as pari_gen
 from cypari2.convert cimport new_gen_from_double, new_t_COMPLEX_from_double
 
-from . import complex_number
+from . import complex_mpfr
 
-from .complex_field import ComplexField
+from .complex_mpfr import ComplexField
 cdef CC = ComplexField()
 
 from .real_mpfr import RealField
@@ -233,12 +233,17 @@ cdef class ComplexDoubleField_class(sage.rings.ring.Field):
 
         EXAMPLES::
 
-            sage: CDF.random_element()
-            -0.43681052967509904 + 0.7369454235661859*I
-            sage: CDF.random_element(-10,10,-10,10)
-            -7.088740263015161 - 9.54135400334003*I
-            sage: CDF.random_element(-10^20,10^20,-2,2)
-            -7.587654737635711e+19 + 0.925549022838656*I
+            sage: CDF.random_element().parent() is CDF
+            True
+            sage: re, im = CDF.random_element()
+            sage: -1 <= re <= 1, -1 <= im <= 1
+            (True, True)
+            sage: re, im = CDF.random_element(-10,10,-10,10)
+            sage: -10 <= re <= 10, -10 <= im <= 10
+            (True, True)
+            sage: re, im = CDF.random_element(-10^20,10^20,-2,2)
+            sage: -10^20 <= re <= 10^20, -2 <= im <= 2
+            (True, True)
         """
         cdef randstate rstate = current_randstate()
         global _CDF
@@ -277,7 +282,7 @@ cdef class ComplexDoubleField_class(sage.rings.ring.Field):
         """
         return r"\Bold{C}"
 
-    def __call__(self, x, im=None):
+    def __call__(self, x=None, im=None):
         """
         Create a complex double using ``x`` and optionally an imaginary part
         ``im``.
@@ -313,7 +318,7 @@ cdef class ComplexDoubleField_class(sage.rings.ring.Field):
             sage: CDF(QQ['x'].0)
             Traceback (most recent call last):
             ...
-            TypeError: cannot coerce nonconstant polynomial to float
+            TypeError: cannot convert nonconstant polynomial
 
         One can convert back and forth between double precision complex
         numbers and higher-precision ones, though of course there may be
@@ -329,8 +334,19 @@ cdef class ComplexDoubleField_class(sage.rings.ring.Field):
             True
             sage: b == CC(a)
             True
+
+        TESTS:
+
+        Check that :trac:`31836` is fixed::
+
+            sage: a = CDF() ; a
+            0.0
+            sage: a.parent()
+            Complex Double Field
         """
         # We implement __call__ to gracefully accept the second argument.
+        if x is None:
+            return self.zero()
         if im is not None:
             x = x, im
         return Parent.__call__(self, x)
@@ -352,7 +368,7 @@ cdef class ComplexDoubleField_class(sage.rings.ring.Field):
             return ComplexDoubleElement(x, 0)
         elif isinstance(x, complex):
             return ComplexDoubleElement(x.real, x.imag)
-        elif isinstance(x, complex_number.ComplexNumber):
+        elif isinstance(x, complex_mpfr.ComplexNumber):
             return ComplexDoubleElement(x.real(), x.imag())
         elif isinstance(x, pari_gen):
             return pari_to_cdf(x)
@@ -411,7 +427,7 @@ cdef class ComplexDoubleField_class(sage.rings.ring.Field):
         from .rational_field import QQ
         from .real_lazy import RLF
         from .real_mpfr import RR, RealField_class
-        from .complex_field import ComplexField_class
+        from .complex_mpfr import ComplexField_class
         if S is ZZ or S is QQ or S is RDF or S is RLF:
             return FloatToCDF(S)
         if isinstance(S, RealField_class):
@@ -430,9 +446,9 @@ cdef class ComplexDoubleField_class(sage.rings.ring.Field):
         elif RR.has_coerce_map_from(S):
             return FloatToCDF(RR) * RR._internal_coerce_map_from(S)
         elif isinstance(S, ComplexField_class) and S.prec() >= 53:
-            return complex_number.CCtoCDF(S, self)
+            return complex_mpfr.CCtoCDF(S, self)
         elif CC.has_coerce_map_from(S):
-            return complex_number.CCtoCDF(CC, self) * CC._internal_coerce_map_from(S)
+            return complex_mpfr.CCtoCDF(CC, self) * CC._internal_coerce_map_from(S)
 
     def _magma_init_(self, magma):
         r"""
@@ -988,6 +1004,17 @@ cdef class ComplexDoubleElement(FieldElement):
         # Sending to another computer algebra system is slow anyway, right?
         return CC(self)._interface_init_(I)
 
+    def _mathematica_init_(self):
+        """
+        TESTS:
+
+        Check that :trac:`28814` is fixed::
+
+            sage: mathematica(CDF(1e-25, 1e25))  # optional - mathematica
+            1.*^-25 + 1.*^25*I
+        """
+        return CC(self)._mathematica_init_()
+
     def _maxima_init_(self, I=None):
         """
         Return a string representation of this complex number in the syntax of
@@ -1098,55 +1125,10 @@ cdef class ComplexDoubleElement(FieldElement):
             '2.0'
             sage: format(CDF(0, 0), '+#.4')
             '+0.000'
-
-        TESTS::
-
-            sage: s = format(CDF(1/80, -1/2), '25'); s
-            '           0.0125 - 0.5*I'
-            sage: len(s) == 25
-            True
-            sage: '{:=^ 25}'.format(CDF(1/80, -1/2))
-            '===== 0.0125 - 0.5*I====='
-            sage: format(float(3), '#.4') == format(CDF(3, 0), '#.4')
-            True
-            sage: format(CDF(1, 2), '=+20')
-            Traceback (most recent call last):
-            ...
-            ValueError: '=' alignment not allowed in complex format specifier
         """
-        import re
-        match = re.match(r'^(.?[><=^])?'         # 1: fill and align
-                         r'([ +-]?)'             # 2: sign
-                         r'[^\d\.]*?0?(\d*)'     # 3: width
-                         r'.*?([eEfFgGn%])?$',   # 4: type
-                         format_spec)
-        if not match:
-            raise ValueError("invalid format specifier %s" % format_spec)
-
-        # format floats without align and width
-        float_format = (format_spec[match.start(2):match.start(3)]
-                        + format_spec[match.end(3):])
-
-        use_str_format = not match.group(4)
-        if use_str_format and self._complex.imag == 0:
-            result = format(self._complex.real, float_format)
-        elif use_str_format and self._complex.real == 0:
-            result = format(self._complex.imag, float_format) + '*I'
-        else:
-            real = format(self._complex.real, float_format)
-            imag = format(self._complex.imag,
-                          '+' + format_spec[match.end(2):match.start(3)]
-                          + format_spec[match.end(3):])
-            result = f"{real} {imag[:1]} {imag[1:]}*I"
-
-        width = match.group(3)
-        if width:
-            align = match.group(1) or '>'
-            if align.endswith('='):
-                raise ValueError("'=' alignment not allowed in "
-                                 "complex format specifier")
-            result = format(result, align + width)
-        return result
+        return complex_mpfr._format_complex_number(self._complex.real,
+                                                     self._complex.imag,
+                                                     format_spec)
 
     def _latex_(self):
         """
@@ -1435,7 +1417,7 @@ cdef class ComplexDoubleElement(FieldElement):
 
             - :func:`sage.misc.functional.norm`
 
-            - :meth:`sage.rings.complex_number.ComplexNumber.norm`
+            - :meth:`sage.rings.complex_mpfr.ComplexNumber.norm`
 
         EXAMPLES::
 

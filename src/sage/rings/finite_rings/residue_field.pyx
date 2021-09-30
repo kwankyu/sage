@@ -151,6 +151,8 @@ from sage.rings.ring cimport Field
 from sage.rings.integer cimport Integer
 from sage.rings.rational cimport Rational
 from sage.categories.homset import Hom
+from sage.categories.basic import Fields, Rings
+from sage.categories.pushout import AlgebraicExtensionFunctor
 from sage.rings.all import ZZ, QQ, Integers
 from sage.rings.finite_rings.finite_field_constructor import zech_log_bound, FiniteField as GF
 from sage.rings.finite_rings.finite_field_givaro import FiniteField_givaro
@@ -478,6 +480,42 @@ class ResidueField_generic(Field):
         """
         self.p = p
         # Note: we don't call Parent.__init__ since many residue fields use multiple inheritance and will be calling __init__ via their other superclass.
+
+    def construction(self):
+        """
+        Construction of this residue field.
+
+        OUTPUT:
+
+        An :class:`~sage.categories.pushout.AlgebraicExtensionFunctor` and the
+        number field that this residue field has been obtained from.
+
+        The residue field is determined by a prime (fractional) ideal in a
+        number field. If this ideal can be coerced into a different number
+        field, then the construction functor applied to this number field will
+        return the corresponding residue field. See :trac:`15223`.
+
+        EXAMPLES::
+
+            sage: K.<z> = CyclotomicField(7)
+            sage: P = K.factor(17)[0][0]
+            sage: k = K.residue_field(P)
+            sage: k
+            Residue field in zbar of Fractional ideal (17)
+            sage: F, R = k.construction()
+            sage: F
+            AlgebraicExtensionFunctor
+            sage: R
+            Cyclotomic Field of order 7 and degree 6
+            sage: F(R) is k
+            True
+            sage: F(ZZ)
+            Residue field of Integers modulo 17
+            sage: F(CyclotomicField(49))
+            Residue field in zbar of Fractional ideal (17)
+
+        """
+        return AlgebraicExtensionFunctor([self.polynomial()], [self.variable_name()], [None], residue=self.p), self.p.ring()
 
     def ideal(self):
         r"""
@@ -1017,7 +1055,7 @@ cdef class ReductionMap(Map):
             sage: f = k.convert_map_from(K)
             sage: s = f.section(); s
             Lifting map:
-              From: Residue field in abar of Fractional ideal (14*a^4 - 24*a^3 - 26*a^2 + 58*a - 15)
+              From: Residue field in abar of Fractional ideal (-14*a^4 + 24*a^3 + 26*a^2 - 58*a + 15)
               To:   Number Field in a with defining polynomial x^5 - 5*x + 2
             sage: s(k.gen())
             a
@@ -1230,7 +1268,7 @@ cdef class ResidueFieldHomomorphism_global(RingHomomorphism):
             sage: f = k.coerce_map_from(K.ring_of_integers())
             sage: s = f.section(); s
             Lifting map:
-              From: Residue field in abar of Fractional ideal (14*a^4 - 24*a^3 - 26*a^2 + 58*a - 15)
+              From: Residue field in abar of Fractional ideal (-14*a^4 + 24*a^3 + 26*a^2 - 58*a + 15)
               To:   Maximal Order in Number Field in a with defining polynomial x^5 - 5*x + 2
             sage: s(k.gen())
             a
@@ -1333,10 +1371,10 @@ cdef class LiftingMap(Section):
             sage: F = K.factor(7)[0][0].residue_field()
             sage: L = F.lift_map(); L
             Lifting map:
-              From: Residue field in abar of Fractional ideal (-2*a^4 + a^3 - 4*a^2 + 2*a - 1)
+              From: Residue field in abar of Fractional ideal (2*a^4 - a^3 + 4*a^2 - 2*a + 1)
               To:   Maximal Order in Number Field in a with defining polynomial x^5 + 2
             sage: L.domain()
-            Residue field in abar of Fractional ideal (-2*a^4 + a^3 - 4*a^2 + 2*a - 1)
+            Residue field in abar of Fractional ideal (2*a^4 - a^3 + 4*a^2 - 2*a + 1)
 
             sage: K.<a> = CyclotomicField(7)
             sage: F = K.factor(5)[0][0].residue_field()
@@ -1460,7 +1498,7 @@ cdef class LiftingMap(Section):
             sage: F.<tmod> = K.factor(7)[0][0].residue_field()
             sage: F.lift_map() #indirect doctest
             Lifting map:
-              From: Residue field in tmod of Fractional ideal (-3*theta_12^2 + 1)
+              From: Residue field in tmod of Fractional ideal (theta_12^2 + 2)
               To:   Maximal Order in Cyclotomic Field of order 12 and degree 4
         """
         return "Lifting"
@@ -1477,7 +1515,7 @@ class ResidueFiniteField_prime_modn(ResidueField_generic, FiniteField_prime_modn
         sage: P = K.ideal(29).factor()[1][0]
         sage: k = ResidueField(P)
         sage: k
-        Residue field of Fractional ideal (a^2 + 2*a + 2)
+        Residue field of Fractional ideal (-a^2 - 2*a - 2)
         sage: k.order()
         29
         sage: OK = K.maximal_order()
@@ -1559,7 +1597,7 @@ class ResidueFiniteField_prime_modn(ResidueField_generic, FiniteField_prime_modn
             sage: P = K.ideal(29).factor()[1][0]
             sage: k = ResidueField(P)
             sage: k
-            Residue field of Fractional ideal (a^2 + 2*a + 2)
+            Residue field of Fractional ideal (-a^2 - 2*a - 2)
             sage: OK = K.maximal_order()
             sage: c = OK(a)
             sage: b = k(a); b

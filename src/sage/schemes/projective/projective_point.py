@@ -31,7 +31,6 @@ AUTHORS:
 # (at your option) any later version.
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
-from __future__ import print_function
 
 from sage.categories.integral_domains import IntegralDomains
 from sage.categories.number_fields import NumberFields
@@ -369,12 +368,8 @@ class SchemeMorphism_point_projective_ring(SchemeMorphism_point):
         EXAMPLES::
 
             sage: P.<x,y> = ProjectiveSpace(ZZ, 1)
-            sage: hash(P([1, 1]))
-            1300952125                      # 32-bit
-            3713081631935493181             # 64-bit
-            sage: hash(P.point([2, 2], False))
-            1300952125                      # 32-bit
-            3713081631935493181             # 64-bit
+            sage: hash(P([1, 1])) == hash(P.point([2, 2], False))
+            True
 
         ::
 
@@ -382,12 +377,8 @@ class SchemeMorphism_point_projective_ring(SchemeMorphism_point):
             sage: K.<w> = NumberField(x^2 + 3)
             sage: O = K.maximal_order()
             sage: P.<x,y> = ProjectiveSpace(O, 1)
-            sage: hash(P([1+w, 2]))
-            -1562365407                    # 32-bit
-            1251212645657227809            # 64-bit
-            sage: hash(P([2, 1-w]))
-            -1562365407                    # 32-bit
-            1251212645657227809            # 64-bit
+            sage: hash(P([1+w, 2])) == hash(P([2, 1-w]))
+            True
 
         TESTS::
 
@@ -860,7 +851,7 @@ class SchemeMorphism_point_projective_ring(SchemeMorphism_point):
 
         kwds:
 
-        - ``error_bound`` -- a positive real number (optional - default: 0.1).
+        - ``err`` -- a positive real number (optional - default: 0.1).
 
         - ``return_period`` -- boolean (optional - default: ``False``).
 
@@ -951,6 +942,14 @@ class SchemeMorphism_point_projective_ring(SchemeMorphism_point):
 
         ::
 
+            sage: P.<x,y,z> =ProjectiveSpace(GF(3), 2)
+            sage: F = DynamicalSystem([x^2 - 2*y^2, y^2, z^2])
+            sage: Q = P(1, 1, 1)
+            sage: Q.is_preperiodic(F, return_period=True)
+            (1, 1)
+
+        TESTS::
+
             sage: P.<x,y> = ProjectiveSpace(QQ, 1)
             sage: H = End(P)
             sage: f = H([16*x^2-29*y^2, 16*y^2])
@@ -959,6 +958,14 @@ class SchemeMorphism_point_projective_ring(SchemeMorphism_point):
             Traceback (most recent call last):
             ...
             TypeError: map must be a dynamical system
+
+        ::
+
+            sage: P.<x,y> = ProjectiveSpace(QQ, 1)
+            sage: f = DynamicalSystem_projective([16*x^2-29*y^2, 16*y^2])
+            sage: Q = P(11,4)
+            sage: Q.is_preperiodic(f, err=2)
+            False
         """
         try:
             return f._is_preperiodic(self, err=err, return_period=return_period)
@@ -1097,12 +1104,8 @@ class SchemeMorphism_point_projective_field(SchemeMorphism_point_projective_ring
         EXAMPLES::
 
             sage: P.<x,y> = ProjectiveSpace(QQ, 1)
-            sage: hash(P([1/2, 1]))
-            -1503642134                     # 32-bit
-            -6819944855328768534            # 64-bit
-            sage: hash(P.point([1, 2], False))
-            -1503642134                     # 32-bit
-            -6819944855328768534            # 64-bit
+            sage: hash(P([1/2, 1])) == hash(P.point([1, 2], False))
+            True
         """
         P = copy(self)
         P.normalize_coordinates()

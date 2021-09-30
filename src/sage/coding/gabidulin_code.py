@@ -16,19 +16,16 @@ AUTHOR:
 - Arpit Merchant (2016-08-16)
 - Marketa Slukova (2019-08-19): initial version
 """
-
 from sage.matrix.constructor import matrix
 from sage.modules.free_module_element import vector
-from sage.modules.free_module import VectorSpace
-from sage.rings.integer import Integer
 from sage.coding.encoder import Encoder
 from sage.coding.decoder import Decoder, DecodingError
-from sage.rings.integer_ring import ZZ
-from sage.functions.other import floor
-from sage.coding.linear_rank_metric import *
+from sage.coding.linear_rank_metric import AbstractLinearRankMetricCode
+from sage.categories.fields import Fields
+
 
 class GabidulinCode(AbstractLinearRankMetricCode):
-    """
+    r"""
     A Gabidulin Code.
 
     DEFINITION:
@@ -173,8 +170,8 @@ class GabidulinCode(AbstractLinearRankMetricCode):
             ValueError: if 'sub_field' is not given, the twisting homomorphism has to have a 'fixed_field' method
         """
         twist_fix_field = None
-        have_twist = (twisting_homomorphism != None)
-        have_subfield = (sub_field != None)
+        have_twist = (twisting_homomorphism is not None)
+        have_subfield = (sub_field is not None)
 
         if have_twist and have_subfield:
             try:
@@ -231,12 +228,12 @@ class GabidulinCode(AbstractLinearRankMetricCode):
         R = self.base_field()
         S = self.sub_field()
         if R and S in Fields():
-            return "[%s, %s, %s] linear Gabidulin code over GF(%s)/GF(%s)"%(self.length(), self.dimension(), self.minimum_distance(), R.cardinality(), S.cardinality())
+            return "[%s, %s, %s] linear Gabidulin code over GF(%s)/GF(%s)" % (self.length(), self.dimension(), self.minimum_distance(), R.cardinality(), S.cardinality())
         else:
-            return "[%s, %s, %s] linear Gabidulin code over %s/%s"%(self.length(), self.dimension(), self.minimum_distance(), R, S)
+            return "[%s, %s, %s] linear Gabidulin code over %s/%s" % (self.length(), self.dimension(), self.minimum_distance(), R, S)
 
     def _latex_(self):
-        """
+        r"""
         Return a latex representation of ``self``.
 
         EXAMPLES::
@@ -247,13 +244,13 @@ class GabidulinCode(AbstractLinearRankMetricCode):
             sage: latex(C)
             [2, 2, 1] \textnormal{ linear Gabidulin code over } \Bold{F}_{2^{4}}/\Bold{F}_{2^{2}}
         """
-        return "[%s, %s, %s] \\textnormal{ linear Gabidulin code over } %s/%s"\
-                % (self.length(), self.dimension() ,self.minimum_distance(),
-                self.base_field()._latex_(), self.sub_field()._latex_())
+        txt = "[%s, %s, %s] \\textnormal{ linear Gabidulin code over } %s/%s"
+        return txt % (self.length(), self.dimension(), self.minimum_distance(),
+                      self.base_field()._latex_(), self.sub_field()._latex_())
 
     def __eq__(self, other):
         """
-        Tests equality between Gabidulin Code objects.
+        Test equality between Gabidulin Code objects.
 
         INPUT:
 
@@ -278,11 +275,11 @@ class GabidulinCode(AbstractLinearRankMetricCode):
             False
         """
         return isinstance(other, GabidulinCode) \
-                and self.base_field() == other.base_field() \
-                and self.sub_field() == other.sub_field() \
-                and self.length() == other.length() \
-                and self.dimension() == other.dimension() \
-                and self.evaluation_points() == other.evaluation_points()
+            and self.base_field() == other.base_field() \
+            and self.sub_field() == other.sub_field() \
+            and self.length() == other.length() \
+            and self.dimension() == other.dimension() \
+            and self.evaluation_points() == other.evaluation_points()
 
     def twisting_homomorphism(self):
         r"""
@@ -317,7 +314,7 @@ class GabidulinCode(AbstractLinearRankMetricCode):
 
     def parity_evaluation_points(self):
         r"""
-        Returns the parity evalution points of ``self``.
+        Return the parity evaluation points of ``self``.
 
         These form the first row of the parity check matrix of ``self``.
 
@@ -330,17 +327,16 @@ class GabidulinCode(AbstractLinearRankMetricCode):
         eval_pts = self.evaluation_points()
         n = self.length()
         k = self.dimension()
-        q = self.sub_field().order()
         sigma = self.twisting_homomorphism()
 
         coefficient_matrix = matrix(self.base_field(), n - 1, n,
-                                    lambda i,j: (sigma**(-n + k + 1 + i))(eval_pts[j]))
+                                    lambda i, j: (sigma**(-n + k + 1 + i))(eval_pts[j]))
         solution_space = coefficient_matrix.right_kernel()
         return list(solution_space.basis()[0])
 
     def dual_code(self):
         r"""
-        Returns the dual code `C^{\perp}` of ``self``, the code `C`,
+        Return the dual code `C^{\perp}` of ``self``, the code `C`,
 
         .. MATH::
 
@@ -355,13 +351,14 @@ class GabidulinCode(AbstractLinearRankMetricCode):
             True
         """
         return GabidulinCode(self.base_field(), self.length(),
-                self.length() - self.dimension(), self.sub_field(),
-                self.twisting_homomorphism(),
-                self.parity_evaluation_points())
+                             self.length() - self.dimension(),
+                             self.sub_field(),
+                             self.twisting_homomorphism(),
+                             self.parity_evaluation_points())
 
     def parity_check_matrix(self):
         r"""
-        Returns the parity check matrix of ``self``.
+        Return the parity check matrix of ``self``.
 
         This is the generator matrix of the dual code of ``self``.
 
@@ -389,7 +386,8 @@ class GabidulinCode(AbstractLinearRankMetricCode):
         """
         return self._evaluation_points
 
-####################### encoders ###############################
+# ---------------------- encoders ------------------------------
+
 
 class GabidulinVectorEvaluationEncoder(Encoder):
 
@@ -446,7 +444,7 @@ class GabidulinVectorEvaluationEncoder(Encoder):
         return "Vector evaluation style encoder for %s" % self.code()
 
     def _latex_(self):
-        """
+        r"""
         Return a latex representation of ``self``.
 
         EXAMPLES:
@@ -462,7 +460,7 @@ class GabidulinVectorEvaluationEncoder(Encoder):
 
     def __eq__(self, other):
         """
-        Tests equality between Gabidulin Generator Matrix Encoder objects.
+        Test equality between Gabidulin Generator Matrix Encoder objects.
 
         INPUT:
 
@@ -490,7 +488,7 @@ class GabidulinVectorEvaluationEncoder(Encoder):
             False
         """
         return isinstance(other, GabidulinVectorEvaluationEncoder) \
-                and self.code() == other.code()
+            and self.code() == other.code()
 
     def generator_matrix(self):
         """
@@ -507,12 +505,14 @@ class GabidulinVectorEvaluationEncoder(Encoder):
         from functools import reduce
         C = self.code()
         eval_pts = C.evaluation_points()
-        k = C.dimension()
         sigma = C.twisting_homomorphism()
-        create_matrix_elements = lambda A,k,f: reduce(lambda L,x: [x] + \
-                list(map(lambda l: list(map(f,l)), L)), [A]*k, [])
-        return matrix(C.base_field(), C.dimension(), C.length(), \
-                create_matrix_elements(eval_pts, C.dimension(), sigma))
+
+        def create_matrix_elements(A, k, f):
+            return reduce(lambda L, x: [x] +
+                          [list(map(f, l)) for l in L], [A] * k, [])
+        return matrix(C.base_field(), C.dimension(), C.length(),
+                      create_matrix_elements(eval_pts, C.dimension(), sigma))
+
 
 class GabidulinPolynomialEvaluationEncoder(Encoder):
     r"""
@@ -598,7 +598,7 @@ class GabidulinPolynomialEvaluationEncoder(Encoder):
         return "Polynomial evaluation style encoder for %s" % self.code()
 
     def _latex_(self):
-        """
+        r"""
         Return a latex representation of ``self``.
 
         EXAMPLES:
@@ -642,7 +642,7 @@ class GabidulinPolynomialEvaluationEncoder(Encoder):
             False
         """
         return isinstance(other, GabidulinPolynomialEvaluationEncoder) \
-                and self.code() == other.code()
+            and self.code() == other.code()
 
     def message_space(self):
         r"""
@@ -735,7 +735,7 @@ class GabidulinPolynomialEvaluationEncoder(Encoder):
 
     def unencode_nocheck(self, c):
         """
-        Returns the message corresponding to the codeword ``c``.
+        Return the message corresponding to the codeword ``c``.
 
         Use this method with caution: it does not check if ``c``
         belongs to the code, and if this is not the case, the output is
@@ -770,7 +770,7 @@ class GabidulinPolynomialEvaluationEncoder(Encoder):
         return p
 
 
-####################### decoders ###############################
+# ---------------------- decoders ------------------------------
 
 
 class GabidulinGaoDecoder(Decoder):
@@ -827,7 +827,7 @@ class GabidulinGaoDecoder(Decoder):
         return "Gao decoder for %s" % self.code()
 
     def _latex_(self):
-        """
+        r"""
         Return a latex representation of ``self``.
 
         EXAMPLES:
@@ -841,9 +841,9 @@ class GabidulinGaoDecoder(Decoder):
         """
         return "\\textnormal{Gao decoder for } %s" % self.code()._latex_()
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         """
-        Tests equality between Gabidulin Gao Decoder objects.
+        Test equality between Gabidulin Gao Decoder objects.
 
         INPUT:
 
@@ -923,8 +923,8 @@ class GabidulinGaoDecoder(Decoder):
 
         while r_c.degree() >= d_stop:
             (q, r_c), r_p = r_p.right_quo_rem(r_c), r_c
-            u_c, u_p = u_p - q*u_c, u_c
-            v_c, v_p = v_p - q*v_c, v_c
+            u_c, u_p = u_p - q * u_c, u_c
+            v_c, v_p = v_p - q * v_c, v_c
         return r_c, u_c
 
     def _decode_to_code_and_message(self, r):
@@ -966,17 +966,17 @@ class GabidulinGaoDecoder(Decoder):
             return r, self.connected_encoder().unencode_nocheck(r)
 
         points = [(eval_pts[i], r[i]) for i in range(len(eval_pts))]
-        #R = S.lagrange_polynomial(eval_pts, list(r))
+        # R = S.lagrange_polynomial(eval_pts, list(r))
         R = S.lagrange_polynomial(points)
         r_out, u_out = self._partial_xgcd(S.minimal_vanishing_polynomial(eval_pts),
-                R, floor((C.length() + C.dimension())//2))
+                R, (C.length() + C.dimension()) // 2)
         quo, rem = r_out.left_quo_rem(u_out)
         if not rem.is_zero():
             raise DecodingError("Decoding failed because the number of errors exceeded the decoding radius")
         if quo not in S:
             raise DecodingError("Decoding failed because the number of errors exceeded the decoding radius")
         c = self.connected_encoder().encode(quo)
-        if C.rank_weight_of_vector(c-r) > self.decoding_radius():
+        if C.rank_weight_of_vector(c - r) > self.decoding_radius():
             raise DecodingError("Decoding failed because the number of errors exceeded the decoding radius")
         return c, quo
 
@@ -1056,9 +1056,10 @@ class GabidulinGaoDecoder(Decoder):
             sage: D.decoding_radius()
             8
         """
-        return (self.code().minimum_distance()-1)//2
+        return (self.code().minimum_distance() - 1) // 2
 
-############################## registration ####################################
+# ----------------------------- registration --------------------------------
+
 
 GabidulinCode._registered_encoders["PolynomialEvaluation"] = GabidulinPolynomialEvaluationEncoder
 GabidulinCode._registered_encoders["VectorEvaluation"] = GabidulinVectorEvaluationEncoder

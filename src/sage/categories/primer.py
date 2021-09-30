@@ -803,6 +803,7 @@ element of the parent?)::
     running ._test_associativity() . . . pass
     running ._test_cardinality() . . . pass
     running ._test_category() . . . pass
+    running ._test_construction() . . . pass
     running ._test_elements() . . .
       Running the test suite of self.an_element()
       running ._test_category() . . . pass
@@ -948,7 +949,7 @@ what to do, ask your parent); it's also a speed critical method::
     sage: x._mul_??                             # not tested
     sage: x._mul_.__module__
     'sage.categories.coercion_methods'
-    sage: x._mul_.__func__ is Magmas.ElementMethods._mul_parent  # py3
+    sage: x._mul_.__func__ is Magmas.ElementMethods._mul_parent
     True
 
 ``product`` is a mathematical method implemented by the parent::

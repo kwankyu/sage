@@ -13,7 +13,6 @@ Elements of Laurent polynomial rings
 from sage.rings.integer cimport Integer
 from sage.categories.map cimport Map
 from sage.structure.element import is_Element, coerce_binop
-from sage.misc.misc import union
 from sage.structure.factorization import Factorization
 from sage.misc.derivative import multi_derivative
 from sage.rings.polynomial.polynomial_element import Polynomial
@@ -420,7 +419,7 @@ cdef class LaurentPolynomial_univariate(LaurentPolynomial):
             ....:     assert Px_a(Lxa(poly)) == Px_a(poly)
         """
         if self.__n < 0:
-            raise ValueError("Laurent polynomial with negative valuation can not be converted to polynomial")
+            raise ValueError("Laurent polynomial with negative valuation cannot be converted to polynomial")
 
         if is_PolynomialRing(R):
             return R(self.__u) << self.__n
@@ -1490,7 +1489,7 @@ cdef class LaurentPolynomial_univariate(LaurentPolynomial):
 
     def variables(self):
         """
-        Return the tuple of variables occuring in this Laurent polynomial.
+        Return the tuple of variables occurring in this Laurent polynomial.
 
         EXAMPLES::
 
@@ -2661,9 +2660,9 @@ cdef class LaurentPolynomial_mpair(LaurentPolynomial):
         cdef dict d = self.dict()
         cdef tuple g = self._parent.gens()
         cdef Py_ssize_t nvars = len(g)
-        cdef list vars = []
+        cdef set vars = set()
         for k in d:
-            vars = union(vars, k.nonzero_positions())
+            vars.update(k.nonzero_positions())
             if len(vars) == nvars:
                 break
         cdef list v = [g[i] for i in vars]
@@ -2943,16 +2942,42 @@ cdef class LaurentPolynomial_mpair(LaurentPolynomial):
             sage: (s^2-t^2).quo_rem(s-t)
             (s + t, 0)
             sage: (s^-2-t^2).quo_rem(s-t)
-            (s + t, -s^4 + 1)
+            (s + t, -s^2 + s^-2)
             sage: (s^-2-t^2).quo_rem(s^-1-t)
             (t + s^-1, 0)
+
+        TESTS:
+
+        Verify that :trac:`31257` is fixed::
+
+            sage: R.<x,y> = LaurentPolynomialRing(QQ)
+            sage: q, r = (1/x).quo_rem(y)
+            sage: q, r
+            (x^-1*y^-1, 0)
+            sage: q*y + r == 1/x
+            True
+            sage: q,r = (x^-2 - y^2).quo_rem(x - y)
+            sage: q*(x - y) + r == x^-2 - y^2
+            True
         """
-        cdef LaurentPolynomial_mpair rightl = <LaurentPolynomial_mpair> right
-        q, r = self._poly.quo_rem(rightl._poly)
+        # make copies of self and right so that the input can be normalized
+        # without affecting the objects that were passed to the method
+        cdef LaurentPolynomial_mpair selfl = self._new_c()
+        selfl._poly = self._poly
+        selfl._mon = self._mon
+        cdef LaurentPolynomial_mpair rightl = self._new_c()
+        rightl._poly = (<LaurentPolynomial_mpair> right)._poly
+        rightl._mon = (<LaurentPolynomial_mpair> right)._mon
+
+        selfl._normalize()
+        rightl._normalize()
+        q, r = selfl._poly.quo_rem(rightl._poly)
         ql = LaurentPolynomial_mpair(self._parent, q,
-                                     mon=self._mon.esub(rightl._mon))
+                                     mon=selfl._mon.esub(rightl._mon))
         rl = LaurentPolynomial_mpair(self._parent, r,
-                                     mon=ETuple({}, int(self._parent.ngens())))
+                                     mon=selfl._mon)
+        ql._normalize()
+        rl._normalize()
         return (ql, rl)
 
     cpdef _richcmp_(self, right, int op):
@@ -3515,6 +3540,12 @@ cdef class LaurentPolynomial_mpair(LaurentPolynomial):
             sage: F = GF(2)
             sage: p.rescale_vars({0: 3, 1: 7}, new_ring=L.change_ring(F))
             x*y^-2 + x^-2*y
+
+        Test for :trac:`30331`::
+
+            sage: F.<z> = CyclotomicField(3)
+            sage: p.rescale_vars({0: 2, 1: z}, new_ring=L.change_ring(F))
+            2*z*x*y^-2 + 1/4*z*x^-2*y
         """
         cdef int i
         cdef dict df
@@ -3525,6 +3556,10 @@ cdef class LaurentPolynomial_mpair(LaurentPolynomial):
             self._compute_polydict()
 
         df = dict(self._prod.__repn)  # This makes a copy for us to manipulate
+        if new_ring is None:
+            R = self._parent._base
+        else:
+            R = new_ring._base
         if h is None:
             for v in df:
                 val = df[v]
@@ -3532,7 +3567,6 @@ cdef class LaurentPolynomial_mpair(LaurentPolynomial):
                     val *= d[i]**v[i]
                 df[v] = val
         else:
-            R = self._parent._base
             for v in df:
                 val = df[v]
                 for i in d:
@@ -3542,7 +3576,11 @@ cdef class LaurentPolynomial_mpair(LaurentPolynomial):
         ans = <LaurentPolynomial_mpair> self._new_c()
         ans._prod = PolyDict(df)
         ans._mon = self._mon
-        ans._poly = <MPolynomial> self._poly._parent({v.esub(ans._mon): df[v] for v in df})
+        if new_ring is None:
+            S = self._poly._parent
+        else:
+            S = self._poly._parent.change_ring(R)
+        ans._poly = <MPolynomial> S({v.esub(ans._mon): df[v] for v in df})
         if new_ring is not None:
             return new_ring(ans)
         return ans
@@ -3564,6 +3602,7 @@ cdef class LaurentPolynomial_mpair(LaurentPolynomial):
             sage: F = GF(2)
             sage: p.toric_coordinate_change(Matrix([[1,-3],[1,1]]), new_ring=L.change_ring(F))
             x^-2*y^2 + x^-3*y
+
         """
         cdef int n, i, j, x
         cdef dict d, dr
@@ -3629,6 +3668,22 @@ cdef class LaurentPolynomial_mpair(LaurentPolynomial):
             sage: F = GF(5)
             sage: p.toric_substitute((2,3), (-1,1), 2, new_ring=L.change_ring(F))
             3*x^3*y^3 + 2*x^-2*y^-2
+
+        TESTS:
+
+        Tests for :trac:`30331`::
+
+            sage: L.<x,y> = LaurentPolynomialRing(QQ, 2)
+            sage: p = x + y
+            sage: F.<z> = CyclotomicField(3)
+            sage: p.toric_substitute((2,3), (-1,1), z, new_ring=L.change_ring(F))
+            (-z - 1)*x^3*y^3 + z*x^-2*y^-2
+
+            sage: P.<x> = LaurentPolynomialRing(QQ, 1)
+            sage: u = x - 1
+            sage: v = u.toric_substitute((-1,), (-1,), 1)
+            sage: v.is_zero()
+            True
         """
         cdef dict d, dr
         cdef ETuple ve, v1e, w, w1, mon
@@ -3637,7 +3692,7 @@ cdef class LaurentPolynomial_mpair(LaurentPolynomial):
 
         if self._prod is None:
             self._compute_polydict()
-        
+
         d = self._prod.__repn
         dr = {}
         ve = ETuple(v)
@@ -3656,11 +3711,18 @@ cdef class LaurentPolynomial_mpair(LaurentPolynomial):
             else:
                 dr[w1] = x * a**t
             mon = mon.emin(w1)
+        for v in tuple(dr.keys()):
+            if not dr[v]:
+                del dr[v]
 
+        if new_ring is None:
+            S = self._poly._parent
+        else:
+            S = self._poly._parent.change_ring(new_ring._base)
         ans = <LaurentPolynomial_mpair> self._new_c()
         ans._prod = PolyDict(dr)
         ans._mon = mon
-        ans._poly = <MPolynomial> self._poly._parent({v.esub(ans._mon): dr[v] for v in dr})
+        ans._poly = <MPolynomial> S({v.esub(ans._mon): dr[v] for v in dr})
         if new_ring is not None:
             return new_ring(ans)
         return ans

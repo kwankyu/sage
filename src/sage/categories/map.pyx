@@ -279,7 +279,6 @@ cdef class Map(Element):
         if one really knows what one is doing::
 
             sage: phi._make_weak_references()
-            sage: del x # py2
             sage: _ = gc.collect()
             sage: numberQuadFields == len([x for x in gc.get_objects() if isinstance(x, C)]) + 1
             True
@@ -341,7 +340,6 @@ cdef class Map(Element):
         if one really knows what one is doing::
 
             sage: phi._make_weak_references()
-            sage: del x # py2
             sage: _ = gc.collect()
             sage: numberQuadFields == len([x for x in gc.get_objects() if isinstance(x, C)]) + 1
             True
@@ -1895,7 +1893,7 @@ cdef class FormalCompositeMap(Map):
             # we try the category first
             # as of 2017-06, the MRO of this class does not get patched to
             # include the category's MorphismMethods (because it is a Cython
-            # class); therefore, we can not simply call "super" but need to
+            # class); therefore, we cannot simply call "super" but need to
             # invoke the category method explicitly
             return self.getattr_from_category('is_injective')()
         except (AttributeError, NotImplementedError):
@@ -1961,7 +1959,7 @@ cdef class FormalCompositeMap(Map):
             # we try the category first
             # as of 2017-06, the MRO of this class does not get patched to
             # include the category's MorphismMethods (because it is a Cython
-            # class); therefore, we can not simply call "super" but need to
+            # class); therefore, we cannot simply call "super" but need to
             # invoke the category method explicitly
             return self.getattr_from_category('is_surjective')()
         except (AttributeError, NotImplementedError):

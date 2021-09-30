@@ -600,6 +600,16 @@ cdef class FPElement(pAdicTemplateElement):
             1 + 4*11^2 + 3*11^3 + 7*11^4
             sage: R(11)^-1
             11^-1
+
+        TESTS:
+
+        Check that :trac:`31875` is fixed::
+
+            sage: R(1)^R(0)
+            1
+            sage: S.<a> = ZqFP(4)
+            sage: S(1)^S(0)
+            1
         """
         cdef long dummyL
         cdef mpz_t tmp
@@ -614,7 +624,7 @@ cdef class FPElement(pAdicTemplateElement):
         elif self.parent() is _right.parent():
             ## For extension elements, we need to switch to the
             ## fraction field sometimes in highly ramified extensions.
-            exact_exp = False
+            exact_exp = (<FPElement>_right)._is_exact_zero()
             pright = _right
         else:
             self, _right = canonical_coercion(self, _right)
@@ -883,11 +893,10 @@ cdef class FPElement(pAdicTemplateElement):
 
     def __nonzero__(self):
         """
-        Returns True if this element is distinguishable from zero.
+        Return ``True`` if this element is distinguishable from zero.
 
         For most applications, explicitly specifying the power of p
-        modulo which the element is supposed to be nonzero is
-        preferrable.
+        modulo which the element is supposed to be nonzero is preferable.
 
         EXAMPLES::
 
@@ -1041,12 +1050,12 @@ cdef class FPElement(pAdicTemplateElement):
         EXAMPLES::
 
             sage: R.<x> = ZZ[]
-            sage: K.<a> = Qq(25)
+            sage: K.<a> = QqFP(5^3)
             sage: W.<w> = K.extension(x^3-5)
-            sage: (1 + w + O(w^11))._polynomial_list()
-            [1 + O(5^4), 1 + O(5^4)]
-            sage: (1 + w + O(w^11))._polynomial_list(pad=True)
-            [1 + O(5^4), 1 + O(5^4), O(5^3)]
+            sage: (1 + w)._polynomial_list()
+            [1, 1]
+            sage: (1 + w)._polynomial_list(pad=True)
+            [1, 1, 0]
         """
         R = self.base_ring()
         if very_pos_val(self.ordp):

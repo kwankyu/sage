@@ -60,7 +60,6 @@ In contrast, input to the ``%time`` magic command is preparsed::
     2 * 3^3 * 11
     sage: shell.quit()
 """
-from __future__ import absolute_import
 
 from IPython.core.magic import Magics, magics_class, line_magic, cell_magic
 
@@ -205,7 +204,7 @@ class SageMagics(Magics):
         A magic command to switch between simple display and ASCII art display.
 
         - ``args`` -- string.  See
-          :meth:`sage.misc.display_hook.DisplayHookBase.set_display`
+          :mod:`sage.repl.rich_output.preferences`
           for allowed values. If the mode is ``ascii_art``, it can
           optionally be followed by a width.
 
@@ -261,7 +260,7 @@ class SageMagics(Magics):
 
             sage: shell.run_cell('%display text latex')
             sage: shell.run_cell('1/2')
-            \newcommand{\Bold}[1]{\mathbf{#1}}\frac{1}{2}
+            1/2
 
         Switch back::
 

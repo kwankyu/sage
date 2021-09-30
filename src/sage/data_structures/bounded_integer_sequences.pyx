@@ -108,7 +108,7 @@ AUTHORS:
 # ****************************************************************************
 
 from cysignals.signals cimport sig_check, sig_on, sig_off
-include 'sage/data_structures/bitset.pxi'
+from sage.data_structures.bitset_base cimport *
 
 from cpython.int cimport PyInt_FromSize_t
 from cpython.slice cimport PySlice_GetIndicesEx
@@ -1081,16 +1081,16 @@ cdef class BoundedIntegerSequence:
             sage: T = BoundedIntegerSequence(27, L0)
             sage: S.startswith(T)
             True
-            sage: L0[-1] += 1
+            sage: L0[-1] = (L0[-1] + 1) % 27
             sage: T = BoundedIntegerSequence(27, L0)
             sage: S.startswith(T)
             False
-            sage: L0[-1] -= 1
-            sage: L0[0] += 1
+            sage: L0[-1] = (L0[-1] - 1) % 27
+            sage: L0[0] = (L0[0] + 1) % 27
             sage: T = BoundedIntegerSequence(27, L0)
             sage: S.startswith(T)
             False
-            sage: L0[0] -= 1
+            sage: L0[0] = (L0[0] - 1) % 27
 
         The bounds of the sequences must be compatible, or :meth:`startswith`
         returns ``False``::

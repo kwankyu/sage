@@ -2,7 +2,7 @@
 Arbitrary Precision Complex Numbers using GNU MPC
 
 This is a binding for the MPC arbitrary-precision floating point library.
-It is adaptated from ``real_mpfr.pyx`` and ``complex_number.pyx``.
+It is adaptated from ``real_mpfr.pyx`` and ``complex_mpfr.pyx``.
 
 We define a class :class:`MPComplexField`, where each instance of
 ``MPComplexField`` specifies a field of floating-point complex numbers with
@@ -75,8 +75,8 @@ from sage.categories.map cimport Map
 from sage.libs.pari.all import pari
 
 from .integer cimport Integer
-from .complex_number cimport ComplexNumber
-from .complex_field import ComplexField_class
+from .complex_mpfr cimport ComplexNumber
+from .complex_mpfr import ComplexField_class
 
 from sage.misc.randstate cimport randstate, current_randstate
 from .real_mpfr cimport RealField_class, RealNumber
@@ -84,13 +84,11 @@ from .real_mpfr import mpfr_prec_min, mpfr_prec_max
 from sage.structure.richcmp cimport rich_to_bool, richcmp
 from sage.categories.fields import Fields
 
+from sage.misc.superseded import deprecated_function_alias
+
 cimport gmpy2
 gmpy2.import_gmpy2()
 
-NumberFieldElement_quadratic = None
-AlgebraicNumber_base = None
-AlgebraicNumber = None
-AlgebraicReal = None
 AA = None
 QQbar = None
 CDF = CLF = RLF = None
@@ -103,19 +101,10 @@ def late_import():
 
         sage: sage.rings.complex_mpc.late_import()
     """
-    global NumberFieldElement_quadratic
-    global AlgebraicNumber_base
-    global AlgebraicNumber
-    global AlgebraicReal
     global AA, QQbar
     global CLF, RLF, CDF
-    if NumberFieldElement_quadratic is None:
-        import sage.rings.number_field.number_field_element_quadratic as nfeq
-        NumberFieldElement_quadratic = nfeq.NumberFieldElement_quadratic
+    if AA is None:
         import sage.rings.qqbar
-        AlgebraicNumber_base = sage.rings.qqbar.AlgebraicNumber_base
-        AlgebraicNumber = sage.rings.qqbar.AlgebraicNumber
-        AlgebraicReal = sage.rings.qqbar.AlgebraicReal
         AA = sage.rings.qqbar.AA
         QQbar = sage.rings.qqbar.QQbar
         from .real_lazy import CLF, RLF
@@ -420,7 +409,7 @@ cdef class MPComplexField_class(sage.rings.ring.Field):
             sage: C20(i*4, 7)
             Traceback (most recent call last):
             ...
-            TypeError: unable to coerce to a ComplexNumber: <type 'sage.symbolic.expression.Expression'>
+            TypeError: unable to coerce to a ComplexNumber: <type 'sage.rings.number_field.number_field_element_quadratic.NumberFieldElement_gaussian'>
 
         Each part can be set with strings (written in base ten)::
 
@@ -861,14 +850,9 @@ cdef class MPComplexNumber(sage.structure.element.FieldElement):
                 real, imag = z
             elif isinstance(z, complex):
                 real, imag = z.real, z.imag
-            elif isinstance(z, sage.symbolic.expression.Expression):
-                zz = sage.rings.complex_field.ComplexField(self._parent.prec())(z)
-                self._set(zz)
-                return
             elif type(z) is gmpy2.mpc:
                 mpc_set(self.value, (<gmpy2.mpc>z).c, rnd)
                 return
-            # then, no imaginary part
             elif type(z) is gmpy2.mpfr:
                 mpc_set_fr(self.value, (<gmpy2.mpfr>z).f, rnd)
                 return
@@ -889,8 +873,13 @@ cdef class MPComplexNumber(sage.structure.element.FieldElement):
                 mpc_set_si(self.value, z, rnd)
                 return
             else:
-                real = z
-                imag = 0
+                C = sage.rings.complex_mpfr.ComplexField(self._parent.prec())
+                if C.has_coerce_map_from(z.parent()) or isinstance(z, sage.symbolic.expression.Expression):
+                    self._set(C(z))
+                    return
+                else:
+                    real = z
+                    imag = 0
         else:
             real = z
             imag = y
@@ -1108,6 +1097,16 @@ cdef class MPComplexNumber(sage.structure.element.FieldElement):
 
             sage: a = MPComplexField()(3.5, 3)
             sage: copy(a) is  a
+            True
+        """
+        return self    # since object is immutable.
+
+    def __deepcopy__(self, memo):
+        """
+        EXAMPLES::
+
+            sage: a = MPComplexField()(3.5, 3)
+            sage: deepcopy(a) is  a
             True
         """
         return self    # since object is immutable.
@@ -1962,8 +1961,6 @@ cdef class MPComplexNumber(sage.structure.element.FieldElement):
             sage: MPC = MPComplexField(53)
             sage: (1+MPC(I)).cot()
             0.217621561854403 - 0.868014142895925*I
-            sage: (1+MPC(I)).cotan()
-            0.217621561854403 - 0.868014142895925*I
             sage: i = MPComplexField(200).0
             sage: (1+i).cot()
             0.21762156185440268136513424360523807352075436916785404091068 - 0.86801414289592494863584920891627388827343874994609327121115*I
@@ -1973,7 +1970,7 @@ cdef class MPComplexNumber(sage.structure.element.FieldElement):
         """
         return ~(self.tan())
 
-    cotan = cot # provide this alias for backward compatibility in #29409
+    cotan = deprecated_function_alias(29412, cot)
 
     ################################
     # Other functions

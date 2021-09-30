@@ -30,7 +30,6 @@ AUTHORS:
 #
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
-from __future__ import division
 
 import copy
 from sage.misc.classcall_metaclass import ClasscallMetaclass
@@ -605,7 +604,7 @@ class AlternatingSignMatrix(Element,
             [0 0 1 0]
 
             sage: a0 = a = AlternatingSignMatrices(5).random_element()
-            sage: for i in range(10):
+            sage: for i in range(20):
             ....:     a = a.gyration()
             sage: a == a0
             True
@@ -1562,7 +1561,8 @@ class AlternatingSignMatrices(UniqueRepresentation, Parent):
             Finite lattice containing 7 elements
 
         """
-        return LatticePoset(self._lattice_initializer(), cover_relations=True)
+        return LatticePoset(self._lattice_initializer(), cover_relations=True,
+                            check=False)
 
     @cached_method
     def gyration_orbits(self):
@@ -1761,7 +1761,8 @@ class MonotoneTriangles(GelfandTsetlinPatternsTopRow):
             sage: P
             Finite lattice containing 7 elements
         """
-        return LatticePoset(self._lattice_initializer(), cover_relations=True)
+        return LatticePoset(self._lattice_initializer(), cover_relations=True,
+                            check=False)
 
 
 def _is_a_cover(mt0, mt1):

@@ -510,6 +510,29 @@ class Rings(CategoryWithAxiom):
             # duck typing failed
             raise TypeError("Don't know how to transform %s into an ideal of %s"%(x,self))
 
+        def __pow__(self, n):
+            """
+            Return the free module of rank `n` over this ring.  If n is a tuple of
+            two elements, creates a matrix space.
+
+            EXAMPLES::
+
+                sage: QQ^5
+                Vector space of dimension 5 over Rational Field
+                sage: Integers(20)^1000
+                Ambient free module of rank 1000 over Ring of integers modulo 20
+
+                sage: QQ^(2,3)
+                Full MatrixSpace of 2 by 3 dense matrices over Rational Field
+            """
+            if isinstance(n, tuple):
+                m, n = n
+                from sage.matrix.matrix_space import MatrixSpace
+                return MatrixSpace(self, m, n)
+            else:
+                from sage.modules.free_module import FreeModule
+                return FreeModule(self, n)
+
         @cached_method
         def ideal_monoid(self):
             """
@@ -760,7 +783,7 @@ class Rings(CategoryWithAxiom):
         ##
         # Quotient rings
         # Again, this is defined in sage.rings.ring.pyx
-        def quotient(self, I, names=None):
+        def quotient(self, I, names=None, **kwds):
             """
             Quotient of a ring by a two-sided ideal.
 
@@ -769,6 +792,8 @@ class Rings(CategoryWithAxiom):
             - ``I``: A twosided ideal of this ring.
             - ``names``: a list of strings to be used as names
               for the variables in the quotient ring.
+            - further named arguments that may be passed to the
+              quotient ring constructor.
 
             EXAMPLES:
 
@@ -801,9 +826,9 @@ class Rings(CategoryWithAxiom):
                 0
             """
             from sage.rings.quotient_ring import QuotientRing
-            return QuotientRing(self, I, names=names)
+            return QuotientRing(self, I, names=names, **kwds)
 
-        def quo(self, I, names=None):
+        def quo(self, I, names=None, **kwds):
             """
             Quotient of a ring by a two-sided ideal.
 
@@ -843,9 +868,9 @@ class Rings(CategoryWithAxiom):
                 )
 
             """
-            return self.quotient(I,names=names)
+            return self.quotient(I,names=names,**kwds)
 
-        def quotient_ring(self, I, names=None):
+        def quotient_ring(self, I, names=None, **kwds):
             """
             Quotient of a ring by a two-sided ideal.
 
@@ -883,7 +908,7 @@ class Rings(CategoryWithAxiom):
                 )
 
             """
-            return self.quotient(I,names=names)
+            return self.quotient(I,names=names, **kwds)
 
         def __truediv__(self, I):
             """
@@ -997,7 +1022,7 @@ class Rings(CategoryWithAxiom):
             and orders in number fields::
 
                 sage: ZZ[I]
-                Order in Number Field in I with defining polynomial x^2 + 1 with I = 1*I
+                Order in Number Field in I0 with defining polynomial x^2 + 1 with I0 = 1*I
                 sage: ZZ[sqrt(5)]
                 Order in Number Field in sqrt5 with defining polynomial x^2 - 5 with sqrt5 = 2.236067977499790?
                 sage: ZZ[sqrt(2)+sqrt(3)]
@@ -1052,8 +1077,6 @@ class Rings(CategoryWithAxiom):
 
             Embeddings::
 
-                sage: QQ[I](I.pyobject())
-                I
                 sage: a = 10^100; expr = (2*a + sqrt(2))/(2*a^2-1)
                 sage: QQ[expr].coerce_embedding() is None
                 False

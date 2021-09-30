@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 r"""
 Module with basis morphisms
 
@@ -90,20 +91,25 @@ compatibility is guaranteed in this case::
 AUTHORS:
 
 - Nicolas M. Thiery (2008-2015)
+
 - Jason Bandlow and Florent Hivert (2010): Triangular Morphisms
+
 - Christian Stump (2010): :trac:`9648` module_morphism's to a wider class
   of codomains
 
 Before :trac:`8678`, this hierarchy of classes used to be in
 sage.categories.modules_with_basis; see :trac:`8678` for the complete log.
 """
-#*****************************************************************************
+
+# ****************************************************************************
 #  Copyright (C) 2015 Nicolas M. Thiery <nthiery at users.sf.net>
 #
-#  Distributed under the terms of the GNU General Public License (GPL)
-#                  http://www.gnu.org/licenses/
-#******************************************************************************
-from __future__ import print_function
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#                  https://www.gnu.org/licenses/
+# ****************************************************************************
 
 from sage.categories.fields import Fields
 from sage.categories.modules import Modules
@@ -644,24 +650,16 @@ class TriangularModuleMorphism(ModuleMorphism):
             ....:                         inverse_on_support="compute")
             sage: TestSuite(phi).run(skip=["_test_pickling"])
 
-        Pickling fails (:trac:`17957`) because the attribute
-        ``phi._inverse_on_support`` is a ``dict.get`` method which is
-        not picklable in Python 2::
+        Pickling works in Python3 (:trac:`17957`)::
 
             sage: phi = X.module_morphism(lt, triangular="lower", codomain=X,
             ....:                         inverse_on_support="compute")
-            sage: dumps(phi) # py2
-            Traceback (most recent call last):
-            ...
-            TypeError: expected string or Unicode object, NoneType found
+            sage: loads(dumps(phi))
+            Generic endomorphism of X
             sage: phi._inverse_on_support
             <built-in method get of dict object at ...>
-            sage: dumps(phi._inverse_on_support) # py2
-            Traceback (most recent call last):
-            ...
-            TypeError: expected string or Unicode object, NoneType found
-            sage: ldp = loads(dumps(phi._inverse_on_support)) # py3
-            sage: [ldp(i) == phi._inverse_on_support(i) for i in range(1, 4)] # py3
+            sage: ldp = loads(dumps(phi._inverse_on_support))
+            sage: [ldp(i) == phi._inverse_on_support(i) for i in range(1, 4)]
             [True, True, True]
         """
         if key is not None:
@@ -1050,7 +1048,7 @@ class TriangularModuleMorphism(ModuleMorphism):
         .. NOTE:: Before :trac:`8678` this method used to be called co_reduced.
         """
         G = self.codomain()
-        if G.base_ring() not in Fields and not self._unitriangular:
+        if G.base_ring() not in Fields() and not self._unitriangular:
             raise NotImplementedError("coreduce for a triangular but not unitriangular morphism over a ring")
         on_basis = self.on_basis()
         assert y in G
@@ -1121,7 +1119,7 @@ class TriangularModuleMorphism(ModuleMorphism):
             NotImplementedError: cokernel_basis_indices implemented only for morphisms with a finite dimensional codomain
         """
         R = self.domain().base_ring()
-        if R not in Fields and not self._unitriangular:
+        if R not in Fields() and not self._unitriangular:
             raise NotImplementedError("cokernel_basis_indices for a triangular but not unitriangular morphism over a ring")
         if self.codomain() not in Modules(R).FiniteDimensional():
             raise NotImplementedError("cokernel_basis_indices implemented only for morphisms with a finite dimensional codomain")
@@ -1455,8 +1453,8 @@ class DiagonalModuleMorphism(ModuleMorphismByLinearity):
                 domain.base_ring()    == codomain.base_ring()):
             raise ValueError("The domain and codomain should have the same base ring "
                              "and the same basis indexing")
-        import collections
-        if not isinstance(diagonal, collections.Callable):
+        from collections.abc import Callable
+        if not isinstance(diagonal, Callable):
             raise ValueError("diagonal (=%s) should be a function"%diagonal)
         if category is None:
             category = ModulesWithBasis(domain.base_ring())

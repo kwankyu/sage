@@ -28,7 +28,6 @@ http://www.risc.uni-linz.ac.at/people/hemmecke/AldorCombinat/combinatse9.html.
 #
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
-from __future__ import absolute_import
 
 import builtins
 
@@ -42,7 +41,7 @@ from sage.misc.repr import repr_lincomb
 from sage.misc.cachefunc import cached_method
 
 from sage.algebras.algebra import Algebra
-import sage.structure.parent_base
+from sage.structure.parent import Parent
 from sage.categories.all import Rings
 from sage.structure.element import Element, parent, AlgebraElement
 
@@ -93,7 +92,7 @@ class LazyPowerSeriesRing(Algebra):
         self._order = None
         self._name = names
         self._zero_base_ring = R.zero()
-        sage.structure.parent_base.ParentWithBase.__init__(self, R, category=Rings())
+        Parent.__init__(self, R, category=Rings())
 
     def ngens(self):
         """

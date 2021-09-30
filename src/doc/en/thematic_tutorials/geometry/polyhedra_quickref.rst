@@ -127,6 +127,7 @@ List of Polyhedron methods
 
     :meth:`~sage.geometry.polyhedron.base.Polyhedron_base.combinatorial_polyhedron` | the combinatorial polyhedron
     :meth:`~sage.geometry.polyhedron.base.Polyhedron_base.face_lattice` | the face lattice
+    :meth:`~sage.geometry.polyhedron.base.Polyhedron_base.hasse_diagram` | the hasse diagram
     :meth:`~sage.geometry.polyhedron.base.Polyhedron_base.combinatorial_automorphism_group` | the automorphism group of the underlying combinatorial polytope
     :meth:`~sage.geometry.polyhedron.base.Polyhedron_base.graph`, :meth:`~sage.geometry.polyhedron.base.Polyhedron_base.vertex_graph` | underlying graph
     :meth:`~sage.geometry.polyhedron.base.Polyhedron_base.vertex_digraph` | digraph (orientation of edges determined by a linear form)
@@ -162,6 +163,7 @@ List of Polyhedron methods
     :widths: 30, 70
     :delim: |
 
+    :meth:`~sage.geometry.polyhedron.base.Polyhedron_base.affine_hull` | returns the smallest affine subspace containing the polyhedron
     :meth:`~sage.geometry.polyhedron.base.Polyhedron_base.boundary_complex` | returns the boundary complex of simplicial compact polyhedron
     :meth:`~sage.geometry.polyhedron.base.Polyhedron_base.center` | returns the average of the vertices of the polyhedron
     :meth:`~sage.geometry.polyhedron.base.Polyhedron_base.centroid` | returns the center of the mass
@@ -171,6 +173,8 @@ List of Polyhedron methods
     :meth:`~sage.geometry.polyhedron.base.Polyhedron_base.face_generator` | a generator over the faces
     :meth:`~sage.geometry.polyhedron.base.Polyhedron_base.faces` | the list of faces
     :meth:`~sage.geometry.polyhedron.base.Polyhedron_base.facets` | the list of facets
+    :meth:`~sage.geometry.polyhedron.base.Polyhedron_base.join_of_Vrep`, :meth:`~sage.geometry.polyhedron.base.Polyhedron_base.least_common_superface_of_Vrep` | smallest face containing specified Vrepresentatives
+    :meth:`~sage.geometry.polyhedron.base.Polyhedron_base.meet_of_Hrep`, :meth:`~sage.geometry.polyhedron.base.Polyhedron_base.greatest_common_subface_of_Hrep` | largest face contained in specified Hrepresentatives
     :meth:`~sage.geometry.polyhedron.base.Polyhedron_base.normal_fan` | returns the fan spanned by the normals of the supporting hyperplanes of the polyhedron
     :meth:`~sage.geometry.polyhedron.base.Polyhedron_base.gale_transform` | returns the (affine) Gale transform of the vertices of the polyhedron
     :meth:`~sage.geometry.polyhedron.base.Polyhedron_base.hyperplane_arrangement` | returns the hyperplane arrangement given by the defining facets of the polyhedron

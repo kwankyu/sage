@@ -115,7 +115,7 @@ cdef class RealDoubleField_class(Field):
         sage: RDF(QQ['x'].0)
         Traceback (most recent call last):
         ...
-        TypeError: cannot coerce nonconstant polynomial to float
+        TypeError: cannot convert nonconstant polynomial
         sage: RDF(QQ['x'](3))
         3.0
 
@@ -495,10 +495,12 @@ cdef class RealDoubleField_class(Field):
 
         EXAMPLES::
 
-            sage: RDF.random_element()
-            0.7369454235661859
-            sage: RDF.random_element(min=100, max=110)
-            102.8159473516245
+            sage: RDF.random_element().parent() is RDF
+            True
+            sage: -1 <= RDF.random_element() <= 1
+            True
+            sage: 100 <= RDF.random_element(min=100, max=110) <= 110
+            True
         """
         cdef randstate rstate = current_randstate()
 
@@ -974,6 +976,20 @@ cdef class RealDoubleElement(FieldElement):
         """
         return repr(self._value)
 
+    def _mathematica_init_(self):
+        """
+        TESTS:
+
+        Check that :trac:`28814` is fixed::
+
+            sage: mathematica(RDF(1e25))   # optional - mathematica
+            1.*^25
+            sage: mathematica(RDF(1e-25))  # optional - mathematica
+            1.*^-25
+        """
+        from .real_mpfr import RR
+        return RR(self._value)._mathematica_init_()
+
     def _sage_input_(self, sib, coerced):
         r"""
         Produce an expression which will reproduce this value when evaluated.
@@ -1183,6 +1199,16 @@ cdef class RealDoubleElement(FieldElement):
 
             sage: r = RDF('-1.6')
             sage: r.__copy__() is r
+            True
+        """
+        return self
+
+    def __deepcopy__(self, memo):
+        """
+        EXAMPLES::
+
+            sage: r = RDF('-1.6')
+            sage: deepcopy(r) is r
             True
         """
         return self
@@ -2671,7 +2697,7 @@ cdef class RealDoubleElement(FieldElement):
 
         ALGORITHM:
 
-        Uses the PARI C-library ``algdep`` command.
+        Uses the PARI C-library :pari:`algdep` command.
 
         EXAMPLES::
 

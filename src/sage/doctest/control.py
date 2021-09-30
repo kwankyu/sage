@@ -19,7 +19,6 @@ AUTHORS:
 # (at your option) any later version.
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
-from __future__ import absolute_import, division, print_function
 
 import random
 import os
@@ -30,7 +29,7 @@ import re
 import types
 import sage.misc.flatten
 from sage.structure.sage_object import SageObject
-from sage.env import DOT_SAGE, SAGE_LIB, SAGE_SRC, SAGE_LOCAL, SAGE_EXTCODE
+from sage.env import DOT_SAGE, SAGE_LIB, SAGE_SRC, SAGE_VENV, SAGE_EXTCODE
 from sage.misc.temporary_file import tmp_dir
 from cysignals.signals import AlarmInterrupt, init_cysignals
 
@@ -44,8 +43,15 @@ nodoctest_regex = re.compile(r'\s*(#+|%+|r"+|"+|\.\.)\s*nodoctest')
 optionaltag_regex = re.compile(r'^\w+$')
 
 # Optional tags which are always automatically added
+
 auto_optional_tags = set(['py3'])
 
+try:
+    from sage.libs.arb.arb_version import version as arb_vers
+    arb_tag = 'arb2' + arb_vers().split('.')[1]
+    auto_optional_tags.add(arb_tag)
+except ImportError:
+    pass
 
 class DocTestDefaults(SageObject):
     """
@@ -90,7 +96,6 @@ class DocTestDefaults(SageObject):
         self.nthreads = 1
         self.serial = False
         self.timeout = -1
-        self.memlimit = 0
         self.all = False
         self.logfile = None
         self.long = False
@@ -147,7 +152,7 @@ class DocTestDefaults(SageObject):
         for k in sorted(dict_difference(self.__dict__, DocTestDefaults().__dict__).keys()):
             if s[-1] != "(":
                 s += ", "
-            s += str(k) + "=" + repr(getattr(self,k))
+            s += str(k) + "=" + repr(getattr(self, k))
         s += ")"
         return s
 
@@ -169,7 +174,7 @@ class DocTestDefaults(SageObject):
 
     def __ne__(self, other):
         """
-        Test for unequality.
+        Test for non-equality.
 
         EXAMPLES::
 
@@ -363,6 +368,9 @@ class DocTestController(SageObject):
                         if pkg['installed'] and pkg['installed_version'] == pkg['remote_version']:
                             options.optional.add(pkg['name'])
 
+                    from sage.features import package_systems
+                    options.optional.update(system.name for system in package_systems())
+
                 # Check that all tags are valid
                 for o in options.optional:
                     if not optionaltag_regex.search(o):
@@ -371,10 +379,6 @@ class DocTestController(SageObject):
                 options.optional |= auto_optional_tags
 
         self.options = options
-
-        if options.memlimit > 0:
-            # Allow tests that require a virtual memory limit to be set
-            options.optional.add('memlimit')
 
         self.files = args
         if options.logfile:
@@ -635,33 +639,6 @@ class DocTestController(SageObject):
         self.logger.write(s + end)
         self.logger.flush()
 
-    def test_safe_directory(self, dir=None):
-        """
-        Test that the given directory is safe to run Python code from.
-
-        TESTS::
-
-            sage: from sage.doctest.control import DocTestDefaults, DocTestController
-            sage: DD = DocTestDefaults()
-            sage: DC = DocTestController(DD, [])
-            sage: DC.test_safe_directory()
-            sage: d = os.path.join(tmp_dir(), "test")
-            sage: os.mkdir(d)
-            sage: os.chmod(d, 0o777)
-            sage: DC.test_safe_directory(d)
-            Traceback (most recent call last):
-            ...
-            RuntimeError: refusing to run doctests...
-        """
-        import stat
-        is_world_writeable = bool(os.stat(dir or os.getcwd()).st_mode & stat.S_IWOTH)
-        if is_world_writeable:
-            raise RuntimeError(
-                  "refusing to run doctests from the current "
-                  "directory '{}' since untrusted users could put files in "
-                  "this directory, making it unsafe to run Sage code from"
-                  .format(os.getcwd()))
-
     def create_run_id(self):
         """
         Creates the run id.
@@ -718,6 +695,7 @@ class DocTestController(SageObject):
             # don't make sense to run outside a build environment
             if have_git:
                 self.files.append(opj(SAGE_SRC, 'sage_setup'))
+                self.files.append(opj(SAGE_SRC, 'sage_docbuild'))
             self.files.append(SAGE_DOC_SRC)
 
         if self.options.all or (self.options.new and not have_git):
@@ -771,8 +749,8 @@ class DocTestController(SageObject):
             sage: DD = DocTestDefaults(optional='magma,guava')
             sage: DC = DocTestController(DD, [dirname])
             sage: DC.expand_files_into_sources()
-            sage: sorted(DC.sources[0].options.optional)  # abs tol 1
-            ['guava', 'magma', 'py2']
+            sage: all(t in DC.sources[0].options.optional for t in ['magma','guava'])
+            True
 
         We check that files are skipped appropriately::
 
@@ -855,7 +833,7 @@ class DocTestController(SageObject):
             ....:     DC.stats[source.basename] = {'walltime': 0.1*(i+1)}
             sage: DC.sort_sources()
             Sorting sources by runtime so that slower doctests are run first....
-            sage: print("\n".join([source.basename for source in DC.sources]))
+            sage: print("\n".join(source.basename for source in DC.sources))
             sage.doctest.util
             sage.doctest.test
             sage.doctest.sources
@@ -1030,7 +1008,7 @@ class DocTestController(SageObject):
         for o in ("all", "long", "force_lib", "verbose", "failed", "new"):
             if o in opt:
                 cmd += "--%s "%o
-        for o in ("timeout", "memlimit", "randorder", "stats_path"):
+        for o in ("timeout", "randorder", "stats_path"):
             if o in opt:
                 cmd += "--%s=%s "%(o, opt[o])
         if "optional" in opt:
@@ -1072,7 +1050,7 @@ class DocTestController(SageObject):
             return 2
         opt = self.options
         if opt.gdb:
-            cmd = '''exec gdb -x "%s" --args '''%(os.path.join(SAGE_LOCAL,"bin","sage-gdb-commands"))
+            cmd = '''exec gdb -x "%s" --args '''%(os.path.join(SAGE_VENV, "bin", "sage-gdb-commands"))
             flags = ""
             if opt.logfile:
                 sage_cmd += " --logfile %s"%(opt.logfile)
@@ -1201,7 +1179,6 @@ class DocTestController(SageObject):
                 return 2
             return self.run_val_gdb()
         else:
-            self.test_safe_directory()
             self.create_run_id()
             from sage.env import SAGE_ROOT_GIT
             # SAGE_ROOT_GIT can be None on distributions which typically
@@ -1262,6 +1239,7 @@ def run_doctests(module, options=None):
     """
     import sys
     sys.stdout.flush()
+
     def stringify(x):
         if isinstance(x, (list, tuple)):
             F = [stringify(a) for a in x]
@@ -1295,15 +1273,16 @@ def run_doctests(module, options=None):
             raise ValueError("You should not try to run doctests with a debugger from within Sage: IPython objects to embedded shells")
         from IPython import get_ipython
         IP = get_ipython()
-        old_color = IP.colors
-        IP.run_line_magic('colors', 'NoColor')
-        old_config_color = IP.config.TerminalInteractiveShell.colors
-        IP.config.TerminalInteractiveShell.colors = 'NoColor'
+        if IP is not None:
+            old_color = IP.colors
+            IP.run_line_magic('colors', 'NoColor')
+            old_config_color = IP.config.TerminalInteractiveShell.colors
+            IP.config.TerminalInteractiveShell.colors = 'NoColor'
 
     try:
         DC.run()
     finally:
         sage.doctest.DOCTEST_MODE = save_dtmode
-        if not save_dtmode:
+        if not save_dtmode and IP is not None:
             IP.run_line_magic('colors', old_color)
             IP.config.TerminalInteractiveShell.colors = old_config_color

@@ -29,7 +29,7 @@ Sage вы увидите вывод, похожий на следующий:
 ::
 
     sage: quit
-    Exiting SAGE (CPU time 0m0.00s, Wall time 0m0.89s)
+    Exiting Sage (CPU time 0m0.00s, Wall time 0m0.89s)
 
 Wall time — это прошедшее время. Это значение верно, потому как в "CPU time"
 не входит время, использованное субпроцессами вроде GAP или Singular.
@@ -182,7 +182,7 @@ Notebook), то вы можете ввести ``%hist``, чтобы вывес�
     sage: x,y = QQ['x,y'].gens()
     sage: G = E.gens()
     sage:
-    Exiting SAGE (CPU time 0m0.61s, Wall time 0m50.39s).
+    Exiting Sage (CPU time 0m0.61s, Wall time 0m50.39s).
     was@form:~$ sage
     ┌────────────────────────────────────────────────────────────────────┐
     │ SageMath version 9.0, Release Date: 2020-01-01                     │
@@ -292,7 +292,7 @@ GMP ведет себя лучше, но только немного (как и 
 
     sage: cputime?
     ...
-        Return the time in CPU second since SAGE started, or with optional
+        Return the time in CPU second since Sage started, or with optional
         argument t, return the time since time t.
         INPUT:
             t -- (optional) float, time in CPU seconds
@@ -358,7 +358,7 @@ Wall time. Однако, если существует существенная 
 Когда что-то идет не так, обычно можно увидеть исключение Python (Python
 "exception"). Python даже попытается предположить, что вызвало ошибку. Часто
 вы можете видеть имя исключения, например, ``NameError`` или ``ValueError``
-(см. Python Reference Manual [Py]_ для полного списка исключений). Например,
+(см. Python Library Reference [PyLR]_ для полного списка исключений). Например,
 
 .. skip
 

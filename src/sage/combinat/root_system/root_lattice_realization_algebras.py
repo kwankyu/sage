@@ -10,9 +10,8 @@ Group algebras of root lattice realizations
 #  Distributed under the terms of the GNU General Public License (GPL)
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
-from __future__ import print_function
-
-import functools, operator
+import functools
+import operator
 from sage.misc.cachefunc import cached_method
 from sage.misc.lazy_import import lazy_import
 from sage.misc.misc_c import prod
@@ -203,7 +202,7 @@ class Algebras(AlgebrasCategory):
                 raise ValueError("the weight does not have an integral scalar product with the coroot")
             alphai = P.simple_root(i)
             if n >= 0:
-                return  self.sum_of_monomials(weight-j*alphai for j in range(0,n+1))
+                return  self.sum_of_monomials(weight-j*alphai for j in range(n + 1))
             else:
                 return -self.sum_of_monomials(weight-j*alphai for j in range(n+1,0))
 
@@ -1083,7 +1082,7 @@ class Algebras(AlgebrasCategory):
 
                 Investigate why `T_0^\vee` currently does not satisfy
                 the quadratic relation in type `BC`. This should
-                hopefuly be fixed when `T_0^\vee` will have a more
+                hopefully be fixed when `T_0^\vee` will have a more
                 uniform implementation::
 
                     sage: cartan_type = CartanType(["BC",1,2])

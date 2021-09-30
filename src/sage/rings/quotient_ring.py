@@ -107,7 +107,6 @@ easily::
 #                  http://www.gnu.org/licenses/
 #*****************************************************************************
 
-from __future__ import absolute_import
 
 import sage.misc.latex as latex
 from . import ring, ideal, quotient_ring_element
@@ -120,7 +119,7 @@ from sage.misc.cachefunc import cached_method
 from sage.categories.rings import Rings
 from sage.categories.commutative_rings import CommutativeRings
 
-def QuotientRing(R, I, names=None):
+def QuotientRing(R, I, names=None, **kwds):
     r"""
     Creates a quotient ring of the ring `R` by the twosided ideal `I`.
 
@@ -136,6 +135,9 @@ def QuotientRing(R, I, names=None):
 
     - ``names`` -- (optional) a list of strings to be used as names for
       the variables in the quotient ring `R/I`.
+
+    - further named arguments that will be passed to the constructor
+      of the quotient ring instance.
 
     OUTPUT: `R/I` - the quotient ring `R` mod the ideal `I`
 
@@ -283,6 +285,10 @@ def QuotientRing(R, I, names=None):
             pass
     else:
         names = normalize_names(R.ngens(), names)
+    if kwds.get('implementation') == 'pbori':
+        from sage.rings.polynomial.polynomial_ring_constructor import BooleanPolynomialRing_constructor as BooleanPolynomialRing
+        kwds.pop('implementation')
+        return BooleanPolynomialRing(R.ngens(), names=names, **kwds)
     if not isinstance(I, ideal.Ideal_generic) or I.ring() != R:
         I = R.ideal(I)
     if I.is_zero():
@@ -305,11 +311,11 @@ def QuotientRing(R, I, names=None):
         I_lift = S.ideal(G)
         J = R.defining_ideal()
         if S == ZZ:
-            return Integers((I_lift+J).gen())
+            return Integers((I_lift+J).gen(), **kwds)
         return R.__class__(S, I_lift + J, names=names)
     if isinstance(R, ring.CommutativeRing):
-        return QuotientRing_generic(R, I, names)
-    return QuotientRing_nc(R, I, names)
+        return QuotientRing_generic(R, I, names, **kwds)
+    return QuotientRing_nc(R, I, names, **kwds)
 
 def is_QuotientRing(x):
     """
@@ -498,7 +504,10 @@ class QuotientRing_nc(ring.Ring, sage.structure.parent_gens.ParentWithGens):
                 names = self.cover_ring().variable_names()
             except ValueError:
                 names = None
-        return QuotientFunctor(self.__I, names=names, as_field=isinstance(self, Field)), self.__R
+        if self in CommutativeRings():
+            return QuotientFunctor(self.__I, names=names, domain=CommutativeRings(), codomain=CommutativeRings(), as_field=isinstance(self, Field)), self.__R
+        else:
+            return QuotientFunctor(self.__I, names=names, as_field=isinstance(self, Field)), self.__R
 
     def _repr_(self):
         """
@@ -1312,7 +1321,7 @@ class QuotientRing_generic(QuotientRing_nc, ring.CommutativeRing):
             sage: Q = R.quotient_ring(I); Q
             Quotient of Multivariate Polynomial Ring in x, y over Rational Field by the ideal (x^2 - y)
             sage: Q._macaulay2_init_()                      # optional - macaulay2
-            QQ[x, y]
+            QQ[x...y]
             --------
               2
              x  - y
@@ -1322,7 +1331,7 @@ class QuotientRing_generic(QuotientRing_nc, ring.CommutativeRing):
             sage: Q = R.quotient(I); Q
             Quotient of Multivariate Polynomial Ring in x, y, z, w over Integer Ring by the ideal (x*y - z^2, y^2 - w^2)
             sage: Q._macaulay2_init_()                      # optional - macaulay2
-               ZZ[x, y, z, w]
+               ZZ[x...z, w]
             -------------------
                     2   2    2
             (x*y - z , y  - w )
@@ -1333,7 +1342,7 @@ class QuotientRing_generic(QuotientRing_nc, ring.CommutativeRing):
             Quotient of Multivariate Polynomial Ring in x, y over Finite Field of size 101 by the ideal (x^2 + x, y^2 + y)
             sage: Q._macaulay2_init_()                      # optional - macaulay2
                  ZZ
-                ---[x, y]
+                ---[x...y]
                 101
             ----------------
               2       2

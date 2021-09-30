@@ -57,6 +57,7 @@ REFERENCES:
 
 from sage.misc.cachefunc import cached_method
 from sage.rings.integer import Integer
+from sage.rings.integer_ring import ZZ
 from sage.tensor.modules.finite_rank_free_module import FiniteRankFreeModule
 from sage.tensor.modules.free_module_tensor import FreeModuleTensor
 from sage.tensor.modules.alternating_contr_tensor import AlternatingContrTensor
@@ -141,7 +142,7 @@ class ExtPowerFreeModule(FiniteRankFreeModule):
         Alternating contravariant tensor of degree 2 on the Rank-3 free
          module M over the Integer Ring
         sage: a.display() # expansion with respect to M's default basis (e)
-        e_0/\e_1
+        e_0∧e_1
         sage: from sage.tensor.modules.alternating_contr_tensor import AlternatingContrTensor
         sage: isinstance(a, AlternatingContrTensor)
         True
@@ -169,7 +170,7 @@ class ExtPowerFreeModule(FiniteRankFreeModule):
         Alternating contravariant tensor a of degree 2 on the Rank-3
          free module M over the Integer Ring
         sage: a.display(e)
-        a = 3 e_0/\e_1 - e_0/\e_2 + 4 e_1/\e_2
+        a = 3 e_0∧e_1 - e_0∧e_2 + 4 e_1∧e_2
 
     An alternative is to construct the alternating contravariant tensor from an
      empty list of components and to set the nonzero components afterwards::
@@ -179,7 +180,7 @@ class ExtPowerFreeModule(FiniteRankFreeModule):
         sage: a.set_comp(e)[0,2] = -1
         sage: a.set_comp(e)[1,2] = 4
         sage: a.display(e)
-        a = 3 e_0/\e_1 - e_0/\e_2 + 4 e_1/\e_2
+        a = 3 e_0∧e_1 - e_0∧e_2 + 4 e_1∧e_2
 
     The exterior powers are unique::
 
@@ -210,9 +211,9 @@ class ExtPowerFreeModule(FiniteRankFreeModule):
         sage: ta = T20(a) ; ta
         Type-(2,0) tensor a on the Rank-3 free module M over the Integer Ring
         sage: ta.display(e)
-        a = 3 e_0*e_1 - e_0*e_2 - 3 e_1*e_0 + 4 e_1*e_2 + e_2*e_0 - 4 e_2*e_1
+        a = 3 e_0⊗e_1 - e_0⊗e_2 - 3 e_1⊗e_0 + 4 e_1⊗e_2 + e_2⊗e_0 - 4 e_2⊗e_1
         sage: a.display(e)
-        a = 3 e_0/\e_1 - e_0/\e_2 + 4 e_1/\e_2
+        a = 3 e_0∧e_1 - e_0∧e_2 + 4 e_1∧e_2
         sage: ta.symmetries()  # the antisymmetry is of course preserved
         no symmetry;  antisymmetry: (0, 1)
         sage: ta == a  # equality as type-(2,0) tensors
@@ -235,15 +236,17 @@ class ExtPowerFreeModule(FiniteRankFreeModule):
             sage: TestSuite(A).run()
 
         """
-        from sage.functions.other import binomial
+        from sage.arith.all import binomial
+        from sage.typeset.unicode_characters import unicode_bigwedge
         self._fmodule = fmodule
-        self._degree = degree
+        self._degree = ZZ(degree)
         rank = binomial(fmodule._rank, degree)
         if name is None and fmodule._name is not None:
-            name = r'/\^{}('.format(degree) + fmodule._name + ')'
+            name = unicode_bigwedge + r'^{}('.format(degree) \
+                   + fmodule._name + ')'
         if latex_name is None and fmodule._latex_name is not None:
-            latex_name = r'\Lambda^{' + str(degree) + r'}\left(' + \
-                                       fmodule._latex_name + r'\right)'
+            latex_name = r'\Lambda^{' + str(degree) + r'}\left(' \
+                         + fmodule._latex_name + r'\right)'
         FiniteRankFreeModule.__init__(self, fmodule._ring, rank,
                                       name=name, latex_name=latex_name,
                                       start_index=fmodule._sindex,
@@ -270,7 +273,7 @@ class ExtPowerFreeModule(FiniteRankFreeModule):
              free module M over the Integer Ring
             sage: a[e,0,2], a[e,1,2] = 3, -1
             sage: a.display()
-            a = 3 e_0/\e_2 - e_1/\e_2
+            a = 3 e_0∧e_2 - e_1∧e_2
 
         """
         if isinstance(comp, (int, Integer)) and comp == 0:
@@ -293,17 +296,17 @@ class ExtPowerFreeModule(FiniteRankFreeModule):
             Alternating contravariant tensor of degree 2 on the 4-dimensional vector space M
              over the Rational Field
             sage: a.display()
-            1/2 e_0/\e_1
+            1/2 e_0∧e_1
             sage: a = M.exterior_power(3)._an_element_() ; a
             Alternating contravariant tensor of degree 3 on the 4-dimensional vector space M
              over the Rational Field
             sage: a.display()
-            1/2 e_0/\e_1/\e_2
+            1/2 e_0∧e_1∧e_2
             sage: a = M.exterior_power(4)._an_element_() ; a
             Alternating contravariant tensor of degree 4 on the 4-dimensional vector space M
              over the Rational Field
             sage: a.display()
-            1/2 e_0/\e_1/\e_2/\e_3
+            1/2 e_0∧e_1∧e_2∧e_3
 
         TESTS:
 
@@ -371,15 +374,10 @@ class ExtPowerFreeModule(FiniteRankFreeModule):
             '4th exterior power of the Rank-5 free module M over the Integer Ring'
             sage: M.exterior_power(5)._repr_()
             '5th exterior power of the Rank-5 free module M over the Integer Ring'
-
+            sage: M.exterior_power(21)._repr_()
+            '21st exterior power of the Rank-5 free module M over the Integer Ring'
         """
-        description = "{}".format(self._degree)
-        if self._degree == 2:
-            description += "nd"
-        elif self._degree == 3:
-            description += "rd"
-        else:
-            description += "th"
+        description = "{}".format(self._degree.ordinal_str())
         description += " exterior power of the {}".format(self._fmodule)
         return description
 
@@ -508,7 +506,7 @@ class ExtPowerDualFreeModule(FiniteRankFreeModule):
         Alternating form of degree 2 on the Rank-3 free module M over the
          Integer Ring
         sage: a.display() # expansion with respect to M's default basis (e)
-        e^0/\e^1
+        e^0∧e^1
         sage: from sage.tensor.modules.free_module_alt_form import FreeModuleAltForm
         sage: isinstance(a, FreeModuleAltForm)
         True
@@ -536,7 +534,7 @@ class ExtPowerDualFreeModule(FiniteRankFreeModule):
         Alternating form a of degree 2 on the Rank-3 free module M over the
          Integer Ring
         sage: a.display(e)
-        a = 3 e^0/\e^1 - e^0/\e^2 + 4 e^1/\e^2
+        a = 3 e^0∧e^1 - e^0∧e^2 + 4 e^1∧e^2
 
     An alternative is to construct the alternating form from an empty list of
     components and to set the nonzero components afterwards::
@@ -546,7 +544,7 @@ class ExtPowerDualFreeModule(FiniteRankFreeModule):
         sage: a.set_comp(e)[0,2] = -1
         sage: a.set_comp(e)[1,2] = 4
         sage: a.display(e)
-        a = 3 e^0/\e^1 - e^0/\e^2 + 4 e^1/\e^2
+        a = 3 e^0∧e^1 - e^0∧e^2 + 4 e^1∧e^2
 
     The exterior powers are unique::
 
@@ -610,9 +608,9 @@ class ExtPowerDualFreeModule(FiniteRankFreeModule):
         sage: ta = T02(a) ; ta
         Type-(0,2) tensor a on the Rank-3 free module M over the Integer Ring
         sage: ta.display(e)
-        a = 3 e^0*e^1 - e^0*e^2 - 3 e^1*e^0 + 4 e^1*e^2 + e^2*e^0 - 4 e^2*e^1
+        a = 3 e^0⊗e^1 - e^0⊗e^2 - 3 e^1⊗e^0 + 4 e^1⊗e^2 + e^2⊗e^0 - 4 e^2⊗e^1
         sage: a.display(e)
-        a = 3 e^0/\e^1 - e^0/\e^2 + 4 e^1/\e^2
+        a = 3 e^0∧e^1 - e^0∧e^2 + 4 e^1∧e^2
         sage: ta.symmetries() # the antisymmetry is of course preserved
         no symmetry;  antisymmetry: (0, 1)
 
@@ -633,9 +631,10 @@ class ExtPowerDualFreeModule(FiniteRankFreeModule):
             sage: TestSuite(A).run()
 
         """
-        from sage.functions.other import binomial
+        from sage.arith.all import binomial
+        from sage.typeset.unicode_characters import unicode_bigwedge
         self._fmodule = fmodule
-        self._degree = degree
+        self._degree = ZZ(degree)
         rank = binomial(fmodule._rank, degree)
         if degree == 1:  # case of the dual
             if name is None and fmodule._name is not None:
@@ -644,10 +643,11 @@ class ExtPowerDualFreeModule(FiniteRankFreeModule):
                 latex_name = fmodule._latex_name + r'^*'
         else:
             if name is None and fmodule._name is not None:
-                name = r'/\^{}('.format(degree) + fmodule._name + '*)'
+                name = unicode_bigwedge + r'^{}('.format(degree) \
+                       + fmodule._name + '*)'
             if latex_name is None and fmodule._latex_name is not None:
-                latex_name = r'\Lambda^{' + str(degree) + r'}\left(' + \
-                             fmodule._latex_name + r'^*\right)'
+                latex_name = r'\Lambda^{' + str(degree) + r'}\left(' \
+                             + fmodule._latex_name + r'^*\right)'
         FiniteRankFreeModule.__init__(self, fmodule._ring, rank, name=name,
                                       latex_name=latex_name,
                                       start_index=fmodule._sindex,
@@ -681,7 +681,7 @@ class ExtPowerDualFreeModule(FiniteRankFreeModule):
              the Integer Ring
             sage: a[e,0,2], a[e,1,2] = 3, -1
             sage: a.display()
-            a = 3 e^0/\e^2 - e^1/\e^2
+            a = 3 e^0∧e^2 - e^1∧e^2
 
         """
         if isinstance(comp, (int, Integer)) and comp == 0:
@@ -723,17 +723,17 @@ class ExtPowerDualFreeModule(FiniteRankFreeModule):
             Alternating form of degree 2 on the 4-dimensional vector space M
              over the Rational Field
             sage: a.display()
-            1/2 e^0/\e^1
+            1/2 e^0∧e^1
             sage: a = M.dual_exterior_power(3)._an_element_() ; a
             Alternating form of degree 3 on the 4-dimensional vector space M
              over the Rational Field
             sage: a.display()
-            1/2 e^0/\e^1/\e^2
+            1/2 e^0∧e^1∧e^2
             sage: a = M.dual_exterior_power(4)._an_element_() ; a
             Alternating form of degree 4 on the 4-dimensional vector space M
              over the Rational Field
             sage: a.display()
-            1/2 e^0/\e^1/\e^2/\e^3
+            1/2 e^0∧e^1∧e^2∧e^3
 
         TESTS:
 
@@ -842,17 +842,13 @@ class ExtPowerDualFreeModule(FiniteRankFreeModule):
             '4th exterior power of the dual of the Rank-5 free module M over the Integer Ring'
             sage: M.dual_exterior_power(5)._repr_()
             '5th exterior power of the dual of the Rank-5 free module M over the Integer Ring'
+            sage: M.dual_exterior_power(21)._repr_()
+            '21st exterior power of the dual of the Rank-5 free module M over the Integer Ring'
 
         """
         if self._degree == 1:
             return "Dual of the {}".format(self._fmodule)
-        description = "{}".format(self._degree)
-        if self._degree == 2:
-            description += "nd"
-        elif self._degree == 3:
-            description += "rd"
-        else:
-            description += "th"
+        description = "{}".format(self._degree.ordinal_str())
         description += " exterior power of the dual of the {}".format(
                                                                  self._fmodule)
         return description

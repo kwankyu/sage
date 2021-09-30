@@ -3,8 +3,9 @@ Fusion Rings
 """
 # ****************************************************************************
 #  Copyright (C) 2019 Daniel Bump <bump at match.stanford.edu>
-#                     Nicolas Thiery <nthiery at users.sf.net>
 #                     Guillermo Aboumrad <gh_willieab>
+#                     Travis Scrimshaw <tcscrims at gmail.com>
+#                     Nicolas Thiery <nthiery at users.sf.net>
 #
 #  Distributed under the terms of the GNU General Public License (GPL)
 #                  https://www.gnu.org/licenses/
@@ -52,6 +53,7 @@ class FusionRing(WeylCharacterRing):
     - [Fuchs1994]_
     - [Row2006]_
     - [Walton1990]_
+    - [Wan2010]_
 
     EXAMPLES::
 
@@ -113,9 +115,10 @@ class FusionRing(WeylCharacterRing):
         [B22(0,0), B22(1,0), B22(0,1), B22(2,0), B22(1,1), B22(0,2)]
 
     The fusion ring has a number of methods that reflect its role
-    as the Grothendieck ring of a *modular tensor category*. These
-    include a twist method :meth:`Element.twist` for its elements related
-    to the ribbon structure, and the S-matrix :meth:`s_ij`.
+    as the Grothendieck ring of a *modular tensor category* (MTC). These
+    include twist methods :meth:`Element.twist` and :meth:`Element.ribbon`
+    for its elements related to the ribbon structure, and the 
+    S-matrix :meth:`s_ij`.
 
     There are two natural normalizations of the S-matrix. Both
     are explained in Chapter 3 of [BaKi2001]_. The one that is computed
@@ -203,6 +206,12 @@ class FusionRing(WeylCharacterRing):
         [[i0, p, s], [p, i0, s], [s, s, i0 + p]]
         sage: [x.twist() for x in b]
         [0, 1, 1/8]
+        sage: [x.ribbon() for x in b]
+        [1, -1, zeta128^8]
+        sage: [I.r_matrix(i, j, k) for (i,j,k) in [(s,s,i0), (p,p,i0), (p,s,s), (s,p,s), (s,s,p)]]
+        [-zeta128^56, -1, -zeta128^32, -zeta128^32, zeta128^24]
+        sage: I.r_matrix(s, s, i0) == I.root_of_unity(-1/8)
+        True
         sage: I.global_q_dimension()
         4
         sage: I.total_q_order()
@@ -348,7 +357,7 @@ class FusionRing(WeylCharacterRing):
         tester = self._tester(**options)
         tqo = self.total_q_order()
         tester.assertTrue(tqo.is_real_positive())
-        tester.assertTrue(tqo**2 == self.global_q_dimension())
+        tester.assertEqual(tqo**2, self.global_q_dimension())
 
     def fusion_labels(self, labels=None, inject_variables=False):
         r"""
@@ -383,7 +392,7 @@ class FusionRing(WeylCharacterRing):
             [     x3      x2      x1      x0]
 
         We give an example where the variables are injected into the
-        global namepsace::
+        global namespace::
 
             sage: A13.fusion_labels("y", inject_variables=True)
             sage: y0
@@ -546,7 +555,7 @@ class FusionRing(WeylCharacterRing):
         where `k` is the level and `h^\vee` is the dual Coxeter number.
         See [DFMS1996]_ Equation (15.61).
 
-        Let `d_i` and `theta_i` be the quantum dimensions and
+        Let `d_i` and `\theta_i` be the quantum dimensions and
         twists of the simple objects. By Proposition 2.3 in [RoStWa2009]_,
         there exists a rational number `c` such that
         `D_+ / \sqrt{D} = e^{i\pi c/4}`, where `D_+ = \sum d_i^2 \theta_i`
@@ -606,7 +615,7 @@ class FusionRing(WeylCharacterRing):
             [        0         0 zeta32^10]
         """
         B = self.basis()
-        return diagonal_matrix(self.root_of_unity(B[x].twist()) for x in self.get_order())
+        return diagonal_matrix(B[x].ribbon() for x in self.get_order())
 
     @cached_method
     def N_ijk(self, elt_i, elt_j, elt_k):
@@ -727,6 +736,63 @@ class FusionRing(WeylCharacterRing):
         else:
             return S
         
+    @cached_method
+    def r_matrix(self, i, j, k):
+        r"""
+        Return the R-matrix entry corresponding to the subobject ``k``
+        in the tensor product of ``i`` with ``j``.
+
+        .. WARNING:: 
+
+            This method only gives complete information when `N_{ij}^k = 1`
+            (an important special case). Tables of MTC including R-matrices
+            may be found in Section 5.3 of [RoStWa2009]_ and in [Bond2007]_.
+
+        The R-matrix is a homomorphism `i \otimes j \rightarrow j \otimes i`.
+        This may be hard to describe since the object `i \otimes j`
+        may be reducible. However if `k` is a simple subobject of
+        `i \otimes j` it is also a subobject of `j \otimes i`. If we fix
+        embeddings `k \rightarrow i \otimes j`, `k \rightarrow j \otimes i`
+        we may ask for the scalar automorphism of `k` induced by the
+        R-matrix. This method computes that scalar. It is possible to
+        adjust the set of embeddings `k \rightarrow i \otimes j` (called
+        a *gauge*) so that this scalar equals
+        
+        .. MATH::
+
+            \pm \sqrt{\frac{ \theta_k }{ \theta_i \theta_j }}.
+
+        If `i \neq j`, the gauge may be used to control the sign of
+        the square root. But if `i = j` then we must be careful
+        about the sign. These cases are computed by a formula
+        of [BDGRTW2019]_, Proposition 2.3.
+
+        EXAMPLES::
+
+            sage: I = FusionRing("E8", 2, conjugate=True)  # Ising MTC
+            sage: I.fusion_labels(["i0","p","s"], inject_variables=True)
+            sage: I.r_matrix(s,s,i0) == I.root_of_unity(-1/8)
+            True
+            sage: I.r_matrix(p,p,i0)
+            -1
+            sage: I.r_matrix(p,s,s) == I.root_of_unity(-1/2)
+            True
+            sage: I.r_matrix(s,p,s) == I.root_of_unity(-1/2)
+            True
+            sage: I.r_matrix(s,s,p) == I.root_of_unity(3/8)
+            True
+        """
+        if self.Nk_ij(i, j, k) == 0:
+            return 0
+        if i != j:
+            return self.root_of_unity((k.twist(reduced=False) - i.twist(reduced=False) - j.twist(reduced=False)) / 2)
+        i0 = self.one()
+        B = self.basis()
+        return sum(y.ribbon()**2 / (i.ribbon() * x.ribbon()**2)
+                   * self.s_ij(i0,y) * self.s_ij(i,z) * self.s_ij(x,z).conjugate()
+                   * self.s_ij(k,x).conjugate() * self.s_ij(y,z).conjugate() / self.s_ij(i0,z)
+                   for x in B for y in B for z in B) / (self.total_q_order()**4)
+
     def global_q_dimension(self):
         r"""
         Return `\sum d_i^2`, where the sum is over all simple objects
@@ -778,7 +844,7 @@ class FusionRing(WeylCharacterRing):
             sage: Dp/Dm == B31.root_of_unity(c/2)
             True
         """
-        return sum((x.q_dimension())**2 * self.root_of_unity(x.twist()) for x in self.basis())
+        return sum((x.q_dimension())**2 * x.ribbon() for x in self.basis())
 
     def D_minus(self):
         r"""
@@ -798,7 +864,7 @@ class FusionRing(WeylCharacterRing):
             sage: Dp*Dm == E83.global_q_dimension()
             True
         """
-        return sum((x.q_dimension())**2 * self.root_of_unity(-x.twist()) for x in self.basis())
+        return sum((x.q_dimension())**2 / x.ribbon() for x in self.basis())
 
     class Element(WeylCharacterRing.Element):
         """
@@ -838,10 +904,11 @@ class FusionRing(WeylCharacterRing):
                 raise ValueError("fusion weight is valid for basis elements only")
             return next(iter(self._monomial_coefficients))
 
-        def twist(self):
+        def twist(self, reduced=True):
             r"""
             Return a rational number `h` such that `\theta = e^{i \pi h}` 
-            is the twist of ``self``.
+            is the twist of ``self``. The quantity `e^{i \pi h}` is
+            also available using :meth:`ribbon`.
 
             This method is only available for simple objects. If
             `\lambda` is the weight of the object, then
@@ -850,6 +917,11 @@ class FusionRing(WeylCharacterRing):
             As in [Row2006]_, this requires normalizing
             the invariant bilinear form so that 
             `\langle \alpha, \alpha \rangle = 2` for short roots.
+
+            INPUT:
+
+            - ``reduced`` -- (default: ``True``) boolean; if ``True``
+              then return the twist reduced modulo 2
 
             EXAMPLES::
 
@@ -879,10 +951,36 @@ class FusionRing(WeylCharacterRing):
             lam = next(iter(self._monomial_coefficients))
             inner = lam.inner_product(lam + 2*rho)
             twist = P._conj * P._nf * inner / P.fusion_l()
-            # Reduce to canonical form
-            f = twist.floor()
-            twist -= f
-            return twist + (f % 2)
+            # Reduce modulo 2
+            if reduced:
+                f = twist.floor()
+                twist -= f
+                return twist + (f % 2)
+            else:
+                return twist
+
+        def ribbon(self):
+            r"""
+            Return the twist or ribbon element of ``self``.
+
+            If `h` is the rational number modulo 2 produced by
+            ``self.twist()``, this  method produces `e^{i\pi h}`.
+
+            .. SEEALSO::
+
+                An additive version of this is available as :meth:`twist`.
+
+            EXAMPLES::
+
+                sage: F = FusionRing("A1",3)
+                sage: [x.twist() for x in F.basis()]
+                [0, 3/10, 4/5, 3/2]
+                sage: [x.ribbon() for x in F.basis()]
+                [1, zeta40^6, zeta40^12 - zeta40^8 + zeta40^4 - 1, -zeta40^10]
+                sage: [F.root_of_unity(x) for x in [0, 3/10, 4/5, 3/2]]
+                [1, zeta40^6, zeta40^12 - zeta40^8 + zeta40^4 - 1, -zeta40^10]
+            """
+            return self.parent().root_of_unity(self.twist())
 
         @cached_method
         def q_dimension(self):
@@ -928,6 +1026,5 @@ class FusionRing(WeylCharacterRing):
                     expr /= q_int(P._nf * val, q)**(-exp)
             expr = R(expr)
             expr = expr.substitute(q=q**4) / (q**(2*expr.degree()))
-            zet = P.field().gen() ** P._fg
+            zet = P.field().gen() ** (P._cyclotomic_order/P._l)
             return expr.substitute(q=zet)
-
