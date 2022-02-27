@@ -216,7 +216,7 @@ REFERENCES:
 .. [AM1969] \M. F. Atiyah and I. G. Macdonald, "Introduction to commutative
             algebra", Addison-Wesley, 1969.
 
- .. [AM1990] \R. Abraham and J. E. Marsden, "Foundations of Mechanics", 
+ .. [AM1990] \R. Abraham and J. E. Marsden, "Foundations of Mechanics",
             Addison-Wesley, 1980.
 
 .. [AM1974] \J. F. Adams and H. R. Margolis, "Sub-Hopf-algebras of the
@@ -1213,7 +1213,7 @@ REFERENCES:
                using return words," Advances in Applied Mathematics
                42 (2009) 60-74.
 
-.. [BSZ2019] Nils Bruin, Jeroen Sijsling, and Alexandre Zotine, 
+.. [BSZ2019] Nils Bruin, Jeroen Sijsling, and Alexandre Zotine,
              *Numerical Computation of Endomorphism Rings of Jacobians*,
              The Open Book Series, Vol. 2 (2019), No. 1, pp. 155-171,
              https://msp.org/obs/2019/2-1/p10.xhtml
@@ -2818,6 +2818,9 @@ REFERENCES:
             Cryptanalysis* ; 2002' available at
             http://www.engr.mun.ca/~howard/PAPERS/ldc_tutorial.pdf
 
+.. [Hes2004] Florian Hess, "Computing relations in divisor class groups of
+              algebraic curves over finite fields," Preprint, 2004.
+
 .. [Hes2002] Florian Hess, "Computing Riemann-Roch spaces in algebraic
              function fields and related topics," J. Symbolic
              Comput. 33 (2002), no. 4, 425--445.
@@ -3349,10 +3352,6 @@ REFERENCES:
              Mandelbrot set*, Nagoya University, 23 Apr. 2009.
              math.titech.ac.jp/~kawahira/programs/mandel-exray.pdf
 
-.. [Kir2016] \M. Kirschmer, *Definite quadratic and hermitian forms with small
-             class number*, Habilitationsschrift, RWTH Aachen University, 2016.
-             http://www.math.rwth-aachen.de/~Markus.Kirschmer/papers/herm.pdf
-
 .. [KB1983] \W. Kühnel and T. F. Banchoff, "The 9-vertex complex
             projective plane", Math. Intelligencer 5 (1983), no. 3,
             11-22.
@@ -3382,9 +3381,16 @@ REFERENCES:
             block cipher*, Lightweight Cryptography Workshop, 2016.
             https://www.nist.gov/sites/default/files/documents/2016/10/18/karpman-paper-lwc2016.pdf
 
+.. [Khu2004] \K. Khuri-Makdisi. *Linear algebra algorithms for divisors on an algebraic curve*,
+             Mathematics of Computation 73, no. 245 (2004) pp. 333-357.
+
 .. [Kin1992] Nancy G. Kinnersley, *The vertex separation number of a graph
              equals its path-width*, Information Processing Letters
              42(6):345-350, 1992. :doi:`10.1016/0020-0190(92)90234-M`.
+
+.. [Kir2016] \M. Kirschmer, *Definite quadratic and hermitian forms with small
+             class number*, Habilitationsschrift, RWTH Aachen University, 2016.
+             http://www.math.rwth-aachen.de/~Markus.Kirschmer/papers/herm.pdf
 
 .. [KK1995] Victor Klee and Peter Kleinschmidt,
             *Convex polytopes and related complexes.*, in \R. L. Graham,
@@ -3678,7 +3684,7 @@ REFERENCES:
               International Mathematics Research Notices. Vol. 2014, No. 2,
               pp. 512-550 (2012)
 
-.. [Kwon2014] Jae-Hoon Kwon. `q`-*deformed Clifford algebra and level zero 
+.. [Kwon2014] Jae-Hoon Kwon. `q`-*deformed Clifford algebra and level zero
               fundamental representations of quantum affine algebras*.
               J. Algebra, **399** (2014), pp. 927--947.
               :doi:`10.1016/j.jalgebra.2013.10.026`.
@@ -4952,7 +4958,7 @@ REFERENCES:
 .. [RSS] :wikipedia:`Residual_sum_of_squares`, accessed 13th
          October 2009.
 
-.. [RS2012] G. Rudolph and M. Schmidt, "Differential Geometry and Mathematical Physics. 
+.. [RS2012] G. Rudolph and M. Schmidt, "Differential Geometry and Mathematical Physics.
             Part I. Manifolds, Lie Groups and Hamiltonian Systems", Springer, 2012.
 
 .. [RSW2011] Victor Reiner, Franco Saliola, Volkmar Welker.
