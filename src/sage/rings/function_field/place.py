@@ -1177,6 +1177,8 @@ class PlaceSet(UniqueRepresentation, Parent):
             sage: places(O.ideal(x,y))
             Place (x, y)
         """
+        from .ideal import FunctionFieldIdeal
+
         if isinstance(x, FunctionFieldIdeal) and x.is_prime():
             return self.element_class(self, x)
         else:
