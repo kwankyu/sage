@@ -27,7 +27,8 @@ from cysignals.signals cimport sig_on, sig_off
 
 from sage.libs.gmpxx cimport *
 
-from sage.rings.all import CC, RR
+from sage.rings.real_mpfr import RR
+from sage.rings.cc import CC
 from sage.rings.integer cimport Integer
 from sage.rings.infinity import infinity
 from .congroup_gammaH import is_GammaH
@@ -37,11 +38,7 @@ from .congroup_gamma import is_Gamma
 from .congroup_sl2z import SL2Z
 from sage.modular.cusps import Cusp
 
-from sage.plot.all import Graphics
-from sage.plot.colors import to_mpl_color
 from sage.misc.decorators import options, rename_keyword
-from sage.plot.all import hyperbolic_arc, hyperbolic_triangle, text
-
 from sage.misc.latex import latex
 from sage.misc.lazy_attribute import lazy_attribute
 from sage.misc.cachefunc import cached_method
@@ -571,7 +568,7 @@ cdef class Farey:
         Serialization for pickling::
 
             sage: FareySymbol(Gamma0(4)).__reduce__()
-            (<type 'sage.modular.arithgroup.farey_symbol.Farey'>, ...))
+            (<class 'sage.modular.arithgroup.farey_symbol.Farey'>, ...))
 
         """
         return Farey, (self.group, self.this_ptr.dumps())
@@ -608,14 +605,10 @@ cdef class Farey:
             sage: FareySymbol(Gamma0(11))._latex_(forced_format = 'xymatrix')
             '\\begin{xy}\\xymatrix{& -\\infty \\ar@{-}@/_1pc/[r]_{1}& 0 \\ar@{-}@/_1pc/[r]_{2}& \\frac{1}{3} \\ar@{-}@/_1pc/[r]_{3}& \\frac{1}{2} \\ar@{-}@/_1pc/[r]_{2}& \\frac{2}{3} \\ar@{-}@/_1pc/[r]_{3}& 1 \\ar@{-}@/_1pc/[r]_{1}& \\infty }\\end{xy}'
 
-            sage: if '\\xymatrix' in sage.misc.latex.latex.mathjax_avoid_list():
-            ....:      'xymatrix' not in FareySymbol(Gamma0(11))._latex_()
-            ....: else:
-            ....:     'xymatrix' in FareySymbol(Gamma0(11))._latex_()
+            sage: 'xymatrix' in FareySymbol(Gamma0(11))._latex_()
             True
         """
-        if forced_format == 'plain' or \
-           (forced_format is None and '\\xymatrix' in latex.mathjax_avoid_list()):
+        if forced_format == 'plain':
             # output not using xymatrix
             s = r'\left( -\infty'
             a = [x._latex_() for x in self.fractions()] + ['\infty']
@@ -967,7 +960,10 @@ cdef class Farey:
             Graphics object consisting of 58 graphics primitives
 
         """
-        from sage.plot.colors import rainbow
+        from sage.plot.all import Graphics
+        from sage.plot.colors import rainbow, to_mpl_color
+        from sage.plot.all import hyperbolic_arc, hyperbolic_triangle, text
+
         I = CC(0, 1)
         w = RR(3).sqrt()
         L = 1000

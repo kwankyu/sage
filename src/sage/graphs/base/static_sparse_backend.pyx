@@ -252,6 +252,54 @@ cdef class StaticSparseCGraph(CGraph):
         """
         return self.has_arc_unsafe(u, v)
 
+    cdef inline int next_out_neighbor_unsafe(self, int u, int v, int* l) except -2:
+        """
+        Return the next out-neighbor of ``u`` after ``v``.
+
+        If ``v`` is ``-1`` return the first neighbor of ``u``.
+
+        Return ``-1`` in case there does not exist such an out-neighbor.
+
+        .. NOTE::
+
+            A caller may not alter ``l``.
+            It is used to keep track of the current position.
+        """
+        cdef int degree = out_degree(self.g, u)
+        if v == -1:
+            l[0] = -1
+        for i in range(l[0] + 1, degree):
+            if self.g.neighbors[u][i] != v:
+                l[0] = i
+                return self.g.neighbors[u][i]
+        else:
+            return -1
+
+    cdef inline int next_in_neighbor_unsafe(self, int u, int v, int* l) except -2:
+        """
+        Return the next in-neighbor of ``u`` after ``v``.
+
+        If ``v`` is ``-1`` return the first neighbor of ``u``.
+
+        Return ``-1`` in case there does not exist such an in-neighbor.
+
+        .. NOTE::
+
+            A caller may not alter ``l``.
+            It is used to keep track of the current position.
+        """
+        if not self._directed:
+            return self.next_out_neighbor_unsafe(u, v, l)
+        cdef int degree = out_degree(self.g_rev, u)
+        if v == -1:
+            l[0] = -1
+        for i in range(l[0] + 1, degree):
+            if self.g_rev.neighbors[u][i] != v:
+                l[0] = i
+                return self.g_rev.neighbors[u][i]
+        else:
+            return -1
+
     cdef int out_neighbors_unsafe(self, int u, int *neighbors, int size) except -2:
         cdef int degree = self.g.neighbors[u+1] - self.g.neighbors[u]
         cdef int i
@@ -815,7 +863,7 @@ cdef class StaticSparseBackend(CGraphBackend):
 
     def iterator_verts(self, vertices):
         r"""
-        Return an iterator over the vertices
+        Iterate over the vertices
 
         INPUT:
 
@@ -834,9 +882,15 @@ cdef class StaticSparseBackend(CGraphBackend):
             [1]
         """
         if vertices is None:
-            return iter(self._vertex_to_labels)
-        else:
-            return (x for x in self._vertex_to_labels if x in vertices)
+            for x in self._vertex_to_labels:
+                yield x
+            return
+
+        cdef set V = set(vertices)
+        for x in self._vertex_to_labels:
+            if x in V:
+                yield x
+        return
 
     def num_verts(self):
         r"""
@@ -955,7 +1009,7 @@ cdef class StaticSparseBackend(CGraphBackend):
 
     def iterator_edges(self, vertices, bint labels):
         r"""
-        Return an iterator over the graph's edges.
+        Iterate over the graph's edges.
 
         INPUT:
 
@@ -1242,7 +1296,7 @@ cdef class StaticSparseBackend(CGraphBackend):
 
     def iterator_nbrs(self, v):
         r"""
-        Return an iterator over the neighbors of a vertex
+        Iterate over the neighbors of a vertex
 
         INPUT:
 
@@ -1299,7 +1353,7 @@ cdef class StaticSparseBackend(CGraphBackend):
 
     def iterator_out_nbrs(self, v):
         r"""
-        Return an iterator over the out-neighbors of a vertex
+        Iterate over the out-neighbors of a vertex
 
         INPUT:
 
@@ -1328,7 +1382,7 @@ cdef class StaticSparseBackend(CGraphBackend):
 
     def iterator_in_nbrs(self, v):
         r"""
-        Return an iterator over the in-neighbors of a vertex
+        Iterate over the in-neighbors of a vertex
 
         INPUT:
 
@@ -1425,9 +1479,9 @@ def _run_it_on_static_instead(f):
         sage: Graph.new_graph_method = new_graph_method
         sage: g = Graph(5)
         sage: print("My backend is of type {}".format(type(g._backend)))
-        My backend is of type <type 'sage.graphs.base.sparse_graph.SparseGraphBackend'>
+        My backend is of type <class 'sage.graphs.base.sparse_graph.SparseGraphBackend'>
         sage: g.new_graph_method()
-        My backend is of type <type 'sage.graphs.base.static_sparse_backend.StaticSparseBackend'>
+        My backend is of type <class 'sage.graphs.base.static_sparse_backend.StaticSparseBackend'>
     """
     def same_function_on_static_version(*kwd, **kwds):
         if not isinstance(kwd[0]._backend, StaticSparseBackend):
@@ -1437,4 +1491,3 @@ def _run_it_on_static_instead(f):
             return f(*kwd, **kwds)
 
     return same_function_on_static_version
-

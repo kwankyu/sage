@@ -3,13 +3,13 @@ PolyhedronFaceLattice
 
 This module provides a class that stores and sorts all faces of the polyhedron.
 
-:class:`~sage.geometry.polyhedron.combinatorial_polyhedron.base.CombinatorialPolyhedron` implicitely uses this class to generate
+:class:`~sage.geometry.polyhedron.combinatorial_polyhedron.base.CombinatorialPolyhedron` implicitly uses this class to generate
 the face lattice of a polyhedron.
 
 Terminology in this module:
 
 - Vrep                  -- ``[vertices, rays, lines]`` of the polyhedron.
-- Hrep                  -- inequalities and equalities of the polyhedron.
+- Hrep                  -- inequalities and equations of the polyhedron.
 - Facets                -- facets of the polyhedron.
 - Coatoms               -- the faces from which all others are constructed in
                            the face iterator. This will be facets or Vrep.
@@ -106,29 +106,33 @@ cdef class PolyhedronFaceLattice:
 
     The faces are recorded with :class:`~sage.geometry.polyhedron.combinatorial_polyhedron.face_iterator.FaceIterator` in Bit-representation.
     Once created, all level-sets but the coatoms are sorted with merge sort.
-    Non-trivial incidences of elements whos rank differs by 1 are determined
+    Non-trivial incidences of elements whose rank differs by 1 are determined
     by intersecting with all coatoms. Then each intersection is looked up in
     the sorted level sets.
     """
-    def __init__(self, CombinatorialPolyhedron C):
+    def __cinit__(self, CombinatorialPolyhedron C):
         r"""
         Initialize :class:`PolyhedronFaceLattice`.
 
         See :class:`PolyhedronFaceLattice`.
 
-        EXAMPLES::
+        TESTS:
 
+        Not initializing the class, does not give segmentation fault::
+
+            sage: from sage.geometry.polyhedron.combinatorial_polyhedron.polyhedron_face_lattice import PolyhedronFaceLattice
             sage: P = polytopes.cube()
-            sage: C = CombinatorialPolyhedron(P)
-            sage: C._record_all_faces() # indirect doctests
-            sage: C.face_lattice()
-            Finite lattice containing 28 elements
-
-            sage: TestSuite(sage.geometry.polyhedron.combinatorial_polyhedron.polyhedron_face_lattice.PolyhedronFaceLattice).run()
+            sage: F = PolyhedronFaceLattice.__new__(PolyhedronFaceLattice, P.combinatorial_polyhedron())
+            sage: F.get_face(2, 3)
+            A 2-dimensional face of a 3-dimensional combinatorial polyhedron
         """
+        # Note that all values are set to zero at the time ``__cinit__`` is called:
+        # https://cython.readthedocs.io/en/latest/src/userguide/special_methods.html#initialisation-methods
+        # In particular, ``__dealloc__`` will not do harm in this case.
+
         cdef int i
         cdef size_t j
-        self._mem = MemoryAllocator()
+
         self.dimension = C.dimension()
         self.dual = False
         if C.bitrep_facets().n_faces() > C.bitrep_Vrep().n_faces():
@@ -138,11 +142,12 @@ cdef class PolyhedronFaceLattice:
         cdef FaceIterator face_iter = C._face_iter(self.dual, -2)
         self._Vrep = C.Vrep()
         self._facet_names = C.facet_names()
-        self._equalities = C.equalities()
+        self._equations = C.equations()
+        self._bounded = C.is_bounded()
 
         # copy f_vector for later use
         f_vector = C.f_vector()
-        self.f_vector = <size_t *> self._mem.allocarray(self.dimension + 2, sizeof(size_t))
+        self.f_vector = <size_t *> check_allocarray(self.dimension + 2, sizeof(size_t))
         if self.dual:
             for i in range(-1, self.dimension + 1):
                 self.f_vector[i+1] = f_vector[-i-2]
@@ -161,20 +166,15 @@ cdef class PolyhedronFaceLattice:
             self.coatoms = face_iter.coatoms
 
         cdef size_t n_atoms = self.atoms.n_faces()
-        self.atom_rep = <size_t *> self._mem.allocarray(self.coatoms.n_atoms(), sizeof(size_t))
-        self.coatom_rep = <size_t *> self._mem.allocarray(self.coatoms.n_faces(), sizeof(size_t))
+        self.atom_rep = <size_t *> check_allocarray(self.coatoms.n_atoms(), sizeof(size_t))
+        self.coatom_rep = <size_t *> check_allocarray(self.coatoms.n_faces(), sizeof(size_t))
 
         # Setting up a pointer to raw data of ``faces``:
-        self.faces = <face_list_t*> self._mem.allocarray(self.dimension + 2, sizeof(face_list_t))
+        self.faces = <face_list_t*> check_calloc(self.dimension + 2, sizeof(face_list_t))
+
         for i in range(self.dimension + 2):
-            if i == self.dimension and self.dimension > 0:
-                face_list_shallow_init(self.faces[i],
-                                       self.f_vector[i], self.coatoms.n_atoms(),
-                                       self.coatoms.n_coatoms(), self._mem)
-            else:
-                face_list_init(self.faces[i],
-                               self.f_vector[i], self.coatoms.n_atoms(),
-                               self.coatoms.n_coatoms(), self._mem)
+            face_list_init(self.faces[i], self.f_vector[i],
+                           self.coatoms.n_atoms(), self.coatoms.n_coatoms())
 
         # The universe.
         for j in range(self.coatoms.n_atoms()):
@@ -183,12 +183,10 @@ cdef class PolyhedronFaceLattice:
         # The coatoms.
         if self.dimension > 0:
             # Note that in the other cases, this was fully initialized above.
-            # Not just shallow.
-            face_list_shallow_copy(self.faces[self.dimension], self.coatoms.data)
+            face_list_copy(self.faces[self.dimension], self.coatoms.data)
 
         # Attributes for iterating over the incidences.
-        self.is_incidence_initialized = 0
-        face_init(self.incidence_face, self.coatoms.n_atoms(), self.coatoms.n_coatoms(), self._mem)
+        face_init(self.incidence_face, self.coatoms.n_atoms(), self.coatoms.n_coatoms())
 
         # Adding all faces, using the iterator.
         for i in range(1, self.dimension):
@@ -205,8 +203,44 @@ cdef class PolyhedronFaceLattice:
                 add_face_deep(self.faces[d+1], face_iter.structure.face)
                 d = face_iter.next_dimension()
 
+    def __init__(self, CombinatorialPolyhedron C):
+        r"""
+        Initialize :class:`PolyhedronFaceLattice`.
+
+        See :class:`PolyhedronFaceLattice`.
+
+        EXAMPLES::
+
+            sage: P = polytopes.cube()
+            sage: C = CombinatorialPolyhedron(P)
+            sage: C._record_all_faces() # indirect doctests
+            sage: C.face_lattice()
+            Finite lattice containing 28 elements
+
+            sage: TestSuite(sage.geometry.polyhedron.combinatorial_polyhedron.polyhedron_face_lattice.PolyhedronFaceLattice).run()
+        """
         # Sorting the faces, except for coatoms.
         self._sort()
+
+    def __dealloc__(self):
+        """
+        TESTS::
+
+            sage: from sage.geometry.polyhedron.combinatorial_polyhedron.polyhedron_face_lattice import PolyhedronFaceLattice
+            sage: PolyhedronFaceLattice()  # indirect doctest
+            Traceback (most recent call last):
+            ...
+            TypeError: __cinit__() takes exactly 1 positional argument (0 given)
+        """
+        cdef int i
+        sig_free(self.f_vector)
+        sig_free(self.atom_rep)
+        sig_free(self.coatom_rep)
+        if self.faces:
+            for i in range(self.dimension + 2):
+                face_list_free(self.faces[i])
+            sig_free(self.faces)
+        face_free(self.incidence_face)
 
     cdef int _sort(self) except -1:
         r"""
@@ -220,7 +254,7 @@ cdef class PolyhedronFaceLattice:
             if unlikely(self.f_vector[i] != self.faces[i].n_faces):
                 raise ValueError("``PolyhedronFaceLattice`` does not contain all faces")
 
-        for i in range(0, dim-1):
+        for i in range(dim - 1):
             # Sort each level set, except for the facets, the full- and empty polyhedron.
             sort_faces_list(self.faces[i+1])
 
@@ -477,7 +511,7 @@ cdef class PolyhedronFaceLattice:
                               coatoms.faces[self.incidence_counter_two])
 
             # Get the location of the intersection and
-            # check, wether it is correct.
+            # check whether it is correct.
             location = self.find_face(self.incidence_dim_two, self.incidence_face)
             two[0] = location
 

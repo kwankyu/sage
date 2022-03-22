@@ -274,29 +274,29 @@ def has_equivalent_Jordan_decomposition_at_prime(self, other, p):
                                           * other_jordan[j][1].hasse_invariant__OMeara(2))
 
 
-        ## SANITY CHECK -- check that the scale powers are strictly increasing
+        # SANITY CHECK -- check that the scale powers are strictly increasing
         for i in range(1, len(scale_list)):
-            if scale_list[i-1] >= scale_list[i]:
-                   raise RuntimeError("Oops!  There is something wrong with the Jordan Decomposition -- the given scales are not strictly increasing!")
+            if scale_list[i - 1] >= scale_list[i]:
+                raise RuntimeError("Oops!  There is something wrong with the Jordan Decomposition -- the given scales are not strictly increasing!")
 
-        ## Test O'Meara's two conditions
-        for i in range(t-1):
+        # Test O'Meara's two conditions
+        for i in range(t - 1):
 
-            ## Condition (i): Check that their (unit) ratio is a square (but it suffices to check at most mod 8).
+            # Condition (i): Check that their (unit) ratio is a square (but it suffices to check at most mod 8).
             modulus = norm_list[i] * norm_list[i+1] / (scale_list[i] ** 2)
             if modulus > 8:
-                   modulus = 8
+                modulus = 8
             if (modulus > 1) and (((self_chain_det_list[i] / other_chain_det_list[i]) % modulus) != 1):
                 return False
 
-            ## Check O'Meara's condition (ii) when appropriate
+            # Check O'Meara's condition (ii) when appropriate
             if norm_list[i+1] % (4 * norm_list[i]) == 0:
                 if self_hasse_chain_list[i] * hilbert_symbol(norm_list[i] * other_chain_det_list[i], -self_chain_det_list[i], 2) \
                        != other_hasse_chain_list[i] * hilbert_symbol(norm_list[i], -other_chain_det_list[i], 2):      ## Nipp conditions
                     return False
 
 
-        ## All tests passed for the prime 2.
+        # All tests passed for the prime 2.
         return True
 
     else:
@@ -533,7 +533,7 @@ def is_rationally_isometric(self, other, return_matrix=False):
     F, f_diagonal_transform = other.rational_diagonal_form(True)
 
     # Call the method that does all the work to compute the transformation.
-    transform = _diagonal_isometry(Q,F)
+    transform = _diagonal_isometry(Q, F)
 
     return f_diagonal_transform * transform * q_diagonal_transform.inverse()
 
@@ -543,9 +543,11 @@ def _diagonal_isometry(V, W):
     Given two diagonal, rationally equivalent quadratic forms, computes a
     transition matrix mapping from one to the other.
 
-    Note: This function is an auxilliary method of ``isometry``, which is the
-    method that should be called as it performs error-checking that isn't present
-    in this function.
+    .. NOTE::
+
+        This function is an auxiliary method of ``isometry``, which is
+        the method that should be called as it performs error-checking
+        that is not present in this function.
 
     INPUT:
 

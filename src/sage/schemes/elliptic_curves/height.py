@@ -30,13 +30,22 @@ import numpy
 import math
 import bisect
 
-from sage.rings.all import (ZZ, QQ, RR, RDF, RIF, CC, CDF, CIF, infinity)
+from sage.rings.integer_ring import ZZ
+from sage.rings.rational_field import QQ
+from sage.rings.infinity import infinity
+from sage.rings.cif import CIF
+from sage.rings.cc import CC
+from sage.rings.complex_double import CDF
+from sage.rings.real_double import RDF
+from sage.rings.real_mpfi import RIF
+from sage.rings.real_mpfr import RR
 
-from sage.misc.all import cached_method, cartesian_product_iterator
+from sage.misc.cachefunc import cached_method
+from sage.misc.mrange import cartesian_product_iterator
 from sage.arith.all import lcm, factorial
 from sage.ext.fast_callable import fast_callable
 from sage.functions.log import log, exp
-from sage.symbolic.all import SR
+from sage.symbolic.ring import SR
 
 
 class UnionOfIntervals:
@@ -1061,7 +1070,7 @@ class EllipticCurveCanonicalHeight:
             sage: E.discriminant()/E.minimal_model().discriminant()
             4096
         """
-        from sage.misc.all import prod
+        from sage.misc.misc_c import prod
         if self.K is QQ:
             return prod([p ** (e - self.E.local_data(p).discriminant_valuation()) for p, e in self.E.discriminant().factor()], QQ.one())
 
@@ -1709,7 +1718,7 @@ class EllipticCurveCanonicalHeight:
                     break
         else:
             z = CIF(intersection.innermost_point())
-            if all(wp((k+1)*z) < B for k, B in enumerate(bounds)):
+            if all(wp((k+1)*z).upper() < B for k, B in enumerate(bounds)):
                 return False
 
         # Now try to prove a positive result.
@@ -1719,6 +1728,7 @@ class EllipticCurveCanonicalHeight:
         for B, n in sorted(zip(bounds, ZZ.range(1, k+1))):
 
             T = PeriodicRegion(CDF(1), CDF(tau), vals < B, full=not use_half).expand().refine()
+            B = RIF(B)
             leaning_right = tau.real() / tau.imag() >= 0
             def check_line(z):
                 wpz = wp(z)

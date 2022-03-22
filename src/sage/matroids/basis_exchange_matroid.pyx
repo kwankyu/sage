@@ -139,7 +139,7 @@ cdef class BasisExchangeMatroid(Matroid):
         - ``basis`` -- (default: ``None``) a subset of groundset.
         - ``rank`` -- (default: ``None``) an integer.
 
-        This initializer sets up a correspondance between elements of
+        This initializer sets up a correspondence between elements of
         ``groundset`` and ``range(len(groundset))``. ``BasisExchangeMatroid``
         uses this correspondence for encoding of subsets of the groundset as
         bitpacked sets of integers --- see ``__pack()`` and ``__unpack()``. In
@@ -1055,7 +1055,7 @@ cdef class BasisExchangeMatroid(Matroid):
             i=i+1
 
         cdef bitset_t active_rows
-        bitset_init(active_rows,self.full_rank()+1)
+        bitset_init(active_rows, <mp_bitcnt_t> self.full_rank()+1)
         bitset_set_first_n(active_rows, <mp_bitcnt_t> self.full_rank())
         i=0
         while i>=0:

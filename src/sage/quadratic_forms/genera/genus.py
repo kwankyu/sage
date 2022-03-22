@@ -20,7 +20,8 @@ AUTHORS:
 # ****************************************************************************
 
 from sage.misc.lazy_import import lazy_import
-from sage.misc.all import prod, cached_method
+from sage.misc.misc_c import prod
+from sage.misc.cachefunc import cached_method
 from sage.arith.all import LCM, fundamental_discriminant
 from sage.matrix.matrix_space import MatrixSpace
 from sage.matrix.constructor import matrix
@@ -201,7 +202,7 @@ def _local_genera(p, rank, det_val, max_scale, even):
                 g1 = Genus_Symbol_p_adic_ring(p, g1)
                 symbols.append(g1)
     # for p == 2 we have to include determinant, even/odd, oddity
-    # further restrictions apply and are defered to _blocks
+    # further restrictions apply and are deferred to _blocks
     # (brute force sieving is too slow)
     # TODO: If this is too slow, enumerate only the canonical symbols.
     # as a drawback one has to reconstruct the symbol from the canonical symbol
@@ -374,6 +375,7 @@ def Genus(A, factored_determinant=None):
         local_symbols.append(G)
     return GenusSymbol_global_ring(sig_pair, local_symbols, representative=A)
 
+
 def LocalGenusSymbol(A, p):
     r"""
     Return the local symbol of `A` at the prime `p`.
@@ -512,12 +514,12 @@ def is_2_adic_genus(genus_symbol_quintuple_list):
             if s[3] == 0 or s[2] != s[4]:
                 return False
         if s[1] == 2 and s[3] == 1:
-            if s[2]%8 in (1,7):
-               if not s[4] in (0,2,6):
-                  return False
-            if s[2]%8 in (3,5):
-               if not s[4] in (2,4,6):
-                  return False
+            if s[2] % 8 in (1, 7):
+                if not s[4] in (0, 2, 6):
+                    return False
+            if s[2] % 8 in (3, 5):
+                if not s[4] in (2, 4, 6):
+                    return False
         if (s[1] - s[4])% 2 == 1:
             return False
         if s[3] == 0 and s[4] != 0:
@@ -574,7 +576,7 @@ def canonical_2_adic_compartments(genus_symbol_quintuple_list):
 
     .. NOTE::
 
-        See [Co1999]_ Conway-Sloane 3rd edition, pp. 381-382 for definitions
+        See [CS1999]_ Conway-Sloane 3rd edition, pp. 381-382 for definitions
         and examples.
     """
     symbol = genus_symbol_quintuple_list
@@ -658,7 +660,7 @@ def canonical_2_adic_trains(genus_symbol_quintuple_list, compartments=None):
 
     .. NOTE::
 
-        See [Co1999]_, pp. 381-382 for definitions and examples.
+        See [CS1999]_, pp. 381-382 for definitions and examples.
 
     """
     if compartments is not None:
@@ -748,7 +750,7 @@ def canonical_2_adic_reduction(genus_symbol_quintuple_list):
 
     .. NOTE::
 
-        See [Co1999]_ Conway-Sloane 3rd edition, pp. 381-382 for definitions
+        See [CS1999]_ Conway-Sloane 3rd edition, pp. 381-382 for definitions
         and examples.
 
     .. TODO::
@@ -816,21 +818,20 @@ def basis_complement(B):
     F = B.parent().base_ring()
     m = B.nrows()
     n = B.ncols()
-    C = MatrixSpace(F,n-m,n,sparse=True)(0)
+    C = MatrixSpace(F, n - m, n, sparse=True)(0)
     k = 0
     l = 0
     for i in range(m):
-        for j in range(k,n):
-             if B[i,j] == 0:
-                 C[l,j] = 1
-                 l += 1
-             else:
-                 k = j+1
-                 break
-    for j in range(k,n):
-        C[l+j-k,j] = 1
+        for j in range(k, n):
+            if B[i, j] == 0:
+                C[l, j] = 1
+                l += 1
+            else:
+                k = j + 1
+                break
+    for j in range(k, n):
+        C[l + j - k, j] = 1
     return C
-
 
 
 def signature_pair_of_matrix(A):
@@ -1037,7 +1038,7 @@ def split_odd(A):
     """
     n0 = A.nrows()
     if n0 == 1:
-       return A[0,0], MatrixSpace(IntegerRing(), 0, A.ncols())([])
+        return A[0, 0], MatrixSpace(IntegerRing(), 0, A.ncols())([])
     even, i = is_even_matrix(A)
     R = A.parent().base_ring()
     C = MatrixSpace(R, n0 - 1, n0)(0)
@@ -1065,8 +1066,8 @@ def split_odd(A):
         C = MatrixSpace(R,n0-1,n0)(0)
         for j in range(n0-1):
             if j < i:
-               C[j,j] = 1
-               C[j,i] = -A[j,i] * u
+                C[j,j] = 1
+                C[j,i] = -A[j,i] * u
             else:
                 C[j,j+1] = 1
                 C[j,i] = -A[j+1,i] * u
@@ -1118,11 +1119,10 @@ def trace_diag_mod_8(A):
         2
     """
     tr = 0
-    while A.nrows() > 0:
-       u, A = split_odd(A)
-       tr += u
+    while A.nrows():
+        u, A = split_odd(A)
+        tr += u
     return IntegerRing()(tr)
-
 
 
 def two_adic_symbol(A, val):
@@ -1246,7 +1246,7 @@ class Genus_Symbol_p_adic_ring(object):
     The genus symbol is a list of such symbols (ordered by `m`) for each
     of the Jordan blocks `A_1,...,A_t`.
 
-    Reference: [Co1999]_ Conway and Sloane 3rd edition, Chapter 15, Section 7.
+    Reference: [CS1999]_ Conway and Sloane 3rd edition, Chapter 15, Section 7.
 
 
     .. WARNING::
@@ -1309,7 +1309,7 @@ class Genus_Symbol_p_adic_ring(object):
             True
         """
         if check:
-           pass
+            pass
         self._prime = ZZ(prime)
         self._symbol = symbol
         self._canonical_symbol = None
@@ -1538,7 +1538,7 @@ class Genus_Symbol_p_adic_ring(object):
 
         A `p`-adic square class `r` is called automorphous if it is
         the spinor norm of a proper `p`-adic integral automorphism of this form.
-        These classes form a group. See [Co1999]_ Chapter 15, 9.6 for details.
+        These classes form a group. See [CS1999]_ Chapter 15, 9.6 for details.
 
         OUTPUT:
 
@@ -1548,7 +1548,7 @@ class Genus_Symbol_p_adic_ring(object):
         EXAMPLES:
 
         The following examples are given in
-        [Co1999]_ 3rd edition, Chapter 15, 9.6 pp. 392::
+        [CS1999]_ 3rd edition, Chapter 15, 9.6 pp. 392::
 
             sage: A = matrix.diagonal([3, 16])
             sage: G = Genus(A)
@@ -1750,7 +1750,7 @@ class Genus_Symbol_p_adic_ring(object):
 
         .. NOTE::
 
-            See [Co1999]_ Conway-Sloane 3rd edition, pp. 381-382 for definitions
+            See [CS1999]_ Conway-Sloane 3rd edition, pp. 381-382 for definitions
             and examples.
 
         .. TODO::
@@ -2184,7 +2184,7 @@ class Genus_Symbol_p_adic_ring(object):
 
         REFERENCE:
 
-        [Co1999]_ Conway and Sloane Book, 3rd edition, pp 370-371.
+        [CS1999]_ Conway and Sloane Book, 3rd edition, pp 370-371.
 
         OUTPUT:
 
@@ -2234,17 +2234,17 @@ class Genus_Symbol_p_adic_ring(object):
         """
         p = self._prime
         if self._prime == 2:
-           k = 0
-           for s in self._symbol:
-               if s[0] % 2 == 1 and s[2] in (3, 5):
-                   k += 1
-           return Integer(sum([ s[4] for s in self._symbol ]) + 4*k).mod(8)
+            k = 0
+            for s in self._symbol:
+                if s[0] % 2 == 1 and s[2] in (3, 5):
+                    k += 1
+            return Integer(sum([ s[4] for s in self._symbol ]) + 4*k).mod(8)
         else:
-           k = 0
-           for s in self._symbol:
-               if s[0] % 2 == 1 and s[2] == -1:
-                   k += 1
-           return Integer(sum([ s[1] * (p**s[0]-1) for s in self._symbol ]) + 4*k).mod(8)
+            k = 0
+            for s in self._symbol:
+                if s[0] % 2 == 1 and s[2] == -1:
+                    k += 1
+            return Integer(sum([ s[1] * (p**s[0]-1) for s in self._symbol]) + 4*k).mod(8)
 
     def scale(self):
         r"""
@@ -2697,9 +2697,13 @@ class GenusSymbol_global_ring(object):
             Subgroup of Group of SpinorOperators at primes (2,) generated by (1, 1, f2))
             sage: gram = matrix(ZZ, 4, [3,0,1,-1, 0,3,-1,-1, 1,-1,6,0, -1,-1,0,6])
             sage: genus = Genus(gram)
-            sage: genus._improper_spinor_kernel()
-            (Group of SpinorOperators at primes (2,),
-            Subgroup of Group of SpinorOperators at primes (2,) generated by (1, 1, f2, f1))
+            sage: A, K = genus._improper_spinor_kernel()
+            sage: A
+            Group of SpinorOperators at primes (2,)
+            sage: K
+            Subgroup of Group of SpinorOperators at primes (2,) generated by (1, 1, f2, ...)
+            sage: sorted([K.generators()[3], K.generators()[2] * K.generators()[3]])
+            [f1, f1*f2]
         """
         A, K = self._proper_spinor_kernel()
         if A.order() == K.order():
@@ -2763,16 +2767,20 @@ class GenusSymbol_global_ring(object):
 
             sage: gram = matrix(ZZ, 4, [2,0,1,0, 0,2,1,0, 1,1,5,0, 0,0,0,16])
             sage: genus = Genus(gram)
-            sage: genus._proper_is_improper()
-            (True, [2:1])
+            sage: b, j = genus._proper_is_improper(); b
+            True
+            sage: j.exponents() in ((0, 0), (0, 1))
+            True
 
         This genus consists of only on (improper) class, hence spinor genus and
         improper spinor genus differ::
 
             sage: gram = matrix(ZZ, 4, [3,0,1,-1, 0,3,-1,-1, 1,-1,6,0, -1,-1,0,6])
             sage: genus = Genus(gram)
-            sage: genus._proper_is_improper()
-            (False, [2:7])
+            sage: b, j = genus._proper_is_improper(); b
+            False
+            sage: j.exponents() in ((1, 0), (1, 1))
+            True
         """
         G = self.representative()
         d = self.dimension()
@@ -2897,18 +2905,18 @@ class GenusSymbol_global_ring(object):
             sage: GS.discriminant_form()
             Finite quadratic module over Integer Ring with invariants (2, 2, 4, 24)
             Gram matrix of the quadratic form with values in Q/2Z:
-            [ 1/2    0    0    0]
-            [   0  3/2    0    0]
-            [   0    0  7/4    0]
-            [   0    0    0 7/24]
+            [  1/2     0   1/2     0]
+            [    0   3/2     0     0]
+            [  1/2     0   3/4     0]
+            [    0     0     0 25/24]
             sage: A = matrix.diagonal(ZZ, [1, -4, 6, 8])
             sage: GS = Genus(A)
             sage: GS.discriminant_form()
             Finite quadratic module over Integer Ring with invariants (2, 4, 24)
             Gram matrix of the quadratic form with values in Q/Z:
-            [ 1/2    0    0]
-            [   0  3/4    0]
-            [   0    0 7/24]
+            [ 1/2  1/2    0]
+            [ 1/2  3/4    0]
+            [   0    0 1/24]
         """
         from sage.modules.torsion_quadratic_module import TorsionQuadraticForm
         qL = []

@@ -322,34 +322,38 @@ from textwrap import dedent
 
 from IPython.lib import pretty
 
-import os  # CHECK: possibly unnecessary after removing 4ti2-dependent methods
 from sage.calculus.functional import derivative
 from sage.combinat.integer_vector import integer_vectors_nk_fast_iter
 from sage.combinat.parking_functions import ParkingFunctions
 from sage.combinat.set_partition import SetPartitions
 from sage.combinat.vector_partition import IntegerVectorsIterator
-from sage.env import SAGE_LOCAL
 from sage.functions.log import exp
 from sage.functions.other import binomial
 from sage.geometry.polyhedron.constructor import Polyhedron
-from sage.graphs.all import DiGraph, Graph
+from sage.graphs.graph import Graph
+from sage.graphs.digraph import DiGraph
 from sage.graphs.digraph_generators import digraphs
 from sage.probability.probability_distribution import GeneralDiscreteDistribution
-from sage.homology.simplicial_complex import SimplicialComplex
+from sage.topology.simplicial_complex import SimplicialComplex
 from sage.interfaces.singular import singular
 from sage.matrix.constructor import matrix, identity_matrix
-from sage.misc.all import prod, det, tmp_filename, exists, denominator
+from sage.misc.functional import det, denominator
+from sage.misc.misc import exists
+from sage.misc.misc_c import prod
+from sage.misc.temporary_file import tmp_filename
 from sage.arith.srange import xsrange
 from sage.modules.free_module_element import vector
-from sage.plot.colors import rainbow
-from sage.arith.all import falling_factorial, lcm
-from sage.rings.all import Integer, PolynomialRing, QQ, ZZ
+from sage.misc.lazy_import import lazy_import
+lazy_import("sage.plot.colors", "rainbow")
+from sage.arith.functions import lcm
+from sage.arith.misc import falling_factorial
+from sage.rings.integer import Integer
+from sage.rings.integer_ring import ZZ
+from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
+from sage.rings.rational_field import QQ
 from sage.symbolic.constants import I, pi
 from sage.symbolic.ring import SR
-
-# TODO: remove the following line once 4ti2 functions are removed
-path_to_zsolve = os.path.join(SAGE_LOCAL, 'bin', 'zsolve')
-
+from sage.features.four_ti_2 import FourTi2Executable
 
 
 def _sandpile_help(cls, usage, verbose=True):
@@ -455,7 +459,7 @@ class Sandpile(DiGraph):
             group_gens               -- A minimal list of generators for the sandpile group.
             group_order              -- The size of the sandpile group.
             h_vector                 -- The number of superstable configurations in each degree.
-            help                     -- List of Sandpile-specific methods (not inherited from "Graph").
+            help                     -- List of Sandpile-specific methods (not inherited from ...Graph...).
             hilbert_function         -- The Hilbert function of the homogeneous toppling ideal.
             ideal                    -- The saturated homogeneous toppling ideal.
             identity                 -- The identity configuration.
@@ -589,7 +593,7 @@ class Sandpile(DiGraph):
             sage: G = Sandpile({0:[]}, 0, weighted=False)
             Traceback (most recent call last):
             ...
-            TypeError: __init__() got an unexpected keyword argument 'weighted'
+            TypeError: ...__init__() got an unexpected keyword argument 'weighted'
         """
         # set graph name
         if isinstance(g, Graph) or isinstance(g, DiGraph):
@@ -1030,10 +1034,9 @@ class Sandpile(DiGraph):
             sage: s.out_degree(2)
             3
         """
-        if not v is None:
+        if v is not None:
             return self._out_degrees[v]
-        else:
-            return self._out_degrees
+        return self._out_degrees
 
     def _set_in_degrees(self):
         """
@@ -1070,10 +1073,9 @@ class Sandpile(DiGraph):
             sage: s.in_degree(2)
             3
         """
-        if not v is None:
+        if v is not None:
             return self._in_degrees[v]
-        else:
-            return self._in_degrees
+        return self._in_degrees
 
     def _set_burning_config(self):
         r"""
@@ -1494,12 +1496,12 @@ class Sandpile(DiGraph):
 
             sage: s = sandpiles.Cycle(5)
             sage: s.group_gens()
-            [{1: 1, 2: 1, 3: 1, 4: 0}]
+            [{1: 0, 2: 1, 3: 1, 4: 1}]
             sage: s.group_gens()[0].order()
             5
             sage: s = sandpiles.Complete(5)
             sage: s.group_gens(False)
-            [[2, 2, 3, 2], [2, 3, 2, 2], [3, 2, 2, 2]]
+            [[2, 3, 2, 2], [2, 2, 3, 2], [2, 2, 2, 3]]
             sage: [i.order() for i in s.group_gens()]
             [5, 5, 5]
             sage: s.invariant_factors()
@@ -2790,7 +2792,7 @@ class Sandpile(DiGraph):
             True
         """
         L = self._reduced_laplacian.transpose().dense_matrix()
-        n = self.num_verts()-1;
+        n = self.num_verts() - 1
         D, U, V = L.smith_form()
         self._points = []
         one = [1]*n
@@ -2817,7 +2819,7 @@ class Sandpile(DiGraph):
 
             sage: S = sandpiles.Complete(4)
             sage: S.points()
-            [[1, I, -I], [I, 1, -I]]
+            [[-I, I, 1], [-I, 1, I]]
         """
         return self._points
 
@@ -5015,7 +5017,7 @@ class SandpileDivisor(dict):
             sage: D.is_linearly_equivalent([0,1,1])
             True
             sage: D.is_linearly_equivalent([0,1,1],True)
-            (1, 0, 0)
+            (0, -1, -1)
             sage: v = vector(D.is_linearly_equivalent([0,1,1],True))
             sage: vector(D.values()) - s.laplacian()*v
             (0, 1, 1)
@@ -5122,8 +5124,6 @@ class SandpileDivisor(dict):
 
             This method requires 4ti2.
         """
-        # import os
-
         L = self._sandpile._laplacian.transpose()
         n = self._sandpile.num_verts()
 
@@ -5172,7 +5172,10 @@ class SandpileDivisor(dict):
             sign_file.write('\n')
         # compute
         try:
-            os.system(path_to_zsolve+' -q ' + lin_sys + ' > ' + lin_sys_log)
+            import os
+            import shlex
+            path_to_zsolve = FourTi2Executable('zsolve').absolute_filename()
+            os.system(shlex.quote(path_to_zsolve) + ' -q ' + lin_sys + ' > ' + lin_sys_log)
             # process the results
             zhom_file = open(lin_sys_zhom,'r')
         except IOError:
@@ -6646,8 +6649,8 @@ def wilmes_algorithm(M):
 
         sage: P = matrix([[2,3,-7,-3],[5,2,-5,5],[8,2,5,4],[-5,-9,6,6]])
         sage: wilmes_algorithm(P)
-        [ 1642   -13 -1627    -1]
-        [   -1  1980 -1582  -397]
+        [ 3279   -79 -1599 -1600]
+        [   -1  1539  -136 -1402]
         [    0    -1  1650 -1649]
         [    0     0 -1658  1658]
 

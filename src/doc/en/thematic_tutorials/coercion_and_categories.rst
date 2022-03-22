@@ -108,8 +108,6 @@ This base class provides a lot more methods than a general parent::
      '__ideal_monoid',
      '__iter__',
      '__len__',
-     '__pow__',
-     '__rpow__',
      '__rtruediv__',
      '__rxor__',
      '__truediv__',
@@ -535,9 +533,7 @@ methods are place-holders: There is no default implementation, but it is
     sage: from sage.misc.abstract_method import abstract_methods_of_class
     sage: abstract_methods_of_class(QuotientFields().element_class)['optional']
     ['_add_', '_mul_']
-    sage: abstract_methods_of_class(QuotientFields().element_class)['required'] # py2
-    ['__nonzero__', 'denominator', 'numerator']
-    sage: abstract_methods_of_class(QuotientFields().element_class)['required'] # py3
+    sage: abstract_methods_of_class(QuotientFields().element_class)['required']
     ['__bool__', 'denominator', 'numerator']
 
 Hence, when implementing elements of a quotient field, it is *required* to
@@ -1500,9 +1496,7 @@ The elements have to provide more::
 
     sage: abstract_methods_of_class(QuotientFields().element_class)['optional']
     ['_add_', '_mul_']
-    sage: abstract_methods_of_class(QuotientFields().element_class)['required'] # py2
-    ['__nonzero__', 'denominator', 'numerator']
-    sage: abstract_methods_of_class(QuotientFields().element_class)['required'] # py3
+    sage: abstract_methods_of_class(QuotientFields().element_class)['required']
     ['__bool__', 'denominator', 'numerator']
 
 .. end of output
@@ -1744,7 +1738,7 @@ The new test is inherited from the category. Since ``an_element()`` is returning
 complicated element, ``_test_factorisation`` is a serious test::
 
     sage: P.an_element()._test_factorisation
-    <bound method MyFrac_with_category.element_class._test_factorisation of (x^2):(x^3 + 3*x^2 + 3*x + 1)>
+    <bound method QuotientFieldsWithTest.ElementMethods._test_factorisation of (x^2):(x^3 + 3*x^2 + 3*x + 1)>
 
 .. end of output
 

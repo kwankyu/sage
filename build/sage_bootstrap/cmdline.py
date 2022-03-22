@@ -21,11 +21,7 @@ import logging
 log = logging.getLogger()
 
 
-# Note that argparse is not part of Python 2.6, so we bundle it
-try:
-    import argparse
-except ImportError:
-    from sage_bootstrap.compat import argparse
+import argparse
 
 from sage_bootstrap.app import Application
 
@@ -70,14 +66,12 @@ EXAMPLE:
     $ sage --package list | sort
     4ti2
     arb
-    atlas
     autotools
     [...]
     zn_poly
 
     $ sage --package list :standard: | sort
     arb
-    atlas
     backports_ssl_match_hostname
     [...]
     zn_poly
@@ -207,12 +201,19 @@ def make_parser():
         'package_class', metavar='[package_name|:package_type:]',
         type=str, default=[':all:'], nargs='*',
         help=('package name or designator for all packages of a given type '
-              '(one of :all:, :standard:, :optional:, :experimental:, and :huge:); '
+              '(one of :all:, :standard:, :optional:, and :experimental:); '
               'default: :all:'))
     parser_list.add_argument(
         '--has-file', action='append', default=[], metavar='FILENAME', dest='has_files',
-        help=('only include packages that have this file in their metadata directory'
+        help=('only include packages that have this file in their metadata directory '
               '(examples: SPKG.rst, spkg-configure.m4, distros/debian.txt)'))
+    parser_list.add_argument(
+        '--no-file', action='append', default=[], metavar='FILENAME', dest='no_files',
+        help=('only include packages that do not have this file in their metadata directory '
+              '(examples: huge, patches)'))
+    parser_list.add_argument(
+        '--exclude', action='append', default=[], metavar='PACKAGE_NAME',
+        help='exclude package from list')
     parser_name = subparsers.add_parser(
         'name', epilog=epilog_name,
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -243,6 +244,9 @@ def make_parser():
         'new_version', type=str, help='New version')
     parser_update.add_argument(
         '--url', type=str, default=None, help='Download URL')
+    parser_update.add_argument(
+        '--commit', action="store_true",
+        help='Whether to run "git commit"')
 
     parser_update_latest = subparsers.add_parser(
         'update-latest', epilog=epilog_update_latest,
@@ -250,6 +254,9 @@ def make_parser():
         help='Update a package to the latest version. This modifies the Sage sources.')
     parser_update_latest.add_argument(
         'package_name', type=str, help='Package name (:all: for all packages)')
+    parser_update_latest.add_argument(
+        '--commit', action="store_true",
+        help='Whether to run "git commit"')
 
     parser_download = subparsers.add_parser(
         'download', epilog=epilog_download,
@@ -260,6 +267,9 @@ def make_parser():
     parser_download.add_argument(
         '--allow-upstream', action="store_true",
         help='Whether to fall back to downloading from the upstream URL')
+    parser_download.add_argument(
+        '--on-error', choices=['stop', 'warn'], default='stop',
+        help='What to do if the tarball cannot be downloaded')
 
     parser_upload = subparsers.add_parser(
         'upload', epilog=epilog_upload,
@@ -271,10 +281,13 @@ def make_parser():
     parser_fix_checksum = subparsers.add_parser(
         'fix-checksum', epilog=epilog_fix_checksum,
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        help='Fix the checksum of package.')
+        help='Fix the checksum of normal packages.')
     parser_fix_checksum.add_argument(
-        'package_name', nargs='?', default=None, type=str,
-        help='Package name. Default: fix all packages.')
+        'package_class', metavar='[package_name|:package_type:]',
+        type=str, default=[':all:'], nargs='*',
+        help=('package name or designator for all packages of a given type '
+              '(one of :all:, :standard:, :optional:, and :experimental:); '
+              'default: :all:'))
 
     parser_create = subparsers.add_parser(
         'create', epilog=epilog_create,
@@ -321,7 +334,7 @@ def run():
     if args.subcommand == 'config':
         app.config()
     elif args.subcommand == 'list':
-        app.list_cls(*args.package_class, has_files=args.has_files)
+        app.list_cls(*args.package_class, has_files=args.has_files, no_files=args.no_files, exclude=args.exclude)
     elif args.subcommand == 'name':
         app.name(args.tarball_filename)
     elif args.subcommand == 'tarball':
@@ -329,14 +342,13 @@ def run():
     elif args.subcommand == 'apropos':
         app.apropos(args.incorrect_name)
     elif args.subcommand == 'update':
-        app.update(args.package_name, args.new_version, url=args.url)
+        app.update(args.package_name, args.new_version, url=args.url, commit=args.commit)
     elif args.subcommand == 'update-latest':
-        if args.package_name == ':all:':
-            app.update_latest_all()
-        else:
-            app.update_latest(args.package_name)
+        app.update_latest_cls(args.package_name, commit=args.commit)
     elif args.subcommand == 'download':
-        app.download_cls(args.package_name, args.allow_upstream)
+        app.download_cls(args.package_name,
+                         allow_upstream=args.allow_upstream,
+                         on_error=args.on_error)
     elif args.subcommand == 'create':
         app.create(args.package_name, args.version, args.tarball, args.type, args.url,
                    args.description, args.license, args.upstream_contact,
@@ -344,10 +356,7 @@ def run():
     elif args.subcommand == 'upload':
         app.upload_cls(args.package_name)
     elif args.subcommand == 'fix-checksum':
-        if args.package_name is None:
-            app.fix_all_checksums()
-        else:
-            app.fix_checksum(args.package_name)
+        app.fix_checksum_cls(*args.package_class)
     else:
         raise RuntimeError('unknown subcommand: {0}'.format(args))
 

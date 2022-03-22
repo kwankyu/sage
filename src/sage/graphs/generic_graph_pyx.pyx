@@ -25,14 +25,14 @@ from cysignals.signals cimport sig_on, sig_off
 
 import cython
 
-include "sage/data_structures/binary_matrix.pxi"
+from sage.data_structures.binary_matrix cimport *
 from libc.math cimport sqrt, fabs
 from libc.string cimport memset
+from memory_allocator cimport MemoryAllocator
 
 from sage.cpython.string cimport char_to_str
 from sage.libs.gmp.mpz cimport *
 from sage.misc.prandom import random
-from sage.ext.memory_allocator cimport MemoryAllocator
 from sage.graphs.base.static_sparse_graph cimport short_digraph
 from sage.graphs.base.static_sparse_graph cimport init_short_digraph
 from sage.graphs.base.static_sparse_graph cimport free_short_digraph
@@ -421,7 +421,7 @@ cdef inline double sqrt_approx(double x,double y,double xx,double yy):
         ....:    y = abs(y)
         ....:    return max(x,y) + min(x,y)**2/(2*max(x,y))
 
-        sage: polar_plot([1,lambda x:dist(cos(x),sin(x))], (0, 2*pi))
+        sage: polar_plot([1,lambda x:dist(cos(x),sin(x))], (0, 2*math.pi))
         Graphics object consisting of 2 graphics primitives
     """
     if xx<yy:

@@ -51,7 +51,7 @@ three internal nodes.
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 from .generating_series import OrdinaryGeneratingSeriesRing, ExponentialGeneratingSeriesRing, CycleIndexSeriesRing
-from sage.rings.all import QQ
+from sage.rings.rational_field import QQ
 from sage.structure.sage_object import SageObject
 from sage.misc.cachefunc import cached_method
 from sage.combinat.species.misc import accept_size
@@ -200,8 +200,11 @@ class GenericCombinatorialSpecies(SageObject):
 
     def _setstate_(self, state):
         """
-        This is used during unpickling to recreate this object from the
-        data provided by the ``__getstate__`` method.
+        This reconstructs an object of this class with args and kwds from `state`
+
+        INPUT:
+
+        - `state` -- args and kwds from :meth:`self._getstate_()`
 
         INPUT:
 
@@ -460,7 +463,7 @@ class GenericCombinatorialSpecies(SageObject):
             ...
             ValueError: only positive exponents are currently supported
         """
-        from sage.rings.all import Integer
+        from sage.rings.integer import Integer
         import operator
         n = Integer(n)
         if n <= 0:
@@ -771,7 +774,7 @@ class GenericCombinatorialSpecies(SageObject):
 
             sage: B = species.BinaryTreeSpecies()
             sage: B.algebraic_equation_system()
-            [-node3^2 + node1, -node1 + node3 - z]
+            [-node3^2 + node1, -node1 + node3 + (-z)]
 
         ::
 

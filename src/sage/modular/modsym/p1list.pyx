@@ -30,13 +30,12 @@ ctypedef long long llong
 cdef int c_p1_normalize_int(int N, int u, int v,
                             int* uu, int* vv, int* ss,
                             int compute_s) except -1:
-    """
+    r"""
     Computes the canonical representative of
     `\mathbb{P}^1(\ZZ/N\ZZ)` equivalent to
     `(u,v)` along with a transforming scalar.
 
     INPUT:
-
 
     -  ``N`` - an integer
 
@@ -44,9 +43,7 @@ cdef int c_p1_normalize_int(int N, int u, int v,
 
     -  ``v`` - an integer
 
-
     OUTPUT: If gcd(u,v,N) = 1, then returns
-
 
     -  ``uu`` - an integer
 
@@ -166,7 +163,7 @@ def p1_normalize_int(N, u, v):
 
 def p1list_int(int N):
     r"""
-    Returns a list of the normalized elements of
+    Return a list of the normalized elements of
     `\mathbb{P}^1(\ZZ/N\ZZ)`.
 
     INPUT:
@@ -421,7 +418,7 @@ def p1_normalize_llong(N, u, v):
 
 def p1list_llong(int N):
     r"""
-    Returns a list of the normalized elements of
+    Return a list of the normalized elements of
     `\mathbb{P}^1(\ZZ/N\ZZ)`, as a plain list of
     2-tuples.
 
@@ -482,7 +479,7 @@ def p1list_llong(int N):
 
 def p1list(N):
     """
-    Returns the elements of the projective line modulo `N`,
+    Return the elements of the projective line modulo `N`,
     `\mathbb{P}^1(\ZZ/N\ZZ)`, as a plain list of 2-tuples.
 
     INPUT:
@@ -969,7 +966,7 @@ cdef class P1List(object):
 
     cpdef index(self, int u, int v):
         r"""
-        Returns the index of the class of `(u,v)` in the fixed list
+        Return the index of the class of `(u,v)` in the fixed list
         of representatives of
         `\mathbb{P}^1(\ZZ/N\ZZ)`.
 
@@ -1056,7 +1053,7 @@ cdef class P1List(object):
 
     def index_of_normalized_pair(self, int u, int v):
         r"""
-        Returns the index of the class of `(u,v)` in the fixed list
+        Return the index of the class of `(u,v)` in the fixed list
         of representatives of
         `\mathbb{P}^1(\ZZ/N\ZZ)`.
 
@@ -1102,7 +1099,7 @@ cdef class P1List(object):
 
     def normalize(self, int u, int v):
         r"""
-        Returns a normalised element of `\mathbb{P}^1(\ZZ/N\ZZ)`.
+        Return a normalised element of `\mathbb{P}^1(\ZZ/N\ZZ)`.
 
         INPUT:
 
@@ -1134,7 +1131,7 @@ cdef class P1List(object):
 
     def normalize_with_scalar(self, int u, int v):
         r"""
-        Returns a normalised element of `\mathbb{P}^1(\ZZ/N\ZZ)`, together with
+        Return a normalised element of `\mathbb{P}^1(\ZZ/N\ZZ)`, together with
         the normalizing scalar.
 
         INPUT:
@@ -1163,11 +1160,11 @@ cdef class P1List(object):
         """
         cdef int uu, vv, ss
         self.__normalize(self.__N, u, v, &uu, &vv, &ss, 1)
-        return (uu,vv,ss)
+        return (uu, vv, ss)
 
     def N(self):
         """
-        Returns the level or modulus of this P1List.
+        Return the level or modulus of this P1List.
 
         EXAMPLES::
 
@@ -1277,8 +1274,7 @@ def lift_to_sl2z_llong(llong c, llong d, int N):
 
         sage: from sage.modular.modsym.p1list import lift_to_sl2z_llong
         sage: lift_to_sl2z_llong(2,6,11)
-        [1L, 8L, 2L, 17L] # 32-bit
-        [1, 8, 2, 17]     # 64-bit
+        [1, 8, 2, 17]
         sage: m=Matrix(Integers(),2,2,lift_to_sl2z_llong(2,6,11))
         sage: m
         [ 1  8]
@@ -1330,6 +1326,7 @@ def lift_to_sl2z_llong(llong c, llong d, int N):
 
     return [z2, -z1, c, d]
 
+
 def lift_to_sl2z(c, d, N):
     r"""
     Return a list of Python ints `[a,b,c',d']` that are the entries of a
@@ -1345,8 +1342,7 @@ def lift_to_sl2z(c, d, N):
         sage: lift_to_sl2z(2,3,6)
         [1, 1, 2, 3]
         sage: lift_to_sl2z(2,3,6000000)
-        [1L, 1L, 2L, 3L] # 32-bit
-        [1, 1, 2, 3]     # 64-bit
+        [1, 1, 2, 3]
 
     You will get a ValueError exception if the input is invalid.  Note
     that here gcd(15,6,24)=3::
@@ -1390,6 +1386,6 @@ def _make_p1list(n):
         See https://trac.sagemath.org/25848 for details.
         The projective line over the integers modulo 3
     """
-    from sage.misc.superseded import deprecation
+    from sage.misc.superseded import deprecation_cython as deprecation
     deprecation(25848, '_make_p1list() is deprecated')
     return P1List(n)

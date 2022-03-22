@@ -22,7 +22,8 @@ from sage.categories.category_types import Category_over_base_ring
 from sage.categories.modules_with_basis import ModulesWithBasis
 from sage.structure.element import Element
 from sage.sets.family import Family
-from sage.rings.all import ZZ, QQ
+from sage.rings.integer_ring import ZZ
+from sage.rings.rational_field import QQ
 from sage.matrix.constructor import matrix
 from sage.modules.free_module_element import vector
 from sage.sets.recursively_enumerated_set import RecursivelyEnumeratedSet
@@ -722,7 +723,7 @@ class RootLatticeRealizations(Category_over_base_ring):
             if index_set is None:
                 return []
             return [x for x in self.positive_roots()
-                    if not x in self.positive_roots(index_set)]
+                    if x not in self.positive_roots(index_set)]
 
         @cached_method
         def nonparabolic_positive_root_sum(self, index_set=None):
@@ -1262,13 +1263,14 @@ class RootLatticeRealizations(Category_over_base_ring):
                 # break some doctests
             return self.cache_simple_coroots
 
+        @cached_method
         def alphacheck(self):
             r"""
-            Returns the family `( \alpha^\vee_i)_{i\in I}` of the simple
-            coroots, with the extra feature that,  for simple irreducible
+            Return the family `(\alpha^\vee_i)_{i \in I}` of the simple
+            coroots, with the extra feature that, for simple irreducible
             root systems, `\alpha^\vee_0` yields the coroot associated to
-            the opposite of the highest root (caveat: for non simply laced
-            root systems, this is not the opposite of the highest coroot!)
+            the opposite of the highest root (caveat: for non-simply-laced
+            root systems, this is not the opposite of the highest coroot!).
 
             EXAMPLES::
 
@@ -1292,8 +1294,8 @@ class RootLatticeRealizations(Category_over_base_ring):
 
             """
             if self.root_system.is_finite() and self.root_system.is_irreducible():
-                return Family(self.index_set(), self.simple_coroot, \
-                              hidden_keys = [0], hidden_function = lambda i: - self.cohighest_root())
+                return Family(self.index_set(), self.simple_coroot,
+                              hidden_keys=[0], hidden_function=lambda i: - self.cohighest_root())
             else:
                 return self.simple_coroots()
 
@@ -3464,7 +3466,17 @@ class RootLatticeRealizations(Category_over_base_ring):
                 4
                 sage: len(L.fundamental_weights()[2].orbit())
                 6
+
+            TESTS::
+
+                sage: la = RootSystem(['A',1,1]).weight_lattice().fundamental_weight(0)
+                sage: la.orbit()
+                Traceback (most recent call last):
+                ...
+                ValueError: cannot list an infinite set
             """
+            if not self.parent().cartan_type().is_finite():
+                raise ValueError("cannot list an infinite set")
             return list(self._orbit_iter())
 
         def _dot_orbit_iter(self):
@@ -3831,7 +3843,7 @@ class RootLatticeRealizations(Category_over_base_ring):
                True
             """
             alphacheck = self.parent().simple_coroots()
-            from sage.rings.semirings.non_negative_integer_semiring import NN
+            from sage.rings.semirings.all import NN
             return all(self.inner_product(alphacheck[i]) in NN
                        for i in self.parent().index_set())
 

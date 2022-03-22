@@ -1006,7 +1006,7 @@ class CachedRepresentation(metaclass=ClasscallMetaclass):
             True
         """
         instance = typecall(cls, *args, **options)
-        assert isinstance( instance, cls )
+        assert isinstance(instance, cls)
         if instance.__class__.__reduce__ == CachedRepresentation.__reduce__:
             instance._reduction = (cls, args, options)
             instance.__class__.__getstate__ = CachedRepresentation.__getstate__
@@ -1292,14 +1292,10 @@ class UniqueRepresentation(CachedRepresentation, WithEqualityById):
 
     This nice behaviour is not available when one just uses a factory::
 
-        sage: isinstance(GF(7), GF)  # py2
+        sage: isinstance(GF(7), GF)
         Traceback (most recent call last):
         ...
-        TypeError: isinstance() arg 2 must be a class, type, or tuple of classes and types
-        sage: isinstance(GF(7), GF)  # py3
-        Traceback (most recent call last):
-        ...
-        TypeError: isinstance() arg 2 must be a type or tuple of types
+        TypeError: isinstance() arg 2 must be a type...
 
         sage: isinstance(GF, sage.structure.factory.UniqueFactory)
         True

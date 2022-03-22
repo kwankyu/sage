@@ -52,10 +52,11 @@ Functions
 
 from sage.categories.sets_cat import EmptySetError
 from sage.misc.unknown import Unknown
-from .design_catalog import transversal_design
+from .design_catalog import transversal_design  # type: ignore
 from sage.arith.all import binomial, is_prime_power
 from .group_divisible_designs import GroupDivisibleDesign
 from .designs_pyx import is_pairwise_balanced_design
+
 
 def biplane(n, existence=False):
     r"""
@@ -721,10 +722,10 @@ def BIBD_from_difference_family(G, D, lambd=None, check=True):
     identity, mul, inv = group_law(G)
     bibd = []
     Gset = set(G)
-    p_to_i = {g:i for i,g in enumerate(Gset)}
+    p_to_i = {g: i for i, g in enumerate(Gset)}
     for b in D:
-        b = [G(_) for _ in b]
-        S = block_stabilizer(G,b)
+        b = [G(w) for w in b]
+        S = block_stabilizer(G, b)
         GG = Gset.copy()
         while GG:
             g = GG.pop()
@@ -958,7 +959,7 @@ def PBD_4_5_8_9_12(v, check=True):
         sage: for v in (0,1,4,5,8,9,12,13,16,17,20,21,24,25):
         ....:     _ = PBD_4_5_8_9_12(v)
     """
-    if not v%4 in [0,1]:
+    if v % 4 not in [0, 1]:
         raise ValueError
     if v <= 1:
         PBD = []
@@ -1526,7 +1527,7 @@ class BalancedIncompleteBlockDesign(PairwiseBalancedDesign):
         l = self._lambd
         return "({},{},{})-Balanced Incomplete Block Design".format(v,k,l)
 
-    def arc(self, s=2, solver=None, verbose=0):
+    def arc(self, s=2, solver=None, verbose=0, *, integrality_tolerance=1e-3):
         r"""
         Return the ``s``-arc with maximum cardinality.
 
@@ -1548,16 +1549,20 @@ class BalancedIncompleteBlockDesign(PairwiseBalancedDesign):
         - ``s`` - (default to ``2``) the maximum number of points from the arc
           in each block
 
-        - ``solver`` -- (default: ``None``) Specify a Linear Program (LP)
-          solver to be used. If set to ``None``, the default one is used. For
-          more information on LP solvers and which default solver is used, see
-          the method
-          :meth:`solve <sage.numerical.mip.MixedIntegerLinearProgram.solve>`
-          of the class
-          :class:`MixedIntegerLinearProgram <sage.numerical.mip.MixedIntegerLinearProgram>`.
+        - ``solver`` -- (default: ``None``) Specify a Mixed Integer Linear
+          Programming (MILP) solver to be used. If set to ``None``, the default
+          one is used. For more information on MILP solvers and which default
+          solver is used, see the method :meth:`solve
+          <sage.numerical.mip.MixedIntegerLinearProgram.solve>` of the class
+          :class:`MixedIntegerLinearProgram
+          <sage.numerical.mip.MixedIntegerLinearProgram>`.
 
         - ``verbose`` -- integer (default: ``0``). Sets the level of
           verbosity. Set to 0 by default, which means quiet.
+
+        - ``integrality_tolerance`` -- parameter for use with MILP solvers over
+          an inexact base ring; see
+          :meth:`MixedIntegerLinearProgram.get_values`.
 
         EXAMPLES::
 
@@ -1627,7 +1632,7 @@ class BalancedIncompleteBlockDesign(PairwiseBalancedDesign):
         elif s >= max(self.block_sizes()):
             return self._points[:]
 
-        # linear program
+        # integer linear program
         from sage.numerical.mip import MixedIntegerLinearProgram
 
         p = MixedIntegerLinearProgram(solver=solver)
@@ -1636,6 +1641,8 @@ class BalancedIncompleteBlockDesign(PairwiseBalancedDesign):
         for i in self._blocks:
             p.add_constraint(p.sum(b[k] for k in i) <= s)
         p.solve(log=verbose)
-        return [self._points[i] for (i,j) in p.get_values(b).items() if j == 1]
+
+        values = p.get_values(b, convert=bool, tolerance=integrality_tolerance)
+        return [self._points[i] for (i,j) in values.items() if j]
 
 BIBD = BalancedIncompleteBlockDesign

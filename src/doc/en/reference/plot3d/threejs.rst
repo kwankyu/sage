@@ -27,7 +27,11 @@ and linked directly from the web server.
 Options currently supported by the viewer:
 
 - ``aspect_ratio`` -- (default: [1,1,1]) list or tuple of three numeric
-  values; `z`-aspect is automatically reduced when large but can be overridden
+  values
+
+- ``auto_scaling`` -- (default: [False, False, False]) list or tuple of three booleans;
+  set to True to automatically scale down the corresponding direction if it is too
+  large
 
 - ``axes`` -- (default: False) Boolean determining whether coordinate axes are drawn
 
@@ -42,6 +46,10 @@ Options currently supported by the viewer:
 - ``color`` -- (default: 'blue') color of the 3D object
 
 - ``decimals`` -- (default: 2) integer determining decimals displayed in labels
+
+- ``depth_write`` -- (default: True for opaque surfaces, False for transparent surfaces)
+  whether to write the surface's depth into the depth buffer for the purpose of occluding
+  objects behind it
 
 - ``frame`` -- (default: True) Boolean determining whether frame is drawn
 

@@ -8,10 +8,13 @@ import os
 import sys
 import time
 import json
+
+# Import setuptools before importing distutils, so that setuptools
+# can replace distutils by its own vendored copy.
+import setuptools
+
 from distutils import log
-from distutils.cmd import Command
-from distutils.errors import (DistutilsModuleError,
-                              DistutilsOptionError)
+from setuptools import Command
 
 from sage_setup.util import stable_uniq
 from sage_setup.find import find_extra_files
@@ -130,12 +133,12 @@ class sage_build_cython(Command):
         try:
             self.parallel = int(self.parallel)
         except ValueError:
-            raise DistutilsOptionError("parallel should be an integer")
+            raise ValueError("parallel should be an integer")
 
         try:
             import Cython
         except ImportError:
-            raise DistutilsModuleError(
+            raise ImportError(
                 "Cython must be installed and importable in order to run "
                 "the cythonize command")
 
@@ -230,9 +233,6 @@ class sage_build_cython(Command):
             # use reliably: http://trac.sagemath.org/ticket/17851
             cache=False,
             )
-
-        # Filter out extensions with skip_build=True
-        extensions = [ext for ext in extensions if not getattr(ext, "skip_build", False)]
 
         # We use [:] to change the list in-place because the same list
         # object is pointed to from different places.
