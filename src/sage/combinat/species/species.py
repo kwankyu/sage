@@ -206,10 +206,6 @@ class GenericCombinatorialSpecies(SageObject):
 
         - `state` -- args and kwds from :meth:`self._getstate_()`
 
-        INPUT:
-
-        - `state` -- args and kwds from :meth:`self._getstate_()`
-
         TESTS::
 
             sage: C2 = species.CharacteristicSpecies(2)
