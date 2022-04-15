@@ -2200,6 +2200,35 @@ class SchemeMorphism_polynomial_projective_subscheme_field(SchemeMorphism_polyno
     """
     Morphisms from subschemes of projective spaces defined over fields.
     """
+    def __call__(self, x):
+        """
+        Apply this morphism to the point ``x``.
+
+        INPUT:
+
+        - ``x`` -- a point in the domain of definition
+
+        OUTPUT: a point in the codomain
+
+        TESTS::
+
+            sage: k = GF(11)
+            sage: E = EllipticCurve(k,[1,1])
+            sage: Q = E(6,5)
+            sage: phi = E.isogeny(Q)
+            sage: mor = phi.morphism()
+            sage: mor(0*Q)
+            (0 : 1 : 0)
+            sage: mor(1*Q)
+            (0 : 1 : 0)
+        """
+        for m in self.representatives():
+            try:
+                return super(SchemeMorphism_polynomial_projective_subscheme_field, m).__call__(x)
+            except ValueError:
+                pass
+        raise ValueError('the morphism is not defined at this point')
+
     @cached_method
     def representatives(self):
         """
