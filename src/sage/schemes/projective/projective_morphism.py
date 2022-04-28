@@ -2491,7 +2491,7 @@ class SchemeMorphism_polynomial_projective_subscheme_field(SchemeMorphism_polyno
 
         if not Y.is_projective():
             e = Y.projective_embedding(0)
-            return (e*self).image().affine_patch(0, Y.ambient_space())
+            return (e * self).image().affine_patch(0, Y.ambient_space())
 
         k = self.base_ring()
 
@@ -2516,3 +2516,63 @@ class SchemeMorphism_polynomial_projective_subscheme_field(SchemeMorphism_polyno
 
         gens = [g.subs(dict(zip(R.gens()[n:],T.gens()))) for g in j]
         return AY.subscheme(gens)
+
+    def graph(self):
+        """
+        Return the graph of this morphism.
+
+        The graph is a subscheme of the product of the ambient spaces of the
+        domain and the codomain. If the ambient space of the codomain is an
+        affine space, it is first embedded into a projective space.
+
+        EXAMPLES:
+
+        We get the standard quadratic curve as the graph of a quadratic function
+        of an affine line. ::
+
+            sage: A1.<x> = AffineSpace(1, QQ)
+            sage: X = A1.subscheme(0)  # affine line
+            sage: phi = X.hom([x^2], A1)
+            sage: mor = phi.homogenize(0)
+            sage: G = mor.graph(); G
+            Closed subscheme of Product of projective spaces P^1 x P^1 over Rational Field defined by:
+              x1^2*x2 - x0^2*x3
+            sage: G.affine_patch([0, 0])
+            Closed subscheme of Affine Space of dimension 2 over Rational Field defined by:
+              x0^2 - x1
+        """
+        X = self.domain()
+        Y = self.codomain()
+
+        if not Y.is_projective():
+            e = Y.projective_embedding(0)
+            return (e * self).graph()
+
+        AX = X.ambient_space()
+        AY = Y.ambient_space()
+
+        n = AX.dimension()
+        m = AY.dimension()
+
+        if any(v in AX.variable_names() for v in AY.variable_names()):
+            from sage.schemes.product_projective.space import ProductProjectiveSpaces
+            AXY = ProductProjectiveSpaces([n, m], self.base_ring())
+        else:
+            AXY = AX * AY  # product of projective spaces
+
+        R = AXY.coordinate_ring()
+        F = [R(f) for f in self.defining_polynomials()]
+        g = R.gens()
+
+        # Suppose R = k[x_0, ..., x_n, y_0, ..., y_m]. Then the bihomogeneous
+        # ideal of the graph is
+        #
+        #    I + (y_iF_j - y_jF_i : 0 <= i, j <= m)
+        #
+        # saturated with respect to (F_0, F_1, ..., F_m).
+        n1 = n + 1; m1 = m + 1
+        I = X.defining_ideal().change_ring(R)
+        h = [g[n1 + i] * F[j] - g[n1 + j] * F[i] for i in range(m1) for j in range(i + 1, m1)]
+        J, _ = (I + R.ideal(h)).saturation(R.ideal(F))
+
+        return AXY.subscheme(J)
