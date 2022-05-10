@@ -1048,6 +1048,44 @@ class AlgebraicScheme_subscheme_projective(AlgebraicScheme_subscheme):
         P = self.defining_ideal().hilbert_polynomial()
         return P.leading_coefficient() * P.degree().factorial()
 
+    def degree2(self):
+        X = self
+        S = X.ambient_space().coordinate_ring()
+
+        I = X.defining_ideal()
+        mres = I._singular_().mres(0)
+
+        L = PolynomialRing(ZZ, name='s1')
+        s1 = L.gen()
+
+        bj = [0]
+        data = [bj]
+        for k in range(len(mres)):
+            bi = []
+            mi = mres[k + 1].matrix().sage_matrix(S)
+            m, n = mi.dimensions()
+            for j in range(n):
+                for i in range(m):
+                    if mi[i,j]:
+                        bi.append(mi[i,j].degree() + bj[i])
+                        break
+            data.append(bi)
+            bj = bi
+
+        Kpoly = 0
+        sign = 1
+        for j in range(len(data)):
+            for v in data[j]:
+                Kpoly += sign * L.monomial(v)
+            sign = -sign
+
+        poly = Kpoly.substitute({s1: 1 - s1})
+
+        n = X.ambient_space().dimension()
+        k = X.dimension()
+
+        return poly[n - k]
+
     def intersection_multiplicity(self, X, P):
         r"""
         Return the intersection multiplicity of this subscheme and the subscheme ``X`` at the point ``P``.
