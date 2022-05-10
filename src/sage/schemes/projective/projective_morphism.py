@@ -2545,3 +2545,120 @@ class SchemeMorphism_polynomial_projective_subscheme_field(SchemeMorphism_polyno
 
         gens = [g.subs(dict(zip(R.gens()[n:],T.gens()))) for g in j]
         return AY.subscheme(gens)
+
+    def graph(self):
+        """
+        Return the graph of this morphism.
+
+        The graph is a subscheme of the product of the ambient spaces of the
+        domain and the codomain. If the ambient space of the codomain is an
+        affine space, it is first embedded into a projective space.
+
+        EXAMPLES:
+
+        We get the standard quadratic curve as the graph of a quadratic function
+        of an affine line. ::
+
+            sage: A1.<x> = AffineSpace(1, QQ)
+            sage: X = A1.subscheme(0)  # affine line
+            sage: phi = X.hom([x^2], A1)
+            sage: mor = phi.homogenize(0)
+            sage: G = mor.graph(); G
+            Closed subscheme of Product of projective spaces P^1 x P^1 over Rational Field defined by:
+              x1^2*x2 - x0^2*x3
+            sage: G.affine_patch([0, 0])
+            Closed subscheme of Affine Space of dimension 2 over Rational Field defined by:
+              x0^2 - x1
+        """
+        X = self.domain()
+        Y = self.codomain()
+
+        if not Y.is_projective():
+            e = Y.projective_embedding(0)
+            return (e * self).graph()
+
+        AX = X.ambient_space()
+        AY = Y.ambient_space()
+
+        n = AX.dimension()
+        m = AY.dimension()
+
+        if any(v in AX.variable_names() for v in AY.variable_names()):
+            from sage.schemes.product_projective.space import ProductProjectiveSpaces
+            AXY = ProductProjectiveSpaces([n, m], self.base_ring())
+        else:
+            AXY = AX * AY  # product of projective spaces
+
+        R = AXY.coordinate_ring()
+        F = [R(f) for f in self.defining_polynomials()]
+        g = R.gens()
+
+        # Suppose R = k[x_0, ..., x_n, y_0, ..., y_m]. Then the bihomogeneous
+        # ideal of the graph is
+        #
+        #    I + (y_iF_j - y_jF_i : 0 <= i, j <= m)
+        #
+        # saturated with respect to (F_0, F_1, ..., F_m).
+        n1 = n + 1; m1 = m + 1
+        I = X.defining_ideal().change_ring(R)
+        h = [g[n1 + i] * F[j] - g[n1 + j] * F[i] for i in range(m1) for j in range(i + 1, m1)]
+        J, _ = (I + R.ideal(h)).saturation(R.ideal(F))
+
+        return AXY.subscheme(J)
+
+    def projective_degrees(self):
+        """
+        """
+        X = self.domain()
+        Y = self.codomain()
+
+        if not Y.is_projective():
+            pass
+
+        gn = X.ambient_space().ngens()
+
+        G = self.graph()
+        I = G.defining_ideal()
+        S = G.ambient_space().coordinate_ring()
+        mres = I._singular_().mres(0)
+
+        L = PolynomialRing(ZZ, names='t1,t2')
+
+        def degree(p):
+            for exp in p.exponents():
+                return (sum(exp[:gn]), sum(exp[gn:]))
+            return -1
+
+        bj = [(0,0)]
+        data = [bj]
+        for k in range(1, len(mres) + 1):
+            bi = []
+            ri = mres[k].matrix().sage_matrix(S)
+            m, n = ri.dimensions()
+            for j in range(n):
+                for i in range(m):
+                    if ri[i,j]:
+                        d = degree(ri[i,j])
+                        e = bj[i]
+                        bi.append((d[0] + e[0], d[1] + e[1]))
+                        break
+            data.append(bi)
+            bj = bi
+
+        Kpoly = 0
+        sign = 1
+        for j in range(len(data)):
+            for v in data[j]:
+                Kpoly += sign * L.monomial(*v)
+            sign = -sign
+
+        t1, t2 = L.gens()
+        poly = Kpoly.substitute({t1: 1 - t1, t2: 1 - t2})
+
+        n = X.ambient_space().dimension()
+        m = Y.ambient_space().dimension()
+        k = X.dimension()
+        return [poly.monomial_coefficient(L.monomial(n - i, m - k + i)) for i in range(k + 1)]
+
+    def degree(self):
+        return self.projective_degrees()[0] // self.image().degree()
