@@ -2605,3 +2605,60 @@ class SchemeMorphism_polynomial_projective_subscheme_field(SchemeMorphism_polyno
         J, _ = (I + R.ideal(h)).saturation(R.ideal(F))
 
         return AXY.subscheme(J)
+
+    def projective_degrees(self):
+        """
+        """
+        X = self.domain()
+        Y = self.codomain()
+
+        if not Y.is_projective():
+            pass
+
+        gn = X.ambient_space().ngens()
+
+        G = self.graph()
+        I = G.defining_ideal()
+        S = G.ambient_space().coordinate_ring()
+        mres = I._singular_().mres(0)
+
+        L = PolynomialRing(ZZ, names='t1,t2')
+
+        def degree(p):
+            for exp in p.exponents():
+                return (sum(exp[:gn]), sum(exp[gn:]))
+            return -1
+
+        bj = [(0,0)]
+        data = [bj]
+        for k in range(1, len(mres) + 1):
+            bi = []
+            ri = mres[k].matrix().sage_matrix(S)
+            m, n = ri.dimensions()
+            for j in range(n):
+                for i in range(m):
+                    if ri[i,j]:
+                        d = degree(ri[i,j])
+                        e = bj[i]
+                        bi.append((d[0] + e[0], d[1] + e[1]))
+                        break
+            data.append(bi)
+            bj = bi
+
+        Kpoly = 0
+        sign = 1
+        for j in range(len(data)):
+            for v in data[j]:
+                Kpoly += sign * L.monomial(*v)
+            sign = -sign
+
+        t1, t2 = L.gens()
+        poly = Kpoly.substitute({t1: 1 - t1, t2: 1 - t2})
+
+        n = X.ambient_space().dimension()
+        m = Y.ambient_space().dimension()
+        k = X.dimension()
+        return [poly.monomial_coefficient(L.monomial(n - i, m - k + i)) for i in range(k + 1)]
+
+    def degree(self):
+        return self.projective_degrees()[0] // self.image().degree()
