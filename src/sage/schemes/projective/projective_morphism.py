@@ -2618,9 +2618,9 @@ class SchemeMorphism_polynomial_projective_subscheme_field(SchemeMorphism_polyno
         gn = X.ambient_space().ngens()
 
         G = self.graph()
-        I = G.defining_ideal()
+        I = G.defining_ideal().groebner_basis()
         S = G.ambient_space().coordinate_ring()
-        mres = I._singular_().mres(0)
+        mres = I._singular_().res(0)
 
         L = PolynomialRing(ZZ, names='t1,t2')
 
@@ -2631,7 +2631,7 @@ class SchemeMorphism_polynomial_projective_subscheme_field(SchemeMorphism_polyno
 
         bj = [(0,0)]
         data = [bj]
-        for k in range(1, len(mres) + 1):
+        for k in range(1, len(mres)):
             bi = []
             ri = mres[k].matrix().sage_matrix(S)
             m, n = ri.dimensions()
