@@ -19,6 +19,7 @@ from sage.libs.singular.decl cimport leftv, idhdl, syStrategy, matrix, poly, ide
 from sage.libs.singular.decl cimport ring as singular_ring
 from sage.rings.polynomial.multi_polynomial_libsingular cimport MPolynomialRing_libsingular, MPolynomial_libsingular
 
+cdef new_sage_polynomial(ring,  poly *p)
 cdef poly* access_singular_poly(p) except <poly*> -1
 cdef singular_ring* access_singular_ring(r) except <singular_ring*> -1
 
@@ -26,9 +27,8 @@ cdef class RingWrap:
     cdef singular_ring *_ring
 
 cdef class Resolution:
-    cdef syStrategy _resolution
+    cdef syStrategy *_resolution
     cdef object base_ring
-    cdef object data
 
 cdef class Converter(SageObject):
     cdef leftv *args
@@ -54,7 +54,6 @@ cdef class Converter(SageObject):
     cdef object to_sage_module_element_sequence_destructive(self, ideal *i)
     cdef to_sage_vector_destructive(self, poly *p, free_module = ?)
     cdef to_sage_matrix(self, matrix* mat)
-    cdef to_sage_resolution(self, syStrategy* data)
     cdef to_python(self, leftv* to_convert)
 
 cdef class BaseCallHandler:
