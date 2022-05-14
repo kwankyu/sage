@@ -340,13 +340,9 @@ cdef class Resolution:
            sage: resolution = mres(M, 0)
            sage: del resolution
         """
-        self._resolution.references -= 1
+        if self._resolution != NULL:
+            self._resolution.references -= 1
 
-    def __len__(self):
-        return self._resolution.length
-
-    def __getitem__(self, i):
-        return self.data
 
 cdef leftv* new_leftv(void *data, res_type):
     """
@@ -723,20 +719,20 @@ cdef class Converter(SageObject):
             previous = NULL
             acc = NULL
             first = NULL
-            p_iter=p
+            p_iter = p
             while p_iter != NULL:
                 if p_GetComp(p_iter, self._singular_ring) == i:
-                    p_SetComp(p_iter,0, self._singular_ring)
+                    p_SetComp(p_iter, 0, self._singular_ring)
                     p_Setm(p_iter, self._singular_ring)
                     if acc == NULL:
                         first = p_iter
                     else:
                         acc.next = p_iter
                     acc = p_iter
-                    if p_iter==p:
-                        p=pNext(p_iter)
+                    if p_iter == p:
+                        p = pNext(p_iter)
                     if previous != NULL:
-                        previous.next=pNext(p_iter)
+                        previous.next = pNext(p_iter)
                     p_iter = pNext(p_iter)
                     acc.next = NULL
                 else:
@@ -785,67 +781,6 @@ cdef class Converter(SageObject):
             for j in xrange(ncols):
                 result[i,j] = mat.get(i*ncols+j)
         return result
-
-    cdef to_sage_resolution(self, syStrategy* data):
-        """
-        Convert Singular resolution to Sage resolution.
-        """
-        cdef poly *acc
-        cdef poly *p_iter
-        cdef poly *first
-        cdef poly *previous
-        cdef ideal *mod
-        cdef int rank
-        cdef int i
-        cdef int j
-
-        res_resolution = Resolution(self._sage_ring)
-        res_resolution._resolution = data[0]
-        res_resolution._resolution.references += 1
-
-        mod = <ideal *> &(res_resolution._resolution.fullres[0])
-
-        rank = mod.rank
-        free_module = self._sage_ring ** rank
-        l = []
-
-        for j from 0 <= j < IDELEMS(mod):
-            p = mod.m[j]
-
-            result = []
-            for i from 1 <= i <= rank:
-                previous = NULL
-                acc = NULL
-                first = NULL
-                p_iter=p
-                while p_iter != NULL:
-                    if p_GetComp(p_iter, self._singular_ring) == i:
-                        p_SetComp(p_iter,0, self._singular_ring)
-                        p_Setm(p_iter, self._singular_ring)
-                        if acc == NULL:
-                            first = p_iter
-                        else:
-                            acc.next = p_iter
-                        acc = p_iter
-                        if p_iter==p:
-                            p=pNext(p_iter)
-                        if previous != NULL:
-                            previous.next=pNext(p_iter)
-                        p_iter = pNext(p_iter)
-                        acc.next = NULL
-                    else:
-                        previous = p_iter
-                        p_iter = pNext(p_iter)
-
-                result.append(new_sage_polynomial(self._sage_ring, first))
-            res = free_module(result)
-
-            #mod.m[j] = NULL # save it from getting freed
-            l.append(res)
-
-        res_resolution.data = Sequence(l, check=False, immutable=True)
-
-        return res_resolution
 
     cdef leftv *append_polynomial(self, p) except NULL:
         """
@@ -961,7 +896,7 @@ cdef class Converter(SageObject):
         Append free resolution ``r`` to the list.
         """
         resolution._resolution.references += 1
-        return self._append(<void*> &resolution._resolution, RESOLUTION_CMD)
+        return self._append(<void*> resolution._resolution, RESOLUTION_CMD)
 
     cdef leftv *append_intmat(self, a) except NULL:
         """
@@ -1037,8 +972,7 @@ cdef class Converter(SageObject):
             ret = char_to_str(<char *>to_convert.data)
             return ret
         elif rtyp == VECTOR_CMD:
-            result = self.to_sage_vector_destructive(
-                <poly *> to_convert.data)
+            result = self.to_sage_vector_destructive(<poly *> to_convert.data)
             to_convert.data = NULL
             return result
         elif rtyp == RING_CMD or rtyp==QRING_CMD:
@@ -1049,19 +983,17 @@ cdef class Converter(SageObject):
             singular_list = <lists*> to_convert.data
             ret = []
             for i in xrange(singular_list.nr+1):
-                ret.append(
-                    self.to_python(
-                        &(singular_list.m[i])))
+                ret.append(self.to_python(&(singular_list.m[i])))
             return ret
         elif rtyp == MODUL_CMD:
-            return self.to_sage_module_element_sequence_destructive(
-                <ideal*> to_convert.data
-            )
+            return self.to_sage_module_element_sequence_destructive(<ideal*> to_convert.data)
         elif rtyp == INTMAT_CMD:
-            return self.to_sage_integer_matrix(
-                <intvec*> to_convert.data)
+            return self.to_sage_integer_matrix(<intvec*> to_convert.data)
         elif rtyp == RESOLUTION_CMD:
-            return self.to_sage_resolution((<syStrategy *> to_convert.data))
+            res_resolution = Resolution(self._sage_ring)
+            res_resolution._resolution = <syStrategy *> to_convert.data
+            res_resolution._resolution.references += 1
+            return res_resolution
         elif rtyp == NONE:
             return None
         else:
