@@ -2660,5 +2660,45 @@ class SchemeMorphism_polynomial_projective_subscheme_field(SchemeMorphism_polyno
         k = X.dimension()
         return [poly.monomial_coefficient(L.monomial(n - i, m - k + i)) for i in range(k + 1)]
 
+    def projective_degrees2(self):
+        """
+
+        EXAMPLES::
+
+            sage: k = GF(11)
+            ....: E = EllipticCurve(k,[1,1])
+            ....: Q = E(6,5)
+            ....: phi = E.isogeny(kernel=Q)
+            ....: mor = phi.morphism()
+            sage: mor.projective_degrees()
+        """
+        X = self.domain()
+        Y = self.codomain()
+
+        if not Y.is_projective():
+            pass
+
+        gn = X.ambient_space().ngens()
+
+        G = self.graph()
+        I = G.defining_ideal()
+
+        from sage.modules.resolutions.multi_graded import multi_graded_free_resolution
+        from sage.modules.free_module_element import vector
+
+        degrees = 3*[vector([1,0])] + 3*[vector([0,1])]
+        res = multi_graded_free_resolution(I, degrees)
+        Kpoly = res.K_polynomial()
+
+        L = Kpoly.parent()
+        t1, t2 = L.gens()
+        poly = Kpoly.substitute({t1: 1 - t1, t2: 1 - t2})
+
+        n = X.ambient_space().dimension()
+        m = Y.ambient_space().dimension()
+        k = X.dimension()
+        return [poly.monomial_coefficient(L.monomial(n - i, m - k + i)) for i in range(k + 1)]
+
+
     def degree(self):
         return self.projective_degrees()[0] // self.image().degree()
