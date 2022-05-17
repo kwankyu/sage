@@ -689,8 +689,6 @@ cdef class Converter(SageObject):
         Convert singular matrix to matrix over the polynomial ring.
         """
         from sage.matrix.constructor import Matrix
-        #cdef ring *singular_ring = (<MPolynomialRing_libsingular>\
-        #    self._sage_ring)._ring
         ncols = mat.ncols
         nrows = mat.nrows
         result = Matrix(self._sage_ring, nrows, ncols)
@@ -702,7 +700,6 @@ cdef class Converter(SageObject):
         return result
 
     cdef to_sage_vector_destructive(self, poly *p, free_module = None):
-        #cdef ring *r=self._ring._ring
         cdef int rank
         if free_module:
             rank = free_module.rank()
@@ -753,7 +750,6 @@ cdef class Converter(SageObject):
         - ``r`` -- a SINGULAR ring
         - ``sage_ring`` -- a Sage ring matching r
         """
-        #cdef MPolynomialRing_libsingular sage_ring = self._ring
         cdef int j
         cdef int rank=i.rank
         free_module = self._sage_ring ** rank
@@ -761,7 +757,7 @@ cdef class Converter(SageObject):
 
         for j from 0 <= j < IDELEMS(i):
             p = self.to_sage_vector_destructive(i.m[j], free_module)
-            i.m[j]=NULL#save it from getting freed
+            i.m[j]=NULL  # save it from getting freed
             l.append( p )
 
         return Sequence(l, check=False, immutable=True)
@@ -956,8 +952,7 @@ cdef class Converter(SageObject):
             # FIXME
             res_poly = MPolynomial_libsingular(self._sage_ring)
             res_poly._poly = <poly*>to_convert.data
-            to_convert.data = NULL
-            # prevent it getting free, when cleaning the leftv
+            to_convert.data = NULL  # prevent it getting free, when cleaning the leftv
             return res_poly
         elif rtyp == INT_CMD:
             return <int><long>to_convert.data
