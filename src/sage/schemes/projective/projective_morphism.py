@@ -45,6 +45,7 @@ AUTHORS:
 
 - Kwankyu Lee (2020-02): added indeterminacy_locus() and image()
 
+- Kwankyu Lee (2022-05): added graph(), projective_degrees(), and degree()
 """
 
 # ****************************************************************************
@@ -59,21 +60,14 @@ AUTHORS:
 #                  http://www.gnu.org/licenses/
 # ****************************************************************************
 
-
 import sys
-
 from sage.arith.all import gcd, lcm
-
 from sage.interfaces.singular import singular
-
 from sage.misc.misc_c import prod
 from sage.misc.cachefunc import cached_method
 from sage.misc.lazy_attribute import lazy_attribute
-
 from sage.ext.fast_callable import fast_callable
-
 from sage.calculus.functions import jacobian
-
 import sage.rings.abc
 from sage.rings.integer import Integer
 from sage.rings.algebraic_closure_finite_field import AlgebraicClosureFiniteField_generic
@@ -87,9 +81,9 @@ from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
 from sage.rings.qqbar import QQbar, number_field_elements_from_algebraics
 from sage.rings.quotient_ring import QuotientRing_generic
 from sage.rings.rational_field import QQ
-
+from sage.modules.resolutions.multi_graded import multi_graded_free_resolution
+from sage.modules.free_module_element import vector
 from sage.schemes.generic.morphism import SchemeMorphism_polynomial
-
 from sage.categories.finite_fields import FiniteFields
 from sage.categories.number_fields import NumberFields
 from sage.categories.homset import Hom, End
@@ -2608,97 +2602,58 @@ class SchemeMorphism_polynomial_projective_subscheme_field(SchemeMorphism_polyno
 
     def projective_degrees(self):
         """
-        """
-        X = self.domain()
-        Y = self.codomain()
-
-        if not Y.is_projective():
-            pass
-
-        gn = X.ambient_space().ngens()
-
-        G = self.graph()
-        I = G.defining_ideal().groebner_basis()
-        S = G.ambient_space().coordinate_ring()
-        mres = I._singular_().res(0)
-
-        L = PolynomialRing(ZZ, names='t1,t2')
-
-        def degree(p):
-            for exp in p.exponents():
-                return (sum(exp[:gn]), sum(exp[gn:]))
-            return -1
-
-        bj = [(0,0)]
-        data = [bj]
-        for k in range(1, len(mres)):
-            bi = []
-            ri = mres[k].matrix().sage_matrix(S)
-            m, n = ri.dimensions()
-            for j in range(n):
-                for i in range(m):
-                    if ri[i,j]:
-                        d = degree(ri[i,j])
-                        e = bj[i]
-                        bi.append((d[0] + e[0], d[1] + e[1]))
-                        break
-            data.append(bi)
-            bj = bi
-
-        Kpoly = 0
-        sign = 1
-        for j in range(len(data)):
-            for v in data[j]:
-                Kpoly += sign * L.monomial(*v)
-            sign = -sign
-
-        t1, t2 = L.gens()
-        poly = Kpoly.substitute({t1: 1 - t1, t2: 1 - t2})
-
-        n = X.ambient_space().dimension()
-        m = Y.ambient_space().dimension()
-        k = X.dimension()
-        return [poly.monomial_coefficient(L.monomial(n - i, m - k + i)) for i in range(k + 1)]
-
-    def projective_degrees2(self):
-        """
+        Return the projective degrees of this rational map.
 
         EXAMPLES::
 
             sage: k = GF(11)
-            ....: E = EllipticCurve(k,[1,1])
-            ....: Q = E(6,5)
-            ....: phi = E.isogeny(kernel=Q)
-            ....: mor = phi.morphism()
+            sage: E = EllipticCurve(k,[1,1])
+            sage: Q = E(6,5)
+            sage: phi = E.multiplication_by_m_isogeny(2)
+            sage: mor = phi.morphism()
             sage: mor.projective_degrees()
+            [12, 3]
         """
         X = self.domain()
         Y = self.codomain()
 
-        if not Y.is_projective():
-            pass
+        if not Y.is_projective():  # Y is affine
+            e = Y.projective_embedding(0)
+            return (e * self).projective_degrees()
 
-        gn = X.ambient_space().ngens()
+        AX = X.ambient_space()
+        AY = Y.ambient_space()
+        xn = AX.ngens()
+        yn = AY.ngens()
 
         G = self.graph()
-        I = G.defining_ideal()
+        I = G.defining_ideal()  # a bihomogeneous ideal
 
-        from sage.modules.resolutions.multi_graded import multi_graded_free_resolution
-        from sage.modules.free_module_element import vector
-
-        degrees = 3*[vector([1,0])] + 3*[vector([0,1])]
+        degrees = xn*[vector([1,0])] + yn*[vector([0,1])]
         res = multi_graded_free_resolution(I, degrees)
-        Kpoly = res.K_polynomial()
+        kpoly = res.K_polynomial()
 
-        L = Kpoly.parent()
+        L = kpoly.parent()
         t1, t2 = L.gens()
         poly = Kpoly.substitute({t1: 1 - t1, t2: 1 - t2})
 
-        n = X.ambient_space().dimension()
-        m = Y.ambient_space().dimension()
+        n = AX.dimension()
+        m = AY.dimension()
         k = X.dimension()
         return [poly.monomial_coefficient(L.monomial(n - i, m - k + i)) for i in range(k + 1)]
 
-
     def degree(self):
+        """
+        Return the degree of this rational map.
+
+        EXAMPLES::
+
+            sage: k = GF(11)
+            sage: E = EllipticCurve(k,[1,1])
+            sage: Q = E(6,5)
+            sage: phi = E.multiplication_by_m_isogeny(2)
+            sage: mor = phi.morphism()
+            sage: mor.degree()
+            4
+        """
         return self.projective_degrees()[0] // self.image().degree()
