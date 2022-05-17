@@ -76,13 +76,4 @@ Finitely presented graded modules
    sage/modules/fp_graded/steenrod/module
    sage/modules/fp_graded/steenrod/morphism
 
-Resolutions
-===========
-
-.. toctree::
-   :maxdepth: 2
-
-   sage/modules/resolutions/free
-   sage/modules/resolutions/graded
-
 .. include:: ../footer.txt
