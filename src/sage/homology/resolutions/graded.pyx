@@ -70,9 +70,11 @@ class GradedFreeResolution(FreeResolution):
         sage: I = P.ideal([y*w - z^2, -x*w + y*z, x*z - y^2])
         sage: r = GradedFreeResolution(I)
         sage: r
-        S(-(0)) <- S(-(2))⊕S(-(2))⊕S(-(2)) <- S(-(3))⊕S(-(3))
+        S(-(3))⊕S(-(3)) <-- S(-(2))⊕S(-(2))⊕S(-(2)) <-- S(-(3))⊕S(-(3)) <-- 0
+        sage: len(r)
+        2
     """
-    def __init__(self, ideal, degrees=None, algorithm='shreyer'):
+    def __init__(self, ideal, degrees=None, name='S', algorithm='shreyer'):
         cdef int i, j, k, ncols, nrows
         cdef list res_betti, prev_grade, grade
 
@@ -80,15 +82,17 @@ class GradedFreeResolution(FreeResolution):
         ng = S.ngens()
 
         if degrees is None:
-            degrees = ng*[vector([1])]  # standard grading
+            degrees = ng*[1]  # standard grading
 
         if len(degrees) != ng:
             raise ValueError('the length of degrees does not match the number of generators')
 
         if degrees[0] in ZZ:
             zero_deg = 0
-        else:  # degrees are integer vectors
+            multigrade = False
+        else:   # degrees are integer vectors
             zero_deg = degrees[0].parent().zero()
+            multigrade = True
 
         # This ensures the first component of the Singular resolution to be a
         # module, like the later components. This is important when the
@@ -137,6 +141,11 @@ class GradedFreeResolution(FreeResolution):
             res_betti.append(grade)
             prev_grade = grade
 
+        M = S.quotient(ideal)
+        d0 = M.coerce_map_from(S)
+
+        super().__init__([d0] + res_mats, name=name)
+
         self.base = (S, zero_deg)
         self.ideal = ideal
         self.degrees = degrees
@@ -144,25 +153,44 @@ class GradedFreeResolution(FreeResolution):
         self.res_mats = res_mats
         self.res_degs = res_degs
         self.res_betti = res_betti
+        self.multigrade = multigrade
 
-    def __repr__(self):
-        S, shift = self.base
-        s = f'S(-{shift})'
-        for i in range(self.length):
-            shifts = self.res_betti[i]
+    def _repr_module(self, i):
+        """
+        EXAMPLES::
+
+            sage: from sage.homology.resolutions.graded import GradedFreeResolution
+            sage: P.<x,y,z,w> = PolynomialRing(QQ)
+            sage: I = P.ideal([y*w - z^2, -x*w + y*z, x*z - y^2])
+            sage: r = GradedFreeResolution(I)
+            sage: r._repr_module(0)
+            'S(-(3))⊕S(-(3))'
+            sage: r._repr_module(1)
+            'S(-(2))⊕S(-(2))⊕S(-(2))'
+            sage: r._repr_module(2)
+            'S(-(3))⊕S(-(3))'
+            sage: r._repr_module(3)
+            '0'
+        """
+        if i == 0:
+            S, shift = self.base
+            m = f'{self._name}(-{shift})'
+        elif i > self.length:
+            m = '0'
+        else:
+            shifts = self.res_betti[i - 1]
             if len(shifts) > 0:
                 for j in range(len(shifts)):
                     shift = shifts[j]
                     if j == 0:
-                        m = f'S(-{shift})'
+                        m = f'{self._name}(-{shift})'
                     else:
-                        m += f'\u2295S(-{shift})'
+                        m += f'\u2295{self._name}(-{shift})'
             else:
                 m = '0'
-            s += ' <- ' + m
-        return s
+        return m
 
-    def __len__(self):
+    def shifts(self, i):
         """
         EXAMPLES::
 
@@ -170,94 +198,26 @@ class GradedFreeResolution(FreeResolution):
             sage: P.<x,y,z,w> = PolynomialRing(QQ)
             sage: I = P.ideal([y*w - z^2, -x*w + y*z, x*z - y^2])
             sage: r = GradedFreeResolution(I)
-            sage: len(r)
-            2
-        """
-        return self.length
-
-    def __getitem__(self, i):
-        """
-        EXAMPLES::
-
-            sage: from sage.homology.resolutions.graded import GradedFreeResolution
-            sage: P.<x,y,z,w> = PolynomialRing(QQ)
-            sage: I = P.ideal([y*w - z^2, -x*w + y*z, x*z - y^2])
-            sage: r = GradedFreeResolution(I)
-            sage: r[0]
-            (Ambient free module of rank 1 over the integral domain Multivariate Polynomial Ring in x, y, z, w over Rational Field,
-             [(0)])
-            sage: r[1]
-            (Ambient free module of rank 3 over the integral domain Multivariate Polynomial Ring in x, y, z, w over Rational Field,
-             [(2), (2), (2)])
-            sage: r[2]
-            (Ambient free module of rank 2 over the integral domain Multivariate Polynomial Ring in x, y, z, w over Rational Field,
-             [(3), (3)])
-            sage: r[3]
-            (Ambient free module of rank 0 over the integral domain Multivariate Polynomial Ring in x, y, z, w over Rational Field,
-             [])
-        """
-        S, zero_deg = self.base
-        if i == 0:
-            shifts = [zero_deg]
-        elif i > 0:
-            if i > self.length:
-                shifts = []
-            else:
-                shifts = self.res_betti[i - 1]
-        else:
-            raise IndexError('invalid index')
-
-        return S**len(shifts), shifts
-
-    def matrix(self, i):
-        """
-        EXAMPLES::
-
-            sage: from sage.homology.resolutions.graded import GradedFreeResolution
-            sage: P.<x,y,z,w> = PolynomialRing(QQ)
-            sage: I = P.ideal([y*w - z^2, -x*w + y*z, x*z - y^2])
-            sage: r = GradedFreeResolution(I)
-        """
-        if i <= 0 or i > self.length:
-            raise IndexError(f'valid indices are from 0 to {self.length}')
-
-        return self.res_mats[i - 1]
-
-    def map(self, i):
-        """
-        EXAMPLES::
-
-            sage: from sage.homology.resolutions.graded import GradedFreeResolution
-            sage: P.<x,y,z,w> = PolynomialRing(QQ)
-            sage: I = P.ideal([y*w - z^2, -x*w + y*z, x*z - y^2])
-            sage: r = GradedFreeResolution(I)
-            sage: r.map(1)
-            Free module morphism defined by the matrix
-            [z^2 - y*w]
-            [y*z - x*w]
-            [y^2 - x*z]
-            Domain: Ambient free module of rank 3 over the integral domain Multivariate Polynomial Ring in x, y, z, w over Rational Field
-            Codomain: Ambient free module of rank 1 over the integral domain Multivariate Polynomial Ring in x, y, z, w over Rational Field
-            sage: r.map(2)
-            Free module morphism defined by the matrix
-            [-y  z -w]
-            [ x -y  z]
-            Domain: Ambient free module of rank 2 over the integral domain Multivariate Polynomial Ring in x, y, z, w over Rational Field
-            Codomain: Ambient free module of rank 3 over the integral domain Multivariate Polynomial Ring in x, y, z, w over Rational Field
-            sage: r.map(3)
-            Free module morphism defined by the matrix
+            sage: r.shifts(0)
+            [0]
+            sage: r.shifts(1)
+            [2, 2, 2]
+            sage: r.shifts(2)
+            [3, 3]
+            sage: r.shifts(3)
             []
-            Domain: Ambient free module of rank 0 over the integral domain Multivariate Polynomial Ring in x, y, z, w over Rational Field
-            Codomain: Ambient free module of rank 2 over the integral domain Multivariate Polynomial Ring in x, y, z, w over Rational Field
         """
-        source, _ = self[i]
-        target, _ = self[i - 1]
-        if i <= 0:
+        if i < 0:
             raise IndexError('invalid index')
-        elif i <= self.length:
-            return source.hom(self.matrix(i).transpose(), target)
+        elif i == 0:
+            _, zero_deg = self.base
+            shifts = [zero_deg]
+        elif i > self.length:
+            shifts = []
         else:
-            return source.hom(0, target)
+            shifts = self.res_betti[i - 1]
+
+        return shifts
 
     def K_polynomial(self):
         """
@@ -267,15 +227,24 @@ class GradedFreeResolution(FreeResolution):
             sage: P.<x,y,z,w> = PolynomialRing(QQ)
             sage: I = P.ideal([y*w - z^2, -x*w + y*z, x*z - y^2])
             sage: r = GradedFreeResolution(I)
+            sage: r.K_polynomial()
+            2*t^3 - 3*t^2 + 1
         """
-        n = self.degrees[0].degree()
+        if self.multigrade:
+            n = self.degrees[0].degree()
+        else:
+            n = 1
+
         L = LaurentPolynomialRing(ZZ, 't', n)
 
         Kpoly = 1
         sign = -1
         for j in range(self.length):
             for v in self.res_betti[j]:
-                Kpoly += sign * L.monomial(*list(v))
+                if self.multigrade:
+                    Kpoly += sign * L.monomial(*list(v))
+                else:
+                    Kpoly += sign * L.monomial(v)
             sign = -sign
 
         return Kpoly
@@ -330,10 +299,9 @@ cdef to_sage_resolution(Resolution res, degrees):
             break
         rank = mod.rank
         free_module = sage_ring ** rank
-        l = []
 
         nrows = rank
-        ncols = IDELEMS(mod)
+        ncols = mod.ncols # IDELEMS(mod)
 
         mat = Matrix(sage_ring, nrows, ncols)
         matdegs = []
@@ -385,7 +353,7 @@ cdef to_sage_resolution(Resolution res, degrees):
             if zero_mat:
                 zero_mat = all(d is None for d in degs)
 
-        # Singular sometimes leaves zero matrix in the resolution. We can finish
+        # Singular sometimes leaves zero matrix in the resolution. We can stop
         # when one is seen.
         if zero_mat:
             break

@@ -92,8 +92,8 @@ Discrete Mathematics
 * :doc:`Symbolic Logic <logic/index>`
 * :doc:`SAT solvers <sat/index>`
 
-Geometry, Topology
-------------------
+Geometry and Topology
+---------------------
 
 * :doc:`Euclidean Spaces and Vector Calculus <euclidean_spaces/index>`
 * :doc:`Combinatorial and Discrete Geometry <discrete_geometry/index>`
