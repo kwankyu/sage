@@ -78,7 +78,13 @@ class GradedFreeResolution(FreeResolution):
         cdef int i, j, k, ncols, nrows
         cdef list res_betti, prev_grade, grade
 
-        S = ideal.ring()
+        from sage.rings.ideal import Ideal_generic
+
+        if isinstance(ideal, Ideal_generic):
+            S = ideal.ring()
+        else:
+            S = ideal.base_ring()
+
         ng = S.ngens()
 
         if degrees is None:
@@ -97,8 +103,12 @@ class GradedFreeResolution(FreeResolution):
         # This ensures the first component of the Singular resolution to be a
         # module, like the later components. This is important when the
         # components are converted to Sage modules.
-        module = singular_function("module")
-        mod = module(ideal)
+        if isinstance(ideal, Ideal_generic):
+            module = singular_function("module")
+            mod = module(ideal)
+        else:
+            module = singular_function("module")
+            mod = module(ideal)
 
         if algorithm == 'minimal':
             mres = singular_function('mres')  # syzygy method
@@ -141,10 +151,12 @@ class GradedFreeResolution(FreeResolution):
             res_betti.append(grade)
             prev_grade = grade
 
-        M = S.quotient(ideal)
-        d0 = M.coerce_map_from(S)
-
-        super().__init__([d0] + res_mats, name=name)
+        if isinstance(ideal, Ideal_generic):
+            M = S.quotient(ideal)
+            d0 = M.coerce_map_from(S)
+            super().__init__([d0] + res_mats, name=name)
+        else:
+            super().__init__(res_mats, name=name)
 
         self.base = (S, zero_deg)
         self.ideal = ideal

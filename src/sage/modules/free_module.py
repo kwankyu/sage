@@ -860,7 +860,7 @@ done from the right side.""")
             except Exception:
                 pass
 
-        super(FreeModule_generic, self).__init__(base_ring, category=category)
+        super().__init__(base_ring, category=category)
         self.__coordinate_ring = coordinate_ring
         self.__uses_ambient_inner_product = True
         self.__rank = rank
@@ -2540,7 +2540,7 @@ done from the right side.""")
         """
         return bool(self.rank())
 
-    
+
 
     def uses_ambient_inner_product(self):
         r"""
@@ -2748,7 +2748,157 @@ done from the right side.""")
         else:
             return macaulay2(self.base_ring())**self.rank()
 
-class FreeModule_generic_pid(FreeModule_generic):
+
+class FreeModule_generic_domain(FreeModule_generic):
+    def span(self, gens, base_ring=None, check=True):
+        """
+        Return the R-span of the given list of gens, where R = base_ring.
+        The default R is the base ring of self. Note that this span need
+        not be a submodule of self, nor even of the ambient space. It must,
+        however, be contained in the ambient vector space, i.e., the
+        ambient space tensored with the fraction field of R.
+
+        EXAMPLES::
+
+            sage: V = FreeModule(ZZ,3)
+            sage: W = V.submodule([V.gen(0)])
+            sage: W.span([V.gen(1)])
+            Free module of degree 3 and rank 1 over Integer Ring
+            Echelon basis matrix:
+            [0 1 0]
+            sage: W.submodule([V.gen(1)])
+            Traceback (most recent call last):
+            ...
+            ArithmeticError: Argument gens (= [(0, 1, 0)]) does not generate a submodule of self.
+            sage: V.span([[1,0,0],[1/5,4,0],[6,3/4,0]])
+            Free module of degree 3 and rank 2 over Integer Ring
+            Echelon basis matrix:
+            [1/5   0   0]
+            [  0 1/4   0]
+
+        It also works with other things than integers::
+
+            sage: R.<x>=QQ[]
+            sage: L=R^1
+            sage: a=L.span([(1/x,)])
+            sage: a
+            Free module of degree 1 and rank 1 over Univariate Polynomial Ring in x over Rational Field
+            Echelon basis matrix:
+            [1/x]
+            sage: b=L.span([(1/x,)])
+            sage: a(b.gens()[0])
+            (1/x)
+            sage: L2 = R^2
+            sage: L2.span([[(x^2+x)/(x^2-3*x+2),1/5],[(x^2+2*x)/(x^2-4*x+3),x]])
+            Free module of degree 2 and rank 2 over Univariate Polynomial Ring in x over Rational Field
+            Echelon basis matrix:
+            [x/(x^3 - 6*x^2 + 11*x - 6)  2/15*x^2 - 17/75*x - 1/75]
+            [                         0 x^3 - 11/5*x^2 - 3*x + 4/5]
+
+        Note that the ``base_ring`` can make a huge difference. We
+        repeat the previous example over the fraction field of R and
+        get a simpler vector space. ::
+
+            sage: L2.span([[(x^2+x)/(x^2-3*x+2),1/5],[(x^2+2*x)/(x^2-4*x+3),x]],base_ring=R.fraction_field())
+            Vector space of degree 2 and dimension 2 over Fraction Field of Univariate Polynomial Ring in x over Rational Field
+            Basis matrix:
+            [1 0]
+            [0 1]
+        """
+        if is_FreeModule(gens):
+            gens = gens.gens()
+        if base_ring is None or base_ring is self.base_ring():
+            return FreeModule_submodule_domain(
+                self.ambient_module(), gens, check=check)
+        else:
+            try:
+                M = self.change_ring(base_ring)
+            except TypeError:
+                raise ValueError("Argument base_ring (= %s) is not compatible "%base_ring + \
+                    "with the base field (= %s)." % self.base_field())
+            try:
+                return M.span(gens)
+            except TypeError:
+                raise ValueError("Argument gens (= %s) is not compatible "%gens + \
+                    "with base_ring (= %s)."%base_ring)
+
+    def submodule(self, gens, check=True):
+        r"""
+        Create the R-submodule of the ambient vector space with given
+        generators, where R is the base ring of self.
+
+        INPUT:
+
+
+        -  ``gens`` - a list of free module elements or a free
+           module
+
+        -  ``check`` - (default: True) whether or not to verify
+           that the gens are in self.
+
+
+        OUTPUT:
+
+
+        -  ``FreeModule`` - the submodule spanned by the
+           vectors in the list gens. The basis for the subspace is always put
+           in reduced row echelon form.
+
+
+        EXAMPLES:
+
+        We create a submodule of `\ZZ^3`::
+
+            sage: M = FreeModule(ZZ, 3)
+            sage: B = M.basis()
+            sage: W = M.submodule([B[0]+B[1], 2*B[1]-B[2]])
+            sage: W
+            Free module of degree 3 and rank 2 over Integer Ring
+            Echelon basis matrix:
+            [ 1  1  0]
+            [ 0  2 -1]
+
+        We create a submodule of a submodule.
+
+        ::
+
+            sage: W.submodule([3*B[0] + 3*B[1]])
+            Free module of degree 3 and rank 1 over Integer Ring
+            Echelon basis matrix:
+            [3 3 0]
+
+        We try to create a submodule that isn't really a submodule,
+        which results in an ``ArithmeticError`` exception::
+
+            sage: W.submodule([B[0] - B[1]])
+            Traceback (most recent call last):
+            ...
+            ArithmeticError: Argument gens (= [(1, -1, 0)]) does not generate a submodule of self.
+
+        Next we create a submodule of a free module over the principal ideal
+        domain `\QQ[x]`, which uses the general Hermite normal form functionality::
+
+            sage: R = PolynomialRing(QQ, 'x'); x = R.gen()
+            sage: M = FreeModule(R, 3)
+            sage: B = M.basis()
+            sage: W = M.submodule([x*B[0], 2*B[1]- x*B[2]]); W
+            Free module of degree 3 and rank 2 over Univariate Polynomial Ring in x over Rational Field
+            Echelon basis matrix:
+            [ x  0  0]
+            [ 0  2 -x]
+            sage: W.ambient_module()
+            Ambient free module of rank 3 over the principal ideal domain Univariate Polynomial Ring in x over Rational Field
+        """
+        if is_FreeModule(gens):
+            gens = gens.gens()
+        V = self.span(gens, check=check)
+        if check:
+            if False: #if not V.is_submodule(self):
+                raise ArithmeticError("Argument gens (= %s) does not generate a submodule of self."%gens)
+        return V
+
+
+class FreeModule_generic_pid(FreeModule_generic_domain):
     """
     Base class for all free modules over a PID.
     """
@@ -2763,11 +2913,7 @@ class FreeModule_generic_pid(FreeModule_generic):
             sage: FreeModule(PolynomialRing(GF(7),'x'), 2)
             Ambient free module of rank 2 over the principal ideal domain Univariate Polynomial Ring in x over Finite Field of size 7
         """
-        # The first check should go away once everything is categorized...
-        if base_ring not in PrincipalIdealDomains():
-            raise TypeError("The base_ring must be a principal ideal domain.")
-        super(FreeModule_generic_pid, self).__init__(base_ring, rank, degree,
-                                                     sparse, coordinate_ring)
+        super().__init__(base_ring, rank, degree, sparse, coordinate_ring)
 
     def scale(self, other):
         """
@@ -3714,6 +3860,7 @@ class FreeModule_generic_pid(FreeModule_generic):
         """
         return self.quotient(sub, check=True)
 
+
 class FreeModule_generic_field(FreeModule_generic_pid):
     """
     Base class for all free modules over fields.
@@ -3739,7 +3886,7 @@ class FreeModule_generic_field(FreeModule_generic_pid):
         """
         if not isinstance(base_field, ring.Field):
             raise TypeError("The base_field (=%s) must be a field"%base_field)
-        FreeModule_generic_pid.__init__(self, base_field, dimension, degree, sparse=sparse)
+        super().__init__(base_field, dimension, degree, sparse=sparse)
 
     def _Hom_(self, Y, category):
         r"""
@@ -4763,6 +4910,7 @@ class FreeModule_generic_field(FreeModule_generic_pid):
 
         return quomap.codomain(), quomap, liftmap
 
+
 ###############################################################################
 #
 # Generic ambient free modules, i.e., of the form R^n for some commutative ring R.
@@ -5201,7 +5349,6 @@ class FreeModule_ambient(FreeModule_generic):
         else:
             return FreeModule(R, self.rank())
 
-
     def linear_combination_of_basis(self, v):
         """
         Return the linear combination of the basis for ``self`` obtained from
@@ -5466,7 +5613,7 @@ class FreeModule_ambient(FreeModule_generic):
 #
 ###############################################################################
 
-class FreeModule_ambient_domain(FreeModule_ambient):
+class FreeModule_ambient_domain(FreeModule_generic_domain, FreeModule_ambient):
     """
     Ambient free module over an integral domain.
     """
@@ -5481,8 +5628,7 @@ class FreeModule_ambient_domain(FreeModule_ambient):
             Ambient free module of rank 3 over the principal ideal domain
             Univariate Polynomial Ring in x over Finite Field of size 5
         """
-        FreeModule_ambient.__init__(self, base_ring,
-                rank, sparse, coordinate_ring)
+        FreeModule_ambient.__init__(self, base_ring, rank, sparse, coordinate_ring)
 
     def _repr_(self):
         """
@@ -5847,6 +5993,94 @@ class FreeModule_ambient_field(FreeModule_generic_field, FreeModule_ambient_pid)
 #
 ###############################################################################
 
+class FreeModule_submodule_domain(FreeModule_generic_domain):
+    def __init__(self, ambient, basis, check=True):
+        r"""
+        See :class:`FreeModule_submodule_with_basis_pid` for documentation.
+
+        TESTS::
+
+            sage: M = ZZ^3
+            sage: W = M.span_of_basis([[1,2,3],[4,5,6]])
+            sage: TestSuite(W).run()
+
+        We test that the issue at :trac:`9502` is solved::
+
+            sage: parent(W.basis()[0])
+            Free module of degree 3 and rank 2 over Integer Ring
+            User basis matrix:
+            [1 2 3]
+            [4 5 6]
+            sage: parent(W.echelonized_basis()[0])
+            Free module of degree 3 and rank 2 over Integer Ring
+            User basis matrix:
+            [1 2 3]
+            [4 5 6]
+
+        Now we test that the issue introduced at :trac:`9502` and reported at
+        :trac:`10250` is solved as well::
+
+            sage: V = (QQ^2).span_of_basis([[1,1]])
+            sage: w = sqrt(2) * V([1,1])
+            sage: 3 * w
+            (3*sqrt(2), 3*sqrt(2))
+        """
+        if not isinstance(ambient, FreeModule_ambient_domain):
+            raise TypeError("ambient (=%s) must be ambient." % ambient)
+        self.__ambient_module = ambient
+        R = ambient.base_ring()
+        R_coord = R
+
+        if check:
+            try:
+                # Convert all basis elements to the ambient module
+                basis = [ambient(x) for x in basis]
+            except TypeError:
+                # That failed, try the ambient vector space instead
+                V = ambient.ambient_vector_space()
+                R_coord = V.base_ring()
+                try:
+                    basis = [V(x) for x in basis]
+                except TypeError:
+                    raise TypeError("each element of basis must be in "
+                                    "the ambient vector space")
+
+        FreeModule_generic_domain.__init__(self, base_ring=R, coordinate_ring=R_coord,
+                                    rank=len(basis), degree=ambient.degree(),
+                                    sparse=ambient.is_sparse())
+        C = self.element_class
+        w = [C(self, x.list(), coerce=False, copy=False) for x in basis]
+        self.__basis = basis_seq(self, w)
+
+    def _repr_(self):
+        """
+        Return a string representation of ``self``.
+
+        EXAMPLES::
+
+            sage: S.<x,y,z> = PolynomialRing(QQ)
+            sage: A = S**2
+            sage: A.submodule([vector([x-y,z]), vector([y*z, x*z])])
+            Free module of degree 2 and rank 2 over Multivariate Polynomial Ring in x, y, z over Rational Field
+            Basis matrix:
+            [x - y     z]
+            [  y*z   x*z]
+        """
+        if self.is_sparse():
+            s = "Sparse free module of degree %s and rank %s over %s\n"%(
+                self.degree(), self.rank(), self.base_ring()) + \
+                "Basis matrix:\n%s" % self.basis_matrix()
+        else:
+            s = "Free module of degree %s and rank %s over %s\n"%(
+                self.degree(), self.rank(), self.base_ring()) + \
+                "Basis matrix:\n%s" % self.basis_matrix()
+        return s
+
+    def basis(self):
+        return self.__basis
+
+
+
 class FreeModule_submodule_with_basis_pid(FreeModule_generic_pid):
     r"""
     Construct a submodule of a free module over PID with a distinguished basis.
@@ -5950,11 +6184,9 @@ class FreeModule_submodule_with_basis_pid(FreeModule_generic_pid):
         if echelonize and not already_echelonized:
             basis = self._echelonized_basis(ambient, basis)
 
-        # The following is WRONG - we should call __init__ of
-        # FreeModule_generic_pid. However, it leads to a bunch of errors.
-        FreeModule_generic.__init__(self, base_ring=R, coordinate_ring=R_coord,
-                                    rank=len(basis), degree=ambient.degree(),
-                                    sparse=ambient.is_sparse())
+        FreeModule_generic_pid.__init__(self, base_ring=R, coordinate_ring=R_coord,
+                                        rank=len(basis), degree=ambient.degree(),
+                                        sparse=ambient.is_sparse())
         C = self.element_class
         w = [C(self, x.list(), coerce=False, copy=False) for x in basis]
         self.__basis = basis_seq(self, w)
@@ -6137,8 +6369,6 @@ class FreeModule_submodule_with_basis_pid(FreeModule_generic_pid):
             E = E.matrix_from_rows(range(r))
         self.__echelonized_basis_matrix = E
         return E.rows()
-
-
 
     def _denominator(self, B):
         """
@@ -6365,7 +6595,6 @@ class FreeModule_submodule_with_basis_pid(FreeModule_generic_pid):
                                              sparse = self.is_sparse())
                 self.__user_to_echelon_matrix = M(rows)
         return self.__user_to_echelon_matrix
-
 
     def echelon_to_user_matrix(self):
         """
@@ -7216,8 +7445,8 @@ class FreeModule_submodule_field(FreeModule_submodule_with_basis_field):
         """
         if is_FreeModule(gens):
             gens = gens.gens()
-        FreeModule_submodule_with_basis_field.__init__(self, ambient, basis=gens, check=check,
-            echelonize=not already_echelonized, already_echelonized=already_echelonized)
+        super().__init__(ambient, basis=gens, check=check, echelonize=not already_echelonized,
+                         already_echelonized=already_echelonized)
 
     def _repr_(self):
         """

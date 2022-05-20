@@ -104,4 +104,8 @@ class FreeResolution(SageObject):
         return self._maps[i]
 
     def chain_complex(self):
-        pass
+        from sage.homology.chain_complex import ChainComplex
+        mats = {}
+        for i in range(len(self), 0, -1):
+            mats[i] = self.matrix(i)
+        return ChainComplex(mats, degree_of_differential=-1)
