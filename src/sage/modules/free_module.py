@@ -719,6 +719,36 @@ def span(gens, base_ring=None, check=True, already_echelonized=False):
         return M.span(gens=gens, base_ring=base_ring, check=check,
                       already_echelonized=already_echelonized)
 
+def basis_seq(V, vecs):
+    """
+    This converts a list vecs of vectors in V to an Sequence of
+    immutable vectors.
+
+    Should it? I.e. in most ``other`` parts of the system the return type
+    of basis or generators is a tuple.
+
+    EXAMPLES::
+
+        sage: V = VectorSpace(QQ,2)
+        sage: B = V.gens()
+        sage: B
+        ((1, 0), (0, 1))
+        sage: v = B[0]
+        sage: v[0] = 0 # immutable
+        Traceback (most recent call last):
+        ...
+        ValueError: vector is immutable; please change a copy instead (use copy())
+        sage: sage.modules.free_module.basis_seq(V, V.gens())
+        [
+        (1, 0),
+        (0, 1)
+        ]
+    """
+    for z in vecs:
+        z.set_immutable()
+    return Sequence(vecs, universe=V, check = False, immutable=True, cr=True)
+
+
 ###############################################################################
 #
 # Base class for all free modules
@@ -4898,7 +4928,7 @@ class FreeModule_generic_field(FreeModule_generic_pid):
 
 ###############################################################################
 #
-# Ambient free modules R^n for some commutative ring R
+# Generic ambient free module R^n for some commutative ring R
 #
 ###############################################################################
 
@@ -5592,6 +5622,12 @@ class FreeModule_ambient(FreeModule_generic):
         return ProductSet(*([self.coordinate_ring()] * self.rank()))
 
 
+###############################################################################
+#
+# Ambient free modules over an integral domain
+#
+###############################################################################
+
 class FreeModule_ambient_domain(FreeModule_generic_domain, FreeModule_ambient):
     """
     Ambient free module over an integral domain.
@@ -5755,6 +5791,11 @@ class FreeModule_ambient_domain(FreeModule_generic_domain, FreeModule_ambient):
         else:
             return self.change_ring(base_field)
 
+###############################################################################
+#
+# Ambient free modules over a principal ideal domain.
+#
+###############################################################################
 
 class FreeModule_ambient_pid(FreeModule_generic_pid, FreeModule_ambient_domain):
     """
@@ -5841,6 +5882,12 @@ class FreeModule_ambient_pid(FreeModule_generic_pid, FreeModule_ambient_domain):
             return "Ambient free module of rank %s over the principal ideal domain %s"%(
                 self.rank(), self.base_ring())
 
+
+###############################################################################
+#
+# Ambient free modules over a field (i.e., a vector space).
+#
+###############################################################################
 
 class FreeModule_ambient_field(FreeModule_generic_field, FreeModule_ambient_pid):
     """
@@ -7444,7 +7491,8 @@ class FreeModule_submodule_field(FreeModule_submodule_with_basis_field):
         """
         if is_FreeModule(gens):
             gens = gens.gens()
-        super().__init__(ambient, basis=gens, check=check, echelonize=not already_echelonized,
+        super().__init__(ambient, basis=gens, check=check,
+                         echelonize=not already_echelonized,
                          already_echelonized=already_echelonized)
 
     def _repr_(self):
@@ -7652,36 +7700,6 @@ class FreeModule_submodule_field(FreeModule_submodule_with_basis_field):
         return False
 
 
-def basis_seq(V, vecs):
-    """
-    This converts a list vecs of vectors in V to an Sequence of
-    immutable vectors.
-
-    Should it? I.e. in most ``other`` parts of the system the return type
-    of basis or generators is a tuple.
-
-    EXAMPLES::
-
-        sage: V = VectorSpace(QQ,2)
-        sage: B = V.gens()
-        sage: B
-        ((1, 0), (0, 1))
-        sage: v = B[0]
-        sage: v[0] = 0 # immutable
-        Traceback (most recent call last):
-        ...
-        ValueError: vector is immutable; please change a copy instead (use copy())
-        sage: sage.modules.free_module.basis_seq(V, V.gens())
-        [
-        (1, 0),
-        (0, 1)
-        ]
-    """
-    for z in vecs:
-        z.set_immutable()
-    return Sequence(vecs, universe=V, check = False, immutable=True, cr=True)
-
-
 class RealDoubleVectorSpace_class(FreeModule_ambient_field):
     def __init__(self,n):
         FreeModule_ambient_field.__init__(self,sage.rings.real_double.RDF,n)
@@ -7698,7 +7716,7 @@ class ComplexDoubleVectorSpace_class(FreeModule_ambient_field):
         return v
 
 
-######################################################
+###############################################################################
 
 def element_class(R, is_sparse):
     """
