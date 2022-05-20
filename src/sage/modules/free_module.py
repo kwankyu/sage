@@ -3090,6 +3090,111 @@ class FreeModule_generic_pid(FreeModule_generic_domain):
         B = other * B if switch_sides else B * other
         return self.span(B.rows())
 
+    def zero_submodule(self):
+        """
+        Return the zero submodule of this module.
+
+        EXAMPLES::
+
+            sage: V = FreeModule(ZZ,2)
+            sage: V.zero_submodule()
+            Free module of degree 2 and rank 0 over Integer Ring
+            Echelon basis matrix:
+            []
+        """
+        return self.submodule([], check=False)
+
+    def span(self, gens, base_ring=None, check=True):
+        """
+        """
+        if is_FreeModule(gens):
+            gens = gens.gens()
+        if base_ring is None or base_ring is self.base_ring():
+            return FreeModule_submodule_domain(
+                self.ambient_module(), gens, check=check)
+        else:
+            try:
+                M = self.change_ring(base_ring)
+            except TypeError:
+                raise ValueError("Argument base_ring (= %s) is not compatible "%base_ring + \
+                    "with the base field (= %s)." % self.base_field())
+            try:
+                return M.span(gens)
+            except TypeError:
+                raise ValueError("Argument gens (= %s) is not compatible "%gens + \
+                    "with base_ring (= %s)."%base_ring)
+
+    def submodule(self, gens, check=True):
+        r"""
+        Create the R-submodule of the ambient vector space with given
+        generators, where R is the base ring of self.
+
+        INPUT:
+
+
+        -  ``gens`` - a list of free module elements or a free
+           module
+
+        -  ``check`` - (default: True) whether or not to verify
+           that the gens are in self.
+        """
+        if is_FreeModule(gens):
+            gens = gens.gens()
+        V = self.span(gens, check=check)
+        if check:
+            if False: #if not V.is_submodule(self):
+                raise ArithmeticError("Argument gens (= %s) does not generate a submodule of self."%gens)
+        return V
+
+
+class FreeModule_generic_pid(FreeModule_generic_domain):
+    """
+    Base class for all free modules over a PID.
+    """
+    def __init__(self, base_ring, rank, degree, sparse=False, coordinate_ring=None):
+        """
+        Create a free module over a PID.
+
+        EXAMPLES::
+
+            sage: FreeModule(ZZ, 2)
+            Ambient free module of rank 2 over the principal ideal domain Integer Ring
+            sage: FreeModule(PolynomialRing(GF(7),'x'), 2)
+            Ambient free module of rank 2 over the principal ideal domain Univariate Polynomial Ring in x over Finite Field of size 7
+        """
+        super().__init__(base_ring, rank, degree, sparse, coordinate_ring)
+
+    def scale(self, other):
+        """
+        Return the product of this module by the number other, which is the
+        module spanned by other times each basis vector.
+
+        EXAMPLES::
+
+            sage: M = FreeModule(ZZ, 3)
+            sage: M.scale(2)
+            Free module of degree 3 and rank 3 over Integer Ring
+            Echelon basis matrix:
+            [2 0 0]
+            [0 2 0]
+            [0 0 2]
+
+        ::
+
+            sage: a = QQ('1/3')
+            sage: M.scale(a)
+            Free module of degree 3 and rank 3 over Integer Ring
+            Echelon basis matrix:
+            [1/3   0   0]
+            [  0 1/3   0]
+            [  0   0 1/3]
+        """
+        if other == 0:
+            return self.zero_submodule()
+        if other == 1 or other == -1:
+            return self
+        return self.span([v*other for v in self.basis()])
+
     def index_in(self, other):
         """
         Return the lattice index [other:self] of ``self`` in other, as an
@@ -6078,7 +6183,6 @@ class FreeModule_submodule_domain(FreeModule_generic_domain):
 
     def basis(self):
         return self.__basis
-
 
 
 class FreeModule_submodule_with_basis_pid(FreeModule_generic_pid):
