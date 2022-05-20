@@ -66,8 +66,8 @@ class GradedFreeResolution(FreeResolution):
     EXAMPLES::
 
         sage: from sage.homology.resolutions.graded import GradedFreeResolution
-        sage: P.<x,y,z,w> = PolynomialRing(QQ)
-        sage: I = P.ideal([y*w - z^2, -x*w + y*z, x*z - y^2])
+        sage: S.<x,y,z,w> = PolynomialRing(QQ)
+        sage: I = S.ideal([y*w - z^2, -x*w + y*z, x*z - y^2])
         sage: r = GradedFreeResolution(I)
         sage: r
         S(-(3))⊕S(-(3)) <-- S(-(2))⊕S(-(2))⊕S(-(2)) <-- S(-(3))⊕S(-(3)) <-- 0
