@@ -74,7 +74,7 @@ class GradedFreeResolution(FreeResolution):
         sage: len(r)
         2
     """
-    def __init__(self, ideal, degrees=None, name='S', algorithm='shreyer'):
+    def __init__(self, ideal, degrees=None, shifts=None, name='S', algorithm='shreyer'):
         cdef int i, j, k, ncols, nrows
         cdef list res_betti, prev_grade, grade
 

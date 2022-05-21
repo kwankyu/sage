@@ -2787,11 +2787,7 @@ class FreeModule_generic_domain(FreeModule_generic):
             sage: FreeModule(PolynomialRing(GF(7),'x'), 2)
             Ambient free module of rank 2 over the principal ideal domain Univariate Polynomial Ring in x over Finite Field of size 7
         """
-<<<<<<< HEAD
-        super().__init__(base_ring, rank, degree, sparse, coordinate_ring)
-=======
         FreeModule_generic.__init__(self, base_ring, rank, degree, sparse, coordinate_ring)
->>>>>>> module-over-domain
 
     def scale(self, other):
         """
@@ -6011,8 +6007,6 @@ class FreeModule_ambient_field(FreeModule_generic_field, FreeModule_ambient_pid)
         return FreeModule_generic_field._element_constructor_(self, e, *args, **kwds)
 
 
-<<<<<<< HEAD
-=======
 class RealDoubleVectorSpace_class(FreeModule_ambient_field):
     def __init__(self,n):
         FreeModule_ambient_field.__init__(self,sage.rings.real_double.RDF,n)
@@ -6029,7 +6023,6 @@ class ComplexDoubleVectorSpace_class(FreeModule_ambient_field):
         return v
 
 
->>>>>>> module-over-domain
 ###############################################################################
 #
 # Submodules of ambient modules
@@ -7518,9 +7511,8 @@ class FreeModule_submodule_field(FreeModule_submodule_with_basis_field):
         """
         if is_FreeModule(gens):
             gens = gens.gens()
-        super().__init__(ambient, basis=gens, check=check,
-                         echelonize=not already_echelonized,
-                         already_echelonized=already_echelonized)
+        FreeModule_submodule_with_basis_field.__init__(self, ambient, basis=gens, check=check,
+            echelonize=not already_echelonized, already_echelonized=already_echelonized)
 
     def _repr_(self):
         """
@@ -7727,25 +7719,6 @@ class FreeModule_submodule_field(FreeModule_submodule_with_basis_field):
         return False
 
 
-<<<<<<< HEAD
-class RealDoubleVectorSpace_class(FreeModule_ambient_field):
-    def __init__(self,n):
-        FreeModule_ambient_field.__init__(self,sage.rings.real_double.RDF,n)
-
-    def coordinates(self,v):
-        return v
-
-
-class ComplexDoubleVectorSpace_class(FreeModule_ambient_field):
-    def __init__(self,n):
-        FreeModule_ambient_field.__init__(self,sage.rings.complex_double.CDF,n)
-
-    def coordinates(self,v):
-        return v
-
-
-=======
->>>>>>> module-over-domain
 ###############################################################################
 
 def element_class(R, is_sparse):

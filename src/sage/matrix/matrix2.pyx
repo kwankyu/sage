@@ -104,7 +104,136 @@ from sage.misc.superseded import deprecated_function_alias
 
 _Fields = Fields()
 
-cdef class Matrix(Matrix1):
+cdef class Matrix_domain(Matrix1):
+
+    def image(self):
+        """
+        Return the image of the homomorphism on rows defined by this
+        matrix.
+
+        EXAMPLES::
+
+            sage: MS1 = MatrixSpace(ZZ,4)
+            sage: MS2 = MatrixSpace(QQ,6)
+            sage: A = MS1.matrix([3,4,5,6,7,3,8,10,14,5,6,7,2,2,10,9])
+            sage: B = MS2.random_element()
+
+        ::
+
+            sage: image(A)
+            Free module of degree 4 and rank 4 over Integer Ring
+            Echelon basis matrix:
+            [  1   0   0 426]
+            [  0   1   0 518]
+            [  0   0   1 293]
+            [  0   0   0 687]
+
+        ::
+
+            sage: image(B) == B.row_module()
+            True
+        """
+        return self.row_module()
+
+    def row_module(self, base_ring=None):
+        """
+        Return the free module over the base ring spanned by the rows of
+        self.
+
+        EXAMPLES::
+
+            sage: A = MatrixSpace(IntegerRing(), 2)([1,2,3,4])
+            sage: A.row_module()
+            Free module of degree 2 and rank 2 over Integer Ring
+            Echelon basis matrix:
+            [1 0]
+            [0 2]
+        """
+        M = self.row_ambient_module(base_ring = base_ring)
+        if self.fetch('in_echelon_form'):
+            if self.rank() != self.nrows():
+                rows = self.matrix_from_rows(range(self.rank())).rows()
+            else:
+                rows = self.rows()
+            return M.span(rows, already_echelonized=True)
+        else:
+            return M.span(self.rows())
+
+    def row_space(self, base_ring=None):
+        """
+        Return the row space of this matrix. (Synonym for
+        self.row_module().)
+
+        EXAMPLES::
+
+            sage: t = matrix(QQ, 3, 3, range(9)); t
+            [0 1 2]
+            [3 4 5]
+            [6 7 8]
+            sage: t.row_space()
+            Vector space of degree 3 and dimension 2 over Rational Field
+            Basis matrix:
+            [ 1  0 -1]
+            [ 0  1  2]
+
+        ::
+
+            sage: m = Matrix(Integers(5),2,2,[2,2,2,2])
+            sage: m.row_space()
+            Vector space of degree 2 and dimension 1 over Ring of integers modulo 5
+            Basis matrix:
+            [1 1]
+        """
+        return self.row_module(base_ring=base_ring)
+
+    def column_module(self):
+        """
+        Return the free module over the base ring spanned by the columns of
+        this matrix.
+
+        EXAMPLES::
+
+            sage: t = matrix(QQ, 3, 3, range(9)); t
+            [0 1 2]
+            [3 4 5]
+            [6 7 8]
+            sage: t.column_module()
+            Vector space of degree 3 and dimension 2 over Rational Field
+            Basis matrix:
+            [ 1  0 -1]
+            [ 0  1  2]
+        """
+        return self.transpose().row_module()
+
+    def column_space(self):
+        """
+        Return the vector space over the base ring spanned by the columns
+        of this matrix.
+
+        EXAMPLES::
+
+            sage: M = MatrixSpace(QQ,3,3)
+            sage: A = M([1,9,-7,4/5,4,3,6,4,3])
+            sage: A.column_space()
+            Vector space of degree 3 and dimension 3 over Rational Field
+            Basis matrix:
+            [1 0 0]
+            [0 1 0]
+            [0 0 1]
+            sage: W = MatrixSpace(CC,2,2)
+            sage: B = W([1, 2+3*I,4+5*I,9]); B
+            [                     1.00000000000000 2.00000000000000 + 3.00000000000000*I]
+            [4.00000000000000 + 5.00000000000000*I                      9.00000000000000]
+            sage: B.column_space()
+            Vector space of degree 2 and dimension 2 over Complex Field with 53 bits of precision
+            Basis matrix:
+            [ 1.00000000000000 0.000000000000000]
+            [0.000000000000000  1.00000000000000]
+        """
+        return self.column_module()
+
+
+cdef class Matrix(Matrix_domain):
     """
     Base class for matrices, part 2
 
@@ -5163,35 +5292,6 @@ cdef class Matrix(Matrix1):
             M = MatrixSpace(ring, self.nrows(), self.ncols())(A)
             return M.kernel()
 
-    def image(self):
-        """
-        Return the image of the homomorphism on rows defined by this
-        matrix.
-
-        EXAMPLES::
-
-            sage: MS1 = MatrixSpace(ZZ,4)
-            sage: MS2 = MatrixSpace(QQ,6)
-            sage: A = MS1.matrix([3,4,5,6,7,3,8,10,14,5,6,7,2,2,10,9])
-            sage: B = MS2.random_element()
-
-        ::
-
-            sage: image(A)
-            Free module of degree 4 and rank 4 over Integer Ring
-            Echelon basis matrix:
-            [  1   0   0 426]
-            [  0   1   0 518]
-            [  0   0   1 293]
-            [  0   0   0 687]
-
-        ::
-
-            sage: image(B) == B.row_module()
-            True
-        """
-        return self.row_module()
-
     def row_module(self, base_ring=None):
         """
         Return the free module over the base ring spanned by the rows of
@@ -5215,79 +5315,6 @@ cdef class Matrix(Matrix1):
             return M.span(rows, already_echelonized=True)
         else:
             return M.span(self.rows(), already_echelonized=False)
-
-    def row_space(self, base_ring=None):
-        """
-        Return the row space of this matrix. (Synonym for
-        self.row_module().)
-
-        EXAMPLES::
-
-            sage: t = matrix(QQ, 3, 3, range(9)); t
-            [0 1 2]
-            [3 4 5]
-            [6 7 8]
-            sage: t.row_space()
-            Vector space of degree 3 and dimension 2 over Rational Field
-            Basis matrix:
-            [ 1  0 -1]
-            [ 0  1  2]
-
-        ::
-
-            sage: m = Matrix(Integers(5),2,2,[2,2,2,2])
-            sage: m.row_space()
-            Vector space of degree 2 and dimension 1 over Ring of integers modulo 5
-            Basis matrix:
-            [1 1]
-        """
-        return self.row_module(base_ring=base_ring)
-
-    def column_module(self):
-        """
-        Return the free module over the base ring spanned by the columns of
-        this matrix.
-
-        EXAMPLES::
-
-            sage: t = matrix(QQ, 3, 3, range(9)); t
-            [0 1 2]
-            [3 4 5]
-            [6 7 8]
-            sage: t.column_module()
-            Vector space of degree 3 and dimension 2 over Rational Field
-            Basis matrix:
-            [ 1  0 -1]
-            [ 0  1  2]
-        """
-        return self.transpose().row_module()
-
-    def column_space(self):
-        """
-        Return the vector space over the base ring spanned by the columns
-        of this matrix.
-
-        EXAMPLES::
-
-            sage: M = MatrixSpace(QQ,3,3)
-            sage: A = M([1,9,-7,4/5,4,3,6,4,3])
-            sage: A.column_space()
-            Vector space of degree 3 and dimension 3 over Rational Field
-            Basis matrix:
-            [1 0 0]
-            [0 1 0]
-            [0 0 1]
-            sage: W = MatrixSpace(CC,2,2)
-            sage: B = W([1, 2+3*I,4+5*I,9]); B
-            [                     1.00000000000000 2.00000000000000 + 3.00000000000000*I]
-            [4.00000000000000 + 5.00000000000000*I                      9.00000000000000]
-            sage: B.column_space()
-            Vector space of degree 2 and dimension 2 over Complex Field with 53 bits of precision
-            Basis matrix:
-            [ 1.00000000000000 0.000000000000000]
-            [0.000000000000000  1.00000000000000]
-        """
-        return self.column_module()
 
     def decomposition(self, algorithm='spin',
                       is_diagonalizable=False, dual=False):
@@ -13224,9 +13251,9 @@ cdef class Matrix(Matrix1):
             sage: P, L, U = C.LU(pivot='partial')
             sage: C == P*L*U
             True
-            
+
         Check that :trac:`32736` is solved::
-        
+
             sage: M = Matrix(FiniteField(11), [[2,3],[4,5]])
             sage: P, L, U = M.LU()
             sage: P.base_ring()
@@ -14356,7 +14383,6 @@ cdef class Matrix(Matrix1):
 
         return (P,L,D)
 
-
     cdef bint _is_positive_definite_or_semidefinite(self, bint semi) except -1:
         """
         This is an internal wrapper that allows us to implement both
@@ -14399,7 +14425,6 @@ cdef class Matrix(Matrix1):
             op = operator.ge
 
         return all(d_i.nrows() == 1 and op(d_i[0,0], 0) for d_i in d)
-
 
     def is_positive_semidefinite(self):
         r"""
@@ -14716,7 +14741,6 @@ cdef class Matrix(Matrix1):
             return (result, L, d)
         else:
             return result
-
 
     def principal_square_root(self, check_positivity=True):
         r"""
