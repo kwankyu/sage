@@ -154,9 +154,9 @@ AUTHORS:
 
 - Niles Johnson (2010-08): (:trac:`3893`) ``random_element()`` should pass on ``*args`` and ``**kwds``.
 
-- Simon King (2010-12): :trac:`8800`: Fixing a bug in ``denominator()``.
+- Simon King (2010-12): (:trac:`8800`) fixed a bug in ``denominator()``.
 
-- Simon King (2010-12), Peter Bruin (June 2014): :trac:`10513`: New coercion model and category framework.
+- Simon King (2010-12), Peter Bruin (June 2014): (:trac:`10513`) new coercion model and category framework.
 
 """
 
@@ -2787,7 +2787,11 @@ class FreeModule_generic_domain(FreeModule_generic):
             sage: FreeModule(PolynomialRing(GF(7),'x'), 2)
             Ambient free module of rank 2 over the principal ideal domain Univariate Polynomial Ring in x over Finite Field of size 7
         """
+<<<<<<< HEAD
         super().__init__(base_ring, rank, degree, sparse, coordinate_ring)
+=======
+        FreeModule_generic.__init__(self, base_ring, rank, degree, sparse, coordinate_ring)
+>>>>>>> module-over-domain
 
     def scale(self, other):
         """
@@ -5797,7 +5801,7 @@ class FreeModule_ambient_domain(FreeModule_generic_domain, FreeModule_ambient):
 
 ###############################################################################
 #
-# Ambient free modules over a principal ideal domain.
+# Ambient free modules over a principal ideal domain
 #
 ###############################################################################
 
@@ -5889,7 +5893,7 @@ class FreeModule_ambient_pid(FreeModule_generic_pid, FreeModule_ambient_domain):
 
 ###############################################################################
 #
-# Ambient free modules over a field (i.e., a vector space).
+# Ambient free modules over a field (vector spaces)
 #
 ###############################################################################
 
@@ -6007,6 +6011,25 @@ class FreeModule_ambient_field(FreeModule_generic_field, FreeModule_ambient_pid)
         return FreeModule_generic_field._element_constructor_(self, e, *args, **kwds)
 
 
+<<<<<<< HEAD
+=======
+class RealDoubleVectorSpace_class(FreeModule_ambient_field):
+    def __init__(self,n):
+        FreeModule_ambient_field.__init__(self,sage.rings.real_double.RDF,n)
+
+    def coordinates(self,v):
+        return v
+
+
+class ComplexDoubleVectorSpace_class(FreeModule_ambient_field):
+    def __init__(self,n):
+        FreeModule_ambient_field.__init__(self,sage.rings.complex_double.CDF,n)
+
+    def coordinates(self,v):
+        return v
+
+
+>>>>>>> module-over-domain
 ###############################################################################
 #
 # Submodules of ambient modules
@@ -7704,6 +7727,7 @@ class FreeModule_submodule_field(FreeModule_submodule_with_basis_field):
         return False
 
 
+<<<<<<< HEAD
 class RealDoubleVectorSpace_class(FreeModule_ambient_field):
     def __init__(self,n):
         FreeModule_ambient_field.__init__(self,sage.rings.real_double.RDF,n)
@@ -7720,6 +7744,8 @@ class ComplexDoubleVectorSpace_class(FreeModule_ambient_field):
         return v
 
 
+=======
+>>>>>>> module-over-domain
 ###############################################################################
 
 def element_class(R, is_sparse):
