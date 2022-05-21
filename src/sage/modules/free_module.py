@@ -271,7 +271,11 @@ class FreeModuleFactory(UniqueFactory):
                 return FreeModule_ambient_pid(base_ring, rank, sparse=sparse)
 
             elif isinstance(base_ring, ring.IntegralDomain) or base_ring.is_integral_domain():
-                return FreeModule_ambient_domain(base_ring, rank, sparse=sparse)
+                if isinstance(base_ring, sage.rings.polynomial.multi_polynomial_libsingular.MPolynomialRing_libsingular):
+                    from sage.modules.free_module_libsingular import FreeModule_ambient_libsingular
+                    return FreeModule_ambient_libsingular(base_ring, rank, sparse=sparse)
+                else:
+                    return FreeModule_ambient_domain(base_ring, rank, sparse=sparse)
 
             else:
                 return FreeModule_ambient(base_ring, rank, sparse=sparse)
