@@ -87,7 +87,7 @@ class FreeResolution(SageObject):
         else:
             s = (self._base_ring)**(self._maps[i].ncols())
             t = (self._base_ring)**(self._maps[i].nrows())
-            m = s.hom(self._maps[i].columns(), t)
+            m = s.hom(self._maps[i], t, side='right')
         return m
 
     def matrix(self, i):
