@@ -14,10 +14,7 @@ Generic matrices
 
 from .matrix1 cimport Matrix as Matrix1
 
-cdef class Matrix_ring(Matrix1):
-    pass
-
-cdef class Matrix(Matrix_ring):
+cdef class Matrix(Matrix1):
     cdef _det_by_minors(self, Py_ssize_t level)
     cdef _pf_bfl(self)
     cdef bint _is_positive_definite_or_semidefinite(self, bint semi) except -1

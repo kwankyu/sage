@@ -2916,7 +2916,7 @@ class FreeModule_generic_domain(FreeModule_generic):
         """
         return self.submodule([], check=False)
 
-    def span(self, gens, base_ring=None, check=True):
+    def span(self, gens, base_ring=None, check=True, already_echelonized=False):
         """
         Return the span of ``gens``.
 
@@ -6032,15 +6032,8 @@ class FreeModule_submodule_domain(FreeModule_generic_domain):
             [x - y     z]
             [  y*z   x*z]
         """
-        if self.is_sparse():
-            s = "Sparse free module of degree %s over %s\n" % (
-                self.degree(), self.base_ring()) + \
-                "Basis matrix:\n%s" % self.basis_matrix()
-        else:
-            s = "Free module of degree %s over %s\n" % (
-                self.degree(), self.base_ring()) + \
-                "Basis matrix:\n%s" % self.basis_matrix()
-        return s
+        return "Submodule of %s\n" % self.ambient_module() + \
+               "Basis matrix:\n%s" % self.basis_matrix()
 
     def basis(self):
         """

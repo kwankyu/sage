@@ -268,6 +268,7 @@ cdef class MatrixMatrixAction(MatrixMulAction):
                 B = B.dense_matrix()
             else:
                 A = A.dense_matrix()
+        assert type(A) == type(B), (type(A), type(B))
         prod = A._matrix_times_matrix_(B)
         if A._subdivisions is not None or B._subdivisions is not None:
             Asubs = A.subdivisions()
@@ -558,8 +559,8 @@ cdef class MatrixSchemePointAction(MatrixMulAction):
             sage: A.codomain()
             Set of rational points of Projective Space of dimension 1 over Rational Field
         """
-        # need to extend the base of the ambient space
-        # and return the set of point over the base
+        #need to extend the base of the ambient space
+        #and return the set of point over the base
         amb = self.underlying_set().codomain()
         return amb.change_ring(base)(base)
 
