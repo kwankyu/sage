@@ -271,10 +271,6 @@ class FreeModuleFactory(UniqueFactory):
                 return FreeModule_ambient_pid(base_ring, rank, sparse=sparse)
 
             elif isinstance(base_ring, ring.IntegralDomain) or base_ring.is_integral_domain():
-                if isinstance(base_ring, sage.rings.polynomial.multi_polynomial_libsingular.MPolynomialRing_libsingular):
-                    from sage.modules.free_module_libsingular import FreeModule_ambient_libsingular
-                    return FreeModule_ambient_libsingular(base_ring, rank, sparse=sparse)
-                else:
                     return FreeModule_ambient_domain(base_ring, rank, sparse=sparse)
 
             else:
@@ -2713,24 +2709,6 @@ class FreeModule_generic(Module):
         else:
             return macaulay2(self.base_ring())**self.rank()
 
-
-class FreeModule_generic_domain(FreeModule_generic):
-    """
-    Base class for free modules over an integral domain.
-    """
-    def __init__(self, base_ring, rank, degree, sparse=False, coordinate_ring=None):
-        """
-        Create a free module over an integral domain.
-
-        EXAMPLES::
-
-            sage: FreeModule(ZZ, 2)
-            Ambient free module of rank 2 over the principal ideal domain Integer Ring
-            sage: FreeModule(PolynomialRing(GF(7),'x'), 2)
-            Ambient free module of rank 2 over the principal ideal domain Univariate Polynomial Ring in x over Finite Field of size 7
-        """
-        FreeModule_generic.__init__(self, base_ring, rank, degree, sparse, coordinate_ring)
-
     def scale(self, other):
         """
         Return the product of this module by the number other, which is the
@@ -2779,22 +2757,6 @@ class FreeModule_generic_domain(FreeModule_generic):
             return self
         else:
             raise TypeError
-
-    def __add__(self, other):
-        r"""
-        Return the sum of ``self`` and other, where both ``self`` and ``other`` must be
-        submodules of the ambient vector space.
-
-        EXAMPLES:
-
-        """
-        if not isinstance(other, FreeModule_generic):
-            if other == 0:
-                return self
-            raise TypeError("other (=%s) must be a free module"%other)
-        if not (self.ambient_module() == other.ambient_module()):
-            raise TypeError("ambient modules must be equal")
-        return self.span(self.basis() + other.basis())
 
     def _mul_(self, other, switch_sides=False):
         r"""
@@ -2845,6 +2807,100 @@ class FreeModule_generic_domain(FreeModule_generic):
         B = self.basis_matrix()
         B = other * B if switch_sides else B * other
         return self.span(B.rows())
+
+
+class FreeModule_generic_domain(FreeModule_generic):
+    """
+    Base class for free modules over an integral domain.
+    """
+    def __init__(self, base_ring, rank, degree, sparse=False, coordinate_ring=None):
+        """
+        Create a free module over an integral domain.
+
+        EXAMPLES::
+
+            sage: FreeModule(ZZ, 2)
+            Ambient free module of rank 2 over the principal ideal domain Integer Ring
+            sage: FreeModule(PolynomialRing(GF(7),'x'), 2)
+            Ambient free module of rank 2 over the principal ideal domain Univariate Polynomial Ring in x over Finite Field of size 7
+        """
+        FreeModule_generic.__init__(self, base_ring, rank, degree, sparse, coordinate_ring)
+
+    def __add__(self, other):
+        r"""
+        Return the sum of ``self`` and other, where both ``self`` and ``other`` must be
+        submodules of the ambient vector space.
+
+        EXAMPLES:
+
+        We add two vector spaces::
+
+            sage: V  = VectorSpace(QQ, 3)
+            sage: W  = V.subspace([V([1,1,0])])
+            sage: W2 = V.subspace([V([1,-1,0])])
+            sage: W + W2
+            Vector space of degree 3 and dimension 2 over Rational Field
+            Basis matrix:
+            [1 0 0]
+            [0 1 0]
+
+        We add two free `\ZZ`-modules.
+
+        ::
+
+            sage: M = FreeModule(ZZ, 3)
+            sage: W = M.submodule([M([1,0,2])])
+            sage: W2 = M.submodule([M([2,0,-4])])
+            sage: W + W2
+            Free module of degree 3 and rank 2 over Integer Ring
+            Echelon basis matrix:
+            [1 0 2]
+            [0 0 8]
+
+        We can also add free `\ZZ`-modules embedded
+        non-integrally into an ambient space.
+
+        ::
+
+            sage: V = VectorSpace(QQ, 3)
+            sage: W = M.span([1/2*V.0 - 1/3*V.1])
+
+        Here the command ``M.span(...)`` creates the span of
+        the indicated vectors over the base ring of `M`.
+
+        ::
+
+            sage: W2 = M.span([1/3*V.0 + V.1])
+            sage: W + W2
+            Free module of degree 3 and rank 2 over Integer Ring
+            Echelon basis matrix:
+            [ 1/6  7/3    0]
+            [   0 11/3    0]
+
+        We add two modules over `\ZZ`::
+
+            sage: A = Matrix(ZZ, 3, 3, [3, 0, -1, 0, -2, 0, 0, 0, -2])
+            sage: V = (A+2).kernel()
+            sage: W = (A-3).kernel()
+            sage: V+W
+            Free module of degree 3 and rank 3 over Integer Ring
+            Echelon basis matrix:
+            [5 0 0]
+            [0 1 0]
+            [0 0 1]
+
+        We add a module to 0::
+
+            sage: ZZ^3 + 0
+            Ambient free module of rank 3 over the principal ideal domain Integer Ring
+        """
+        if not isinstance(other, FreeModule_generic):
+            if other == 0:
+                return self
+            raise TypeError("other (=%s) must be a free module"%other)
+        if not (self.ambient_vector_space() == other.ambient_vector_space()):
+            raise TypeError("ambient vector spaces must be equal")
+        return self.span(self.basis() + other.basis())
 
     def zero_submodule(self):
         """
@@ -2944,82 +3000,6 @@ class FreeModule_generic_pid(FreeModule_generic_domain):
         """
         super().__init__(base_ring, rank, degree, sparse, coordinate_ring)
 
-    def __add__(self, other):
-        r"""
-        Return the sum of ``self`` and other, where both ``self`` and ``other`` must be
-        submodules of the ambient vector space.
-
-        EXAMPLES:
-
-        We add two vector spaces::
-
-            sage: V  = VectorSpace(QQ, 3)
-            sage: W  = V.subspace([V([1,1,0])])
-            sage: W2 = V.subspace([V([1,-1,0])])
-            sage: W + W2
-            Vector space of degree 3 and dimension 2 over Rational Field
-            Basis matrix:
-            [1 0 0]
-            [0 1 0]
-
-        We add two free `\ZZ`-modules.
-
-        ::
-
-            sage: M = FreeModule(ZZ, 3)
-            sage: W = M.submodule([M([1,0,2])])
-            sage: W2 = M.submodule([M([2,0,-4])])
-            sage: W + W2
-            Free module of degree 3 and rank 2 over Integer Ring
-            Echelon basis matrix:
-            [1 0 2]
-            [0 0 8]
-
-        We can also add free `\ZZ`-modules embedded
-        non-integrally into an ambient space.
-
-        ::
-
-            sage: V = VectorSpace(QQ, 3)
-            sage: W = M.span([1/2*V.0 - 1/3*V.1])
-
-        Here the command ``M.span(...)`` creates the span of
-        the indicated vectors over the base ring of `M`.
-
-        ::
-
-            sage: W2 = M.span([1/3*V.0 + V.1])
-            sage: W + W2
-            Free module of degree 3 and rank 2 over Integer Ring
-            Echelon basis matrix:
-            [ 1/6  7/3    0]
-            [   0 11/3    0]
-
-        We add two modules over `\ZZ`::
-
-            sage: A = Matrix(ZZ, 3, 3, [3, 0, -1, 0, -2, 0, 0, 0, -2])
-            sage: V = (A+2).kernel()
-            sage: W = (A-3).kernel()
-            sage: V+W
-            Free module of degree 3 and rank 3 over Integer Ring
-            Echelon basis matrix:
-            [5 0 0]
-            [0 1 0]
-            [0 0 1]
-
-        We add a module to 0::
-
-            sage: ZZ^3 + 0
-            Ambient free module of rank 3 over the principal ideal domain Integer Ring
-        """
-        if not isinstance(other, FreeModule_generic):
-            if other == 0:
-                return self
-            raise TypeError("other (=%s) must be a free module"%other)
-        if not (self.ambient_vector_space() == other.ambient_vector_space()):
-            raise TypeError("ambient vector spaces must be equal")
-        return self.span(self.basis() + other.basis())
-
     def dimension(self):
         """
         Return the dimension of this free module.
@@ -3057,37 +3037,6 @@ class FreeModule_generic_pid(FreeModule_generic_domain):
             0
         """
         return self.degree() - self.rank()
-
-    def scale(self, other):
-        """
-        Return the product of this module by the number other, which is the
-        module spanned by other times each basis vector.
-
-        EXAMPLES::
-
-            sage: M = FreeModule(ZZ, 3)
-            sage: M.scale(2)
-            Free module of degree 3 and rank 3 over Integer Ring
-            Echelon basis matrix:
-            [2 0 0]
-            [0 2 0]
-            [0 0 2]
-
-        ::
-
-            sage: a = QQ('1/3')
-            sage: M.scale(a)
-            Free module of degree 3 and rank 3 over Integer Ring
-            Echelon basis matrix:
-            [1/3   0   0]
-            [  0 1/3   0]
-            [  0   0 1/3]
-        """
-        if other == 0:
-            return self.zero_submodule()
-        if other == 1 or other == -1:
-            return self
-        return self.span([v*other for v in self.basis()])
 
     def index_in(self, other):
         """
