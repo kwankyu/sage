@@ -565,4 +565,10 @@ class Matrix_mpolynomial_dense(_Matrix_mpolynomial_dense, Matrix_ring):
     """
     row_module = Matrix_ring.row_module
 
+class Matrix_mpolynomial_dense(_Matrix_mpolynomial_dense, Matrix_ring):
+    """
+    Base class for dense matrices over a multivariate polynomial ring over a field.
+    """
+    row_module = Matrix_ring.row_module
+
 
