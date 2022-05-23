@@ -2902,8 +2902,8 @@ class FreeModule_generic_domain(FreeModule_generic):
             if other == 0:
                 return self
             raise TypeError("other (=%s) must be a free module"%other)
-        if not (self.ambient_vector_space() == other.ambient_vector_space()):
-            raise TypeError("ambient vector spaces must be equal")
+        if not (self.ambient_module() == other.ambient_module()):
+            raise TypeError("ambient modules must be equal")
         return self.span(self.basis() + other.basis())
 
     def zero_submodule(self):
