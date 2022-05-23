@@ -22,7 +22,7 @@ AUTHOR:
 from sage.rings.polynomial.multi_polynomial_libsingular cimport new_MP
 
 from sage.matrix.matrix_generic_dense cimport Matrix_generic_dense
-from sage.matrix.matrix2 cimport Matrix, Matrix_ring
+from sage.matrix.matrix2 cimport Matrix
 
 from sage.rings.polynomial.multi_polynomial_libsingular cimport MPolynomial_libsingular
 from sage.rings.polynomial.multi_polynomial_libsingular cimport MPolynomialRing_libsingular
@@ -31,7 +31,7 @@ from sage.rings.polynomial.polynomial_singular_interface import can_convert_to_s
 from sage.libs.singular.function import singular_function
 
 
-cdef class _Matrix_mpolynomial_dense(Matrix_generic_dense):
+cdef class Matrix_mpolynomial_dense(Matrix_generic_dense):
     """
     Dense matrix over a multivariate polynomial ring over a field.
     """
@@ -558,12 +558,3 @@ cdef class _Matrix_mpolynomial_dense(Matrix_generic_dense):
 
         self.cache('det', d)
         return d
-
-
-class Matrix_mpolynomial_dense(_Matrix_mpolynomial_dense, Matrix_ring):
-    """
-    Base class for dense matrices over a multivariate polynomial ring over a field.
-    """
-    row_module = Matrix_ring.row_module
-
-
