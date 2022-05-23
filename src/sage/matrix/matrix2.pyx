@@ -104,14 +104,50 @@ from sage.misc.superseded import deprecated_function_alias
 
 _Fields = Fields()
 
-
-cdef class Matrix_ring(Matrix1):
+cdef class Matrix(Matrix1):
     """
-    Base class for matrices over an arbitrary ring.
+    Base class for matrices, part 2
 
-    A matrix of this class may not have an echelon form, and is restricted to
-    basic computations that do not rely on echelon form.
+    TESTS::
+
+        sage: m = matrix(ZZ['x'], 2, 3, [1..6])
+        sage: TestSuite(m).run()
+
+    Check that a pair consisting of a matrix and its echelon form is
+    pickled correctly (this used to give a wrong answer due to a Python
+    bug, see :trac:`17527`)::
+
+        sage: K.<x> = FractionField(QQ['x'])
+        sage: m = Matrix([[1], [x]])
+        sage: t = (m, m.echelon_form())
+        sage: loads(dumps(t))
+        (
+        [1]  [1]
+        [x], [0]
+        )
     """
+    def _backslash_(self, B):
+        r"""
+        Used to compute `A \backslash B`, i.e., the backslash solver
+        operator.
+
+        EXAMPLES::
+
+            sage: A = matrix(QQ, 3, [1,2,4,2,3,1,0,1,2])
+            sage: B = matrix(QQ, 3, 2, [1,7,5, 2,1,3])
+            sage: C = A._backslash_(B); C
+            [  -1    1]
+            [13/5 -3/5]
+            [-4/5  9/5]
+            sage: A*C == B
+            True
+            sage: A._backslash_(B) == A \ B
+            True
+            sage: A._backslash_(B) == A.solve_right(B)
+            True
+        """
+        return self.solve_right(B)
+
     def subs(self, *args, **kwds):
         """
         Substitute values to the variables in that matrix.
@@ -161,1824 +197,6 @@ cdef class Matrix_ring(Matrix1):
         else:
             return matrix([a.subs(*args, **kwds) for a in self.list()],
                         nrows=self._nrows, ncols=self._ncols, sparse=False)
-
-    def prod_of_row_sums(self, cols):
-        r"""
-        Calculate the product of all row sums of a submatrix of `A`
-        for a list of selected columns ``cols``.
-
-        EXAMPLES::
-
-            sage: a = matrix(QQ, 2,2, [1,2,3,2]); a
-            [1 2]
-            [3 2]
-            sage: a.prod_of_row_sums([0,1])
-            15
-
-        Another example::
-
-            sage: a = matrix(QQ, 2,3, [1,2,3,2,5,6]); a
-            [1 2 3]
-            [2 5 6]
-            sage: a.prod_of_row_sums([1,2])
-            55
-        """
-        cdef Py_ssize_t c, row
-        pr = 1
-        for row from 0 <= row < self._nrows:
-            tmp = []
-            for c in cols:
-#               if c<0 or c >= self._ncols:
-#                   raise IndexError("matrix column index out of range")
-                tmp.append(self.get_unsafe(row, c))
-            pr = pr * sum(tmp)
-        return pr
-
-    def elementwise_product(self, right):
-        r"""
-        Returns the elementwise product of two matrices
-        of the same size (also known as the Hadamard product).
-
-        INPUT:
-
-        - ``right`` - the right operand of the product.  A matrix
-          of the same size as ``self`` such that multiplication
-          of elements of the base rings of ``self`` and ``right``
-          is defined, once Sage's coercion model is applied.  If
-          the matrices have different sizes, or if multiplication
-          of individual entries cannot be achieved, a ``TypeError``
-          will result.
-
-        OUTPUT:
-
-        A matrix of the same size as ``self`` and ``right``.  The
-        entry in location `(i,j)` of the output is the product of
-        the two entries in location `(i,j)` of ``self`` and
-        ``right`` (in that order).
-
-        The parent of the result is determined by Sage's coercion
-        model.  If the base rings are identical, then the result
-        is dense or sparse according to this property for
-        the left operand.  If the base rings must be adjusted
-        for one, or both, matrices then the result will be sparse
-        only if both operands are sparse.  No subdivisions are
-        present in the result.
-
-        If the type of the result is not to your liking, or
-        the ring could be "tighter," adjust the operands with
-        :meth:`~sage.matrix.matrix0.Matrix.change_ring`.
-        Adjust sparse versus dense inputs with the methods
-        :meth:`~sage.matrix.matrix1.Matrix.sparse_matrix` and
-        :meth:`~sage.matrix.matrix1.Matrix.dense_matrix`.
-
-        EXAMPLES::
-
-            sage: A = matrix(ZZ, 2, 3, range(6))
-            sage: B = matrix(QQ, 2, 3, [5, 1/3, 2/7, 11/2, -3/2, 8])
-            sage: C = A.elementwise_product(B)
-            sage: C
-            [   0  1/3  4/7]
-            [33/2   -6   40]
-            sage: C.parent()
-            Full MatrixSpace of 2 by 3 dense matrices over Rational Field
-
-
-        Notice the base ring of the results in the next two examples.  ::
-
-            sage: D = matrix(ZZ['x'],2,[1+x^2,2,3,4-x])
-            sage: E = matrix(QQ,2,[1,2,3,4])
-            sage: F = D.elementwise_product(E)
-            sage: F
-            [  x^2 + 1         4]
-            [        9 -4*x + 16]
-            sage: F.parent()
-            Full MatrixSpace of 2 by 2 dense matrices over Univariate Polynomial Ring in x over Rational Field
-
-        ::
-
-            sage: G = matrix(GF(3),2,[0,1,2,2])
-            sage: H = matrix(ZZ,2,[1,2,3,4])
-            sage: J = G.elementwise_product(H)
-            sage: J
-            [0 2]
-            [0 2]
-            sage: J.parent()
-            Full MatrixSpace of 2 by 2 dense matrices over Finite Field of size 3
-
-        Non-commutative rings behave as expected.  These are the usual quaternions. ::
-
-            sage: R.<i,j,k> = QuaternionAlgebra(-1, -1)
-            sage: A = matrix(R, 2, [1,i,j,k])
-            sage: B = matrix(R, 2, [i,i,i,i])
-            sage: A.elementwise_product(B)
-            [ i -1]
-            [-k  j]
-            sage: B.elementwise_product(A)
-            [ i -1]
-            [ k -j]
-
-        Input that is not a matrix will raise an error.  ::
-
-            sage: A = random_matrix(ZZ,5,10,x=20)
-            sage: A.elementwise_product(vector(ZZ, [1,2,3,4]))
-            Traceback (most recent call last):
-            ...
-            TypeError: no common canonical parent for objects with parents: 'Full MatrixSpace of 5 by 10 dense matrices over Integer Ring' and 'Ambient free module of rank 4 over the principal ideal domain Integer Ring'
-
-            sage: A = matrix(2, 2, range(4))
-            sage: A.elementwise_product(polygen(parent(A)))
-            Traceback (most recent call last):
-            ...
-            TypeError: elementwise_product() argument should be a matrix or coercible to a matrix
-
-        Matrices of different sizes for operands will raise an error. ::
-
-            sage: A = random_matrix(ZZ,5,10,x=20)
-            sage: B = random_matrix(ZZ,10,5,x=40)
-            sage: A.elementwise_product(B)
-            Traceback (most recent call last):
-            ...
-            TypeError: no common canonical parent for objects with parents: 'Full MatrixSpace of 5 by 10 dense matrices over Integer Ring' and 'Full MatrixSpace of 10 by 5 dense matrices over Integer Ring'
-
-        Some pairs of rings do not have a common parent where
-        multiplication makes sense.  This will raise an error. ::
-
-            sage: A = matrix(QQ, 3, 2, range(6))
-            sage: B = matrix(GF(3), 3, [2]*6)
-            sage: A.elementwise_product(B)
-            Traceback (most recent call last):
-            ...
-            TypeError: no common canonical parent for objects with parents: 'Full MatrixSpace of 3 by 2 dense matrices over Rational Field' and 'Full MatrixSpace of 3 by 2 dense matrices over Finite Field of size 3'
-
-        We illustrate various combinations of sparse and dense matrices.
-        The usual coercion rules apply::
-
-            sage: A = matrix(ZZ, 5, 6, range(30), sparse=False)
-            sage: B = matrix(ZZ, 5, 6, range(30), sparse=True)
-            sage: C = matrix(QQ, 5, 6, range(30), sparse=True)
-            sage: A.elementwise_product(C).is_sparse()
-            True
-            sage: B.elementwise_product(C).is_sparse()
-            True
-            sage: A.elementwise_product(B).is_dense()
-            True
-            sage: B.elementwise_product(A).is_dense()
-            True
-
-        TESTS:
-
-        Implementation for dense and sparse matrices are
-        different, this will provide a trivial test that
-        they are working identically. ::
-
-            sage: A = random_matrix(ZZ, 10, x=1000, sparse=False)
-            sage: B = random_matrix(ZZ, 10, x=1000, sparse=False)
-            sage: C = A.sparse_matrix()
-            sage: D = B.sparse_matrix()
-            sage: E = A.elementwise_product(B)
-            sage: F = C.elementwise_product(D)
-            sage: E.is_dense() and F.is_sparse() and (E == F)
-            True
-
-        If the ring has zero divisors, the routines for setting
-        entries of a sparse matrix should intercept zero results
-        and not create an entry. ::
-
-            sage: R = Integers(6)
-            sage: A = matrix(R, 2, [3, 2, 0, 0], sparse=True)
-            sage: B = matrix(R, 2, [2, 3, 1, 0], sparse=True)
-            sage: C = A.elementwise_product(B)
-            sage: len(C.nonzero_positions()) == 0
-            True
-        """
-        # Optimized routines for specialized classes would likely be faster
-        # See the "pairwise_product" of vectors for some guidance on doing this
-        if have_same_parent(self, right):
-            return self._elementwise_product(right)
-        A, B = coercion_model.canonical_coercion(self, right)
-        if not isinstance(A, Matrix):
-            # Canonical coercion is not a matrix?!
-            raise TypeError("elementwise_product() argument should be a matrix or coercible to a matrix")
-        return (<Matrix>A)._elementwise_product(B)
-
-    def permanent(self, algorithm="Ryser"):
-        r"""
-        Return the permanent of this matrix.
-
-        Let `A = (a_{i,j})` be an `m \times n` matrix over any
-        commutative ring with `m \le n`. The permanent of `A` is
-
-        .. MATH::
-
-           \mathrm{per}(A)
-           = \sum_\pi a_{1,\pi(1)} a_{2,\pi(2)} \cdots a_{m,\pi(m)}
-
-        where the summation extends over all one-to-one functions
-        `\pi` from `\{1, \ldots, m\}` to `\{1, \ldots, n\}`.
-
-        The product
-        `a_{1,\pi(1)} a_{2,\pi(2)} \cdots a_{m,\pi(m)}` is
-        called *diagonal product*. So the permanent of an
-        `m \times n` matrix `A` is the sum of all the
-        diagonal products of `A`.
-
-        By default, this method uses Ryser's algorithm, but setting
-        ``algorithm`` to "ButeraPernici" you can use the algorithm of Butera and
-        Pernici (which is well suited for band matrices, i.e. matrices whose
-        entries are concentrated near the diagonal).
-
-        INPUT:
-
-        - ``A`` -- matrix of size `m \times n` with `m \leq n`
-
-        - ``algorithm`` -- either "Ryser" (default) or "ButeraPernici". The
-          Butera-Pernici algorithm takes advantage of presence of zeros and is
-          very well suited for sparse matrices.
-
-        ALGORITHM:
-
-        The Ryser algorithm is implemented in the method
-        :meth:`_permanent_ryser`. It is a modification of theorem 7.1.1. from
-        Brualdi and Ryser: Combinatorial Matrix Theory. Instead of deleting
-        columns from `A`, we choose columns from `A` and calculate the product
-        of the row sums of the selected submatrix.
-
-        The Butera-Pernici algorithm is implemented in the function
-        :func:`~sage.matrix.matrix_misc.permanental_minor_polynomial`. It takes
-        advantage of cancellations that may occur in the computations.
-
-        EXAMPLES::
-
-            sage: A = ones_matrix(4,4)
-            sage: A.permanent()
-            24
-
-            sage: A = matrix(3,6,[1,1,1,1,0,0,0,1,1,1,1,0,0,0,1,1,1,1])
-            sage: A.permanent()
-            36
-            sage: B = A.change_ring(RR)
-            sage: B.permanent()
-            36.0000000000000
-
-        The permanent above is directed to the Sloane's sequence :oeis:`A079908`
-        ("The Dancing School Problems") for which the third term is 36:
-
-        ::
-
-            sage: oeis(79908)                           # optional -- internet
-            A079908: Solution to the Dancing School Problem with 3 girls and n+3 boys: f(3,n).
-            sage: _(3)                                  # optional -- internet
-            36
-
-        ::
-
-            sage: A = matrix(4,5,[1,1,0,1,1,0,1,1,1,1,1,0,1,0,1,1,1,0,1,0])
-            sage: A.permanent()
-            32
-
-        A huge permanent that cannot be reasonably computed with the Ryser
-        algorithm (a `50 \times 50` band matrix with width `5`)::
-
-            sage: n, w = 50, 5
-            sage: A = matrix(ZZ, n, n, lambda i,j: (i+j)%5 + 1 if abs(i-j) <= w else 0)
-            sage: A.permanent(algorithm="ButeraPernici")
-            57766972735511097036962481710892268404670105604676932908
-
-        See Minc: Permanents, Example 2.1, p. 5.
-
-        ::
-
-            sage: A = matrix(QQ,2,2,[1/5,2/7,3/2,4/5])
-            sage: A.permanent()
-            103/175
-
-        ::
-
-            sage: R.<a> = PolynomialRing(ZZ)
-            sage: A = matrix(R,2,2,[a,1,a,a+1])
-            sage: A.permanent()
-            a^2 + 2*a
-
-        ::
-
-            sage: R.<x,y> = PolynomialRing(ZZ,2)
-            sage: A = matrix(R,2,2,[x, y, x^2, y^2])
-            sage: A.permanent()
-            x^2*y + x*y^2
-        """
-        if algorithm == "Ryser":
-            return self._permanent_ryser()
-
-        elif algorithm == "ButeraPernici":
-            return permanental_minor_polynomial(self, True)
-
-        else:
-            raise ValueError("algorithm must be one of \"Ryser\" or \"ButeraPernici\".")
-
-    def _permanent_ryser(self):
-        r"""
-        Return the permanent computed using Ryser algorithm.
-
-        See :meth:`permanent` for the documentation.
-
-        EXAMPLES::
-
-            sage: m = matrix([[1,1],[1,1]])
-            sage: m._permanent_ryser()
-            2
-        """
-        cdef Py_ssize_t m, n, r
-        cdef int sn
-
-        perm = 0
-        m = self._nrows
-        n = self._ncols
-        if not m <= n:
-            raise ValueError("must have m <= n, but m (=%s) and n (=%s)"%(m,n))
-
-        for r from 1 <= r < m+1:
-            lst = _choose(n, r)
-            tmp = []
-            for cols in lst:
-                tmp.append(self.prod_of_row_sums(cols))
-            s = sum(tmp)
-            # sn = (-1)^(m-r)
-            if (m - r) % 2 == 0:
-                sn = 1
-            else:
-                sn = -1
-            perm = perm + sn * _binomial(n-r, m-r) * s
-        return perm
-
-    def permanental_minor(self, Py_ssize_t k, algorithm="Ryser"):
-        r"""
-        Return the permanental `k`-minor of this matrix.
-
-        The *permanental* `k`-*minor* of a matrix `A` is the sum of the
-        permanents of all possible `k` by `k` submatrices of `A`. Note that the
-        maximal permanental minor is just the permanent.
-
-        For a (0,1)-matrix `A` the permanental `k`-minor
-        counts the number of different selections of `k` 1's of
-        `A` with no two of the 1's on the same row and no two of the
-        1's on the same column.
-
-        See Brualdi and Ryser: Combinatorial Matrix Theory, p. 203. Note
-        the typo `p_0(A) = 0` in that reference! For applications
-        see Theorem 7.2.1 and Theorem 7.2.4.
-
-        .. SEEALSO::
-
-            The method :meth:`rook_vector` returns the list of all permanental
-            minors.
-
-        INPUT:
-
-        - ``k`` -- the size of the minor
-
-        - ``algorithm`` -- either "Ryser" (default) or "ButeraPernici". The
-          Butera-Pernici algorithm is well suited for band matrices.
-
-        EXAMPLES::
-
-            sage: A = matrix(4,[1,0,1,0,1,0,1,0,1,0,10,10,1,0,1,1])
-            sage: A.permanental_minor(2)
-            114
-
-        ::
-
-            sage: A = matrix(3,6,[1,1,1,1,0,0,0,1,1,1,1,0,0,0,1,1,1,1])
-            sage: A.permanental_minor(0)
-            1
-            sage: A.permanental_minor(1)
-            12
-            sage: A.permanental_minor(2)
-            40
-            sage: A.permanental_minor(3)
-            36
-
-        Note that if `k = m = n`, the permanental `k`-minor equals
-        `\mathrm{per}(A)`::
-
-            sage: A.permanent()
-            36
-
-        The permanental minors of the "complement" matrix of `A` is
-        related to the permanent of `A`::
-
-            sage: m, n = 3, 6
-            sage: C = matrix(m, n, lambda i,j: 1 - A[i,j])
-            sage: sum((-1)^k * C.permanental_minor(k)*factorial(n-k)/factorial(n-m) for k in range(m+1))
-            36
-
-        See Theorem 7.2.1 of Brualdi and Ryser: Combinatorial Matrix
-        Theory: per(A)
-
-        TESTS::
-
-            sage: A.permanental_minor(5)
-            0
-        """
-        if algorithm == "Ryser":
-            return self._permanental_minor_ryser(k)
-
-        elif algorithm == "ButeraPernici":
-            p = permanental_minor_polynomial(self, prec=k+1)
-            return p[k]
-
-        else:
-            raise ValueError("algorithm must be one of \"Ryser\" or \"ButeraPernici\".")
-
-    def _permanental_minor_ryser(self, Py_ssize_t k):
-        r"""
-        Compute the `k`-th permanental minor using Ryser algorithm.
-
-        See :meth:`permanental_minor` for the documentation.
-
-        EXAMPLES::
-
-            sage: m = matrix([[1,2,1],[3,4,3],[5,6,5]])
-            sage: m._permanental_minor_ryser(1)
-            30
-            sage: m._permanental_minor_ryser(2)
-            174
-            sage: m._permanental_minor_ryser(3)
-            136
-        """
-        m = self._nrows
-        n = self._ncols
-
-        R = self._base_ring
-        if k == 0:
-            return R.one()
-        if k > m:
-            return R.zero()
-
-        pm = 0
-        for cols in _choose(n,k):
-            for rows in _choose(m,k):
-                pm = pm + self.matrix_from_rows_and_columns(rows, cols).permanent()
-        return pm
-
-    def minors(self, k):
-        r"""
-        Return the list of all `k \times k` minors of self.
-
-        Let `A` be an `m \times n` matrix and `k` an integer with
-        `0 \leq k`, `k \leq m` and `k \leq n`.
-        A `k \times k` minor of `A` is the determinant of a
-        `k \times k` matrix obtained from `A` by deleting `m - k`
-        rows and `n - k` columns.
-        There are no `k \times k` minors of `A` if `k` is larger
-        than either `m` or `n`.
-
-        The returned list is sorted in lexicographical row major ordering,
-        e.g., if A is a `3 \times 3` matrix then the minors returned are
-        with these rows/columns: [ [0, 1]x[0, 1], [0, 1]x[0, 2], [0, 1]x[1, 2],
-        [0, 2]x[0, 1], [0, 2]x[0, 2], [0, 2]x[1, 2], [1, 2]x[0, 1], [1,
-        2]x[0, 2], [1, 2]x[1, 2] ].
-
-        INPUT:
-
-        - ``k`` -- integer
-
-        EXAMPLES::
-
-            sage: A = Matrix(ZZ,2,3,[1,2,3,4,5,6]); A
-            [1 2 3]
-            [4 5 6]
-            sage: A.minors(2)
-            [-3, -6, -3]
-            sage: A.minors(1)
-            [1, 2, 3, 4, 5, 6]
-            sage: A.minors(0)
-            [1]
-            sage: A.minors(5)
-            []
-
-        ::
-
-            sage: k = GF(37)
-            sage: P.<x0,x1,x2> = PolynomialRing(k)
-            sage: A = Matrix(P,2,3,[x0*x1, x0, x1, x2, x2 + 16, x2 + 5*x1 ])
-            sage: A.minors(2)
-            [x0*x1*x2 + 16*x0*x1 - x0*x2, 5*x0*x1^2 + x0*x1*x2 - x1*x2, 5*x0*x1 + x0*x2 - x1*x2 - 16*x1]
-
-        This test addresses an issue raised at :trac:`20512`::
-
-            sage: A.minors(0)[0].parent() == P
-            True
-        """
-        from sage.combinat.combination import Combinations
-        if k == 0:
-            return [self.base_ring().one()]
-        all_rows = range(self.nrows())
-        all_cols = range(self.ncols())
-        m = []
-        for rows in Combinations(all_rows,k):
-            for cols in Combinations(all_cols,k):
-                m.append(self.matrix_from_rows_and_columns(rows,cols).determinant())
-        return m
-
-    def apply_morphism(self, phi):
-        """
-        Apply the morphism phi to the coefficients of this dense matrix.
-
-        The resulting matrix is over the codomain of phi.
-
-        INPUT:
-
-
-        -  ``phi`` - a morphism, so phi is callable and
-           phi.domain() and phi.codomain() are defined. The codomain must be a
-           ring.
-
-        OUTPUT: a matrix over the codomain of phi
-
-        EXAMPLES::
-
-            sage: m = matrix(ZZ, 3, 3, range(9))
-            sage: phi = ZZ.hom(GF(5))
-            sage: m.apply_morphism(phi)
-            [0 1 2]
-            [3 4 0]
-            [1 2 3]
-            sage: parent(m.apply_morphism(phi))
-            Full MatrixSpace of 3 by 3 dense matrices over Finite Field of size 5
-
-        We apply a morphism to a matrix over a polynomial ring::
-
-            sage: R.<x,y> = QQ[]
-            sage: m = matrix(2, [x,x^2 + y, 2/3*y^2-x, x]); m
-            [          x     x^2 + y]
-            [2/3*y^2 - x           x]
-            sage: phi = R.hom([y,x])
-            sage: m.apply_morphism(phi)
-            [          y     y^2 + x]
-            [2/3*x^2 - y           y]
-        """
-        M = self.parent().change_ring(phi.codomain())
-        if self.is_sparse():
-            values = {(i,j): phi(z) for (i,j),z in self.dict()}
-        else:
-            values = [phi(z) for z in self.list()]
-        image = M(values)
-        if self._subdivisions is not None:
-            image.subdivide(*self.subdivisions())
-        return image
-
-    def apply_map(self, phi, R=None, sparse=None):
-        """
-        Apply the given map phi (an arbitrary Python function or callable
-        object) to this dense matrix. If R is not given, automatically
-        determine the base ring of the resulting matrix.
-
-        INPUT:
-
-        - ``sparse`` -- True to make the output a sparse matrix; default False
-
-        -  ``phi`` - arbitrary Python function or callable object
-
-        -  ``R`` - (optional) ring
-
-        OUTPUT: a matrix over R
-
-        EXAMPLES::
-
-            sage: m = matrix(ZZ, 3, 3, range(9))
-            sage: k.<a> = GF(9)
-            sage: f = lambda x: k(x)
-            sage: n = m.apply_map(f); n
-            [0 1 2]
-            [0 1 2]
-            [0 1 2]
-            sage: n.parent()
-            Full MatrixSpace of 3 by 3 dense matrices over Finite Field in a of size 3^2
-
-        In this example, we explicitly specify the codomain.
-
-        ::
-
-            sage: s = GF(3)
-            sage: f = lambda x: s(x)
-            sage: n = m.apply_map(f, k); n
-            [0 1 2]
-            [0 1 2]
-            [0 1 2]
-            sage: n.parent()
-            Full MatrixSpace of 3 by 3 dense matrices over Finite Field in a of size 3^2
-
-        If self is subdivided, the result will be as well::
-
-            sage: m = matrix(2, 2, srange(4))
-            sage: m.subdivide(None, 1); m
-            [0|1]
-            [2|3]
-            sage: m.apply_map(lambda x: x*x)
-            [0|1]
-            [4|9]
-
-        If the matrix is sparse, the result will be as well::
-
-            sage: m = matrix(ZZ,100,100,sparse=True)
-            sage: m[18,32] = -6
-            sage: m[1,83] = 19
-            sage: n = m.apply_map(abs, R=ZZ)
-            sage: n.dict()
-            {(1, 83): 19, (18, 32): 6}
-            sage: n.is_sparse()
-            True
-
-        If the map sends most of the matrix to zero, then it may be useful
-        to get the result as a sparse matrix.
-
-        ::
-
-            sage: m = matrix(ZZ, 3, 3, range(1, 10))
-            sage: n = m.apply_map(lambda x: 1//x, sparse=True); n
-            [1 0 0]
-            [0 0 0]
-            [0 0 0]
-            sage: n.parent()
-            Full MatrixSpace of 3 by 3 sparse matrices over Integer Ring
-
-        TESTS::
-
-            sage: m = matrix([])
-            sage: m.apply_map(lambda x: x*x) == m
-            True
-
-            sage: m.apply_map(lambda x: x*x, sparse=True).parent()
-            Full MatrixSpace of 0 by 0 sparse matrices over Integer Ring
-
-        Check that :trac:`19920` is fixed::
-
-            sage: matrix.ones(2).apply_map(lambda x: int(-3))
-            [-3 -3]
-            [-3 -3]
-        """
-        if self._nrows == 0 or self._ncols == 0:
-            if sparse is None or self.is_sparse() is sparse:
-                return self.__copy__()
-            elif sparse:
-                return self.sparse_matrix()
-            else:
-                return self.dense_matrix()
-
-        if self.is_sparse():
-            values = {(i,j): phi(v) for (i,j),v in self.dict().iteritems()}
-            if R is None:
-                R = sage.structure.sequence.Sequence(values.values()).universe()
-        else:
-            values = [phi(v) for v in self.list()]
-            if R is None:
-                R = sage.structure.sequence.Sequence(values).universe()
-
-        if isinstance(R, type):
-            R = py_scalar_parent(R)
-        if not is_Ring(R):
-            raise TypeError("unable to find a common ring for all elements")
-
-        if sparse is None or sparse is self.is_sparse():
-            M = self.parent().change_ring(R)
-        else:
-            from sage.matrix.matrix_space import MatrixSpace
-            M = MatrixSpace(R, self._nrows,
-                       self._ncols, sparse=sparse)
-        image = M(values)
-        if self._subdivisions is not None:
-            image.subdivide(*self.subdivisions())
-        return image
-
-    def diagonal(self):
-        r"""
-        Return the diagonal entries of ``self``.
-
-        OUTPUT:
-
-        A list containing the entries of the matrix that
-        have equal row and column indices, in order of the
-        indices.  Behavior is not limited to square matrices.
-
-        EXAMPLES::
-
-            sage: A = matrix([[2,5],[3,7]]); A
-            [2 5]
-            [3 7]
-            sage: A.diagonal()
-            [2, 7]
-
-        Two rectangular matrices. ::
-
-            sage: B = matrix(3, 7, range(21)); B
-            [ 0  1  2  3  4  5  6]
-            [ 7  8  9 10 11 12 13]
-            [14 15 16 17 18 19 20]
-            sage: B.diagonal()
-            [0, 8, 16]
-
-            sage: C = matrix(3, 2, range(6)); C
-            [0 1]
-            [2 3]
-            [4 5]
-            sage: C.diagonal()
-            [0, 3]
-
-        Empty matrices behave properly. ::
-
-            sage: E = matrix(0, 5, []); E
-            []
-            sage: E.diagonal()
-            []
-        """
-        n = min(self.nrows(), self.ncols())
-        return [self[i,i] for i in range(n)]
-
-    def trace(self):
-        """
-        Return the trace of self, which is the sum of the diagonal entries
-        of self.
-
-        INPUT:
-
-
-        -  ``self`` - a square matrix
-
-
-        OUTPUT: element of the base ring of self
-
-        EXAMPLES::
-
-            sage: a = matrix(3,3,range(9)); a
-            [0 1 2]
-            [3 4 5]
-            [6 7 8]
-            sage: a.trace()
-            12
-            sage: a = matrix({(1,1):10, (2,1):-3, (2,2):4/3}); a
-            [  0   0   0]
-            [  0  10   0]
-            [  0  -3 4/3]
-            sage: a.trace()
-            34/3
-        """
-        if self._nrows != self._ncols:
-            raise ValueError("self must be a square matrix")
-        R = self._base_ring
-        cdef Py_ssize_t i
-        cdef object s
-        s = R(0)
-        for i from 0 <= i < self._nrows:
-            s = s + self.get_unsafe(i,i)
-        return s
-
-    def trace_of_product(self, Matrix other):
-        """
-        Returns the trace of self * other without computing the entire product.
-
-        EXAMPLES::
-
-            sage: M = random_matrix(ZZ, 10, 20)
-            sage: N = random_matrix(ZZ, 20, 10)
-            sage: M.trace_of_product(N) == (M*N).trace()
-            True
-        """
-        if self._nrows != other._ncols or other._nrows != self._ncols:
-            raise ArithmeticError("incompatible dimensions")
-        s = self._base_ring(0)
-        for i from 0 <= i < self._nrows:
-            for j from 0 <= j < self._ncols:
-                s += self.get_unsafe(i, j) * other.get_unsafe(j, i)
-        return s
-
-    def set_block(self, row, col, block):
-        """
-        Sets the sub-matrix of self, with upper left corner given by row,
-        col to block.
-
-        EXAMPLES::
-
-            sage: A = matrix(QQ, 3, 3, range(9))/2
-            sage: B = matrix(ZZ, 2, 1, [100,200])
-            sage: A.set_block(0, 1, B)
-            sage: A
-            [  0 100   1]
-            [3/2 200 5/2]
-            [  3 7/2   4]
-
-        We test that an exception is raised when the block is out of
-        bounds::
-
-            sage: matrix([1]).set_block(0,1,matrix([1]))
-            Traceback (most recent call last):
-            ...
-            IndexError: matrix window index out of range
-        """
-        self.check_mutability()
-        if block.base_ring() is not self.base_ring():
-            block = block.change_ring(self.base_ring())
-        window = self.matrix_window(row, col, block.nrows(), block.ncols(), check=True)
-        window.set(block.matrix_window())
-
-    def subdivide(self, row_lines=None, col_lines=None):
-        r"""
-        Divides ``self`` into logical submatrices which can then be queried
-        and extracted.
-
-        If a subdivision already exists, this method forgets the
-        previous subdivision and flushes the cache.
-
-        INPUT:
-
-        - ``row_lines`` -- ``None``, an integer, or a list of
-          integers (lines at which self must be split)
-
-        - ``col_lines`` -- ``None``, an integer, or a list of
-          integers (columns at which self must be split)
-
-        OUTPUT: ``None`` but changes ``self``
-
-        .. NOTE::
-
-           One may also pass a tuple into the first argument which
-           will be interpreted as ``(row_lines, col_lines)``.
-
-        EXAMPLES::
-
-            sage: M = matrix(5, 5, prime_range(100))
-            sage: M.subdivide(2,3); M
-            [ 2  3  5| 7 11]
-            [13 17 19|23 29]
-            [--------+-----]
-            [31 37 41|43 47]
-            [53 59 61|67 71]
-            [73 79 83|89 97]
-            sage: M.subdivision(0,0)
-            [ 2  3  5]
-            [13 17 19]
-            sage: M.subdivision(1,0)
-            [31 37 41]
-            [53 59 61]
-            [73 79 83]
-            sage: M.subdivision_entry(1,0,0,0)
-            31
-            sage: M.subdivisions()
-            ([2], [3])
-            sage: M.subdivide(None, [1,3]); M
-            [ 2| 3  5| 7 11]
-            [13|17 19|23 29]
-            [31|37 41|43 47]
-            [53|59 61|67 71]
-            [73|79 83|89 97]
-
-        Degenerate cases work too::
-
-            sage: M.subdivide([2,5], [0,1,3]); M
-            [| 2| 3  5| 7 11]
-            [|13|17 19|23 29]
-            [+--+-----+-----]
-            [|31|37 41|43 47]
-            [|53|59 61|67 71]
-            [|73|79 83|89 97]
-            [+--+-----+-----]
-            sage: M.subdivision(0,0)
-            []
-            sage: M.subdivision(0,1)
-            [ 2]
-            [13]
-            sage: M.subdivide([2,2,3], [0,0,1,1]); M
-            [|| 2|| 3  5  7 11]
-            [||13||17 19 23 29]
-            [++--++-----------]
-            [++--++-----------]
-            [||31||37 41 43 47]
-            [++--++-----------]
-            [||53||59 61 67 71]
-            [||73||79 83 89 97]
-            sage: M.subdivision(0,0)
-            []
-            sage: M.subdivision(2,4)
-            [37 41 43 47]
-
-        Indices do not need to be in the right order (:trac:`14064`)::
-
-            sage: M.subdivide([4, 2], [3, 1]); M
-            [ 2| 3  5| 7 11]
-            [13|17 19|23 29]
-            [--+-----+-----]
-            [31|37 41|43 47]
-            [53|59 61|67 71]
-            [--+-----+-----]
-            [73|79 83|89 97]
-
-        TESTS:
-
-        Input such that the matrix has no subdivision results in
-        the ``_subdivision`` attribute being set to ``None``::
-
-            sage: A = matrix.identity(QQ, 4)
-            sage: A._subdivisions is None
-            True
-            sage: A.subdivide()
-            sage: A._subdivisions is None
-            True
-            sage: A.subdivide(2, 3)  # perform a subdivision
-            sage: A._subdivisions is None
-            False
-            sage: A.subdivide(([], []))  # now reset
-            sage: A._subdivisions is None
-            True
-        """
-        self.check_mutability()
-        if col_lines is None and row_lines is not None and isinstance(row_lines, tuple):
-            tmp = row_lines
-            row_lines, col_lines = tmp
-        if row_lines is None:
-            row_lines = []
-        elif not isinstance(row_lines, list):
-            row_lines = [row_lines]
-        if col_lines is None:
-            col_lines = []
-        elif not isinstance(col_lines, list):
-            col_lines = [col_lines]
-        if self._subdivisions is not None:
-            self.clear_cache()
-        if (not row_lines) and (not col_lines):
-            self._subdivisions = None
-        else:
-            l_row = sorted(row_lines)
-            l_col = sorted(col_lines)
-            l_row = [0] + [int(ZZ(x)) for x in l_row] + [self._nrows]
-            l_col = [0] + [int(ZZ(x)) for x in l_col] + [self._ncols]
-            self._subdivisions = (l_row, l_col)
-
-    def subdivision(self, i, j):
-        """
-        Returns an immutable copy of the (i,j)th submatrix of self,
-        according to a previously set subdivision.
-
-        Before a subdivision is set, the only valid arguments are (0,0)
-        which returns self.
-
-        EXAMPLES::
-
-            sage: M = matrix(3, 4, range(12))
-            sage: M.subdivide(1,2); M
-            [ 0  1| 2  3]
-            [-----+-----]
-            [ 4  5| 6  7]
-            [ 8  9|10 11]
-            sage: M.subdivision(0,0)
-            [0 1]
-            sage: M.subdivision(0,1)
-            [2 3]
-            sage: M.subdivision(1,0)
-            [4 5]
-            [8 9]
-
-        It handles size-zero subdivisions as well.
-
-        ::
-
-            sage: M = matrix(3, 4, range(12))
-            sage: M.subdivide([0],[0,2,2,4]); M
-            [+-----++-----+]
-            [| 0  1|| 2  3|]
-            [| 4  5|| 6  7|]
-            [| 8  9||10 11|]
-            sage: M.subdivision(0,0)
-            []
-            sage: M.subdivision(1,1)
-            [0 1]
-            [4 5]
-            [8 9]
-            sage: M.subdivision(1,2)
-            []
-            sage: M.subdivision(1,0)
-            []
-            sage: M.subdivision(0,1)
-            []
-        """
-        if self._subdivisions is None:
-            self._subdivisions = ([0, self._nrows], [0, self._ncols])
-        key = "subdivision %s %s"%(i,j)
-        sd = self.fetch(key)
-        if sd is None:
-            sd = self[self._subdivisions[0][i]:self._subdivisions[0][i+1],
-                      self._subdivisions[1][j]:self._subdivisions[1][j+1]]
-            sd.set_immutable()
-            self.cache(key, sd)
-        return sd
-
-    def subdivision_entry(self, i, j, x, y):
-        """
-        Returns the x,y entry of the i,j submatrix of self.
-
-        EXAMPLES::
-
-            sage: M = matrix(5, 5, range(25))
-            sage: M.subdivide(3,3); M
-            [ 0  1  2| 3  4]
-            [ 5  6  7| 8  9]
-            [10 11 12|13 14]
-            [--------+-----]
-            [15 16 17|18 19]
-            [20 21 22|23 24]
-            sage: M.subdivision_entry(0,0,1,2)
-            7
-            sage: M.subdivision(0,0)[1,2]
-            7
-            sage: M.subdivision_entry(0,1,0,0)
-            3
-            sage: M.subdivision_entry(1,0,0,0)
-            15
-            sage: M.subdivision_entry(1,1,1,1)
-            24
-
-        Even though this entry exists in the matrix, the index is invalid
-        for the submatrix.
-
-        ::
-
-            sage: M.subdivision_entry(0,0,4,0)
-            Traceback (most recent call last):
-            ...
-            IndexError: Submatrix 0,0 has no entry 4,0
-        """
-        if self._subdivisions is None:
-            if not i and not j:
-                return self[x,y]
-            else:
-                raise IndexError("No such submatrix %s, %s"%(i,j))
-        if x >= self._subdivisions[0][i+1]-self._subdivisions[0][i] or \
-           y >= self._subdivisions[1][j+1]-self._subdivisions[1][j]:
-            raise IndexError("Submatrix %s,%s has no entry %s,%s"%(i,j, x, y))
-        return self[self._subdivisions[0][i] + x , self._subdivisions[1][j] + y]
-
-    def _subdivide_on_augment(self, left, right):
-        r"""
-        Helper method to manage subdivisions when augmenting a matrix.
-
-        INPUT:
-
-        - ``left``, ``right`` - two matrices, such that if ``left`` is
-          augmented by placing ``right`` on the right side of ``left``,
-          then the result is ``self``.  It is the responsibility of the
-          calling routine to ensure this condition holds.
-
-        OUTPUT:
-
-        ``None``.  A new subdivision is created between ``left`` and
-        ``right`` for ``self``.  If possible, row subdivisions are
-        preserved in ``self``, but if the two sets of row subdivisions
-        are incompatible, they are removed.
-
-        EXAMPLES::
-
-            sage: A = matrix(QQ, 3, 4, range(12))
-            sage: B = matrix(QQ, 3, 6, range(18))
-            sage: C = A.augment(B)
-            sage: C._subdivide_on_augment(A, B)
-            sage: C
-            [ 0  1  2  3| 0  1  2  3  4  5]
-            [ 4  5  6  7| 6  7  8  9 10 11]
-            [ 8  9 10 11|12 13 14 15 16 17]
-
-        More descriptive, but indirect, doctests are at
-        :meth:`sage.matrix.matrix1.Matrix.augment`.
-        """
-        left_rows, left_cols = left.subdivisions()
-        right_rows, right_cols = right.subdivisions()
-        if left_rows == right_rows:
-            self_rows = left_rows
-        else:
-            self_rows = None
-        nc = left.ncols()
-        self_cols = left_cols + [nc]
-        for col in right_cols:
-            self_cols.append(col+nc)
-        self.subdivide(self_rows, self_cols)
-        return None
-
-    def _subdivide_on_stack(self, top, bottom):
-        r"""
-        Helper method to manage subdivisions when stacking a matrix.
-
-        INPUT:
-
-        - ``top``, ``bottom`` - two matrices, such that if ``top`` is
-        stacked by placing ``top`` above ``bottom``, then the result
-        is ``self``.  It is the responsibility of the calling routine
-        to ensure this condition holds.
-
-        OUTPUT:
-
-        ``None``.  A new subdivision is created between ``top`` and
-        ``bottom`` for ``self``.  If possible, column subdivisions are
-        preserved in ``self``, but if the two sets of column subdivisions
-        are incompatible, they are removed.
-
-        EXAMPLES::
-
-            sage: A = matrix(QQ, 3, 2, range(6))
-            sage: B = matrix(QQ, 4, 2, range(8))
-            sage: C = A.stack(B)
-            sage: C._subdivide_on_stack(A, B)
-            sage: C
-            [0 1]
-            [2 3]
-            [4 5]
-            [---]
-            [0 1]
-            [2 3]
-            [4 5]
-            [6 7]
-
-        More descriptive, but indirect, doctests are at
-        :meth:`sage.matrix.matrix1.Matrix.augment`.
-        """
-        top_rows, top_cols = top.subdivisions()
-        bottom_rows, bottom_cols = bottom.subdivisions()
-        if top_cols == bottom_cols:
-            self_cols = top_cols
-        else:
-            self_cols = None
-        nr = top.nrows()
-        self_rows = top_rows + [nr]
-        for row in bottom_rows:
-            self_rows.append(row+nr)
-        self.subdivide(self_rows, self_cols)
-        return None
-
-    def subdivisions(self):
-        """
-        Returns the current subdivision of self.
-
-        EXAMPLES::
-
-            sage: M = matrix(5, 5, range(25))
-            sage: M.subdivisions()
-            ([], [])
-            sage: M.subdivide(2,3)
-            sage: M.subdivisions()
-            ([2], [3])
-            sage: N = M.parent()(1)
-            sage: N.subdivide(M.subdivisions()); N
-            [1 0 0|0 0]
-            [0 1 0|0 0]
-            [-----+---]
-            [0 0 1|0 0]
-            [0 0 0|1 0]
-            [0 0 0|0 1]
-        """
-        if self._subdivisions is None:
-            return ([], [])
-        else:
-            return (self._subdivisions[0][1:-1], self._subdivisions[1][1:-1])
-
-    # for backwards compatibility: see #4983.
-    get_subdivisions = subdivisions
-
-    def tensor_product(self, A, subdivide=True):
-        r"""
-        Returns the tensor product of two matrices.
-
-        INPUT:
-
-        - ``A`` - a matrix
-        - ``subdivide`` - default: True - whether or not to return
-          natural subdivisions with the matrix
-
-        OUTPUT:
-
-        Replace each element of ``self`` by a copy of ``A``, but first
-        create a scalar multiple of ``A`` by the element it replaces.
-        So if ``self`` is an `m\times n` matrix and ``A`` is a
-        `p\times q` matrix, then the tensor product is an `mp\times nq`
-        matrix.  By default, the matrix will be subdivided into
-        submatrices of size `p\times q`.
-
-        EXAMPLES::
-
-            sage: M1=Matrix(QQ,[[-1,0],[-1/2,-1]])
-            sage: M2=Matrix(ZZ,[[1,-1,2],[-2,4,8]])
-            sage: M1.tensor_product(M2)
-            [  -1    1   -2|   0    0    0]
-            [   2   -4   -8|   0    0    0]
-            [--------------+--------------]
-            [-1/2  1/2   -1|  -1    1   -2]
-            [   1   -2   -4|   2   -4   -8]
-            sage: M2.tensor_product(M1)
-            [  -1    0|   1    0|  -2    0]
-            [-1/2   -1| 1/2    1|  -1   -2]
-            [---------+---------+---------]
-            [   2    0|  -4    0|  -8    0]
-            [   1    2|  -2   -4|  -4   -8]
-
-        Subdivisions can be optionally suppressed.  ::
-
-            sage: M1.tensor_product(M2, subdivide=False)
-            [  -1    1   -2    0    0    0]
-            [   2   -4   -8    0    0    0]
-            [-1/2  1/2   -1   -1    1   -2]
-            [   1   -2   -4    2   -4   -8]
-
-        Different base rings are handled sensibly.  ::
-
-            sage: A = matrix(ZZ, 2, 3, range(6))
-            sage: B = matrix(FiniteField(23), 3, 4, range(12))
-            sage: C = matrix(FiniteField(29), 4, 5, range(20))
-            sage: D = A.tensor_product(B)
-            sage: D.parent()
-            Full MatrixSpace of 6 by 12 dense matrices over Finite Field of size 23
-            sage: E = C.tensor_product(B)
-            Traceback (most recent call last):
-            ...
-            TypeError: unsupported operand parent(s) for *: 'Finite Field of size 29' and 'Full MatrixSpace of 3 by 4 dense matrices over Finite Field of size 23'
-
-        The input is checked to be sure it is a matrix.  ::
-
-            sage: A = matrix(QQ, 2, 2, range(4))
-            sage: A.tensor_product('junk')
-            Traceback (most recent call last):
-            ...
-            TypeError: tensor product requires a second matrix, not junk
-
-        TESTS:
-
-        Check that `m \times 0` and `0 \times m` matrices work
-        (:trac:`22769`)::
-
-            sage: m1 = matrix(QQ, 1, 0, [])
-            sage: m2 = matrix(QQ, 2, 2, [1, 2, 3, 4])
-            sage: m1.tensor_product(m2).dimensions()
-            (2, 0)
-            sage: m2.tensor_product(m1).dimensions()
-            (2, 0)
-            sage: m3 = matrix(QQ, 0, 3, [])
-            sage: m3.tensor_product(m2).dimensions()
-            (0, 6)
-            sage: m2.tensor_product(m3).dimensions()
-            (0, 6)
-
-            sage: m1 = MatrixSpace(GF(5), 3, 2).an_element()
-            sage: m2 = MatrixSpace(GF(5), 0, 4).an_element()
-            sage: m1.tensor_product(m2).parent()
-            Full MatrixSpace of 0 by 8 dense matrices over Finite Field of size 5
-        """
-        if not isinstance(A, Matrix):
-            raise TypeError('tensor product requires a second matrix, not {0}'.format(A))
-        from sage.matrix.constructor import block_matrix
-        # Special case when one of the matrices is 0 \times m or m \times 0
-        if self.nrows() == 0 or self.ncols() == 0 or A.nrows() == 0 or A.ncols() == 0:
-            return self.matrix_space(self.nrows()*A.nrows(),
-                                     self.ncols()*A.ncols()).zero_matrix().__copy__()
-        return block_matrix(self.nrows(), self.ncols(),
-                            [x * A for x in self.list()], subdivide=subdivide)
-
-    def randomize(self, density=1, nonzero=False, *args, **kwds):
-        """
-        Replace a proportion of the entries of a matrix by random elements,
-        leaving the remaining entries unchanged.
-
-        .. NOTE::
-
-           The locations of the entries of the matrix to change are
-           determined randomly, with the total number of locations
-           determined by the ``density`` keyword. These locations
-           are not guaranteed to be distinct.  So it is possible
-           that the same position can be chosen multiple times,
-           especially for a very small matrix.  The exception is
-           when ``density = 1``, in which case every entry of the
-           matrix will be changed.
-
-        INPUT:
-
-        -  ``density`` - ``float`` (default: ``1``); upper bound for the
-           proportion of entries that are changed
-        -  ``nonzero`` - Bool (default: ``False``); if ``True``, then new
-           entries will be nonzero
-        -  ``*args, **kwds`` - Remaining parameters may be passed to the
-           ``random_element`` function of the base ring
-
-        EXAMPLES:
-
-        We construct the zero matrix over a polynomial ring.
-
-        ::
-
-            sage: a = matrix(QQ['x'], 3); a
-            [0 0 0]
-            [0 0 0]
-            [0 0 0]
-
-        We then randomize roughly half the entries::
-
-            sage: a.randomize(0.5)
-            sage: a.density() <= 0.5
-            True
-
-        Now we randomize all the entries of the resulting matrix::
-
-            sage: while a.density() < 0.9:
-            ....:     a = matrix(QQ['x'], 3)
-            ....:     a.randomize()
-
-        We create the zero matrix over the integers::
-
-            sage: a = matrix(ZZ, 2); a
-            [0 0]
-            [0 0]
-
-        Then we randomize it; the ``x`` and ``y`` keywords, which determine the
-        size of the random elements, are passed on to the ``random_element``
-        method for ``ZZ``.
-
-        ::
-
-            sage: a.randomize(x=-2^64, y=2^64)
-            sage: while all(abs(b) < 2^63 for b in a.list()):
-            ....:     a.randomize(x=-2^64, y=2^64)
-            sage: all(abs(b) < 2^64 for b in a.list())
-            True
-        """
-        randint = current_randstate().python_random().randint
-
-        density = float(density)
-        if density <= 0:
-            return
-        if density > 1:
-            density = 1
-
-        self.check_mutability()
-        self.clear_cache()
-
-        R = self.base_ring()
-
-        cdef Py_ssize_t i, j, num
-
-        if nonzero:
-            if density >= 1:
-                for i from 0 <= i < self._nrows:
-                    for j from 0 <= j < self._ncols:
-                        self.set_unsafe(i, j, R._random_nonzero_element(*args,\
-                            **kwds))
-            else:
-                num = int(self._nrows * self._ncols * density)
-                for i from 0 <= i < num:
-                    self.set_unsafe(randint(0, self._nrows - 1),
-                                    randint(0, self._ncols - 1),
-                                    R._random_nonzero_element(*args, **kwds))
-        else:
-            if density >= 1:
-                for i from 0 <= i < self._nrows:
-                    for j from 0 <= j < self._ncols:
-                        self.set_unsafe(i, j, R.random_element(*args, **kwds))
-            else:
-                num = int(self._nrows * self._ncols * density)
-                for i from 0 <= i < num:
-                    self.set_unsafe(randint(0, self._nrows - 1),
-                                    randint(0, self._ncols - 1),
-                                    R.random_element(*args, **kwds))
-
-    def is_one(self):
-        """
-        Return True if this matrix is the identity matrix.
-
-        EXAMPLES::
-
-            sage: m = matrix(QQ,2,2,range(4))
-            sage: m.is_one()
-            False
-            sage: m = matrix(QQ,2,[5,0,0,5])
-            sage: m.is_one()
-            False
-            sage: m = matrix(QQ,2,[1,0,0,1])
-            sage: m.is_one()
-            True
-            sage: m = matrix(QQ,2,[1,1,1,1])
-            sage: m.is_one()
-            False
-        """
-        return self.is_scalar(self.base_ring().one())
-
-    def is_scalar(self, a = None):
-        """
-        Return True if this matrix is a scalar matrix.
-
-        INPUT:
-
-        - base_ring element a, which is chosen as self[0][0] if
-          a = None
-
-        OUTPUT:
-
-        - whether self is a scalar matrix (in fact the scalar matrix
-          aI if a is input)
-
-        EXAMPLES::
-
-            sage: m = matrix(QQ,2,2,range(4))
-            sage: m.is_scalar(5)
-            False
-            sage: m = matrix(QQ,2,[5,0,0,5])
-            sage: m.is_scalar(5)
-            True
-            sage: m = matrix(QQ,2,[1,0,0,1])
-            sage: m.is_scalar(1)
-            True
-            sage: m = matrix(QQ,2,[1,1,1,1])
-            sage: m.is_scalar(1)
-            False
-        """
-        if not self.is_square():
-            return False
-        cdef Py_ssize_t i, j
-        if a is None:
-            if self._nrows == 0:
-                return True
-            a = self.get_unsafe(0,0)
-        else:
-            a = self.base_ring()(a)
-        for i in range(self._nrows):
-            for j in range(self._ncols):
-                if i != j:
-                    if not self.get_unsafe(i,j).is_zero():
-                        return False
-                else:
-                    if self.get_unsafe(i, i) != a:
-                        return False
-        return True
-
-    def is_diagonal(self) -> bool:
-        """
-        Return ``True`` if this matrix is a diagonal matrix.
-
-        OUTPUT:
-
-        boolean
-
-        EXAMPLES::
-
-            sage: m = matrix(QQ,2,2,range(4))
-            sage: m.is_diagonal()
-            False
-            sage: m = matrix(QQ,2,[5,0,0,5])
-            sage: m.is_diagonal()
-            True
-            sage: m = matrix(QQ,2,[1,0,0,1])
-            sage: m.is_diagonal()
-            True
-            sage: m = matrix(QQ,2,[1,1,1,1])
-            sage: m.is_diagonal()
-            False
-        """
-        if not self.is_square():
-            return False
-        cdef Py_ssize_t i, j
-
-        for i in range(self._nrows):
-            for j in range(self._ncols):
-                if i != j:
-                    if not self.get_unsafe(i,j).is_zero():
-                        return False
-        return True
-
-    def is_triangular(self, side="lower") -> bool:
-        """
-        Return ``True`` if this matrix is a triangular matrix.
-
-        INPUT:
-
-        - ``side`` -- either ``"lower"`` (default) or ``"upper"``
-
-        OUTPUT:
-
-        boolean
-
-        EXAMPLES::
-
-            sage: m = matrix(QQ, 2, 2, range(4))
-            sage: m.is_triangular()
-            False
-            sage: m = matrix(QQ, 2, [5, 0, 0, 5])
-            sage: m.is_triangular()
-            True
-            sage: m = matrix(QQ, 2, [1, 2, 0, 1])
-            sage: m.is_triangular("upper")
-            True
-            sage: m.is_triangular("lower")
-            False
-        """
-        if not self.is_square():
-            return False
-        cdef Py_ssize_t i, j
-
-        if side == "upper":
-            for i in range(1, self._nrows):
-                for j in range(i):
-                    if not self.get_unsafe(i, j).is_zero():
-                        return False
-        else:
-            for i in range(self._nrows - 1):
-                for j in range(i + 1, self._ncols):
-                    if not self.get_unsafe(i, j).is_zero():
-                        return False
-        return True
-
-    def visualize_structure(self, maxsize=512):
-        r"""
-        Visualize the non-zero entries
-
-        White pixels are put at positions with zero entries. If 'maxsize'
-        is given, then the maximal dimension in either x or y direction is
-        set to 'maxsize' depending on which is bigger. If the image is
-        scaled, the darkness of the pixel reflects how many of the
-        represented entries are nonzero. So if e.g. one image pixel
-        actually represents a 2x2 submatrix, the dot is darker the more of
-        the four values are nonzero.
-
-        INPUT:
-
-        - ``maxsize`` - integer (default: ``512``). Maximal dimension
-          in either x or y direction of the resulting image. If
-          ``None`` or a maxsize larger than
-          ``max(self.nrows(),self.ncols())`` is given the image will
-          have the same pixelsize as the matrix dimensions.
-
-        OUTPUT:
-
-        Bitmap image as an instance of
-        :class:`~sage.repl.image.Image`.
-
-        EXAMPLES::
-
-            sage: M = random_matrix(CC, 5, 7)
-            sage: for i in range(5):  M[i,i] = 0
-            sage: M[4, 0] = M[0, 6] = M[4, 6] = 0
-            sage: img = M.visualize_structure();  img
-            7x5px 24-bit RGB image
-
-        You can use :meth:`~sage.repl.image.Image.save` to save the
-        resulting image::
-
-            sage: filename = tmp_filename(ext='.png')
-            sage: img.save(filename)
-            sage: with open(filename, 'rb') as fobj:
-            ....:     fobj.read().startswith(b'\x89PNG')
-            True
-
-        TESTS:
-
-        Test :trac:`17341`::
-
-            sage: random_matrix(GF(2), 8, 586, sparse=True).visualize_structure()
-            512x6px 24-bit RGB image
-        """
-        cdef Py_ssize_t x, y, _x, _y, v, bi, bisq
-        cdef Py_ssize_t ir, ic
-        cdef double b, fct
-        mr, mc = self.nrows(), self.ncols()
-        if maxsize is None:
-            ir = mc
-            ic = mr
-            b = 1.0
-        elif max(mr,mc) > maxsize:
-            maxsize = float(maxsize)
-            ir = int(mc * maxsize/max(mr,mc))
-            ic = int(mr * maxsize/max(mr,mc))
-            b = max(mr,mc)/maxsize
-        else:
-            ir = mc
-            ic = mr
-            b = 1.0
-        bi = int(round(b))
-        bisq = bi*bi
-        fct = 255.0/bisq
-        from sage.repl.image import Image
-        img = Image('RGB', (ir, ic))
-        pixel = img.pixels()
-        for x in range(ic):
-            for y in range(ir):
-                v = bisq
-                for _x in range(bi):
-                    for _y in range(bi):
-                        if not self.get_unsafe(<Py_ssize_t>(x*b + _x), <Py_ssize_t>(y*b + _y)).is_zero():
-                            v -= 1 #increase darkness
-                v = <Py_ssize_t>(v * fct + 0.5)
-                pixel[y, x] = (v, v, v)
-        return img
-
-    def density(self):
-        """
-        Return the density of the matrix.
-
-        By density we understand the ratio of the number of nonzero
-        positions and the self.nrows() \* self.ncols(), i.e. the number of
-        possible nonzero positions.
-
-        EXAMPLES:
-
-        First, note that the density parameter does not ensure the density
-        of a matrix, it is only an upper bound.
-
-        ::
-
-            sage: A = random_matrix(GF(127),200,200,density=0.3)
-            sage: A.density() <= 0.3
-            True
-
-        ::
-
-            sage: A = matrix(QQ,3,3,[0,1,2,3,0,0,6,7,8])
-            sage: A.density()
-            2/3
-
-        ::
-
-            sage: a = matrix([[],[],[],[]])
-            sage: a.density()
-            0
-        """
-        cdef int x,y,k
-        k = 0
-        nr = self.nrows()
-        nc = self.ncols()
-        if nc == 0 or nr == 0:
-            return 0
-        for x from 0 <= x < nr:
-            for y from 0 <= y < nc:
-                if not self.get_unsafe(x,y).is_zero():
-                    k+=1
-        return QQ(k)/QQ(nr*nc)
-
-    def image(self):
-        """
-        Return the image of the homomorphism on rows defined by this
-        matrix.
-
-        EXAMPLES::
-
-            sage: MS1 = MatrixSpace(ZZ,4)
-            sage: MS2 = MatrixSpace(QQ,6)
-            sage: A = MS1.matrix([3,4,5,6,7,3,8,10,14,5,6,7,2,2,10,9])
-            sage: B = MS2.random_element()
-
-        ::
-
-            sage: image(A)
-            Free module of degree 4 and rank 4 over Integer Ring
-            Echelon basis matrix:
-            [  1   0   0 426]
-            [  0   1   0 518]
-            [  0   0   1 293]
-            [  0   0   0 687]
-
-        ::
-
-            sage: image(B) == B.row_module()
-            True
-        """
-        return self.row_module()
-
-    def row_module(self, base_ring=None):
-        """
-        Return the free module over the base ring spanned by the rows of
-        self.
-
-        EXAMPLES::
-
-            sage: A = MatrixSpace(IntegerRing(), 2)([1,2,3,4])
-            sage: A.row_module()
-            Free module of degree 2 and rank 2 over Integer Ring
-            Echelon basis matrix:
-            [1 0]
-            [0 2]
-        """
-        M = self.row_ambient_module(base_ring=base_ring)
-        return M.span(self.rows())
-
-    def row_space(self, base_ring=None):
-        """
-        Return the row space of this matrix. (Synonym for
-        self.row_module().)
-
-        EXAMPLES::
-
-            sage: t = matrix(QQ, 3, 3, range(9)); t
-            [0 1 2]
-            [3 4 5]
-            [6 7 8]
-            sage: t.row_space()
-            Vector space of degree 3 and dimension 2 over Rational Field
-            Basis matrix:
-            [ 1  0 -1]
-            [ 0  1  2]
-
-        ::
-
-            sage: m = Matrix(Integers(5),2,2,[2,2,2,2])
-            sage: m.row_space()
-            Vector space of degree 2 and dimension 1 over Ring of integers modulo 5
-            Basis matrix:
-            [1 1]
-        """
-        return self.row_module(base_ring=base_ring)
-
-    def column_module(self):
-        """
-        Return the free module over the base ring spanned by the columns of
-        this matrix.
-
-        EXAMPLES::
-
-            sage: t = matrix(QQ, 3, 3, range(9)); t
-            [0 1 2]
-            [3 4 5]
-            [6 7 8]
-            sage: t.column_module()
-            Vector space of degree 3 and dimension 2 over Rational Field
-            Basis matrix:
-            [ 1  0 -1]
-            [ 0  1  2]
-        """
-        return self.transpose().row_module()
-
-    def column_space(self):
-        """
-        Return the vector space over the base ring spanned by the columns
-        of this matrix.
-
-        EXAMPLES::
-
-            sage: M = MatrixSpace(QQ,3,3)
-            sage: A = M([1,9,-7,4/5,4,3,6,4,3])
-            sage: A.column_space()
-            Vector space of degree 3 and dimension 3 over Rational Field
-            Basis matrix:
-            [1 0 0]
-            [0 1 0]
-            [0 0 1]
-            sage: W = MatrixSpace(CC,2,2)
-            sage: B = W([1, 2+3*I,4+5*I,9]); B
-            [                     1.00000000000000 2.00000000000000 + 3.00000000000000*I]
-            [4.00000000000000 + 5.00000000000000*I                      9.00000000000000]
-            sage: B.column_space()
-            Vector space of degree 2 and dimension 2 over Complex Field with 53 bits of precision
-            Basis matrix:
-            [ 1.00000000000000 0.000000000000000]
-            [0.000000000000000  1.00000000000000]
-        """
-        return self.column_module()
-
-
-cdef class Matrix(Matrix_ring):
-    """
-    Base class for matrices, part 2
-
-    A matrix of this class is equipped with an echelon form, that facilitates
-    extensive computations with the matrix. This essentially requires the base
-    ring to be a field, a principal ideal domain, or an Euclidean domain.
-
-    TESTS::
-
-        sage: m = matrix(ZZ['x'], 2, 3, [1..6])
-        sage: TestSuite(m).run()
-
-    Check that a pair consisting of a matrix and its echelon form is
-    pickled correctly (this used to give a wrong answer due to a Python
-    bug, see :trac:`17527`)::
-
-        sage: K.<x> = FractionField(QQ['x'])
-        sage: m = Matrix([[1], [x]])
-        sage: t = (m, m.echelon_form())
-        sage: loads(dumps(t))
-        (
-        [1]  [1]
-        [x], [0]
-        )
-    """
-    def _backslash_(self, B):
-        r"""
-        Used to compute `A \backslash B`, i.e., the backslash solver
-        operator.
-
-        EXAMPLES::
-
-            sage: A = matrix(QQ, 3, [1,2,4,2,3,1,0,1,2])
-            sage: B = matrix(QQ, 3, 2, [1,7,5, 2,1,3])
-            sage: C = A._backslash_(B); C
-            [  -1    1]
-            [13/5 -3/5]
-            [-4/5  9/5]
-            sage: A*C == B
-            True
-            sage: A._backslash_(B) == A \ B
-            True
-            sage: A._backslash_(B) == A.solve_right(B)
-            True
-        """
-        return self.solve_right(B)
 
     def solve_left(self, B, check=True):
         """
@@ -2813,6 +1031,464 @@ cdef class Matrix(Matrix_ring):
                 raise ValueError("matrix equation has no solutions")
         return X
 
+    def prod_of_row_sums(self, cols):
+        r"""
+        Calculate the product of all row sums of a submatrix of `A`
+        for a list of selected columns ``cols``.
+
+        EXAMPLES::
+
+            sage: a = matrix(QQ, 2,2, [1,2,3,2]); a
+            [1 2]
+            [3 2]
+            sage: a.prod_of_row_sums([0,1])
+            15
+
+        Another example::
+
+            sage: a = matrix(QQ, 2,3, [1,2,3,2,5,6]); a
+            [1 2 3]
+            [2 5 6]
+            sage: a.prod_of_row_sums([1,2])
+            55
+        """
+        cdef Py_ssize_t c, row
+        pr = 1
+        for row from 0 <= row < self._nrows:
+            tmp = []
+            for c in cols:
+#               if c<0 or c >= self._ncols:
+#                   raise IndexError("matrix column index out of range")
+                tmp.append(self.get_unsafe(row, c))
+            pr = pr * sum(tmp)
+        return pr
+
+    def elementwise_product(self, right):
+        r"""
+        Returns the elementwise product of two matrices
+        of the same size (also known as the Hadamard product).
+
+        INPUT:
+
+        - ``right`` - the right operand of the product.  A matrix
+          of the same size as ``self`` such that multiplication
+          of elements of the base rings of ``self`` and ``right``
+          is defined, once Sage's coercion model is applied.  If
+          the matrices have different sizes, or if multiplication
+          of individual entries cannot be achieved, a ``TypeError``
+          will result.
+
+        OUTPUT:
+
+        A matrix of the same size as ``self`` and ``right``.  The
+        entry in location `(i,j)` of the output is the product of
+        the two entries in location `(i,j)` of ``self`` and
+        ``right`` (in that order).
+
+        The parent of the result is determined by Sage's coercion
+        model.  If the base rings are identical, then the result
+        is dense or sparse according to this property for
+        the left operand.  If the base rings must be adjusted
+        for one, or both, matrices then the result will be sparse
+        only if both operands are sparse.  No subdivisions are
+        present in the result.
+
+        If the type of the result is not to your liking, or
+        the ring could be "tighter," adjust the operands with
+        :meth:`~sage.matrix.matrix0.Matrix.change_ring`.
+        Adjust sparse versus dense inputs with the methods
+        :meth:`~sage.matrix.matrix1.Matrix.sparse_matrix` and
+        :meth:`~sage.matrix.matrix1.Matrix.dense_matrix`.
+
+        EXAMPLES::
+
+            sage: A = matrix(ZZ, 2, 3, range(6))
+            sage: B = matrix(QQ, 2, 3, [5, 1/3, 2/7, 11/2, -3/2, 8])
+            sage: C = A.elementwise_product(B)
+            sage: C
+            [   0  1/3  4/7]
+            [33/2   -6   40]
+            sage: C.parent()
+            Full MatrixSpace of 2 by 3 dense matrices over Rational Field
+
+
+        Notice the base ring of the results in the next two examples.  ::
+
+            sage: D = matrix(ZZ['x'],2,[1+x^2,2,3,4-x])
+            sage: E = matrix(QQ,2,[1,2,3,4])
+            sage: F = D.elementwise_product(E)
+            sage: F
+            [  x^2 + 1         4]
+            [        9 -4*x + 16]
+            sage: F.parent()
+            Full MatrixSpace of 2 by 2 dense matrices over Univariate Polynomial Ring in x over Rational Field
+
+        ::
+
+            sage: G = matrix(GF(3),2,[0,1,2,2])
+            sage: H = matrix(ZZ,2,[1,2,3,4])
+            sage: J = G.elementwise_product(H)
+            sage: J
+            [0 2]
+            [0 2]
+            sage: J.parent()
+            Full MatrixSpace of 2 by 2 dense matrices over Finite Field of size 3
+
+        Non-commutative rings behave as expected.  These are the usual quaternions. ::
+
+            sage: R.<i,j,k> = QuaternionAlgebra(-1, -1)
+            sage: A = matrix(R, 2, [1,i,j,k])
+            sage: B = matrix(R, 2, [i,i,i,i])
+            sage: A.elementwise_product(B)
+            [ i -1]
+            [-k  j]
+            sage: B.elementwise_product(A)
+            [ i -1]
+            [ k -j]
+
+        Input that is not a matrix will raise an error.  ::
+
+            sage: A = random_matrix(ZZ,5,10,x=20)
+            sage: A.elementwise_product(vector(ZZ, [1,2,3,4]))
+            Traceback (most recent call last):
+            ...
+            TypeError: no common canonical parent for objects with parents: 'Full MatrixSpace of 5 by 10 dense matrices over Integer Ring' and 'Ambient free module of rank 4 over the principal ideal domain Integer Ring'
+
+            sage: A = matrix(2, 2, range(4))
+            sage: A.elementwise_product(polygen(parent(A)))
+            Traceback (most recent call last):
+            ...
+            TypeError: elementwise_product() argument should be a matrix or coercible to a matrix
+
+        Matrices of different sizes for operands will raise an error. ::
+
+            sage: A = random_matrix(ZZ,5,10,x=20)
+            sage: B = random_matrix(ZZ,10,5,x=40)
+            sage: A.elementwise_product(B)
+            Traceback (most recent call last):
+            ...
+            TypeError: no common canonical parent for objects with parents: 'Full MatrixSpace of 5 by 10 dense matrices over Integer Ring' and 'Full MatrixSpace of 10 by 5 dense matrices over Integer Ring'
+
+        Some pairs of rings do not have a common parent where
+        multiplication makes sense.  This will raise an error. ::
+
+            sage: A = matrix(QQ, 3, 2, range(6))
+            sage: B = matrix(GF(3), 3, [2]*6)
+            sage: A.elementwise_product(B)
+            Traceback (most recent call last):
+            ...
+            TypeError: no common canonical parent for objects with parents: 'Full MatrixSpace of 3 by 2 dense matrices over Rational Field' and 'Full MatrixSpace of 3 by 2 dense matrices over Finite Field of size 3'
+
+        We illustrate various combinations of sparse and dense matrices.
+        The usual coercion rules apply::
+
+            sage: A = matrix(ZZ, 5, 6, range(30), sparse=False)
+            sage: B = matrix(ZZ, 5, 6, range(30), sparse=True)
+            sage: C = matrix(QQ, 5, 6, range(30), sparse=True)
+            sage: A.elementwise_product(C).is_sparse()
+            True
+            sage: B.elementwise_product(C).is_sparse()
+            True
+            sage: A.elementwise_product(B).is_dense()
+            True
+            sage: B.elementwise_product(A).is_dense()
+            True
+
+        TESTS:
+
+        Implementation for dense and sparse matrices are
+        different, this will provide a trivial test that
+        they are working identically. ::
+
+            sage: A = random_matrix(ZZ, 10, x=1000, sparse=False)
+            sage: B = random_matrix(ZZ, 10, x=1000, sparse=False)
+            sage: C = A.sparse_matrix()
+            sage: D = B.sparse_matrix()
+            sage: E = A.elementwise_product(B)
+            sage: F = C.elementwise_product(D)
+            sage: E.is_dense() and F.is_sparse() and (E == F)
+            True
+
+        If the ring has zero divisors, the routines for setting
+        entries of a sparse matrix should intercept zero results
+        and not create an entry. ::
+
+            sage: R = Integers(6)
+            sage: A = matrix(R, 2, [3, 2, 0, 0], sparse=True)
+            sage: B = matrix(R, 2, [2, 3, 1, 0], sparse=True)
+            sage: C = A.elementwise_product(B)
+            sage: len(C.nonzero_positions()) == 0
+            True
+        """
+        # Optimized routines for specialized classes would likely be faster
+        # See the "pairwise_product" of vectors for some guidance on doing this
+        if have_same_parent(self, right):
+            return self._elementwise_product(right)
+        A, B = coercion_model.canonical_coercion(self, right)
+        if not isinstance(A, Matrix):
+            # Canonical coercion is not a matrix?!
+            raise TypeError("elementwise_product() argument should be a matrix or coercible to a matrix")
+        return (<Matrix>A)._elementwise_product(B)
+
+    def permanent(self, algorithm="Ryser"):
+        r"""
+        Return the permanent of this matrix.
+
+        Let `A = (a_{i,j})` be an `m \times n` matrix over any
+        commutative ring with `m \le n`. The permanent of `A` is
+
+        .. MATH::
+
+           \mathrm{per}(A)
+           = \sum_\pi a_{1,\pi(1)} a_{2,\pi(2)} \cdots a_{m,\pi(m)}
+
+        where the summation extends over all one-to-one functions
+        `\pi` from `\{1, \ldots, m\}` to `\{1, \ldots, n\}`.
+
+        The product
+        `a_{1,\pi(1)} a_{2,\pi(2)} \cdots a_{m,\pi(m)}` is
+        called *diagonal product*. So the permanent of an
+        `m \times n` matrix `A` is the sum of all the
+        diagonal products of `A`.
+
+        By default, this method uses Ryser's algorithm, but setting
+        ``algorithm`` to "ButeraPernici" you can use the algorithm of Butera and
+        Pernici (which is well suited for band matrices, i.e. matrices whose
+        entries are concentrated near the diagonal).
+
+        INPUT:
+
+        - ``A`` -- matrix of size `m \times n` with `m \leq n`
+
+        - ``algorithm`` -- either "Ryser" (default) or "ButeraPernici". The
+          Butera-Pernici algorithm takes advantage of presence of zeros and is
+          very well suited for sparse matrices.
+
+        ALGORITHM:
+
+        The Ryser algorithm is implemented in the method
+        :meth:`_permanent_ryser`. It is a modification of theorem 7.1.1. from
+        Brualdi and Ryser: Combinatorial Matrix Theory. Instead of deleting
+        columns from `A`, we choose columns from `A` and calculate the product
+        of the row sums of the selected submatrix.
+
+        The Butera-Pernici algorithm is implemented in the function
+        :func:`~sage.matrix.matrix_misc.permanental_minor_polynomial`. It takes
+        advantage of cancellations that may occur in the computations.
+
+        EXAMPLES::
+
+            sage: A = ones_matrix(4,4)
+            sage: A.permanent()
+            24
+
+            sage: A = matrix(3,6,[1,1,1,1,0,0,0,1,1,1,1,0,0,0,1,1,1,1])
+            sage: A.permanent()
+            36
+            sage: B = A.change_ring(RR)
+            sage: B.permanent()
+            36.0000000000000
+
+        The permanent above is directed to the Sloane's sequence :oeis:`A079908`
+        ("The Dancing School Problems") for which the third term is 36:
+
+        ::
+
+            sage: oeis(79908)                           # optional -- internet
+            A079908: Solution to the Dancing School Problem with 3 girls and n+3 boys: f(3,n).
+            sage: _(3)                                  # optional -- internet
+            36
+
+        ::
+
+            sage: A = matrix(4,5,[1,1,0,1,1,0,1,1,1,1,1,0,1,0,1,1,1,0,1,0])
+            sage: A.permanent()
+            32
+
+        A huge permanent that cannot be reasonably computed with the Ryser
+        algorithm (a `50 \times 50` band matrix with width `5`)::
+
+            sage: n, w = 50, 5
+            sage: A = matrix(ZZ, n, n, lambda i,j: (i+j)%5 + 1 if abs(i-j) <= w else 0)
+            sage: A.permanent(algorithm="ButeraPernici")
+            57766972735511097036962481710892268404670105604676932908
+
+        See Minc: Permanents, Example 2.1, p. 5.
+
+        ::
+
+            sage: A = matrix(QQ,2,2,[1/5,2/7,3/2,4/5])
+            sage: A.permanent()
+            103/175
+
+        ::
+
+            sage: R.<a> = PolynomialRing(ZZ)
+            sage: A = matrix(R,2,2,[a,1,a,a+1])
+            sage: A.permanent()
+            a^2 + 2*a
+
+        ::
+
+            sage: R.<x,y> = PolynomialRing(ZZ,2)
+            sage: A = matrix(R,2,2,[x, y, x^2, y^2])
+            sage: A.permanent()
+            x^2*y + x*y^2
+        """
+        if algorithm == "Ryser":
+            return self._permanent_ryser()
+
+        elif algorithm == "ButeraPernici":
+            return permanental_minor_polynomial(self, True)
+
+        else:
+            raise ValueError("algorithm must be one of \"Ryser\" or \"ButeraPernici\".")
+
+    def _permanent_ryser(self):
+        r"""
+        Return the permanent computed using Ryser algorithm.
+
+        See :meth:`permanent` for the documentation.
+
+        EXAMPLES::
+
+            sage: m = matrix([[1,1],[1,1]])
+            sage: m._permanent_ryser()
+            2
+        """
+        cdef Py_ssize_t m, n, r
+        cdef int sn
+
+        perm = 0
+        m = self._nrows
+        n = self._ncols
+        if not m <= n:
+            raise ValueError("must have m <= n, but m (=%s) and n (=%s)"%(m,n))
+
+        for r from 1 <= r < m+1:
+            lst = _choose(n, r)
+            tmp = []
+            for cols in lst:
+                tmp.append(self.prod_of_row_sums(cols))
+            s = sum(tmp)
+            # sn = (-1)^(m-r)
+            if (m - r) % 2 == 0:
+                sn = 1
+            else:
+                sn = -1
+            perm = perm + sn * _binomial(n-r, m-r) * s
+        return perm
+
+    def permanental_minor(self, Py_ssize_t k, algorithm="Ryser"):
+        r"""
+        Return the permanental `k`-minor of this matrix.
+
+        The *permanental* `k`-*minor* of a matrix `A` is the sum of the
+        permanents of all possible `k` by `k` submatrices of `A`. Note that the
+        maximal permanental minor is just the permanent.
+
+        For a (0,1)-matrix `A` the permanental `k`-minor
+        counts the number of different selections of `k` 1's of
+        `A` with no two of the 1's on the same row and no two of the
+        1's on the same column.
+
+        See Brualdi and Ryser: Combinatorial Matrix Theory, p. 203. Note
+        the typo `p_0(A) = 0` in that reference! For applications
+        see Theorem 7.2.1 and Theorem 7.2.4.
+
+        .. SEEALSO::
+
+            The method :meth:`rook_vector` returns the list of all permanental
+            minors.
+
+        INPUT:
+
+        - ``k`` -- the size of the minor
+
+        - ``algorithm`` -- either "Ryser" (default) or "ButeraPernici". The
+          Butera-Pernici algorithm is well suited for band matrices.
+
+        EXAMPLES::
+
+            sage: A = matrix(4,[1,0,1,0,1,0,1,0,1,0,10,10,1,0,1,1])
+            sage: A.permanental_minor(2)
+            114
+
+        ::
+
+            sage: A = matrix(3,6,[1,1,1,1,0,0,0,1,1,1,1,0,0,0,1,1,1,1])
+            sage: A.permanental_minor(0)
+            1
+            sage: A.permanental_minor(1)
+            12
+            sage: A.permanental_minor(2)
+            40
+            sage: A.permanental_minor(3)
+            36
+
+        Note that if `k = m = n`, the permanental `k`-minor equals
+        `\mathrm{per}(A)`::
+
+            sage: A.permanent()
+            36
+
+        The permanental minors of the "complement" matrix of `A` is
+        related to the permanent of `A`::
+
+            sage: m, n = 3, 6
+            sage: C = matrix(m, n, lambda i,j: 1 - A[i,j])
+            sage: sum((-1)^k * C.permanental_minor(k)*factorial(n-k)/factorial(n-m) for k in range(m+1))
+            36
+
+        See Theorem 7.2.1 of Brualdi and Ryser: Combinatorial Matrix
+        Theory: per(A)
+
+        TESTS::
+
+            sage: A.permanental_minor(5)
+            0
+        """
+        if algorithm == "Ryser":
+            return self._permanental_minor_ryser(k)
+
+        elif algorithm == "ButeraPernici":
+            p = permanental_minor_polynomial(self, prec=k+1)
+            return p[k]
+
+        else:
+            raise ValueError("algorithm must be one of \"Ryser\" or \"ButeraPernici\".")
+
+    def _permanental_minor_ryser(self, Py_ssize_t k):
+        r"""
+        Compute the `k`-th permanental minor using Ryser algorithm.
+
+        See :meth:`permanental_minor` for the documentation.
+
+        EXAMPLES::
+
+            sage: m = matrix([[1,2,1],[3,4,3],[5,6,5]])
+            sage: m._permanental_minor_ryser(1)
+            30
+            sage: m._permanental_minor_ryser(2)
+            174
+            sage: m._permanental_minor_ryser(3)
+            136
+        """
+        m = self._nrows
+        n = self._ncols
+
+        R = self._base_ring
+        if k == 0:
+            return R.one()
+        if k > m:
+            return R.zero()
+
+        pm = 0
+        for cols in _choose(n,k):
+            for rows in _choose(m,k):
+                pm = pm + self.matrix_from_rows_and_columns(rows, cols).permanent()
+        return pm
+
     def pseudoinverse(self, *, algorithm=None):
         """
         Return the Moore-Penrose pseudoinverse of this matrix.
@@ -3189,6 +1865,66 @@ cdef class Matrix(Matrix_ring):
             return a
         else:
             return b
+
+    def minors(self, k):
+        r"""
+        Return the list of all `k \times k` minors of self.
+
+        Let `A` be an `m \times n` matrix and `k` an integer with
+        `0 \leq k`, `k \leq m` and `k \leq n`.
+        A `k \times k` minor of `A` is the determinant of a
+        `k \times k` matrix obtained from `A` by deleting `m - k`
+        rows and `n - k` columns.
+        There are no `k \times k` minors of `A` if `k` is larger
+        than either `m` or `n`.
+
+        The returned list is sorted in lexicographical row major ordering,
+        e.g., if A is a `3 \times 3` matrix then the minors returned are
+        with these rows/columns: [ [0, 1]x[0, 1], [0, 1]x[0, 2], [0, 1]x[1, 2],
+        [0, 2]x[0, 1], [0, 2]x[0, 2], [0, 2]x[1, 2], [1, 2]x[0, 1], [1,
+        2]x[0, 2], [1, 2]x[1, 2] ].
+
+        INPUT:
+
+        - ``k`` -- integer
+
+        EXAMPLES::
+
+            sage: A = Matrix(ZZ,2,3,[1,2,3,4,5,6]); A
+            [1 2 3]
+            [4 5 6]
+            sage: A.minors(2)
+            [-3, -6, -3]
+            sage: A.minors(1)
+            [1, 2, 3, 4, 5, 6]
+            sage: A.minors(0)
+            [1]
+            sage: A.minors(5)
+            []
+
+        ::
+
+            sage: k = GF(37)
+            sage: P.<x0,x1,x2> = PolynomialRing(k)
+            sage: A = Matrix(P,2,3,[x0*x1, x0, x1, x2, x2 + 16, x2 + 5*x1 ])
+            sage: A.minors(2)
+            [x0*x1*x2 + 16*x0*x1 - x0*x2, 5*x0*x1^2 + x0*x1*x2 - x1*x2, 5*x0*x1 + x0*x2 - x1*x2 - 16*x1]
+
+        This test addresses an issue raised at :trac:`20512`::
+
+            sage: A.minors(0)[0].parent() == P
+            True
+        """
+        from sage.combinat.combination import Combinations
+        if k == 0:
+            return [self.base_ring().one()]
+        all_rows = range(self.nrows())
+        all_cols = range(self.ncols())
+        m = []
+        for rows in Combinations(all_rows,k):
+            for cols in Combinations(all_cols,k):
+                m.append(self.matrix_from_rows_and_columns(rows,cols).determinant())
+        return m
 
     def det(self, *args, **kwds):
         """
@@ -3837,6 +2573,176 @@ cdef class Matrix(Matrix_ring):
         c = -M.trace() / (2*q)
         return (-1)**q * c
 
+    def apply_morphism(self, phi):
+        """
+        Apply the morphism phi to the coefficients of this dense matrix.
+
+        The resulting matrix is over the codomain of phi.
+
+        INPUT:
+
+
+        -  ``phi`` - a morphism, so phi is callable and
+           phi.domain() and phi.codomain() are defined. The codomain must be a
+           ring.
+
+        OUTPUT: a matrix over the codomain of phi
+
+        EXAMPLES::
+
+            sage: m = matrix(ZZ, 3, 3, range(9))
+            sage: phi = ZZ.hom(GF(5))
+            sage: m.apply_morphism(phi)
+            [0 1 2]
+            [3 4 0]
+            [1 2 3]
+            sage: parent(m.apply_morphism(phi))
+            Full MatrixSpace of 3 by 3 dense matrices over Finite Field of size 5
+
+        We apply a morphism to a matrix over a polynomial ring::
+
+            sage: R.<x,y> = QQ[]
+            sage: m = matrix(2, [x,x^2 + y, 2/3*y^2-x, x]); m
+            [          x     x^2 + y]
+            [2/3*y^2 - x           x]
+            sage: phi = R.hom([y,x])
+            sage: m.apply_morphism(phi)
+            [          y     y^2 + x]
+            [2/3*x^2 - y           y]
+        """
+        M = self.parent().change_ring(phi.codomain())
+        if self.is_sparse():
+            values = {(i,j): phi(z) for (i,j),z in self.dict()}
+        else:
+            values = [phi(z) for z in self.list()]
+        image = M(values)
+        if self._subdivisions is not None:
+            image.subdivide(*self.subdivisions())
+        return image
+
+    def apply_map(self, phi, R=None, sparse=None):
+        """
+        Apply the given map phi (an arbitrary Python function or callable
+        object) to this dense matrix. If R is not given, automatically
+        determine the base ring of the resulting matrix.
+
+        INPUT:
+
+        - ``sparse`` -- True to make the output a sparse matrix; default False
+
+        -  ``phi`` - arbitrary Python function or callable object
+
+        -  ``R`` - (optional) ring
+
+        OUTPUT: a matrix over R
+
+        EXAMPLES::
+
+            sage: m = matrix(ZZ, 3, 3, range(9))
+            sage: k.<a> = GF(9)
+            sage: f = lambda x: k(x)
+            sage: n = m.apply_map(f); n
+            [0 1 2]
+            [0 1 2]
+            [0 1 2]
+            sage: n.parent()
+            Full MatrixSpace of 3 by 3 dense matrices over Finite Field in a of size 3^2
+
+        In this example, we explicitly specify the codomain.
+
+        ::
+
+            sage: s = GF(3)
+            sage: f = lambda x: s(x)
+            sage: n = m.apply_map(f, k); n
+            [0 1 2]
+            [0 1 2]
+            [0 1 2]
+            sage: n.parent()
+            Full MatrixSpace of 3 by 3 dense matrices over Finite Field in a of size 3^2
+
+        If self is subdivided, the result will be as well::
+
+            sage: m = matrix(2, 2, srange(4))
+            sage: m.subdivide(None, 1); m
+            [0|1]
+            [2|3]
+            sage: m.apply_map(lambda x: x*x)
+            [0|1]
+            [4|9]
+
+        If the matrix is sparse, the result will be as well::
+
+            sage: m = matrix(ZZ,100,100,sparse=True)
+            sage: m[18,32] = -6
+            sage: m[1,83] = 19
+            sage: n = m.apply_map(abs, R=ZZ)
+            sage: n.dict()
+            {(1, 83): 19, (18, 32): 6}
+            sage: n.is_sparse()
+            True
+
+        If the map sends most of the matrix to zero, then it may be useful
+        to get the result as a sparse matrix.
+
+        ::
+
+            sage: m = matrix(ZZ, 3, 3, range(1, 10))
+            sage: n = m.apply_map(lambda x: 1//x, sparse=True); n
+            [1 0 0]
+            [0 0 0]
+            [0 0 0]
+            sage: n.parent()
+            Full MatrixSpace of 3 by 3 sparse matrices over Integer Ring
+
+        TESTS::
+
+            sage: m = matrix([])
+            sage: m.apply_map(lambda x: x*x) == m
+            True
+
+            sage: m.apply_map(lambda x: x*x, sparse=True).parent()
+            Full MatrixSpace of 0 by 0 sparse matrices over Integer Ring
+
+        Check that :trac:`19920` is fixed::
+
+            sage: matrix.ones(2).apply_map(lambda x: int(-3))
+            [-3 -3]
+            [-3 -3]
+        """
+        if self._nrows == 0 or self._ncols == 0:
+            if sparse is None or self.is_sparse() is sparse:
+                return self.__copy__()
+            elif sparse:
+                return self.sparse_matrix()
+            else:
+                return self.dense_matrix()
+
+        if self.is_sparse():
+            values = {(i,j): phi(v) for (i,j),v in self.dict().iteritems()}
+            if R is None:
+                R = sage.structure.sequence.Sequence(values.values()).universe()
+        else:
+            values = [phi(v) for v in self.list()]
+            if R is None:
+                R = sage.structure.sequence.Sequence(values).universe()
+
+        if isinstance(R, type):
+            R = py_scalar_parent(R)
+        if not is_Ring(R):
+            raise TypeError("unable to find a common ring for all elements")
+
+        if sparse is None or sparse is self.is_sparse():
+            M = self.parent().change_ring(R)
+        else:
+            from sage.matrix.matrix_space import MatrixSpace
+            M = MatrixSpace(R, self._nrows,
+                       self._ncols, sparse=sparse)
+        image = M(values)
+        if self._subdivisions is not None:
+            image.subdivide(*self.subdivisions())
+        return image
+
     def characteristic_polynomial(self, *args, **kwds):
         """
         Synonym for self.charpoly(...).
@@ -4359,6 +3265,107 @@ cdef class Matrix(Matrix_ring):
         except AttributeError:
             raise TypeError("lcm function not defined for elements of the base ring")
         return d
+
+    def diagonal(self):
+        r"""
+        Return the diagonal entries of ``self``.
+
+        OUTPUT:
+
+        A list containing the entries of the matrix that
+        have equal row and column indices, in order of the
+        indices.  Behavior is not limited to square matrices.
+
+        EXAMPLES::
+
+            sage: A = matrix([[2,5],[3,7]]); A
+            [2 5]
+            [3 7]
+            sage: A.diagonal()
+            [2, 7]
+
+        Two rectangular matrices. ::
+
+            sage: B = matrix(3, 7, range(21)); B
+            [ 0  1  2  3  4  5  6]
+            [ 7  8  9 10 11 12 13]
+            [14 15 16 17 18 19 20]
+            sage: B.diagonal()
+            [0, 8, 16]
+
+            sage: C = matrix(3, 2, range(6)); C
+            [0 1]
+            [2 3]
+            [4 5]
+            sage: C.diagonal()
+            [0, 3]
+
+        Empty matrices behave properly. ::
+
+            sage: E = matrix(0, 5, []); E
+            []
+            sage: E.diagonal()
+            []
+        """
+        n = min(self.nrows(), self.ncols())
+        return [self[i,i] for i in range(n)]
+
+    def trace(self):
+        """
+        Return the trace of self, which is the sum of the diagonal entries
+        of self.
+
+        INPUT:
+
+
+        -  ``self`` - a square matrix
+
+
+        OUTPUT: element of the base ring of self
+
+        EXAMPLES::
+
+            sage: a = matrix(3,3,range(9)); a
+            [0 1 2]
+            [3 4 5]
+            [6 7 8]
+            sage: a.trace()
+            12
+            sage: a = matrix({(1,1):10, (2,1):-3, (2,2):4/3}); a
+            [  0   0   0]
+            [  0  10   0]
+            [  0  -3 4/3]
+            sage: a.trace()
+            34/3
+        """
+        if self._nrows != self._ncols:
+            raise ValueError("self must be a square matrix")
+        R = self._base_ring
+        cdef Py_ssize_t i
+        cdef object s
+        s = R(0)
+        for i from 0 <= i < self._nrows:
+            s = s + self.get_unsafe(i,i)
+        return s
+
+    def trace_of_product(self, Matrix other):
+        """
+        Returns the trace of self * other without computing the entire product.
+
+        EXAMPLES::
+
+            sage: M = random_matrix(ZZ, 10, 20)
+            sage: N = random_matrix(ZZ, 20, 10)
+            sage: M.trace_of_product(N) == (M*N).trace()
+            True
+        """
+        if self._nrows != other._ncols or other._nrows != self._ncols:
+            raise ArithmeticError("incompatible dimensions")
+        s = self._base_ring(0)
+        for i from 0 <= i < self._nrows:
+            for j from 0 <= j < self._ncols:
+                s += self.get_unsafe(i, j) * other.get_unsafe(j, i)
+        return s
 
     #####################################################################################
     # Generic Hessenberg Form and charpoly algorithm
@@ -6156,6 +5163,35 @@ cdef class Matrix(Matrix_ring):
             M = MatrixSpace(ring, self.nrows(), self.ncols())(A)
             return M.kernel()
 
+    def image(self):
+        """
+        Return the image of the homomorphism on rows defined by this
+        matrix.
+
+        EXAMPLES::
+
+            sage: MS1 = MatrixSpace(ZZ,4)
+            sage: MS2 = MatrixSpace(QQ,6)
+            sage: A = MS1.matrix([3,4,5,6,7,3,8,10,14,5,6,7,2,2,10,9])
+            sage: B = MS2.random_element()
+
+        ::
+
+            sage: image(A)
+            Free module of degree 4 and rank 4 over Integer Ring
+            Echelon basis matrix:
+            [  1   0   0 426]
+            [  0   1   0 518]
+            [  0   0   1 293]
+            [  0   0   0 687]
+
+        ::
+
+            sage: image(B) == B.row_module()
+            True
+        """
+        return self.row_module()
+
     def row_module(self, base_ring=None):
         """
         Return the free module over the base ring spanned by the rows of
@@ -6179,6 +5215,79 @@ cdef class Matrix(Matrix_ring):
             return M.span(rows, already_echelonized=True)
         else:
             return M.span(self.rows(), already_echelonized=False)
+
+    def row_space(self, base_ring=None):
+        """
+        Return the row space of this matrix. (Synonym for
+        self.row_module().)
+
+        EXAMPLES::
+
+            sage: t = matrix(QQ, 3, 3, range(9)); t
+            [0 1 2]
+            [3 4 5]
+            [6 7 8]
+            sage: t.row_space()
+            Vector space of degree 3 and dimension 2 over Rational Field
+            Basis matrix:
+            [ 1  0 -1]
+            [ 0  1  2]
+
+        ::
+
+            sage: m = Matrix(Integers(5),2,2,[2,2,2,2])
+            sage: m.row_space()
+            Vector space of degree 2 and dimension 1 over Ring of integers modulo 5
+            Basis matrix:
+            [1 1]
+        """
+        return self.row_module(base_ring=base_ring)
+
+    def column_module(self):
+        """
+        Return the free module over the base ring spanned by the columns of
+        this matrix.
+
+        EXAMPLES::
+
+            sage: t = matrix(QQ, 3, 3, range(9)); t
+            [0 1 2]
+            [3 4 5]
+            [6 7 8]
+            sage: t.column_module()
+            Vector space of degree 3 and dimension 2 over Rational Field
+            Basis matrix:
+            [ 1  0 -1]
+            [ 0  1  2]
+        """
+        return self.transpose().row_module()
+
+    def column_space(self):
+        """
+        Return the vector space over the base ring spanned by the columns
+        of this matrix.
+
+        EXAMPLES::
+
+            sage: M = MatrixSpace(QQ,3,3)
+            sage: A = M([1,9,-7,4/5,4,3,6,4,3])
+            sage: A.column_space()
+            Vector space of degree 3 and dimension 3 over Rational Field
+            Basis matrix:
+            [1 0 0]
+            [0 1 0]
+            [0 0 1]
+            sage: W = MatrixSpace(CC,2,2)
+            sage: B = W([1, 2+3*I,4+5*I,9]); B
+            [                     1.00000000000000 2.00000000000000 + 3.00000000000000*I]
+            [4.00000000000000 + 5.00000000000000*I                      9.00000000000000]
+            sage: B.column_space()
+            Vector space of degree 2 and dimension 2 over Complex Field with 53 bits of precision
+            Basis matrix:
+            [ 1.00000000000000 0.000000000000000]
+            [0.000000000000000  1.00000000000000]
+        """
+        return self.column_module()
 
     def decomposition(self, algorithm='spin',
                       is_diagonalizable=False, dual=False):
@@ -9551,6 +8660,741 @@ cdef class Matrix(Matrix_ring):
             raise IndexError("matrix window index out of range")
         return matrix_window.MatrixWindow(self, row, col, nrows, ncols)
 
+    def set_block(self, row, col, block):
+        """
+        Sets the sub-matrix of self, with upper left corner given by row,
+        col to block.
+
+        EXAMPLES::
+
+            sage: A = matrix(QQ, 3, 3, range(9))/2
+            sage: B = matrix(ZZ, 2, 1, [100,200])
+            sage: A.set_block(0, 1, B)
+            sage: A
+            [  0 100   1]
+            [3/2 200 5/2]
+            [  3 7/2   4]
+
+        We test that an exception is raised when the block is out of
+        bounds::
+
+            sage: matrix([1]).set_block(0,1,matrix([1]))
+            Traceback (most recent call last):
+            ...
+            IndexError: matrix window index out of range
+        """
+        self.check_mutability()
+        if block.base_ring() is not self.base_ring():
+            block = block.change_ring(self.base_ring())
+        window = self.matrix_window(row, col, block.nrows(), block.ncols(), check=True)
+        window.set(block.matrix_window())
+
+    def subdivide(self, row_lines=None, col_lines=None):
+        r"""
+        Divides ``self`` into logical submatrices which can then be queried
+        and extracted.
+
+        If a subdivision already exists, this method forgets the
+        previous subdivision and flushes the cache.
+
+        INPUT:
+
+        - ``row_lines`` -- ``None``, an integer, or a list of
+          integers (lines at which self must be split)
+
+        - ``col_lines`` -- ``None``, an integer, or a list of
+          integers (columns at which self must be split)
+
+        OUTPUT: ``None`` but changes ``self``
+
+        .. NOTE::
+
+           One may also pass a tuple into the first argument which
+           will be interpreted as ``(row_lines, col_lines)``.
+
+        EXAMPLES::
+
+            sage: M = matrix(5, 5, prime_range(100))
+            sage: M.subdivide(2,3); M
+            [ 2  3  5| 7 11]
+            [13 17 19|23 29]
+            [--------+-----]
+            [31 37 41|43 47]
+            [53 59 61|67 71]
+            [73 79 83|89 97]
+            sage: M.subdivision(0,0)
+            [ 2  3  5]
+            [13 17 19]
+            sage: M.subdivision(1,0)
+            [31 37 41]
+            [53 59 61]
+            [73 79 83]
+            sage: M.subdivision_entry(1,0,0,0)
+            31
+            sage: M.subdivisions()
+            ([2], [3])
+            sage: M.subdivide(None, [1,3]); M
+            [ 2| 3  5| 7 11]
+            [13|17 19|23 29]
+            [31|37 41|43 47]
+            [53|59 61|67 71]
+            [73|79 83|89 97]
+
+        Degenerate cases work too::
+
+            sage: M.subdivide([2,5], [0,1,3]); M
+            [| 2| 3  5| 7 11]
+            [|13|17 19|23 29]
+            [+--+-----+-----]
+            [|31|37 41|43 47]
+            [|53|59 61|67 71]
+            [|73|79 83|89 97]
+            [+--+-----+-----]
+            sage: M.subdivision(0,0)
+            []
+            sage: M.subdivision(0,1)
+            [ 2]
+            [13]
+            sage: M.subdivide([2,2,3], [0,0,1,1]); M
+            [|| 2|| 3  5  7 11]
+            [||13||17 19 23 29]
+            [++--++-----------]
+            [++--++-----------]
+            [||31||37 41 43 47]
+            [++--++-----------]
+            [||53||59 61 67 71]
+            [||73||79 83 89 97]
+            sage: M.subdivision(0,0)
+            []
+            sage: M.subdivision(2,4)
+            [37 41 43 47]
+
+        Indices do not need to be in the right order (:trac:`14064`)::
+
+            sage: M.subdivide([4, 2], [3, 1]); M
+            [ 2| 3  5| 7 11]
+            [13|17 19|23 29]
+            [--+-----+-----]
+            [31|37 41|43 47]
+            [53|59 61|67 71]
+            [--+-----+-----]
+            [73|79 83|89 97]
+
+        TESTS:
+
+        Input such that the matrix has no subdivision results in
+        the ``_subdivision`` attribute being set to ``None``::
+
+            sage: A = matrix.identity(QQ, 4)
+            sage: A._subdivisions is None
+            True
+            sage: A.subdivide()
+            sage: A._subdivisions is None
+            True
+            sage: A.subdivide(2, 3)  # perform a subdivision
+            sage: A._subdivisions is None
+            False
+            sage: A.subdivide(([], []))  # now reset
+            sage: A._subdivisions is None
+            True
+        """
+        self.check_mutability()
+        if col_lines is None and row_lines is not None and isinstance(row_lines, tuple):
+            tmp = row_lines
+            row_lines, col_lines = tmp
+        if row_lines is None:
+            row_lines = []
+        elif not isinstance(row_lines, list):
+            row_lines = [row_lines]
+        if col_lines is None:
+            col_lines = []
+        elif not isinstance(col_lines, list):
+            col_lines = [col_lines]
+        if self._subdivisions is not None:
+            self.clear_cache()
+        if (not row_lines) and (not col_lines):
+            self._subdivisions = None
+        else:
+            l_row = sorted(row_lines)
+            l_col = sorted(col_lines)
+            l_row = [0] + [int(ZZ(x)) for x in l_row] + [self._nrows]
+            l_col = [0] + [int(ZZ(x)) for x in l_col] + [self._ncols]
+            self._subdivisions = (l_row, l_col)
+
+    def subdivision(self, i, j):
+        """
+        Returns an immutable copy of the (i,j)th submatrix of self,
+        according to a previously set subdivision.
+
+        Before a subdivision is set, the only valid arguments are (0,0)
+        which returns self.
+
+        EXAMPLES::
+
+            sage: M = matrix(3, 4, range(12))
+            sage: M.subdivide(1,2); M
+            [ 0  1| 2  3]
+            [-----+-----]
+            [ 4  5| 6  7]
+            [ 8  9|10 11]
+            sage: M.subdivision(0,0)
+            [0 1]
+            sage: M.subdivision(0,1)
+            [2 3]
+            sage: M.subdivision(1,0)
+            [4 5]
+            [8 9]
+
+        It handles size-zero subdivisions as well.
+
+        ::
+
+            sage: M = matrix(3, 4, range(12))
+            sage: M.subdivide([0],[0,2,2,4]); M
+            [+-----++-----+]
+            [| 0  1|| 2  3|]
+            [| 4  5|| 6  7|]
+            [| 8  9||10 11|]
+            sage: M.subdivision(0,0)
+            []
+            sage: M.subdivision(1,1)
+            [0 1]
+            [4 5]
+            [8 9]
+            sage: M.subdivision(1,2)
+            []
+            sage: M.subdivision(1,0)
+            []
+            sage: M.subdivision(0,1)
+            []
+        """
+        if self._subdivisions is None:
+            self._subdivisions = ([0, self._nrows], [0, self._ncols])
+        key = "subdivision %s %s"%(i,j)
+        sd = self.fetch(key)
+        if sd is None:
+            sd = self[self._subdivisions[0][i]:self._subdivisions[0][i+1],
+                      self._subdivisions[1][j]:self._subdivisions[1][j+1]]
+            sd.set_immutable()
+            self.cache(key, sd)
+        return sd
+
+    def subdivision_entry(self, i, j, x, y):
+        """
+        Returns the x,y entry of the i,j submatrix of self.
+
+        EXAMPLES::
+
+            sage: M = matrix(5, 5, range(25))
+            sage: M.subdivide(3,3); M
+            [ 0  1  2| 3  4]
+            [ 5  6  7| 8  9]
+            [10 11 12|13 14]
+            [--------+-----]
+            [15 16 17|18 19]
+            [20 21 22|23 24]
+            sage: M.subdivision_entry(0,0,1,2)
+            7
+            sage: M.subdivision(0,0)[1,2]
+            7
+            sage: M.subdivision_entry(0,1,0,0)
+            3
+            sage: M.subdivision_entry(1,0,0,0)
+            15
+            sage: M.subdivision_entry(1,1,1,1)
+            24
+
+        Even though this entry exists in the matrix, the index is invalid
+        for the submatrix.
+
+        ::
+
+            sage: M.subdivision_entry(0,0,4,0)
+            Traceback (most recent call last):
+            ...
+            IndexError: Submatrix 0,0 has no entry 4,0
+        """
+        if self._subdivisions is None:
+            if not i and not j:
+                return self[x,y]
+            else:
+                raise IndexError("No such submatrix %s, %s"%(i,j))
+        if x >= self._subdivisions[0][i+1]-self._subdivisions[0][i] or \
+           y >= self._subdivisions[1][j+1]-self._subdivisions[1][j]:
+            raise IndexError("Submatrix %s,%s has no entry %s,%s"%(i,j, x, y))
+        return self[self._subdivisions[0][i] + x , self._subdivisions[1][j] + y]
+
+    def _subdivide_on_augment(self, left, right):
+        r"""
+        Helper method to manage subdivisions when augmenting a matrix.
+
+        INPUT:
+
+        - ``left``, ``right`` - two matrices, such that if ``left`` is
+          augmented by placing ``right`` on the right side of ``left``,
+          then the result is ``self``.  It is the responsibility of the
+          calling routine to ensure this condition holds.
+
+        OUTPUT:
+
+        ``None``.  A new subdivision is created between ``left`` and
+        ``right`` for ``self``.  If possible, row subdivisions are
+        preserved in ``self``, but if the two sets of row subdivisions
+        are incompatible, they are removed.
+
+        EXAMPLES::
+
+            sage: A = matrix(QQ, 3, 4, range(12))
+            sage: B = matrix(QQ, 3, 6, range(18))
+            sage: C = A.augment(B)
+            sage: C._subdivide_on_augment(A, B)
+            sage: C
+            [ 0  1  2  3| 0  1  2  3  4  5]
+            [ 4  5  6  7| 6  7  8  9 10 11]
+            [ 8  9 10 11|12 13 14 15 16 17]
+
+        More descriptive, but indirect, doctests are at
+        :meth:`sage.matrix.matrix1.Matrix.augment`.
+        """
+        left_rows, left_cols = left.subdivisions()
+        right_rows, right_cols = right.subdivisions()
+        if left_rows == right_rows:
+            self_rows = left_rows
+        else:
+            self_rows = None
+        nc = left.ncols()
+        self_cols = left_cols + [nc]
+        for col in right_cols:
+            self_cols.append(col+nc)
+        self.subdivide(self_rows, self_cols)
+        return None
+
+    def _subdivide_on_stack(self, top, bottom):
+        r"""
+        Helper method to manage subdivisions when stacking a matrix.
+
+        INPUT:
+
+        - ``top``, ``bottom`` - two matrices, such that if ``top`` is
+        stacked by placing ``top`` above ``bottom``, then the result
+        is ``self``.  It is the responsibility of the calling routine
+        to ensure this condition holds.
+
+        OUTPUT:
+
+        ``None``.  A new subdivision is created between ``top`` and
+        ``bottom`` for ``self``.  If possible, column subdivisions are
+        preserved in ``self``, but if the two sets of column subdivisions
+        are incompatible, they are removed.
+
+        EXAMPLES::
+
+            sage: A = matrix(QQ, 3, 2, range(6))
+            sage: B = matrix(QQ, 4, 2, range(8))
+            sage: C = A.stack(B)
+            sage: C._subdivide_on_stack(A, B)
+            sage: C
+            [0 1]
+            [2 3]
+            [4 5]
+            [---]
+            [0 1]
+            [2 3]
+            [4 5]
+            [6 7]
+
+        More descriptive, but indirect, doctests are at
+        :meth:`sage.matrix.matrix1.Matrix.augment`.
+        """
+        top_rows, top_cols = top.subdivisions()
+        bottom_rows, bottom_cols = bottom.subdivisions()
+        if top_cols == bottom_cols:
+            self_cols = top_cols
+        else:
+            self_cols = None
+        nr = top.nrows()
+        self_rows = top_rows + [nr]
+        for row in bottom_rows:
+            self_rows.append(row+nr)
+        self.subdivide(self_rows, self_cols)
+        return None
+
+    def subdivisions(self):
+        """
+        Returns the current subdivision of self.
+
+        EXAMPLES::
+
+            sage: M = matrix(5, 5, range(25))
+            sage: M.subdivisions()
+            ([], [])
+            sage: M.subdivide(2,3)
+            sage: M.subdivisions()
+            ([2], [3])
+            sage: N = M.parent()(1)
+            sage: N.subdivide(M.subdivisions()); N
+            [1 0 0|0 0]
+            [0 1 0|0 0]
+            [-----+---]
+            [0 0 1|0 0]
+            [0 0 0|1 0]
+            [0 0 0|0 1]
+        """
+        if self._subdivisions is None:
+            return ([], [])
+        else:
+            return (self._subdivisions[0][1:-1], self._subdivisions[1][1:-1])
+
+    # for backwards compatibility: see #4983.
+    get_subdivisions = subdivisions
+
+    def tensor_product(self, A, subdivide=True):
+        r"""
+        Returns the tensor product of two matrices.
+
+        INPUT:
+
+        - ``A`` - a matrix
+        - ``subdivide`` - default: True - whether or not to return
+          natural subdivisions with the matrix
+
+        OUTPUT:
+
+        Replace each element of ``self`` by a copy of ``A``, but first
+        create a scalar multiple of ``A`` by the element it replaces.
+        So if ``self`` is an `m\times n` matrix and ``A`` is a
+        `p\times q` matrix, then the tensor product is an `mp\times nq`
+        matrix.  By default, the matrix will be subdivided into
+        submatrices of size `p\times q`.
+
+        EXAMPLES::
+
+            sage: M1=Matrix(QQ,[[-1,0],[-1/2,-1]])
+            sage: M2=Matrix(ZZ,[[1,-1,2],[-2,4,8]])
+            sage: M1.tensor_product(M2)
+            [  -1    1   -2|   0    0    0]
+            [   2   -4   -8|   0    0    0]
+            [--------------+--------------]
+            [-1/2  1/2   -1|  -1    1   -2]
+            [   1   -2   -4|   2   -4   -8]
+            sage: M2.tensor_product(M1)
+            [  -1    0|   1    0|  -2    0]
+            [-1/2   -1| 1/2    1|  -1   -2]
+            [---------+---------+---------]
+            [   2    0|  -4    0|  -8    0]
+            [   1    2|  -2   -4|  -4   -8]
+
+        Subdivisions can be optionally suppressed.  ::
+
+            sage: M1.tensor_product(M2, subdivide=False)
+            [  -1    1   -2    0    0    0]
+            [   2   -4   -8    0    0    0]
+            [-1/2  1/2   -1   -1    1   -2]
+            [   1   -2   -4    2   -4   -8]
+
+        Different base rings are handled sensibly.  ::
+
+            sage: A = matrix(ZZ, 2, 3, range(6))
+            sage: B = matrix(FiniteField(23), 3, 4, range(12))
+            sage: C = matrix(FiniteField(29), 4, 5, range(20))
+            sage: D = A.tensor_product(B)
+            sage: D.parent()
+            Full MatrixSpace of 6 by 12 dense matrices over Finite Field of size 23
+            sage: E = C.tensor_product(B)
+            Traceback (most recent call last):
+            ...
+            TypeError: unsupported operand parent(s) for *: 'Finite Field of size 29' and 'Full MatrixSpace of 3 by 4 dense matrices over Finite Field of size 23'
+
+        The input is checked to be sure it is a matrix.  ::
+
+            sage: A = matrix(QQ, 2, 2, range(4))
+            sage: A.tensor_product('junk')
+            Traceback (most recent call last):
+            ...
+            TypeError: tensor product requires a second matrix, not junk
+
+        TESTS:
+
+        Check that `m \times 0` and `0 \times m` matrices work
+        (:trac:`22769`)::
+
+            sage: m1 = matrix(QQ, 1, 0, [])
+            sage: m2 = matrix(QQ, 2, 2, [1, 2, 3, 4])
+            sage: m1.tensor_product(m2).dimensions()
+            (2, 0)
+            sage: m2.tensor_product(m1).dimensions()
+            (2, 0)
+            sage: m3 = matrix(QQ, 0, 3, [])
+            sage: m3.tensor_product(m2).dimensions()
+            (0, 6)
+            sage: m2.tensor_product(m3).dimensions()
+            (0, 6)
+
+            sage: m1 = MatrixSpace(GF(5), 3, 2).an_element()
+            sage: m2 = MatrixSpace(GF(5), 0, 4).an_element()
+            sage: m1.tensor_product(m2).parent()
+            Full MatrixSpace of 0 by 8 dense matrices over Finite Field of size 5
+        """
+        if not isinstance(A, Matrix):
+            raise TypeError('tensor product requires a second matrix, not {0}'.format(A))
+        from sage.matrix.constructor import block_matrix
+        # Special case when one of the matrices is 0 \times m or m \times 0
+        if self.nrows() == 0 or self.ncols() == 0 or A.nrows() == 0 or A.ncols() == 0:
+            return self.matrix_space(self.nrows()*A.nrows(),
+                                     self.ncols()*A.ncols()).zero_matrix().__copy__()
+        return block_matrix(self.nrows(), self.ncols(),
+                            [x * A for x in self.list()], subdivide=subdivide)
+
+    def randomize(self, density=1, nonzero=False, *args, **kwds):
+        """
+        Replace a proportion of the entries of a matrix by random elements,
+        leaving the remaining entries unchanged.
+
+        .. NOTE::
+
+           The locations of the entries of the matrix to change are
+           determined randomly, with the total number of locations
+           determined by the ``density`` keyword. These locations
+           are not guaranteed to be distinct.  So it is possible
+           that the same position can be chosen multiple times,
+           especially for a very small matrix.  The exception is
+           when ``density = 1``, in which case every entry of the
+           matrix will be changed.
+
+        INPUT:
+
+        -  ``density`` - ``float`` (default: ``1``); upper bound for the
+           proportion of entries that are changed
+        -  ``nonzero`` - Bool (default: ``False``); if ``True``, then new
+           entries will be nonzero
+        -  ``*args, **kwds`` - Remaining parameters may be passed to the
+           ``random_element`` function of the base ring
+
+        EXAMPLES:
+
+        We construct the zero matrix over a polynomial ring.
+
+        ::
+
+            sage: a = matrix(QQ['x'], 3); a
+            [0 0 0]
+            [0 0 0]
+            [0 0 0]
+
+        We then randomize roughly half the entries::
+
+            sage: a.randomize(0.5)
+            sage: a.density() <= 0.5
+            True
+
+        Now we randomize all the entries of the resulting matrix::
+
+            sage: while a.density() < 0.9:
+            ....:     a = matrix(QQ['x'], 3)
+            ....:     a.randomize()
+
+        We create the zero matrix over the integers::
+
+            sage: a = matrix(ZZ, 2); a
+            [0 0]
+            [0 0]
+
+        Then we randomize it; the ``x`` and ``y`` keywords, which determine the
+        size of the random elements, are passed on to the ``random_element``
+        method for ``ZZ``.
+
+        ::
+
+            sage: a.randomize(x=-2^64, y=2^64)
+            sage: while all(abs(b) < 2^63 for b in a.list()):
+            ....:     a.randomize(x=-2^64, y=2^64)
+            sage: all(abs(b) < 2^64 for b in a.list())
+            True
+        """
+        randint = current_randstate().python_random().randint
+
+        density = float(density)
+        if density <= 0:
+            return
+        if density > 1:
+            density = 1
+
+        self.check_mutability()
+        self.clear_cache()
+
+        R = self.base_ring()
+
+        cdef Py_ssize_t i, j, num
+
+        if nonzero:
+            if density >= 1:
+                for i from 0 <= i < self._nrows:
+                    for j from 0 <= j < self._ncols:
+                        self.set_unsafe(i, j, R._random_nonzero_element(*args,\
+                            **kwds))
+            else:
+                num = int(self._nrows * self._ncols * density)
+                for i from 0 <= i < num:
+                    self.set_unsafe(randint(0, self._nrows - 1),
+                                    randint(0, self._ncols - 1),
+                                    R._random_nonzero_element(*args, **kwds))
+        else:
+            if density >= 1:
+                for i from 0 <= i < self._nrows:
+                    for j from 0 <= j < self._ncols:
+                        self.set_unsafe(i, j, R.random_element(*args, **kwds))
+            else:
+                num = int(self._nrows * self._ncols * density)
+                for i from 0 <= i < num:
+                    self.set_unsafe(randint(0, self._nrows - 1),
+                                    randint(0, self._ncols - 1),
+                                    R.random_element(*args, **kwds))
+
+    def is_one(self):
+        """
+        Return True if this matrix is the identity matrix.
+
+        EXAMPLES::
+
+            sage: m = matrix(QQ,2,2,range(4))
+            sage: m.is_one()
+            False
+            sage: m = matrix(QQ,2,[5,0,0,5])
+            sage: m.is_one()
+            False
+            sage: m = matrix(QQ,2,[1,0,0,1])
+            sage: m.is_one()
+            True
+            sage: m = matrix(QQ,2,[1,1,1,1])
+            sage: m.is_one()
+            False
+        """
+        return self.is_scalar(self.base_ring().one())
+
+    def is_scalar(self, a = None):
+        """
+        Return True if this matrix is a scalar matrix.
+
+        INPUT:
+
+        - base_ring element a, which is chosen as self[0][0] if
+          a = None
+
+        OUTPUT:
+
+        - whether self is a scalar matrix (in fact the scalar matrix
+          aI if a is input)
+
+        EXAMPLES::
+
+            sage: m = matrix(QQ,2,2,range(4))
+            sage: m.is_scalar(5)
+            False
+            sage: m = matrix(QQ,2,[5,0,0,5])
+            sage: m.is_scalar(5)
+            True
+            sage: m = matrix(QQ,2,[1,0,0,1])
+            sage: m.is_scalar(1)
+            True
+            sage: m = matrix(QQ,2,[1,1,1,1])
+            sage: m.is_scalar(1)
+            False
+        """
+        if not self.is_square():
+            return False
+        cdef Py_ssize_t i, j
+        if a is None:
+            if self._nrows == 0:
+                return True
+            a = self.get_unsafe(0,0)
+        else:
+            a = self.base_ring()(a)
+        for i in range(self._nrows):
+            for j in range(self._ncols):
+                if i != j:
+                    if not self.get_unsafe(i,j).is_zero():
+                        return False
+                else:
+                    if self.get_unsafe(i, i) != a:
+                        return False
+        return True
+
+    def is_diagonal(self) -> bool:
+        """
+        Return ``True`` if this matrix is a diagonal matrix.
+
+        OUTPUT:
+
+        boolean
+
+        EXAMPLES::
+
+            sage: m = matrix(QQ,2,2,range(4))
+            sage: m.is_diagonal()
+            False
+            sage: m = matrix(QQ,2,[5,0,0,5])
+            sage: m.is_diagonal()
+            True
+            sage: m = matrix(QQ,2,[1,0,0,1])
+            sage: m.is_diagonal()
+            True
+            sage: m = matrix(QQ,2,[1,1,1,1])
+            sage: m.is_diagonal()
+            False
+        """
+        if not self.is_square():
+            return False
+        cdef Py_ssize_t i, j
+
+        for i in range(self._nrows):
+            for j in range(self._ncols):
+                if i != j:
+                    if not self.get_unsafe(i,j).is_zero():
+                        return False
+        return True
+
+    def is_triangular(self, side="lower") -> bool:
+        """
+        Return ``True`` if this matrix is a triangular matrix.
+
+        INPUT:
+
+        - ``side`` -- either ``"lower"`` (default) or ``"upper"``
+
+        OUTPUT:
+
+        boolean
+
+        EXAMPLES::
+
+            sage: m = matrix(QQ, 2, 2, range(4))
+            sage: m.is_triangular()
+            False
+            sage: m = matrix(QQ, 2, [5, 0, 0, 5])
+            sage: m.is_triangular()
+            True
+            sage: m = matrix(QQ, 2, [1, 2, 0, 1])
+            sage: m.is_triangular("upper")
+            True
+            sage: m.is_triangular("lower")
+            False
+        """
+        if not self.is_square():
+            return False
+        cdef Py_ssize_t i, j
+
+        if side == "upper":
+            for i in range(1, self._nrows):
+                for j in range(i):
+                    if not self.get_unsafe(i, j).is_zero():
+                        return False
+        else:
+            for i in range(self._nrows - 1):
+                for j in range(i + 1, self._ncols):
+                    if not self.get_unsafe(i, j).is_zero():
+                        return False
+        return True
+
     def is_unitary(self) -> bool:
         r"""
         Return ``True`` if the columns of the matrix are an orthonormal basis.
@@ -9833,6 +9677,132 @@ cdef class Matrix(Matrix_ring):
 
         from sage.combinat.permutation import bistochastic_as_sum_of_permutations
         return bistochastic_as_sum_of_permutations(self)
+
+    def visualize_structure(self, maxsize=512):
+        r"""
+        Visualize the non-zero entries
+
+        White pixels are put at positions with zero entries. If 'maxsize'
+        is given, then the maximal dimension in either x or y direction is
+        set to 'maxsize' depending on which is bigger. If the image is
+        scaled, the darkness of the pixel reflects how many of the
+        represented entries are nonzero. So if e.g. one image pixel
+        actually represents a 2x2 submatrix, the dot is darker the more of
+        the four values are nonzero.
+
+        INPUT:
+
+        - ``maxsize`` - integer (default: ``512``). Maximal dimension
+          in either x or y direction of the resulting image. If
+          ``None`` or a maxsize larger than
+          ``max(self.nrows(),self.ncols())`` is given the image will
+          have the same pixelsize as the matrix dimensions.
+
+        OUTPUT:
+
+        Bitmap image as an instance of
+        :class:`~sage.repl.image.Image`.
+
+        EXAMPLES::
+
+            sage: M = random_matrix(CC, 5, 7)
+            sage: for i in range(5):  M[i,i] = 0
+            sage: M[4, 0] = M[0, 6] = M[4, 6] = 0
+            sage: img = M.visualize_structure();  img
+            7x5px 24-bit RGB image
+
+        You can use :meth:`~sage.repl.image.Image.save` to save the
+        resulting image::
+
+            sage: filename = tmp_filename(ext='.png')
+            sage: img.save(filename)
+            sage: with open(filename, 'rb') as fobj:
+            ....:     fobj.read().startswith(b'\x89PNG')
+            True
+
+        TESTS:
+
+        Test :trac:`17341`::
+
+            sage: random_matrix(GF(2), 8, 586, sparse=True).visualize_structure()
+            512x6px 24-bit RGB image
+        """
+        cdef Py_ssize_t x, y, _x, _y, v, bi, bisq
+        cdef Py_ssize_t ir, ic
+        cdef double b, fct
+        mr, mc = self.nrows(), self.ncols()
+        if maxsize is None:
+            ir = mc
+            ic = mr
+            b = 1.0
+        elif max(mr,mc) > maxsize:
+            maxsize = float(maxsize)
+            ir = int(mc * maxsize/max(mr,mc))
+            ic = int(mr * maxsize/max(mr,mc))
+            b = max(mr,mc)/maxsize
+        else:
+            ir = mc
+            ic = mr
+            b = 1.0
+        bi = int(round(b))
+        bisq = bi*bi
+        fct = 255.0/bisq
+        from sage.repl.image import Image
+        img = Image('RGB', (ir, ic))
+        pixel = img.pixels()
+        for x in range(ic):
+            for y in range(ir):
+                v = bisq
+                for _x in range(bi):
+                    for _y in range(bi):
+                        if not self.get_unsafe(<Py_ssize_t>(x*b + _x), <Py_ssize_t>(y*b + _y)).is_zero():
+                            v -= 1 #increase darkness
+                v = <Py_ssize_t>(v * fct + 0.5)
+                pixel[y, x] = (v, v, v)
+        return img
+
+    def density(self):
+        """
+        Return the density of the matrix.
+
+        By density we understand the ratio of the number of nonzero
+        positions and the self.nrows() \* self.ncols(), i.e. the number of
+        possible nonzero positions.
+
+        EXAMPLES:
+
+        First, note that the density parameter does not ensure the density
+        of a matrix, it is only an upper bound.
+
+        ::
+
+            sage: A = random_matrix(GF(127),200,200,density=0.3)
+            sage: A.density() <= 0.3
+            True
+
+        ::
+
+            sage: A = matrix(QQ,3,3,[0,1,2,3,0,0,6,7,8])
+            sage: A.density()
+            2/3
+
+        ::
+
+            sage: a = matrix([[],[],[],[]])
+            sage: a.density()
+            0
+        """
+        cdef int x,y,k
+        k = 0
+        nr = self.nrows()
+        nc = self.ncols()
+        if nc == 0 or nr == 0:
+            return 0
+        for x from 0 <= x < nr:
+            for y from 0 <= y < nc:
+                if not self.get_unsafe(x,y).is_zero():
+                    k+=1
+        return QQ(k)/QQ(nr*nc)
 
     def inverse(self):
         """
@@ -12411,6 +12381,7 @@ cdef class Matrix(Matrix_ring):
         else:
             return subspace
 
+
     def cholesky(self):
         r"""
         Returns the Cholesky decomposition of a Hermitian matrix.
@@ -12878,6 +12849,7 @@ cdef class Matrix(Matrix_ring):
         # Take A = PLDL^{*}P^{T} and simply invert.
         return P*L_inv.conjugate_transpose()*D.inverse()*L_inv*P.transpose()
 
+
     def LU(self, pivot=None, format='plu'):
         r"""
         Finds a decomposition into a lower-triangular matrix and
@@ -13252,9 +13224,9 @@ cdef class Matrix(Matrix_ring):
             sage: P, L, U = C.LU(pivot='partial')
             sage: C == P*L*U
             True
-
+            
         Check that :trac:`32736` is solved::
-
+        
             sage: M = Matrix(FiniteField(11), [[2,3],[4,5]])
             sage: P, L, U = M.LU()
             sage: P.base_ring()
@@ -14384,6 +14356,7 @@ cdef class Matrix(Matrix_ring):
 
         return (P,L,D)
 
+
     cdef bint _is_positive_definite_or_semidefinite(self, bint semi) except -1:
         """
         This is an internal wrapper that allows us to implement both
@@ -14426,6 +14399,7 @@ cdef class Matrix(Matrix_ring):
             op = operator.ge
 
         return all(d_i.nrows() == 1 and op(d_i[0,0], 0) for d_i in d)
+
 
     def is_positive_semidefinite(self):
         r"""
@@ -14742,6 +14716,7 @@ cdef class Matrix(Matrix_ring):
             return (result, L, d)
         else:
             return result
+
 
     def principal_square_root(self, check_positivity=True):
         r"""
@@ -17969,6 +17944,7 @@ def _binomial(Py_ssize_t n, Py_ssize_t k):
         i, n, k = i + 1, n - 1, k - 1
     return result
 
+
 def _jordan_form_vector_in_difference(V, W):
     r"""
     Given two lists of vectors ``V`` and ``W`` over the same base field,
@@ -18151,7 +18127,6 @@ def _matrix_power_symbolic(A, n):
         Pinv = ~P
 
     return P * M * Pinv
-
 
 class NotFullRankError(ValueError):
     """
