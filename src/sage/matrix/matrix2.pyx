@@ -5206,7 +5206,7 @@ cdef class Matrix(Matrix1):
             [1 0]
             [0 2]
         """
-        M = self.row_ambient_module(base_ring = base_ring)
+        M = self.row_ambient_module(base_ring=base_ring)
         if (base_ring is None or base_ring == self.base_ring()) and self.fetch('in_echelon_form'):
             if self.rank() != self.nrows():
                 rows = self.matrix_from_rows(range(self.rank())).rows()

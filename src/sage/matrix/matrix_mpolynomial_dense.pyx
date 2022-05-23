@@ -31,7 +31,7 @@ from sage.rings.polynomial.polynomial_singular_interface import can_convert_to_s
 from sage.libs.singular.function import singular_function
 
 
-cdef class _Matrix_mpolynomial_dense(Matrix_generic_dense):
+cdef class Matrix_mpolynomial_dense(Matrix_generic_dense):
     """
     Dense matrix over a multivariate polynomial ring over a field.
     """
@@ -558,10 +558,3 @@ cdef class _Matrix_mpolynomial_dense(Matrix_generic_dense):
 
         self.cache('det', d)
         return d
-
-
-class Matrix_mpolynomial_dense(_Matrix_mpolynomial_dense, Matrix):
-    """
-    Base class for dense matrices over a multivariate polynomial ring over a field.
-    """
-    pass
