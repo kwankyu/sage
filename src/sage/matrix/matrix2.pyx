@@ -12411,7 +12411,6 @@ cdef class Matrix(Matrix_ring):
         else:
             return subspace
 
-
     def cholesky(self):
         r"""
         Returns the Cholesky decomposition of a Hermitian matrix.
@@ -12878,7 +12877,6 @@ cdef class Matrix(Matrix_ring):
 
         # Take A = PLDL^{*}P^{T} and simply invert.
         return P*L_inv.conjugate_transpose()*D.inverse()*L_inv*P.transpose()
-
 
     def LU(self, pivot=None, format='plu'):
         r"""
