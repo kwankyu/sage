@@ -22,7 +22,7 @@ AUTHOR:
 from sage.rings.polynomial.multi_polynomial_libsingular cimport new_MP
 
 from sage.matrix.matrix_generic_dense cimport Matrix_generic_dense
-from sage.matrix.matrix2 cimport Matrix, Matrix_ring
+from sage.matrix.matrix2 cimport Matrix
 
 from sage.rings.polynomial.multi_polynomial_libsingular cimport MPolynomial_libsingular
 from sage.rings.polynomial.multi_polynomial_libsingular cimport MPolynomialRing_libsingular
@@ -565,7 +565,7 @@ class Matrix_mpolynomial_dense(_Matrix_mpolynomial_dense, Matrix_ring):
     """
     row_module = Matrix_ring.row_module
 
-class Matrix_mpolynomial_dense(_Matrix_mpolynomial_dense, Matrix_ring):
+class Matrix_mpolynomial_dense(_Matrix_mpolynomial_dense, Matrix):
     """
     Base class for dense matrices over a multivariate polynomial ring over a field.
     """
