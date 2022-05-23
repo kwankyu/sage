@@ -565,5 +565,3 @@ class Matrix_mpolynomial_dense(_Matrix_mpolynomial_dense, Matrix):
     Base class for dense matrices over a multivariate polynomial ring over a field.
     """
     pass
-
-
