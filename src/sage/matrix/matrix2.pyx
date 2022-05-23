@@ -1938,7 +1938,7 @@ cdef class Matrix(Matrix_ring):
 
     A matrix of this class is equipped with an echelon form, that facilitates
     extensive computations with the matrix. This essentially requires the base
-    ring to be a field, a principal ideal domain, or a Euclidean domain.
+    ring to be a field, a principal ideal domain, or an Euclidean domain.
 
     TESTS::
 
