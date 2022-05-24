@@ -17,7 +17,50 @@ Quotients of finite rank free modules over a field.
 #                  http://www.gnu.org/licenses/
 ####################################################################################
 
-from .free_module import FreeModule_ambient_field
+from .free_module import FreeModule_ambient_domain, FreeModule_ambient_field
+
+
+class FreeModule_ambient_domain_quotient(FreeModule_ambient_domain):
+    """
+    A quotient `V/W` of two vector spaces as a vector space.
+
+    TESTS::
+
+    """
+    def __init__(self, domain, sub):
+        """
+        Create this quotient space, from the given domain, submodule,
+        and quotient_matrix.
+
+        EXAMPLES::
+
+        """
+        base_ring = domain.base_ring()
+        rank = domain.rank()
+        sparse = domain.is_sparse()
+        self.__sub = sub
+        self.__domain = domain
+        self.__hash = hash((domain, sub))
+        FreeModule_ambient_domain.__init__(self, base_ring, rank, sparse)
+
+    def _repr_(self):
+        r"""
+        Return the rather verbose string representation of this quotient space V/W.
+
+        EXAMPLES:
+
+        """
+        return "Quotient module by %s" % self.__sub
+
+    def __hash__(self):
+        """
+        Return hash of this quotient space `V/W`, which is, by definition,
+        the hash of the tuple `(V, W)`.
+
+        EXAMPLES:
+
+        """
+        return self.__hash
 
 
 class FreeModule_ambient_field_quotient(FreeModule_ambient_field):

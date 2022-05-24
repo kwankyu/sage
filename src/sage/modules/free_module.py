@@ -2955,7 +2955,7 @@ class FreeModule_generic_domain(FreeModule_generic):
                 raise ValueError("Argument gens (= %s) is not compatible " % gens +
                                  "with base_ring (= %s)."%base_ring)
 
-    def submodule(self, gens, check=True):
+    def submodule(self, gens, check=True, unitriangular=False, already_echelonized=False):
         r"""
         Create the `R`-submodule of the ambient vector space with given
         generators, where `R` is the base ring of ``self``.
@@ -2985,6 +2985,56 @@ class FreeModule_generic_domain(FreeModule_generic):
                 raise ArithmeticError("Argument gens (= %s) does not generate "
                                       "a submodule of self." % gens)
         return V
+
+    def quotient_module(self, sub, check=True):
+        """
+        Return the quotient of ``self`` by the given subspace sub.
+
+        INPUT:
+
+
+        -  ``sub`` - a submodule of self, or something that can
+           be turned into one via self.submodule(sub).
+
+        -  ``check`` - (default: True) whether or not to check
+           that sub is a submodule.
+
+
+        EXAMPLES::
+
+            sage: A = QQ^3; V = A.span([[1,2,3], [4,5,6]])
+            sage: Q = V.quotient( [V.0 + V.1] ); Q
+            Vector space quotient V/W of dimension 1 over Rational Field where
+            V: Vector space of degree 3 and dimension 2 over Rational Field
+            Basis matrix:
+            [ 1  0 -1]
+            [ 0  1  2]
+            W: Vector space of degree 3 and dimension 1 over Rational Field
+            Basis matrix:
+            [1 1 1]
+            sage: Q(V.0 + V.1)
+            (0)
+
+        We illustrate that the base rings must be the same::
+
+            sage: (QQ^2)/(ZZ^2)
+            Traceback (most recent call last):
+            ...
+            ValueError: base rings must be the same
+        """
+        # Calling is_submodule may be way too slow and repeat work done below.
+        # It will be very desirable to somehow do this step better.
+        if is_FreeModule(sub) and self.base_ring() != sub.base_ring():
+            raise ValueError("base rings must be the same")
+        if check and (not is_FreeModule(sub) or not sub.is_submodule(self)):
+            try:
+                sub = self.submodule(sub)
+            except (TypeError, ArithmeticError):
+                raise ArithmeticError("sub must be a subspace of self")
+        from . import quotient_module
+        return quotient_module.FreeModule_ambient_domain_quotient(self, sub)
+
+    quotient = quotient_module
 
 
 class FreeModule_generic_pid(FreeModule_generic_domain):
@@ -4657,55 +4707,6 @@ class FreeModule_generic_field(FreeModule_generic_pid):
             (0.0)
         """
         return self.quotient(sub, check=True)
-
-    def quotient(self, sub, check=True):
-        """
-        Return the quotient of ``self`` by the given subspace sub.
-
-        INPUT:
-
-
-        -  ``sub`` - a submodule of self, or something that can
-           be turned into one via self.submodule(sub).
-
-        -  ``check`` - (default: True) whether or not to check
-           that sub is a submodule.
-
-
-        EXAMPLES::
-
-            sage: A = QQ^3; V = A.span([[1,2,3], [4,5,6]])
-            sage: Q = V.quotient( [V.0 + V.1] ); Q
-            Vector space quotient V/W of dimension 1 over Rational Field where
-            V: Vector space of degree 3 and dimension 2 over Rational Field
-            Basis matrix:
-            [ 1  0 -1]
-            [ 0  1  2]
-            W: Vector space of degree 3 and dimension 1 over Rational Field
-            Basis matrix:
-            [1 1 1]
-            sage: Q(V.0 + V.1)
-            (0)
-
-        We illustrate that the base rings must be the same::
-
-            sage: (QQ^2)/(ZZ^2)
-            Traceback (most recent call last):
-            ...
-            ValueError: base rings must be the same
-        """
-        # Calling is_submodule may be way too slow and repeat work done below.
-        # It will be very desirable to somehow do this step better.
-        if is_FreeModule(sub) and self.base_ring() != sub.base_ring():
-            raise ValueError("base rings must be the same")
-        if check and (not is_FreeModule(sub) or not sub.is_subspace(self)):
-            try:
-                sub = self.subspace(sub)
-            except (TypeError, ArithmeticError):
-                raise ArithmeticError("sub must be a subspace of self")
-        A, L = self.__quotient_matrices(sub)
-        from . import quotient_module
-        return quotient_module.FreeModule_ambient_field_quotient(self, sub, A, L)
 
     def __quotient_matrices(self, sub):
         r"""

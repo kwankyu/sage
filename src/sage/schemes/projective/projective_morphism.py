@@ -81,7 +81,7 @@ from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
 from sage.rings.qqbar import QQbar, number_field_elements_from_algebraics
 from sage.rings.quotient_ring import QuotientRing_generic
 from sage.rings.rational_field import QQ
-from sage.homology.resolutions.graded import GradedFreeResolution
+from sage.homology.resolutions.graded import GradedFreeResolution_polynomial
 from sage.modules.free_module_element import vector
 from sage.schemes.generic.morphism import SchemeMorphism_polynomial
 from sage.categories.finite_fields import FiniteFields
