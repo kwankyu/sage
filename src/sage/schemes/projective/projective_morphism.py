@@ -2630,12 +2630,12 @@ class SchemeMorphism_polynomial_projective_subscheme_field(SchemeMorphism_polyno
         I = G.defining_ideal()  # a bihomogeneous ideal
 
         degrees = xn*[vector([1,0])] + yn*[vector([0,1])]
-        res = GradedFreeResolution(I, degrees)
+        res = GradedFreeResolution_polynomial(I, degrees)
         kpoly = res.K_polynomial()
 
         L = kpoly.parent()
         t1, t2 = L.gens()
-        poly = Kpoly.substitute({t1: 1 - t1, t2: 1 - t2})
+        poly = kpoly.substitute({t1: 1 - t1, t2: 1 - t2})
 
         n = AX.dimension()
         m = AY.dimension()
