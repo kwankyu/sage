@@ -271,12 +271,7 @@ class FreeModuleFactory(UniqueFactory):
                 return FreeModule_ambient_pid(base_ring, rank, sparse=sparse)
 
             elif isinstance(base_ring, ring.IntegralDomain) or base_ring.is_integral_domain():
-                if isinstance(base_ring, sage.rings.polynomial.multi_polynomial_libsingular.MPolynomialRing_libsingular):
-                    from sage.modules.free_module_libsingular import FreeModule_ambient_libsingular
-                    return FreeModule_ambient_libsingular(base_ring, rank, sparse=sparse)
-                else:
-                    return FreeModule_ambient_domain(base_ring, rank, sparse=sparse)
-
+                return FreeModule_ambient_domain(base_ring, rank, sparse=sparse)
             else:
                 return FreeModule_ambient(base_ring, rank, sparse=sparse)
         except NotImplementedError:
@@ -1423,8 +1418,7 @@ class FreeModule_generic(Module):
             sage: L._eq(IntegralLattice("U"))
             True
         """
-        if (self.rank() is None and other.rank() is not None or
-            self.rank() is not None and other.rank() is None):
+        if self.rank() is None or other.rank() is None:
             return False
         if self.rank() != other.rank():
             return False
@@ -2170,10 +2164,9 @@ class FreeModule_generic(Module):
             ...
             TypeError: unable to convert rational 4/3 to an integer
         """
-        basis = self.basis()
-        if i < 0 or i >= len(basis):
+        if i < 0 or i >= self.rank():
             raise ValueError("Generator %s not defined." % i)
-        return basis[i]
+        return self.basis()[i]
 
     def gram_matrix(self):
         r"""
@@ -2902,8 +2895,8 @@ class FreeModule_generic_domain(FreeModule_generic):
             if other == 0:
                 return self
             raise TypeError("other (=%s) must be a free module"%other)
-        if not (self.ambient_module() == other.ambient_module()):
-            raise TypeError("ambient modules must be equal")
+        if not (self.ambient_vector_space() == other.ambient_vector_space()):
+            raise TypeError("ambient vector spaces must be equal")
         return self.span(self.basis() + other.basis())
 
     def zero_submodule(self):
@@ -2928,12 +2921,14 @@ class FreeModule_generic_domain(FreeModule_generic):
 
         - ``base_ring`` -- (optional) a ring
 
+        - ``already_echelonized`` -- boolean; ignored
+
         EXAMPLES::
 
             sage: S.<x,y,z> = PolynomialRing(QQ)
             sage: A = S**2
-            sage: A.span([vector([x-y,z]), vector([y*z, x*z])])
-            Free module of degree 2 over Multivariate Polynomial Ring in x, y, z over Rational Field
+            sage: A.span([vector([x - y, z]), vector([y*z, x*z])])
+            Submodule of Ambient free module of rank 2 over the integral domain Multivariate Polynomial Ring in x, y, z over Rational Field
             Basis matrix:
             [x - y     z]
             [  y*z   x*z]
@@ -2948,12 +2943,12 @@ class FreeModule_generic_domain(FreeModule_generic):
                 M = self.change_ring(base_ring)
             except TypeError:
                 raise ValueError("Argument base_ring (= %s) is not compatible " % base_ring +
-                                 "with the base field (= %s)." % self.base_field())
+                                 "with the base ring (= %s)." % self.base_ring())
             try:
                 return M.span(gens)
             except TypeError:
                 raise ValueError("Argument gens (= %s) is not compatible " % gens +
-                                 "with base_ring (= %s)."%base_ring)
+                                 "with base_ring (= %s)." % base_ring)
 
     def submodule(self, gens, check=True, unitriangular=False, already_echelonized=False):
         r"""
@@ -2967,12 +2962,14 @@ class FreeModule_generic_domain(FreeModule_generic):
         -  ``check`` -- (default: True) whether or not to verify
            that the gens are in ``self``.
 
+        - ``already_echelonized`` -- boolean; ignored
+
         EXAMPLES::
 
             sage: S.<x,y,z> = PolynomialRing(QQ)
             sage: A = S**2
-            sage: A.submodule([vector([x-y,z]), vector([y*z, x*z])])
-            Free module of degree 2 over Multivariate Polynomial Ring in x, y, z over Rational Field
+            sage: A.submodule([vector([x - y,z]), vector([y*z, x*z])])
+            Submodule of Ambient free module of rank 2 over the integral domain Multivariate Polynomial Ring in x, y, z over Rational Field
             Basis matrix:
             [x - y     z]
             [  y*z   x*z]
@@ -2985,56 +2982,6 @@ class FreeModule_generic_domain(FreeModule_generic):
                 raise ArithmeticError("Argument gens (= %s) does not generate "
                                       "a submodule of self." % gens)
         return V
-
-    def quotient_module(self, sub, check=True):
-        """
-        Return the quotient of ``self`` by the given subspace sub.
-
-        INPUT:
-
-
-        -  ``sub`` - a submodule of self, or something that can
-           be turned into one via self.submodule(sub).
-
-        -  ``check`` - (default: True) whether or not to check
-           that sub is a submodule.
-
-
-        EXAMPLES::
-
-            sage: A = QQ^3; V = A.span([[1,2,3], [4,5,6]])
-            sage: Q = V.quotient( [V.0 + V.1] ); Q
-            Vector space quotient V/W of dimension 1 over Rational Field where
-            V: Vector space of degree 3 and dimension 2 over Rational Field
-            Basis matrix:
-            [ 1  0 -1]
-            [ 0  1  2]
-            W: Vector space of degree 3 and dimension 1 over Rational Field
-            Basis matrix:
-            [1 1 1]
-            sage: Q(V.0 + V.1)
-            (0)
-
-        We illustrate that the base rings must be the same::
-
-            sage: (QQ^2)/(ZZ^2)
-            Traceback (most recent call last):
-            ...
-            ValueError: base rings must be the same
-        """
-        # Calling is_submodule may be way too slow and repeat work done below.
-        # It will be very desirable to somehow do this step better.
-        if is_FreeModule(sub) and self.base_ring() != sub.base_ring():
-            raise ValueError("base rings must be the same")
-        if check and (not is_FreeModule(sub) or not sub.is_submodule(self)):
-            try:
-                sub = self.submodule(sub)
-            except (TypeError, ArithmeticError):
-                raise ArithmeticError("sub must be a subspace of self")
-        from . import quotient_module
-        return quotient_module.FreeModule_ambient_domain_quotient(self, sub)
-
-    quotient = quotient_module
 
 
 class FreeModule_generic_pid(FreeModule_generic_domain):
@@ -4708,6 +4655,55 @@ class FreeModule_generic_field(FreeModule_generic_pid):
         """
         return self.quotient(sub, check=True)
 
+    def quotient(self, sub, check=True):
+        """
+        Return the quotient of ``self`` by the given subspace sub.
+
+        INPUT:
+
+
+        -  ``sub`` - a submodule of self, or something that can
+           be turned into one via self.submodule(sub).
+
+        -  ``check`` - (default: True) whether or not to check
+           that sub is a submodule.
+
+
+        EXAMPLES::
+
+            sage: A = QQ^3; V = A.span([[1,2,3], [4,5,6]])
+            sage: Q = V.quotient( [V.0 + V.1] ); Q
+            Vector space quotient V/W of dimension 1 over Rational Field where
+            V: Vector space of degree 3 and dimension 2 over Rational Field
+            Basis matrix:
+            [ 1  0 -1]
+            [ 0  1  2]
+            W: Vector space of degree 3 and dimension 1 over Rational Field
+            Basis matrix:
+            [1 1 1]
+            sage: Q(V.0 + V.1)
+            (0)
+
+        We illustrate that the base rings must be the same::
+
+            sage: (QQ^2)/(ZZ^2)
+            Traceback (most recent call last):
+            ...
+            ValueError: base rings must be the same
+        """
+        # Calling is_submodule may be way too slow and repeat work done below.
+        # It will be very desirable to somehow do this step better.
+        if is_FreeModule(sub) and self.base_ring() != sub.base_ring():
+            raise ValueError("base rings must be the same")
+        if check and (not is_FreeModule(sub) or not sub.is_subspace(self)):
+            try:
+                sub = self.subspace(sub)
+            except (TypeError, ArithmeticError):
+                raise ArithmeticError("sub must be a subspace of self")
+        A, L = self.__quotient_matrices(sub)
+        from . import quotient_module
+        return quotient_module.FreeModule_ambient_field_quotient(self, sub, A, L)
+
     def __quotient_matrices(self, sub):
         r"""
         This internal function is used by
@@ -5729,6 +5725,43 @@ class FreeModule_ambient_domain(FreeModule_generic_domain, FreeModule_ambient):
         else:
             return self.change_ring(base_field)
 
+    def quotient_module(self, sub, check=True):
+        """
+        Return the quotient of ``self`` by the given subspace sub.
+
+        INPUT:
+
+        -  ``sub`` -- a submodule of self, or something that can
+           be turned into one via self.submodule(sub).
+
+        -  ``check`` -- (default: True) whether or not to check
+           that sub is a submodule.
+
+        EXAMPLES::
+
+            sage: S.<x,y,z> = PolynomialRing(QQ)
+            sage: M = S**2
+            sage: N = M.submodule([vector([x - y, z]), vector([y * z, x * z])])
+            sage: M.quotient(N)
+            Quotient module by Submodule of Ambient free module of rank 2 over the integral domain Multivariate Polynomial Ring in x, y, z over Rational Field
+            Basis matrix:
+            [x - y     z]
+            [  y*z   x*z]
+        """
+        if isinstance(sub, FreeModule_generic) and self.base_ring() != sub.base_ring():
+            raise ValueError("base rings must be the same")
+        if check and (not isinstance(sub, FreeModule_generic) or not sub.is_submodule(self)):
+            try:
+                sub = self.submodule(sub)
+            except (TypeError, ArithmeticError):
+                raise ArithmeticError("sub must be a subspace of self")
+        from . import quotient_module
+        return quotient_module.FreeModule_ambient_domain_quotient(self, sub)
+
+    quotient = quotient_module
+
+
+
 ###############################################################################
 #
 # Ambient free modules over a principal ideal domain
@@ -5969,24 +6002,24 @@ class FreeModule_submodule_domain(FreeModule_generic_domain):
 
     INPUT:
 
-    - ``ambient`` -- ambient free module
+    - ``ambient`` -- an ambient free module
 
     - ``basis`` -- vectors of the ambient free module generating this submodule
 
     - ``check`` -- boolean; if ``True``, vectors in ``basis`` are checked whether
       they belong to the ambient free module
 
-    A basis of a submodule over an integral domain is a generating set of the
-    submodule. Note that there is no notion of linear independence about
-    vectors in modules over a integral domain.
+    A basis of a submodule over an integral domain is just a generating set of
+    the submodule, as there is no notion of linear independence about vectors
+    in modules over an integral domain.
 
     EXAMPLES::
 
         sage: S.<x,y,z> = PolynomialRing(QQ)
-        sage: A = S**2
-        sage: M = A.submodule([vector([x - y, z]), vector([y*z, x*z])])
-        sage: M
-        Free module of degree 2 over Multivariate Polynomial Ring in x, y, z over Rational Field
+        sage: M = S**2
+        sage: N = M.submodule([vector([x - y, z]), vector([y * z, x * z])])
+        sage: N
+        Submodule of Ambient free module of rank 2 over the integral domain Multivariate Polynomial Ring in x, y, z over Rational Field
         Basis matrix:
         [x - y     z]
         [  y*z   x*z]
@@ -5998,9 +6031,10 @@ class FreeModule_submodule_domain(FreeModule_generic_domain):
         TESTS::
 
             sage: S.<x,y,z> = PolynomialRing(QQ)
-            sage: A = S**2
-            sage: M = A.submodule([vector([x - y, z]), vector([y*z, x*z])])
-            sage: TestSuite(M).run(skip=['_test_cardinality', '_test_construction', '_test_elements'])
+            sage: M = S**2
+            sage: N = M.submodule([vector([x - y, z]), vector([y * z, x * z])])
+            sage: N.is_submodule(M)
+            True
         """
         if not isinstance(ambient, FreeModule_ambient_domain):
             raise TypeError("ambient (=%s) must be ambient." % ambient)
@@ -6010,10 +6044,10 @@ class FreeModule_submodule_domain(FreeModule_generic_domain):
 
         if check:
             try:
-                # Convert all basis elements to the ambient module
+                # convert all basis elements to the ambient module
                 basis = [ambient(x) for x in basis]
             except TypeError:
-                raise TypeError("each element of basis must be in the ambient vector space")
+                raise TypeError("each element of basis must be in the ambient free module")
 
         super().__init__(base_ring=R, coordinate_ring=R_coord,
                          rank=None, degree=ambient.degree(),
@@ -6030,9 +6064,9 @@ class FreeModule_submodule_domain(FreeModule_generic_domain):
         EXAMPLES::
 
             sage: S.<x,y,z> = PolynomialRing(QQ)
-            sage: A = S**2
-            sage: A.submodule([vector([x-y,z]), vector([y*z, x*z])])
-            Free module of degree 2 over Multivariate Polynomial Ring in x, y, z over Rational Field
+            sage: M = S**2
+            sage: M.submodule([vector([x-y,z]), vector([y*z, x*z])])
+            Submodule of Ambient free module of rank 2 over the integral domain Multivariate Polynomial Ring in x, y, z over Rational Field
             Basis matrix:
             [x - y     z]
             [  y*z   x*z]
@@ -6049,9 +6083,9 @@ class FreeModule_submodule_domain(FreeModule_generic_domain):
         EXAMPLES::
 
             sage: S.<x,y,z> = PolynomialRing(QQ)
-            sage: A = S**2
-            sage: M = A.submodule([vector([x - y, z]), vector([y*z, x*z])])
-            sage: M.basis()
+            sage: M = S**2
+            sage: N = M.submodule([vector([x - y, z]), vector([y * z, x * z])])
+            sage: N.basis()
             [
             (x - y, z),
             (y*z, x*z)
@@ -6072,10 +6106,10 @@ class FreeModule_submodule_domain(FreeModule_generic_domain):
         EXAMPLES::
 
             sage: S.<x,y,z> = PolynomialRing(QQ)
-            sage: A = S**2
-            sage: M = A.submodule([vector([x - y, z]), vector([y*z, x*z])])
+            sage: M = S**2
+            sage: N = M.submodule([vector([x - y, z]), vector([y * z, x * z])])
             sage: v = vector([x - y, z])
-            sage: M.coordinate_vector(v)
+            sage: N.coordinate_vector(v)
             (x - y, z)
         """
         if check:

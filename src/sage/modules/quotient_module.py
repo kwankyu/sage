@@ -22,43 +22,73 @@ from .free_module import FreeModule_ambient_domain, FreeModule_ambient_field
 
 class FreeModule_ambient_domain_quotient(FreeModule_ambient_domain):
     """
-    A quotient `V/W` of two vector spaces as a vector space.
+    Quotients of ambient free modules over a domain by a submodule.
 
-    TESTS::
+    INPUT:
 
+    - ``module`` -- an ambient free module
+
+    - ``sub`` -- a submodule of the ambient free module
+
+    EXAMPLES::
+
+        sage: S.<x,y,z> = PolynomialRing(QQ)
+        sage: M = S**2
+        sage: N = M.submodule([vector([x - y, z]), vector([y*z, x*z])])
+        sage: M.quotient_module(N)
+        Quotient module by Submodule of Ambient free module of rank 2 over the integral domain Multivariate Polynomial Ring in x, y, z over Rational Field
+        Basis matrix:
+        [x - y     z]
+        [  y*z   x*z]
     """
-    def __init__(self, domain, sub):
+    def __init__(self, module, sub):
         """
-        Create this quotient space, from the given domain, submodule,
-        and quotient_matrix.
+        Create this quotient module of  ``module`` by a submodule ``sub``.
 
-        EXAMPLES::
+        TESTS::
 
+            sage: S.<x,y,z> = PolynomialRing(QQ)
+            sage: M = S**2
+            sage: N = M.submodule([vector([x - y, z]), vector([y*z, x*z])])
+            sage: Q = M.quotient_module(N)
+            sage: TestSuite(Q).run()
         """
-        base_ring = domain.base_ring()
-        rank = domain.rank()
-        sparse = domain.is_sparse()
+        base_ring = module.base_ring()
+        rank = module.rank()
+        sparse = module.is_sparse()
         self.__sub = sub
-        self.__domain = domain
-        self.__hash = hash((domain, sub))
-        FreeModule_ambient_domain.__init__(self, base_ring, rank, sparse)
+        self.__module = module
+        self.__hash = hash((module, sub))
+        super().__init__(base_ring, rank, sparse)
 
     def _repr_(self):
         r"""
         Return the rather verbose string representation of this quotient space V/W.
 
-        EXAMPLES:
+        EXAMPLES::
 
+            sage: S.<x,y,z> = PolynomialRing(QQ)
+            sage: M = S**2
+            sage: N = M.submodule([vector([x - y, z]), vector([y*z , x*z])])
+            sage: M.quotient_module(N)
+            Quotient module by Submodule of Ambient free module of rank 2 over the integral domain Multivariate Polynomial Ring in x, y, z over Rational Field
+            Basis matrix:
+            [x - y     z]
+            [  y*z   x*z]
         """
         return "Quotient module by %s" % self.__sub
 
     def __hash__(self):
-        """
-        Return hash of this quotient space `V/W`, which is, by definition,
-        the hash of the tuple `(V, W)`.
+        r"""
+        Return the hash of this quotient module.
 
-        EXAMPLES:
+        TESTS::
 
+            sage: S.<x,y,z> = PolynomialRing(QQ)
+            sage: M = S**2
+            sage: N = M.submodule([vector([x - y, z]), vector([y*z, x*z])])
+            sage: Q = M.quotient_module(N)
+            sage: d = {Q: 1}
         """
         return self.__hash
 
