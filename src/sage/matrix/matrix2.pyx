@@ -13224,9 +13224,9 @@ cdef class Matrix(Matrix1):
             sage: P, L, U = C.LU(pivot='partial')
             sage: C == P*L*U
             True
-            
+
         Check that :trac:`32736` is solved::
-        
+
             sage: M = Matrix(FiniteField(11), [[2,3],[4,5]])
             sage: P, L, U = M.LU()
             sage: P.base_ring()
