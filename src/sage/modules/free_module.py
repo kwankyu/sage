@@ -1865,6 +1865,33 @@ class FreeModule_generic(Module):
         else:
             return A.change_ring(ring)
 
+    def echelonized_basis_matrix(self):
+        """
+        The echelonized basis matrix (not implemented for this module).
+
+        This example works because M is an ambient module. Submodule
+        creation should exist for generic modules.
+
+        EXAMPLES::
+
+            sage: R = IntegerModRing(12)
+            sage: S.<x,y> = R[]
+            sage: M = FreeModule(S,3)
+            sage: M.echelonized_basis_matrix()
+            [1 0 0]
+            [0 1 0]
+            [0 0 1]
+
+        TESTS::
+
+            sage: from sage.modules.free_module import FreeModule_generic
+            sage: FreeModule_generic.echelonized_basis_matrix(M)
+            Traceback (most recent call last):
+            ...
+            NotImplementedError
+        """
+        raise NotImplementedError
+
     def matrix(self):
         """
         Return the basis matrix of this module, which is the matrix whose
