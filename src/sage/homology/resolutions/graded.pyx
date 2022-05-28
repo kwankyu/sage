@@ -1,14 +1,18 @@
-"""
-Graded free resolutions
+r"""
+Graded free resolutions of modules
 
 This module defines :class:`GradedFreeResolution` which computes a graded free
-resolution of a homogeneous ideal `I` of a graded multi-variate polynomial ring
-`S`. The output resolution is always minimal.
+resolution of a homogeneous ideal `I` of a graded multivariate polynomial ring
+`S`, or a homogeneous submodule of a graded free module `M` over `S`. The
+output resolution is always minimal.
 
 The degrees given to the variables of `S` are integers or integer vectors of
-the same length. In the latter case, the resolution is also called multigraded
-free resolution. The standard grading where all variables have degree `1` is
-used if the degrees are not specified.
+the same length. In the latter case, `S` is said to be multigraded, and the
+resolution is a multigraded free resolution. The standard grading where all
+variables have degree `1` is used if the degrees are not specified.
+
+A summand of the graded free module `M` is a shifted (or twisted) module of
+rank one over `S`, denoted `S(-d)` with shift `d`.
 
 The computation of the resolution is done by the libSingular behind. Different
 Singular algorithms can be chosen for best performance.
@@ -27,7 +31,47 @@ EXAMPLES::
     S(0) <-- S(-2)⊕S(-2)⊕S(-2) <-- S(-3)⊕S(-3) <-- 0
     sage: GradedFreeResolution_polynomial(I, algorithm='heuristic')
     S(0) <-- S(-2)⊕S(-2)⊕S(-2) <-- S(-3)⊕S(-3) <-- 0
+
+::
+
+    sage: d = r.differential(2)
+    sage: d
+    Free module morphism defined as left-multiplication by the matrix
+    [ y  x]
+    [-z -y]
+    [ w  z]
+    Domain: Ambient free module of rank 2 over the integral domain Multivariate Polynomial Ring
+    in x, y, z, w over Rational Field
+    Codomain: Ambient free module of rank 3 over the integral domain Multivariate Polynomial Ring
+    in x, y, z, w over Rational Field
+    sage: d.image()
+    Submodule of Ambient free module of rank 3 over the integral domain Multivariate Polynomial Ring
+    in x, y, z, w over Rational Field
+    Basis matrix:
+    [ y -z  w]
+    [ x -y  z]
+    sage: m = d.image()
+    sage: GradedFreeResolution_polynomial(m, shifts=(2,2,2))
+    S(-2)⊕S(-2)⊕S(-2) <-- S(-3)⊕S(-3) <-- 0
+
+A reference for graded free resolutions with respect to multigrading is
+[MilStu2005]_.
+
+AUTHORS:
+
+- Kwankyu Lee (2022-05): initial version
+
 """
+
+# ****************************************************************************
+#       Copyright (C) 2022 Kwankyu Lee <ekwankyu@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#                  https://www.gnu.org/licenses/
+# ****************************************************************************
 
 from sage.libs.singular.decl cimport *
 from sage.libs.singular.decl cimport ring
@@ -52,16 +96,22 @@ class GradedFreeResolution_polynomial(FreeResolution):
 
     INPUT:
 
-    - ``ideal`` -- a homogeneous ideal of a multi-variate polynomial ring
+    - ``ideal`` -- a homogeneous ideal of a multivariate polynomial ring `S`, or
+      a homogeneous submodule of a free module `M` of rank `n` over `S`
 
-    - ``degree`` -- list of integers or integer vectors
+    - ``degree`` -- a list of integers or integer vectors giving degrees of
+      variables of `S`; this is a list of 1s by default
+
+    - ``shifts`` -- a list of integers or integer vectors giving shifts of
+      degrees of `n` summands of the free module `M`; this is a list of zero
+      degrees of length `n` by default
 
     - ``algorithm`` -- Singular algorithm to compute a resolution of ``ideal``
 
-    OUTPUT: a graded minimal free resolution of the ideal
+    If ``ideal`` is an ideal of `S`, then `M = S`, a free module of rank `1`
+    over `S`.
 
-    The ``degrees`` specify degrees of the variables of the multi-variate
-    polynomial ring `S` of which ``ideal`` is a homogeneous ideal.
+    OUTPUT: a graded minimal free resolution of ``ideal``
 
     The available algorithms and the corresponding Singular commands are shown
     below:
