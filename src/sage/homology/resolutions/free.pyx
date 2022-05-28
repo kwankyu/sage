@@ -277,6 +277,8 @@ class FreeResolution(SageObject):
             m = s.hom(self.__maps[i], t, side='right')
         return m
 
+    d = differential
+
     def matrix(self, i):
         """
         Return the matrix representing the `i`-th differential map.
@@ -329,7 +331,7 @@ class FreeResolution(SageObject):
         """
         from sage.homology.chain_complex import ChainComplex
         mats = {}
-        for i in range(len(self), 0, -1):
+        for i in range(self.__length, 0, -1):
             mats[i] = self.matrix(i)
         return ChainComplex(mats, degree_of_differential=-1)
 

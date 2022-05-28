@@ -98,7 +98,7 @@ class SageKernel(IPythonKernel):
         """
         from sage.repl.ipython_kernel.install import SageKernelSpec
         identifier = SageKernelSpec.identifier()
-        kernel_url = lambda x: 'kernelspecs/{0}/{1}'.format(identifier, x)
+        kernel_url = lambda x: '/kernelspecs/{0}/{1}?token=af49cf5a9ab454a5eeb0432e86d6cec922ee415764bfd4c6'.format(identifier, x)
         return [
             {
                 'text': 'Sage Documentation',

@@ -795,7 +795,7 @@ class FreeModule_generic(Module):
 
         - ``base_ring`` -- a commutative ring
 
-        - ``rank`` -- a non-negative integer; ``None`` if undefined
+        - ``rank`` -- a non-negative integer
 
         - ``degree`` -- a non-negative integer
 
@@ -2806,185 +2806,7 @@ class FreeModule_generic(Module):
         return self.span(B.rows())
 
 
-class FreeModule_generic_domain(FreeModule_generic):
-    """
-    Base class for free modules over an integral domain.
-    """
-    def __init__(self, base_ring, rank, degree, sparse=False, coordinate_ring=None):
-        """
-        Create a free module over an integral domain.
-
-        EXAMPLES::
-
-            sage: FreeModule(ZZ, 2)
-            Ambient free module of rank 2 over the principal ideal domain Integer Ring
-            sage: FreeModule(PolynomialRing(GF(7),'x'), 2)
-            Ambient free module of rank 2 over the principal ideal domain Univariate Polynomial Ring in x over Finite Field of size 7
-        """
-        FreeModule_generic.__init__(self, base_ring, rank, degree, sparse, coordinate_ring)
-
-    def __add__(self, other):
-        r"""
-        Return the sum of ``self`` and other, where both ``self`` and ``other`` must be
-        submodules of the ambient vector space.
-
-        EXAMPLES:
-
-        We add two vector spaces::
-
-            sage: V  = VectorSpace(QQ, 3)
-            sage: W  = V.subspace([V([1,1,0])])
-            sage: W2 = V.subspace([V([1,-1,0])])
-            sage: W + W2
-            Vector space of degree 3 and dimension 2 over Rational Field
-            Basis matrix:
-            [1 0 0]
-            [0 1 0]
-
-        We add two free `\ZZ`-modules.
-
-        ::
-
-            sage: M = FreeModule(ZZ, 3)
-            sage: W = M.submodule([M([1,0,2])])
-            sage: W2 = M.submodule([M([2,0,-4])])
-            sage: W + W2
-            Free module of degree 3 and rank 2 over Integer Ring
-            Echelon basis matrix:
-            [1 0 2]
-            [0 0 8]
-
-        We can also add free `\ZZ`-modules embedded
-        non-integrally into an ambient space.
-
-        ::
-
-            sage: V = VectorSpace(QQ, 3)
-            sage: W = M.span([1/2*V.0 - 1/3*V.1])
-
-        Here the command ``M.span(...)`` creates the span of
-        the indicated vectors over the base ring of `M`.
-
-        ::
-
-            sage: W2 = M.span([1/3*V.0 + V.1])
-            sage: W + W2
-            Free module of degree 3 and rank 2 over Integer Ring
-            Echelon basis matrix:
-            [ 1/6  7/3    0]
-            [   0 11/3    0]
-
-        We add two modules over `\ZZ`::
-
-            sage: A = Matrix(ZZ, 3, 3, [3, 0, -1, 0, -2, 0, 0, 0, -2])
-            sage: V = (A+2).kernel()
-            sage: W = (A-3).kernel()
-            sage: V+W
-            Free module of degree 3 and rank 3 over Integer Ring
-            Echelon basis matrix:
-            [5 0 0]
-            [0 1 0]
-            [0 0 1]
-
-        We add a module to 0::
-
-            sage: ZZ^3 + 0
-            Ambient free module of rank 3 over the principal ideal domain Integer Ring
-        """
-        if not isinstance(other, FreeModule_generic):
-            if other == 0:
-                return self
-            raise TypeError("other (=%s) must be a free module"%other)
-        if not (self.ambient_vector_space() == other.ambient_vector_space()):
-            raise TypeError("ambient vector spaces must be equal")
-        return self.span(self.basis() + other.basis())
-
-    def zero_submodule(self):
-        """
-        Return the zero submodule of this module.
-
-        EXAMPLES::
-
-            sage: V = FreeModule(ZZ,2)
-            sage: V.zero_submodule()
-            Free module of degree 2 and rank 0 over Integer Ring
-            Echelon basis matrix:
-            []
-        """
-        return self.submodule([], check=False)
-
-    def span(self, gens, base_ring=None, check=True, already_echelonized=False):
-        """
-        Return the span of ``gens``.
-
-        INPUT:
-
-        - ``base_ring`` -- (optional) a ring
-
-        - ``already_echelonized`` -- boolean; ignored
-
-        EXAMPLES::
-
-            sage: S.<x,y,z> = PolynomialRing(QQ)
-            sage: A = S**2
-            sage: A.span([vector([x - y, z]), vector([y*z, x*z])])
-            Submodule of Ambient free module of rank 2 over the integral domain Multivariate Polynomial Ring in x, y, z over Rational Field
-            Basis matrix:
-            [x - y     z]
-            [  y*z   x*z]
-        """
-        if isinstance(gens, FreeModule_generic):
-            gens = gens.gens()
-        if base_ring is None or base_ring is self.base_ring():
-            return FreeModule_submodule_domain(self.ambient_module(), gens,
-                                               check=check)
-        else:
-            try:
-                M = self.change_ring(base_ring)
-            except TypeError:
-                raise ValueError("Argument base_ring (= %s) is not compatible " % base_ring +
-                                 "with the base ring (= %s)." % self.base_ring())
-            try:
-                return M.span(gens)
-            except TypeError:
-                raise ValueError("Argument gens (= %s) is not compatible " % gens +
-                                 "with base_ring (= %s)." % base_ring)
-
-    def submodule(self, gens, check=True, unitriangular=False, already_echelonized=False):
-        r"""
-        Create the `R`-submodule of the ambient vector space with given
-        generators, where `R` is the base ring of ``self``.
-
-        INPUT:
-
-        -  ``gens`` -- a list of free module elements or a free module
-
-        -  ``check`` -- (default: True) whether or not to verify
-           that the gens are in ``self``.
-
-        - ``already_echelonized`` -- boolean; ignored
-
-        EXAMPLES::
-
-            sage: S.<x,y,z> = PolynomialRing(QQ)
-            sage: A = S**2
-            sage: A.submodule([vector([x - y,z]), vector([y*z, x*z])])
-            Submodule of Ambient free module of rank 2 over the integral domain Multivariate Polynomial Ring in x, y, z over Rational Field
-            Basis matrix:
-            [x - y     z]
-            [  y*z   x*z]
-        """
-        if isinstance(gens, FreeModule_generic):
-            gens = gens.gens()
-        V = self.span(gens, check=check)
-        if check:
-            if not V.is_submodule(self):
-                raise ArithmeticError("Argument gens (= %s) does not generate "
-                                      "a submodule of self." % gens)
-        return V
-
-
-class FreeModule_generic_pid(FreeModule_generic_domain):
+class FreeModule_generic_pid(FreeModule_generic):
     """
     Base class for all free modules over a PID.
     """
@@ -5761,7 +5583,6 @@ class FreeModule_ambient_domain(FreeModule_generic_domain, FreeModule_ambient):
     quotient = quotient_module
 
 
-
 ###############################################################################
 #
 # Ambient free modules over a principal ideal domain
@@ -5992,7 +5813,7 @@ class ComplexDoubleVectorSpace_class(FreeModule_ambient_field):
 
 ###############################################################################
 #
-# Submodules of ambient modules
+# R-Submodule of K^n where K is the fraction field of a principal ideal domain R
 #
 ###############################################################################
 
