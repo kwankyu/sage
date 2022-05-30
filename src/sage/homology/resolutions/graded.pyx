@@ -314,6 +314,51 @@ class GradedFreeResolution_polynomial(FreeResolution):
 
         return shifts
 
+    def betti(self, i, a=None):
+        """
+        Return the `i`-th Betti number in degree `a`.
+
+        INPUT:
+
+        - ``i`` -- nonnegative integer
+
+        - ``a`` -- a degree; if ``None``, return Betti numbers in all degrees
+
+        EXAMPLES::
+
+            sage: from sage.homology.resolutions.graded import GradedFreeResolution_polynomial
+            sage: P.<x,y,z,w> = PolynomialRing(QQ)
+            sage: I = P.ideal([y*w - z^2, -x*w + y*z, x*z - y^2])
+            sage: r = GradedFreeResolution_polynomial(I)
+            sage: r.betti(0)
+            {0: 1}
+            sage: r.betti(1)
+            {2: 3}
+            sage: r.betti(2)
+            {3: 2}
+            sage: r.betti(1, 0)
+            0
+            sage: r.betti(1, 1)
+            0
+            sage: r.betti(1, 2)
+            3
+        """
+        shifts = self.shifts(i)
+
+        if a is None:
+            degrees = shifts
+        else:
+            degrees = [a]
+
+        betti = {}
+        for s in degrees:
+            betti[s] = len([d for d in shifts if d == s])
+
+        if a is None:
+            return betti
+        else:
+            return betti[a] if a in betti else 0
+
     def K_polynomial(self):
         """
         EXAMPLES::
