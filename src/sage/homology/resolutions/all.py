@@ -1,2 +1,2 @@
-from .free import FreeResolution, FreeResolution_polynomial
-from .graded import GradedFreeResolution_polynomial
+from .free import FreeResolution, MinimalFreeResolution
+from .graded import GradedMinimalFreeResolution

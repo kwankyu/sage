@@ -25,12 +25,24 @@ EXAMPLES::
 
 ::
 
-    sage: from sage.homology.resolutions.graded import GradedFreeResolution_polynomial
+    sage: from sage.homology.resolutions.graded import GradedMinimalFreeResolution
     sage: S.<x,y,z,w> = PolynomialRing(QQ)
     sage: I = S.ideal([y*w - z^2, -x*w + y*z, x*z - y^2])
-    sage: r = GradedFreeResolution_polynomial(I)
+    sage: r = GradedMinimalFreeResolution(I)
     sage: r
     S(0) <-- S(-2)⊕S(-2)⊕S(-2) <-- S(-3)⊕S(-3) <-- 0
+
+The :class:`MinimalFreeResolution` computes a minimal free resolution of modules
+over a multivariate polynomial ring.
+
+EXAMPLES::
+
+    sage: from sage.homology.resolutions.free import MinimalFreeResolution
+    sage: P.<x,y,z,w> = PolynomialRing(QQ)
+    sage: I = P.ideal([y*w - z^2, -x*w + y*z, x*z - y^2])
+    sage: r = MinimalFreeResolution(I)
+    sage: r
+    S^1 <-- S^3 <-- S^2 <-- 0
 
 AUTHORS:
 
@@ -51,8 +63,8 @@ AUTHORS:
 from sage.libs.singular.decl cimport *
 from sage.libs.singular.decl cimport ring
 from sage.libs.singular.function cimport Resolution, new_sage_polynomial, access_singular_ring
-from sage.structure.sequence import Sequence, Sequence_generic
 from sage.libs.singular.function import singular_function
+from sage.structure.sequence import Sequence, Sequence_generic
 from sage.matrix.constructor import matrix as _matrix
 from sage.matrix.matrix_mpolynomial_dense import Matrix_mpolynomial_dense
 from sage.modules.free_module_element import vector
@@ -113,10 +125,10 @@ class FreeResolution(SageObject):
 
         EXAMPLES::
 
-            sage: from sage.homology.resolutions.graded import GradedFreeResolution_polynomial
+            sage: from sage.homology.resolutions.graded import GradedMinimalFreeResolution
             sage: S.<x,y,z,w> = PolynomialRing(QQ)
             sage: I = S.ideal([y*w - z^2, -x*w + y*z, x*z - y^2])
-            sage: r = GradedFreeResolution_polynomial(I)
+            sage: r = GradedMinimalFreeResolution(I)
             sage: r
             S(0) <-- S(-2)⊕S(-2)⊕S(-2) <-- S(-3)⊕S(-3) <-- 0
         """
@@ -170,10 +182,10 @@ class FreeResolution(SageObject):
 
         EXAMPLES::
 
-            sage: from sage.homology.resolutions.graded import GradedFreeResolution_polynomial
+            sage: from sage.homology.resolutions.graded import GradedMinimalFreeResolution
             sage: S.<x,y,z,w> = PolynomialRing(QQ)
             sage: I = S.ideal([y*w - z^2, -x*w + y*z, x*z - y^2])
-            sage: r = GradedFreeResolution_polynomial(I)
+            sage: r = GradedMinimalFreeResolution(I)
             sage: r
             S(0) <-- S(-2)⊕S(-2)⊕S(-2) <-- S(-3)⊕S(-3) <-- 0
             sage: len(r)
@@ -191,14 +203,15 @@ class FreeResolution(SageObject):
 
         EXAMPLES::
 
-            sage: from sage.homology.resolutions.graded import GradedFreeResolution_polynomial
+            sage: from sage.homology.resolutions.graded import GradedMinimalFreeResolution
             sage: S.<x,y,z,w> = PolynomialRing(QQ)
             sage: I = S.ideal([y*w - z^2, -x*w + y*z, x*z - y^2])
-            sage: r = GradedFreeResolution_polynomial(I)
+            sage: r = GradedMinimalFreeResolution(I)
             sage: r
             S(0) <-- S(-2)⊕S(-2)⊕S(-2) <-- S(-3)⊕S(-3) <-- 0
             sage: r.target()
-            Quotient module by Submodule of Ambient free module of rank 1 over the integral domain Multivariate Polynomial Ring in x, y, z, w over Rational Field
+            Quotient module by Submodule of Ambient free module of rank 1 over the integral domain
+            Multivariate Polynomial Ring in x, y, z, w over Rational Field
             Basis matrix:
             [-z^2 + y*w]
             [ y*z - x*w]
@@ -216,18 +229,19 @@ class FreeResolution(SageObject):
 
     def target(self):
         """
-        Return the codomain of the initial differential map.
+        Return the codomain of the 0-th differential map.
 
         EXAMPLES::
 
-            sage: from sage.homology.resolutions.graded import GradedFreeResolution_polynomial
+            sage: from sage.homology.resolutions.graded import GradedMinimalFreeResolution
             sage: S.<x,y,z,w> = PolynomialRing(QQ)
             sage: I = S.ideal([y*w - z^2, -x*w + y*z, x*z - y^2])
-            sage: r = GradedFreeResolution_polynomial(I)
+            sage: r = GradedMinimalFreeResolution(I)
             sage: r
             S(0) <-- S(-2)⊕S(-2)⊕S(-2) <-- S(-3)⊕S(-3) <-- 0
             sage: r.target()
-            Quotient module by Submodule of Ambient free module of rank 1 over the integral domain Multivariate Polynomial Ring in x, y, z, w over Rational Field
+            Quotient module by Submodule of Ambient free module of rank 1 over the integral domain
+            Multivariate Polynomial Ring in x, y, z, w over Rational Field
             Basis matrix:
             [-z^2 + y*w]
             [ y*z - x*w]
@@ -245,10 +259,10 @@ class FreeResolution(SageObject):
 
         EXAMPLES::
 
-            sage: from sage.homology.resolutions.graded import GradedFreeResolution_polynomial
+            sage: from sage.homology.resolutions.graded import GradedMinimalFreeResolution
             sage: S.<x,y,z,w> = PolynomialRing(QQ)
             sage: I = S.ideal([y*w - z^2, -x*w + y*z, x*z - y^2])
-            sage: r = GradedFreeResolution_polynomial(I)
+            sage: r = GradedMinimalFreeResolution(I)
             sage: r
             S(0) <-- S(-2)⊕S(-2)⊕S(-2) <-- S(-3)⊕S(-3) <-- 0
             sage: r.differential(3)
@@ -299,10 +313,10 @@ class FreeResolution(SageObject):
 
         EXAMPLES::
 
-            sage: from sage.homology.resolutions.graded import GradedFreeResolution_polynomial
+            sage: from sage.homology.resolutions.graded import GradedMinimalFreeResolution
             sage: S.<x,y,z,w> = PolynomialRing(QQ)
             sage: I = S.ideal([y*w - z^2, -x*w + y*z, x*z - y^2])
-            sage: r = GradedFreeResolution_polynomial(I)
+            sage: r = GradedMinimalFreeResolution(I)
             sage: r
             S(0) <-- S(-2)⊕S(-2)⊕S(-2) <-- S(-3)⊕S(-3) <-- 0
             sage: r.matrix(3)
@@ -329,10 +343,10 @@ class FreeResolution(SageObject):
 
         EXAMPLES::
 
-            sage: from sage.homology.resolutions.graded import GradedFreeResolution_polynomial
+            sage: from sage.homology.resolutions.graded import GradedMinimalFreeResolution
             sage: S.<x,y,z,w> = PolynomialRing(QQ)
             sage: I = S.ideal([y*w - z^2, -x*w + y*z, x*z - y^2])
-            sage: r = GradedFreeResolution_polynomial(I)
+            sage: r = GradedMinimalFreeResolution(I)
             sage: unicode_art(r.chain_complex())
                                                            ⎛-y  x⎞
                                                            ⎜ z -y⎟
@@ -346,9 +360,9 @@ class FreeResolution(SageObject):
         return ChainComplex(mats, degree_of_differential=-1)
 
 
-class FreeResolution_polynomial(FreeResolution):
+class MinimalFreeResolution(FreeResolution):
     """
-    Graded free resolutions of ideals of multi-variate polynomial rings.
+    Graded minimal free resolutions of ideals of multi-variate polynomial rings.
 
     INPUT:
 
@@ -377,10 +391,10 @@ class FreeResolution_polynomial(FreeResolution):
 
     EXAMPLES::
 
-        sage: from sage.homology.resolutions.free import FreeResolution_polynomial
+        sage: from sage.homology.resolutions.free import MinimalFreeResolution
         sage: P.<x,y,z,w> = PolynomialRing(QQ)
         sage: I = P.ideal([y*w - z^2, -x*w + y*z, x*z - y^2])
-        sage: r = FreeResolution_polynomial(I)
+        sage: r = MinimalFreeResolution(I)
         sage: r
         S^1 <-- S^3 <-- S^2 <-- 0
         sage: len(r)
@@ -388,25 +402,25 @@ class FreeResolution_polynomial(FreeResolution):
 
     ::
 
-        sage: FreeResolution_polynomial(I, algorithm='shreyer')
+        sage: MinimalFreeResolution(I, algorithm='shreyer')
         S^1 <-- S^3 <-- S^2 <-- 0
-        sage: FreeResolution_polynomial(I, algorithm='standard')
+        sage: MinimalFreeResolution(I, algorithm='standard')
         S^1 <-- S^3 <-- S^2 <-- 0
-        sage: FreeResolution_polynomial(I, algorithm='heuristic')
+        sage: MinimalFreeResolution(I, algorithm='heuristic')
         S^1 <-- S^3 <-- S^2 <-- 0
-        sage: FreeResolution_polynomial(I, algorithm='minimal')
+        sage: MinimalFreeResolution(I, algorithm='minimal')
         S^1 <-- S^3 <-- S^2 <-- 0
     """
-    def __init__(self, ideal, name='S', algorithm='shreyer'):
+    def __init__(self, ideal, name='S', algorithm='heuristic'):
         """
         Initialize.
 
         TESTS::
 
-            sage: from sage.homology.resolutions.free import FreeResolution_polynomial
+            sage: from sage.homology.resolutions.free import MinimalFreeResolution
             sage: P.<x,y,z,w> = PolynomialRing(QQ)
             sage: I = P.ideal([y*w - z^2, -x*w + y*z, x*z - y^2])
-            sage: r = FreeResolution_polynomial(I)
+            sage: r = MinimalFreeResolution(I)
             sage: TestSuite(r).run(skip=['_test_pickling'])
         """
         if isinstance(ideal, Ideal_generic):
@@ -466,16 +480,25 @@ class FreeResolution_polynomial(FreeResolution):
         self._name = name
 
 
+cdef singular_monomial_exponents(poly *p, ring *r):
+    """
+    Return the list of exponents of monomial ``p``.
+    """
+    cdef int v
+    cdef list ml = list()
+
+    for v in range(1, r.N + 1):
+        ml.append(p_GetExp(p, v, r))
+    return ml
+
 cdef to_sage_resolution(Resolution res):
     """
-    Pull from Singular resolution ``res`` the data to construct Sage
+    Pull the data from Singular resolution ``res`` to construct a Sage
     resolution.
 
     INPUT:
 
     - ``res`` -- Singular resolution
-
-    - ``degrees`` -- list of integers or integer vectors
 
     The procedure is destructive, and ``res`` is not usable afterward.
     """
@@ -562,16 +585,3 @@ cdef to_sage_resolution(Resolution res):
         res_mats.append(mat)
 
     return res_mats
-
-
-cdef singular_monomial_exponents(poly *p, ring *r):
-    """
-    Return the list of exponents of monomial ``p``.
-    """
-    cdef int v
-    cdef list ml = list()
-
-    for v in range(1, r.N + 1):
-        ml.append(p_GetExp(p, v, r))
-    return ml
-

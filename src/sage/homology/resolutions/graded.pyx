@@ -1,10 +1,10 @@
 r"""
-Graded free resolutions of modules
+Graded free resolutions
 
-This module defines :class:`GradedFreeResolution` which computes a graded free
-resolution of a homogeneous ideal `I` of a graded multivariate polynomial ring
-`S`, or a homogeneous submodule of a graded free module `M` over `S`. The
-output resolution is always minimal.
+This module defines :class:`GradedMinimalFreeResolution` which computes a
+graded free resolution of a homogeneous ideal `I` of a graded multivariate
+polynomial ring `S`, or a homogeneous submodule of a graded free module `M`
+over `S`. The output resolution is always minimal.
 
 The degrees given to the variables of `S` are integers or integer vectors of
 the same length. In the latter case, `S` is said to be multigraded, and the
@@ -19,17 +19,17 @@ Singular algorithms can be chosen for best performance.
 
 EXAMPLES::
 
-    sage: from sage.homology.resolutions.graded import GradedFreeResolution_polynomial
+    sage: from sage.homology.resolutions.graded import GradedMinimalFreeResolution
     sage: S.<x,y,z,w> = PolynomialRing(QQ)
     sage: I = S.ideal([y*w - z^2, -x*w + y*z, x*z - y^2])
-    sage: r = GradedFreeResolution_polynomial(I, algorithm='minimal')
+    sage: r = GradedMinimalFreeResolution(I, algorithm='minimal')
     sage: r
     S(0) <-- S(-2)⊕S(-2)⊕S(-2) <-- S(-3)⊕S(-3) <-- 0
-    sage: GradedFreeResolution_polynomial(I, algorithm='shreyer')
+    sage: GradedMinimalFreeResolution(I, algorithm='shreyer')
     S(0) <-- S(-2)⊕S(-2)⊕S(-2) <-- S(-3)⊕S(-3) <-- 0
-    sage: GradedFreeResolution_polynomial(I, algorithm='standard')
+    sage: GradedMinimalFreeResolution(I, algorithm='standard')
     S(0) <-- S(-2)⊕S(-2)⊕S(-2) <-- S(-3)⊕S(-3) <-- 0
-    sage: GradedFreeResolution_polynomial(I, algorithm='heuristic')
+    sage: GradedMinimalFreeResolution(I, algorithm='heuristic')
     S(0) <-- S(-2)⊕S(-2)⊕S(-2) <-- S(-3)⊕S(-3) <-- 0
 
 ::
@@ -51,11 +51,23 @@ EXAMPLES::
     [ y -z  w]
     [ x -y  z]
     sage: m = d.image()
-    sage: GradedFreeResolution_polynomial(m, shifts=(2,2,2))
+    sage: GradedMinimalFreeResolution(m, shifts=(2,2,2))
     S(-2)⊕S(-2)⊕S(-2) <-- S(-3)⊕S(-3) <-- 0
 
-A reference for graded free resolutions with respect to multigrading is
-[MilStu2005]_.
+An example of multigraded resolution from Example 9.1 of [MilStu2005]_::
+
+    sage: R.<s,t> = QQ[]
+    sage: S.<a,b,c,d> = QQ[]
+    sage: phi = S.hom([s, s*t, s*t^2, s*t^3])
+    sage: I = phi.kernel(); I
+    Ideal (c^2 - b*d, b*c - a*d, b^2 - a*c) of Multivariate Polynomial Ring in a, b, c, d over Rational Field
+    sage: P3 = ProjectiveSpace(S)
+    sage: C = P3.subscheme(I)  # twisted cubic curve
+    sage: r = GradedMinimalFreeResolution(I, degrees=[(1,0), (1,1), (1,2), (1,3)])
+    sage: r
+    S(0) <-- S(-(2, 4))⊕S(-(2, 3))⊕S(-(2, 2)) <-- S(-(3, 5))⊕S(-(3, 4)) <-- 0
+    sage: r.K_polynomial(names='s,t')
+    s^3*t^5 + s^3*t^4 - s^2*t^4 - s^2*t^3 - s^2*t^2 + 1
 
 AUTHORS:
 
@@ -76,8 +88,8 @@ AUTHORS:
 from sage.libs.singular.decl cimport *
 from sage.libs.singular.decl cimport ring
 from sage.libs.singular.function cimport Resolution, new_sage_polynomial, access_singular_ring
-from sage.structure.sequence import Sequence, Sequence_generic
 from sage.libs.singular.function import singular_function
+from sage.structure.sequence import Sequence, Sequence_generic
 from sage.matrix.constructor import matrix as _matrix
 from sage.matrix.matrix_mpolynomial_dense import Matrix_mpolynomial_dense
 from sage.modules.free_module_element import vector
@@ -90,7 +102,7 @@ from .free import FreeResolution
 from .free cimport singular_monomial_exponents
 
 
-class GradedFreeResolution_polynomial(FreeResolution):
+class GradedMinimalFreeResolution(FreeResolution):
     """
     Graded free resolutions of ideals of multi-variate polynomial rings.
 
@@ -127,29 +139,29 @@ class GradedFreeResolution_polynomial(FreeResolution):
 
     EXAMPLES::
 
-        sage: from sage.homology.resolutions.graded import GradedFreeResolution_polynomial
+        sage: from sage.homology.resolutions.graded import GradedMinimalFreeResolution
         sage: S.<x,y,z,w> = PolynomialRing(QQ)
         sage: I = S.ideal([y*w - z^2, -x*w + y*z, x*z - y^2])
-        sage: r = GradedFreeResolution_polynomial(I)
+        sage: r = GradedMinimalFreeResolution(I)
         sage: r
         S(0) <-- S(-2)⊕S(-2)⊕S(-2) <-- S(-3)⊕S(-3) <-- 0
         sage: len(r)
         2
     """
-    def __init__(self, ideal, degrees=None, shifts=None, name='S', algorithm='shreyer'):
+    def __init__(self, ideal, degrees=None, shifts=None, name='S', algorithm='heuristic'):
         """
         Initialize.
 
         TESTS::
 
-            sage: from sage.homology.resolutions.graded import GradedFreeResolution_polynomial
+            sage: from sage.homology.resolutions.graded import GradedMinimalFreeResolution
             sage: S.<x,y,z,w> = PolynomialRing(QQ)
             sage: I = S.ideal([y*w - z^2, -x*w + y*z, x*z - y^2])
-            sage: r = GradedFreeResolution_polynomial(I)
+            sage: r = GradedMinimalFreeResolution(I)
             sage: TestSuite(r).run(skip=['_test_pickling'])
         """
         cdef int i, j, k, ncols, nrows
-        cdef list res_betti, prev_grade, grade
+        cdef list res_shifts, prev_shifts, new_shifts
 
         if isinstance(ideal, Ideal_generic):
             S = ideal.ring()
@@ -185,7 +197,8 @@ class GradedFreeResolution_polynomial(FreeResolution):
         if degrees[0] in ZZ:
             zero_deg = 0
             multigrade = False
-        else:   # degrees are integer vectors
+        else: # degrees are integer vectors
+            degrees = [vector(v) for v in degrees]
             zero_deg = degrees[0].parent().zero()
             multigrade = True
 
@@ -218,44 +231,44 @@ class GradedFreeResolution_polynomial(FreeResolution):
 
         res_mats, res_degs = to_sage_resolution_graded(r, degrees)
 
-        # compute graded Betti numbers
-        res_betti = []
-        prev_grade = list(shifts)
+        # compute shifts of free modules in the resolution
+        res_shifts = []
+        prev_shifts = list(shifts)
         for k in range(len(res_degs)):
-            grade = []
+            new_shifts = []
             degs = res_degs[k]
             ncols = len(degs)
             for j in range(ncols):
                 col = degs[j]
                 nrows = len(col)
-                # should be enough to compute the graded Betti number
+                # should be enough to compute the new shifts
                 # from any one entry of the column vector
                 for i in range(nrows):
                     d = col[i]
                     if d is not None:
-                        e = prev_grade[i]
-                        grade.append(d + e)
+                        e = prev_shifts[i]
+                        new_shifts.append(d + e)
                         break
-            res_betti.append(grade)
-            prev_grade = grade
+            res_shifts.append(new_shifts)
+            prev_shifts = new_shifts
 
         super().__init__([d0] + res_mats, name=name)
 
-        self._base = (M, shifts)
-        self._zero_deg = zero_deg
+        self._target = (M, shifts)
         self._degrees = degrees
-        self._res_betti = res_betti
+        self._res_shifts = res_shifts
         self._multigrade = multigrade
+        self._zero_deg = zero_deg
         self._name = name
 
     def _repr_module(self, i):
         """
         EXAMPLES::
 
-            sage: from sage.homology.resolutions.graded import GradedFreeResolution_polynomial
+            sage: from sage.homology.resolutions.graded import GradedMinimalFreeResolution
             sage: P.<x,y,z,w> = PolynomialRing(QQ)
             sage: I = P.ideal([y*w - z^2, -x*w + y*z, x*z - y^2])
-            sage: r = GradedFreeResolution_polynomial(I)
+            sage: r = GradedMinimalFreeResolution(I)
             sage: r._repr_module(0)
             'S(0)'
             sage: r._repr_module(1)
@@ -269,9 +282,9 @@ class GradedFreeResolution_polynomial(FreeResolution):
             m = '0'
         else:
             if i == 0:
-                S, shifts = self._base
+                S, shifts = self._target
             else:
-                shifts = self._res_betti[i - 1]
+                shifts = self._res_shifts[i - 1]
 
             if len(shifts) > 0:
                 for j in range(len(shifts)):
@@ -290,10 +303,10 @@ class GradedFreeResolution_polynomial(FreeResolution):
         """
         EXAMPLES::
 
-            sage: from sage.homology.resolutions.graded import GradedFreeResolution_polynomial
+            sage: from sage.homology.resolutions.graded import GradedMinimalFreeResolution
             sage: P.<x,y,z,w> = PolynomialRing(QQ)
             sage: I = P.ideal([y*w - z^2, -x*w + y*z, x*z - y^2])
-            sage: r = GradedFreeResolution_polynomial(I)
+            sage: r = GradedMinimalFreeResolution(I)
             sage: r.shifts(0)
             [0]
             sage: r.shifts(1)
@@ -306,11 +319,11 @@ class GradedFreeResolution_polynomial(FreeResolution):
         if i < 0:
             raise IndexError('invalid index')
         elif i == 0:
-            _, shifts = self._base
+            _, shifts = self._target
         elif i > len(self):
             shifts = []
         else:
-            shifts = self._res_betti[i - 1]
+            shifts = self._res_shifts[i - 1]
 
         return shifts
 
@@ -326,10 +339,10 @@ class GradedFreeResolution_polynomial(FreeResolution):
 
         EXAMPLES::
 
-            sage: from sage.homology.resolutions.graded import GradedFreeResolution_polynomial
+            sage: from sage.homology.resolutions.graded import GradedMinimalFreeResolution
             sage: P.<x,y,z,w> = PolynomialRing(QQ)
             sage: I = P.ideal([y*w - z^2, -x*w + y*z, x*z - y^2])
-            sage: r = GradedFreeResolution_polynomial(I)
+            sage: r = GradedMinimalFreeResolution(I)
             sage: r.betti(0)
             {0: 1}
             sage: r.betti(1)
@@ -359,14 +372,20 @@ class GradedFreeResolution_polynomial(FreeResolution):
         else:
             return betti[a] if a in betti else 0
 
-    def K_polynomial(self):
+    def K_polynomial(self, names=None):
         """
+        Return the K-polynomial of this resolution.
+
+        INPUT:
+
+        - ``names`` -- a string of names of the variables of the K-polynomial
+
         EXAMPLES::
 
-            sage: from sage.homology.resolutions.graded import GradedFreeResolution_polynomial
+            sage: from sage.homology.resolutions.graded import GradedMinimalFreeResolution
             sage: P.<x,y,z,w> = PolynomialRing(QQ)
             sage: I = P.ideal([y*w - z^2, -x*w + y*z, x*z - y^2])
-            sage: r = GradedFreeResolution_polynomial(I)
+            sage: r = GradedMinimalFreeResolution(I)
             sage: r.K_polynomial()
             2*t^3 - 3*t^2 + 1
         """
@@ -375,24 +394,27 @@ class GradedFreeResolution_polynomial(FreeResolution):
         else:
             n = 1
 
-        L = LaurentPolynomialRing(ZZ, 't', n)
+        if names is not None:
+            L = LaurentPolynomialRing(ZZ, names=names)
+        else:
+            L = LaurentPolynomialRing(ZZ, 't', n)
 
-        Kpoly = 1
+        kpoly = 1
         sign = -1
         for j in range(len(self)):
-            for v in self._res_betti[j]:
+            for v in self._res_shifts[j]:
                 if self._multigrade:
-                    Kpoly += sign * L.monomial(*list(v))
+                    kpoly += sign * L.monomial(*list(v))
                 else:
-                    Kpoly += sign * L.monomial(v)
+                    kpoly += sign * L.monomial(v)
             sign = -sign
 
-        return Kpoly
+        return kpoly
 
 
 cdef to_sage_resolution_graded(Resolution res, degrees):
     """
-    Pull from Singular resolution ``res`` the data to construct Sage
+    Pull the data from Singular resolution ``res`` to construct a Sage
     resolution.
 
     INPUT:
@@ -475,6 +497,11 @@ cdef to_sage_resolution_graded(Resolution res, degrees):
                         previous = p_iter
                         p_iter = pNext(p_iter)
 
+                if zero_mat:
+                    zero_mat = first == NULL
+
+                mat[i - 1, j] = new_sage_polynomial(sage_ring, first)
+
                 # degree of a homogeneous polynomial can be computed from the
                 # first monomial
                 if first != NULL:
@@ -486,12 +513,7 @@ cdef to_sage_resolution_graded(Resolution res, degrees):
                 else:
                     degs.append(None)
 
-                mat[i - 1, j] = new_sage_polynomial(sage_ring, first)
-
-            matdegs.append(degs)
-
-            if zero_mat:
-                zero_mat = all(d is None for d in degs)
+            matdegs.append(degs)  # store degrees of the column
 
         # Singular sometimes leaves zero matrix in the resolution. We can stop
         # when one is seen.
