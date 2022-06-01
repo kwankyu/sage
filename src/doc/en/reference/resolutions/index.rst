@@ -7,7 +7,7 @@ geometry.
 .. toctree::
    :maxdepth: 2
 
-   sage/homology/resolutions/free
-   sage/homology/resolutions/graded
+   sage/resolutions/free
+   sage/resolutions/graded
 
 .. include:: ../footer.txt
