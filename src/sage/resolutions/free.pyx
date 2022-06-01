@@ -15,7 +15,7 @@ EXAMPLES::
     sage: S.<x,y,z,w> = PolynomialRing(QQ)
     sage: m1 = matrix(S, 1, [z^2 - y*w, y*z - x*w, y^2 - x*z])
     sage: m2 = matrix(S, 3, [-y, x, z, -y, -w, z])
-    sage: r = FreeResolution([m1, m2], name='S')
+    sage: r = FreeResolution(S, [m1, m2], name='S')
     sage: r
     S^1 <-- S^3 <-- S^2 <-- 0
 
@@ -82,11 +82,11 @@ class FreeResolution(SageObject):
         sage: S.<x,y,z,w> = PolynomialRing(QQ)
         sage: m1 = matrix(S, 1, [z^2 - y*w, y*z - x*w, y^2 - x*z])
         sage: m2 = matrix(S, 3, [-y, x, z, -y, -w, z])
-        sage: r = FreeResolution([m1, m2], name='S')
+        sage: r = FreeResolution(S, [m1, m2], name='S')
         sage: r
         S^1 <-- S^3 <-- S^2 <-- 0
     """
-    def __init__(self, maps, name='F'):
+    def __init__(self, base_ring, maps, name='F'):
         """
         Initialize.
 
@@ -96,10 +96,10 @@ class FreeResolution(SageObject):
             sage: S.<x,y,z,w> = PolynomialRing(QQ)
             sage: m1 = matrix(S, 1, [z^2 - y*w, y*z - x*w, y^2 - x*z])
             sage: m2 = matrix(S, 3, [-y, x, z, -y, -w, z])
-            sage: r = FreeResolution([m1, m2], name='S')
+            sage: r = FreeResolution(S, [m1, m2], name='S')
             sage: TestSuite(r).run(skip=['_test_pickling'])
         """
-        self.__base_ring = maps[0].base_ring()
+        self.__base_ring = base_ring
         self.__maps = maps
         self.__name = name
         self.__length = len(maps)
@@ -141,7 +141,7 @@ class FreeResolution(SageObject):
             sage: S.<x,y,z,w> = PolynomialRing(QQ)
             sage: m1 = matrix(S, 1, [z^2 - y*w, y*z - x*w, y^2 - x*z])
             sage: m2 = matrix(S, 3, [-y, x, z, -y, -w, z])
-            sage: r = FreeResolution([m1, m2], name='S')
+            sage: r = FreeResolution(S, [m1, m2], name='S')
             sage: r
             S^1 <-- S^3 <-- S^2 <-- 0
         """
@@ -468,7 +468,7 @@ class MinimalFreeResolution(FreeResolution):
 
         res_mats = to_sage_resolution(r)
 
-        super().__init__(res_mats, name=name)
+        super().__init__(S, res_mats, name=name)
 
         self._ideal = ideal
         self._name = name

@@ -245,7 +245,7 @@ class GradedMinimalFreeResolution(MinimalFreeResolution):
             res_shifts.append(new_shifts)
             prev_shifts = new_shifts
 
-        super(MinimalFreeResolution, self).__init__(res_mats, name=name)
+        super(MinimalFreeResolution, self).__init__(S, res_mats, name=name)
 
         self._ideal = ideal
         self._shifts = shifts
