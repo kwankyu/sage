@@ -76,6 +76,23 @@ class FreeResolution(SageObject):
     """
     Base class of free resolutions.
 
+    INPUT:
+
+    - ``base_ring`` -- a ring
+
+    - ``maps`` -- list of matrices over the base ring
+
+    The matrix at index `i` in the list defines the differential map from
+    `i+1`-th free module to the `i`-th free module over the base ring by
+    multiplication on the left. The number of matrices in the list is the
+    length of the resolution. The number of rows and columns of the matrices
+    define the ranks of the free modules in the resolution.
+
+    Note that the first matrix in the list defines the differential map at
+    homological index `1`. A subclass can define ``_initial_differential``
+    attribute that contains the `0`th differential map whose codomain is the
+    target of the free resolution.
+
     EXAMPLES::
 
         sage: from sage.resolutions.free import FreeResolution
