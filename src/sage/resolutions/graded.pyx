@@ -119,6 +119,8 @@ class GradedMinimalFreeResolution(MinimalFreeResolution):
       degrees of `n` summands of the free module `M`; this is a list of zero
       degrees of length `n` by default
 
+    - ``name`` -- a string; name of the base ring
+
     - ``algorithm`` -- Singular algorithm to compute a resolution of ``ideal``
 
     If ``ideal`` is an ideal of `S`, then `M = S`, a free module of rank `1`

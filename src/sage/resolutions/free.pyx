@@ -11,11 +11,11 @@ Examples below.
 
 EXAMPLES::
 
-    sage: from sage.resolutions.free import FreeResolution
+    sage: from sage.resolutions.free import FreeResolution_generic
     sage: S.<x,y,z,w> = PolynomialRing(QQ)
     sage: m1 = matrix(S, 1, [z^2 - y*w, y*z - x*w, y^2 - x*z])
     sage: m2 = matrix(S, 3, [-y, x, z, -y, -w, z])
-    sage: r = FreeResolution(S, [m1, m2], name='S')
+    sage: r = FreeResolution_generic(S, [m1, m2], name='S')
     sage: r
     S^1 <-- S^3 <-- S^2 <-- 0
 
@@ -39,6 +39,21 @@ EXAMPLES::
     sage: r = MinimalFreeResolution(I)
     sage: r
     S^1 <-- S^3 <-- S^2 <-- 0
+
+An example of a minimal free resolution from [CLO2005]_::
+
+    sage: R.<x,y,z,w> = QQ[]
+    sage: I = R.ideal([y*z - x*w, y^3 - x^2*z, x*z^2 - y^2*w, z^3 - y*w^2])
+    sage: r = MinimalFreeResolution(I)
+    sage: r
+    S^1 <-- S^4 <-- S^4 <-- S^1 <-- 0
+    sage: len(r)
+    3
+    sage: r.matrix(2)
+    [-z^2 -x*z  y*w -y^2]
+    [   y    0   -x    0]
+    [  -w    y    z    x]
+    [   0    w    0    z]
 
 AUTHORS:
 
@@ -72,7 +87,7 @@ from sage.rings.ideal import Ideal_generic
 from sage.structure.sage_object import SageObject
 
 
-class FreeResolution(SageObject):
+class FreeResolution_generic(SageObject):
     """
     Base class of free resolutions.
 
@@ -83,25 +98,42 @@ class FreeResolution(SageObject):
     - ``maps`` -- list of matrices over the base ring
 
     The matrix at index `i` in the list defines the differential map from
-    `i+1`-th free module to the `i`-th free module over the base ring by
+    `(i+1)`-th free module to the `i`-th free module over the base ring by
     multiplication on the left. The number of matrices in the list is the
     length of the resolution. The number of rows and columns of the matrices
     define the ranks of the free modules in the resolution.
 
     Note that the first matrix in the list defines the differential map at
     homological index `1`. A subclass can define ``_initial_differential``
-    attribute that contains the `0`th differential map whose codomain is the
+    attribute that contains the `0`-th differential map whose codomain is the
     target of the free resolution.
 
     EXAMPLES::
 
-        sage: from sage.resolutions.free import FreeResolution
+        sage: from sage.resolutions.free import FreeResolution_generic
         sage: S.<x,y,z,w> = PolynomialRing(QQ)
         sage: m1 = matrix(S, 1, [z^2 - y*w, y*z - x*w, y^2 - x*z])
         sage: m2 = matrix(S, 3, [-y, x, z, -y, -w, z])
-        sage: r = FreeResolution(S, [m1, m2], name='S')
+        sage: r = FreeResolution_generic(S, [m1, m2], name='S')
         sage: r
         S^1 <-- S^3 <-- S^2 <-- 0
+
+    ::
+
+        sage: from sage.resolutions.free import MinimalFreeResolution
+        sage: P.<x,y,z,w> = PolynomialRing(QQ)
+        sage: I = P.ideal([y*w - z^2, -x*w + y*z, x*z - y^2])
+        sage: r = MinimalFreeResolution(I)
+        sage: r.differential(0)
+        Coercion map:
+          From: Ambient free module of rank 1 over the integral domain
+        Multivariate Polynomial Ring in x, y, z, w over Rational Field
+          To:   Quotient module by Submodule of Ambient free module of rank 1
+        over the integral domain Multivariate Polynomial Ring in x, y, z, w over Rational Field
+        Basis matrix:
+        [-z^2 + y*w]
+        [ y*z - x*w]
+        [-y^2 + x*z]
     """
     def __init__(self, base_ring, maps, name='F'):
         """
@@ -109,11 +141,11 @@ class FreeResolution(SageObject):
 
         TESTS::
 
-            sage: from sage.resolutions.free import FreeResolution
+            sage: from sage.resolutions.free import FreeResolution_generic
             sage: S.<x,y,z,w> = PolynomialRing(QQ)
             sage: m1 = matrix(S, 1, [z^2 - y*w, y*z - x*w, y^2 - x*z])
             sage: m2 = matrix(S, 3, [-y, x, z, -y, -w, z])
-            sage: r = FreeResolution(S, [m1, m2], name='S')
+            sage: r = FreeResolution_generic(S, [m1, m2], name='S')
             sage: TestSuite(r).run(skip=['_test_pickling'])
         """
         self.__base_ring = base_ring
@@ -154,12 +186,12 @@ class FreeResolution(SageObject):
 
         EXAMPLES::
 
-            sage: from sage.resolutions.free import FreeResolution
+            sage: from sage.resolutions.free import FreeResolution_generic
             sage: S.<x,y,z,w> = PolynomialRing(QQ)
             sage: m1 = matrix(S, 1, [z^2 - y*w, y*z - x*w, y^2 - x*z])
             sage: m2 = matrix(S, 3, [-y, x, z, -y, -w, z])
-            sage: r = FreeResolution(S, [m1, m2], name='S')
-            sage: r
+            sage: r = FreeResolution_generic(S, [m1, m2], name='S')
+            sage: r  # indirect doctest
             S^1 <-- S^3 <-- S^2 <-- 0
         """
         if i == 0:
@@ -272,8 +304,8 @@ class FreeResolution(SageObject):
             Coercion map:
               From: Ambient free module of rank 1 over the integral domain
             Multivariate Polynomial Ring in x, y, z, w over Rational Field
-              To:   Quotient module by Submodule of Ambient free module of rank 1
-            over the integral domain Multivariate Polynomial Ring in x, y, z, w over Rational Field
+              To:   Quotient module by Submodule of Ambient free module of rank 1 over the integral domain
+            Multivariate Polynomial Ring in x, y, z, w over Rational Field
             Basis matrix:
             [-z^2 + y*w]
             [ y*z - x*w]
@@ -379,22 +411,20 @@ class FreeResolution(SageObject):
         return ChainComplex(mats, degree_of_differential=-1)
 
 
-class MinimalFreeResolution(FreeResolution):
+class MinimalFreeResolution(FreeResolution_generic):
     """
-    Graded minimal free resolutions of ideals of multi-variate polynomial rings.
+    Minimal free resolutions of ideals of multivariate polynomial rings.
 
     INPUT:
 
-    - ``ideal`` -- a homogeneous ideal of a multi-variate polynomial ring
+    - ``ideal`` -- a homogeneous ideal of a multi-variate polynomial ring or
+      a submodule of a free module `M` of rank `n` over `S`
 
-    - ``degree`` -- list of integers or integer vectors
+    - ``name`` -- a string; name of the base ring
 
     - ``algorithm`` -- Singular algorithm to compute a resolution of ``ideal``
 
-    OUTPUT: a graded minimal free resolution of the ideal
-
-    The ``degrees`` specify degrees of the variables of the multi-variate
-    polynomial ring `S` of which ``ideal`` is a homogeneous ideal.
+    OUTPUT: a minimal free resolution of the ideal
 
     The available algorithms and the corresponding Singular commands are shown
     below:
@@ -421,13 +451,13 @@ class MinimalFreeResolution(FreeResolution):
 
     ::
 
+        sage: MinimalFreeResolution(I, algorithm='minimal')
+        S^1 <-- S^3 <-- S^2 <-- 0
         sage: MinimalFreeResolution(I, algorithm='shreyer')
         S^1 <-- S^3 <-- S^2 <-- 0
         sage: MinimalFreeResolution(I, algorithm='standard')
         S^1 <-- S^3 <-- S^2 <-- 0
         sage: MinimalFreeResolution(I, algorithm='heuristic')
-        S^1 <-- S^3 <-- S^2 <-- 0
-        sage: MinimalFreeResolution(I, algorithm='minimal')
         S^1 <-- S^3 <-- S^2 <-- 0
     """
     def __init__(self, ideal, name='S', algorithm='heuristic'):
@@ -494,6 +524,8 @@ class MinimalFreeResolution(FreeResolution):
     @cached_method
     def _initial_differential(self):
         """
+        Defines the `0`-th differential map of this resolution.
+
         EXAMPLES::
 
             sage: from sage.resolutions.free import MinimalFreeResolution

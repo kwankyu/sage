@@ -105,6 +105,7 @@ Geometry and Topology
 
 Homological Algebra
 -------------------
+
 * :doc:`Chain Complexes and their Homology <homology/index>`
 * :doc:`Resolutions <resolutions/index>`
 
