@@ -625,6 +625,7 @@ class SchemeMorphism(Element):
         from . import glue
         return glue.GluedScheme(self, other)
 
+
 class SchemeMorphism_id(SchemeMorphism):
     """
     Return the identity morphism from `X` to itself.
@@ -885,11 +886,11 @@ class SchemeMorphism_spec(SchemeMorphism):
 
 
 ############################################################################
-# Morphisms between schemes given on points
-# The _affine and _projective below refer to the CODOMAIN.
-# The domain can be either affine or projective regardless
-# of the class
+# Morphisms between schemes given on points. The _affine and _projective below
+# refer to the CODOMAIN. The domain can be either affine or projective
+# regardless of the class
 ############################################################################
+
 class SchemeMorphism_polynomial(SchemeMorphism):
     r"""
     A morphism of schemes determined by polynomials that define what
@@ -1164,7 +1165,6 @@ class SchemeMorphism_polynomial(SchemeMorphism):
         # containment of x in the domain has already been checked, in __call__
         P = [f(x._coords) for f in self.defining_polynomials()]
         return self._codomain.point(P,check)
-
 
     def _repr_defn(self):
         """
@@ -1715,6 +1715,48 @@ class SchemeMorphism_polynomial(SchemeMorphism):
         except AttributeError:
             return super(SchemeMorphism_polynomial, self)._composition_(other, homset)
         return homset([p(*opolys) for p in self._polys])
+
+
+class SchemeMorphism_polynomial_id(SchemeMorphism_polynomial, SchemeMorphism_id):
+    """
+    Return the identity morphism from `X` to itself defined by polynomials.
+
+    INPUT:
+
+    - ``X`` -- a scheme
+
+    EXAMPLES::
+
+        sage: A.<x,y> = AffineSpace(2, QQ)
+        sage: A.identity_morphism()
+        Scheme endomorphism of Affine Space of dimension 2 over Rational Field
+          Defn: Identity map
+    """
+    def __init__(self, X):
+        """
+        Initialize.
+
+        TESTS::
+
+            sage: A.<x,y> = AffineSpace(2, QQ)
+            sage: I = A.identity_morphism()
+            sage: TestSuite(_).run(skip=['_test_category', '_test_pickling'])
+        """
+        super().__init__(X.Hom(X), X.gens())
+
+    def _repr_defn(self):
+        r"""
+        Return a string representation of this identity morphism.
+
+        EXAMPLES::
+
+            sage: P.<x,y,z> = ProjectiveSpace(2, QQ)
+            sage: P.identity_morphism()
+            Scheme endomorphism of Projective Space of dimension 2 over Rational Field
+              Defn: Identity map
+        """
+        return super(SchemeMorphism_polynomial, self)._repr_defn()
+
 
 ############################################################################
 # Rational points on schemes, which we view as morphisms determined

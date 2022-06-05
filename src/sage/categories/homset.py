@@ -743,8 +743,6 @@ class Homset(Set_generic):
         """
         return True
 
-    
-
     def homset_category(self):
         """
         Return the category that this is a Hom in, i.e., this is typically
@@ -1083,7 +1081,7 @@ class Homset(Set_generic):
             True
         """
         return not (self == other)
-    
+
     def __contains__(self, x):
         """
         Test whether the parent of the argument is ``self``.
