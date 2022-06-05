@@ -87,7 +87,7 @@ class SchemeHomset_points_spec(SchemeHomset_generic):
               Defn: Ring endomorphism of Rational Field
                       Defn: 1 |--> 1
         """
-        return sage.schemes.generic.homset.SchemeHomset_generic._element_constructor_(self, *args, **kwds)
+        return SchemeHomset_generic._element_constructor_(self, *args, **kwds)
 
     def _repr_(self):
         """
