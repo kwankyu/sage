@@ -781,7 +781,7 @@ cdef number *sa2si_GFqNTLGF2E(FFgf2eE elem, ring *_ring):
                 apow2 = _ring.cf.cfMult(coeff, apow1,_ring.cf)
                 n2 = _ring.cf.cfAdd(apow2, n1,_ring.cf)
                 _ring.cf.cfDelete(&apow2, _ring.cf)
-                _ring.cf.cfDelete(&n1, _ring.cf);
+                _ring.cf.cfDelete(&n1, _ring.cf)
                 n1 = n2
 
             apow2 = _ring.cf.cfMult(apow1, a,_ring.cf)
@@ -847,7 +847,7 @@ cdef number *sa2si_GFq_generic(object elem, ring *_ring):
                 apow2 = _ring.cf.cfMult(coeff, apow1,_ring.cf)
                 n2 = _ring.cf.cfAdd(apow2, n1,_ring.cf)
                 _ring.cf.cfDelete(&apow2, _ring.cf)
-                _ring.cf.cfDelete(&n1, _ring.cf);
+                _ring.cf.cfDelete(&n1, _ring.cf)
                 n1 = n2
 
             apow2 = _ring.cf.cfMult(apow1, a,_ring.cf)
@@ -936,7 +936,7 @@ cdef number *sa2si_transext_QQ(object elem, ring *_ring):
     cdef number *power
     cdef int ngens
     cdef int ex
-    cdef nMapFunc nMapFuncPtr = NULL;
+    cdef nMapFunc nMapFuncPtr = NULL
 
     if _ring != currRing:
         rChangeCurrRing(_ring)
@@ -1053,7 +1053,7 @@ cdef number *sa2si_transext_FF(object elem, ring *_ring):
     cdef number *aux2
     cdef int ngens
     cdef int ex
-    cdef nMapFunc nMapFuncPtr = NULL;
+    cdef nMapFunc nMapFuncPtr = NULL
 
     if _ring != currRing:
         rChangeCurrRing(_ring)
@@ -1158,7 +1158,7 @@ cdef number *sa2si_NF(object elem, ring *_ring):
     cdef number *apow1
     cdef number *apow2
 
-    cdef nMapFunc nMapFuncPtr = NULL;
+    cdef nMapFunc nMapFuncPtr = NULL
 
     nMapFuncPtr =  naSetMap(_ring.cf, currRing.cf) # choose correct mapping function
 
@@ -1183,7 +1183,7 @@ cdef number *sa2si_NF(object elem, ring *_ring):
     cdef char **_ext_names
     _ext_names = <char**>omAlloc0(sizeof(char*))
     _ext_names[0] = omStrDup(_name)
-    qqr = rDefault( 0, 1, _ext_names);
+    qqr = rDefault( 0, 1, _ext_names)
     rComplete(qqr,1)
     qqr.ShortOut = 0
 
@@ -1198,7 +1198,7 @@ cdef number *sa2si_NF(object elem, ring *_ring):
         apow2 = _ring.cf.cfMult(naCoeff, apow1,_ring.cf)
         n2 = _ring.cf.cfAdd(apow2, n1,_ring.cf)
         _ring.cf.cfDelete(&apow2, _ring.cf)
-        _ring.cf.cfDelete(&n1, _ring.cf);
+        _ring.cf.cfDelete(&n1, _ring.cf)
         _ring.cf.cfDelete(&naCoeff, _ring.cf)
         n1 = n2
 
@@ -1297,7 +1297,7 @@ cdef inline number *sa2si_ZZmod(IntegerMod_abstract d, ring *_ring):
     cdef char *_name
     cdef char **_ext_names
 
-    cdef nMapFunc nMapFuncPtr = NULL;
+    cdef nMapFunc nMapFuncPtr = NULL
 
     if _ring.cf.type == n_Z2m:
         _d = long(d)
