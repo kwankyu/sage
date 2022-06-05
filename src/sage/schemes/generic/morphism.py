@@ -978,6 +978,26 @@ class SchemeMorphism_polynomial(SchemeMorphism):
 
         SchemeMorphism.__init__(self, parent)
 
+    def __eq__(self, other):
+        """
+        Check equality of ``self`` and ``other``.
+
+        INPUT:
+
+        - ``other`` -- a morphism
+
+        EXAMPLES::
+
+            sage: A.<x,y> = AffineSpace(2, QQ)
+            sage: I = A.identity_morphism()
+            sage: I.parent().identity() == I
+            True
+        """
+        if isinstance(other, SchemeMorphism_polynomial):
+            if self.parent() == other.parent() and self._polys == other._polys:
+                return True
+        raise TypeError('cannot determine equality')
+
     def defining_polynomials(self):
         """
         Return the defining polynomials.
