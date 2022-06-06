@@ -2217,11 +2217,17 @@ class SchemeMorphism_polynomial_projective_subscheme_field(SchemeMorphism_polyno
             sage: _ == C([0, -1, 2])
             True
         """
-        for m in self.representatives():
+        try:
+            representatives = self.representatives()
+        except NotImplementedError:
+            return super(SchemeMorphism_polynomial_projective_space_field, self).__call__(x)
+
+        for m in representatives:
             try:
                 return super(SchemeMorphism_polynomial_projective_subscheme_field, m).__call__(x)
             except ValueError:
                 pass
+
         raise ValueError('the morphism is not defined at this point')
 
     @cached_method
@@ -2319,6 +2325,10 @@ class SchemeMorphism_polynomial_projective_subscheme_field(SchemeMorphism_polyno
         X = self.domain()
         Y = self.codomain()
 
+        if not (X.base_ring() in _NumberFields or
+                X.base_ring() in _FiniteFields):
+            raise NotImplementedError("base ring {} is not supported by Singular".format(X.base_ring()))
+
         if not Y.is_projective():  # Y is affine
             emb = Y.projective_embedding(0)
             hom = self.parent()
@@ -2330,10 +2340,6 @@ class SchemeMorphism_polynomial_projective_subscheme_field(SchemeMorphism_polyno
 
         if not X.is_irreducible():
             raise ValueError("domain is not an irreducible scheme")
-
-        if not (X.base_ring() in _NumberFields or
-                X.base_ring() in _FiniteFields):
-            raise NotImplementedError("base ring {} is not supported by Singular".format(X.base_ring()))
 
         # prepare homogeneous coordinate ring of X in Singular
         from sage.rings.polynomial.term_order import TermOrder
