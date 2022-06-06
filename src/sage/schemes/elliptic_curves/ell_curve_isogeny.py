@@ -2785,6 +2785,13 @@ class EllipticCurveIsogeny(EllipticCurveHom):
             True
             sage: mor(Q) == phi(Q)
             True
+
+        TESTS::
+
+            sage: mor(0*Q)
+            (0 : 1 : 0)
+            sage: mor(1*Q)
+            (0 : 1 : 0)
         """
         from sage.schemes.curves.constructor import Curve
         X_affine = Curve(self.domain()).affine_patch(2)

@@ -2207,15 +2207,15 @@ class SchemeMorphism_polynomial_projective_subscheme_field(SchemeMorphism_polyno
 
         TESTS::
 
-            sage: k = GF(11)
-            sage: E = EllipticCurve(k,[1,1])
-            sage: Q = E(6,5)
-            sage: phi = E.isogeny(Q)
-            sage: mor = phi.morphism()
-            sage: mor(0*Q)
-            (0 : 1 : 0)
-            sage: mor(1*Q)
-            (0 : 1 : 0)
+            sage: R.<x,y,z> = QQ[]
+            sage: C = Curve(7*x^2 + 2*y*z + z^2)
+            sage: f, g = C.parametrization()
+            sage: g([0, -1, 2])
+            (1 : 0)
+            sage: f([1, 0])
+            (0 : -1/2 : 1)
+            sage: _ == C([0, -1, 2])
+            True
         """
         for m in self.representatives():
             try:
