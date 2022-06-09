@@ -80,7 +80,7 @@ from sage.misc.cachefunc import cached_method
 from sage.matrix.constructor import matrix as _matrix
 from sage.matrix.matrix_mpolynomial_dense import Matrix_mpolynomial_dense
 from sage.modules.free_module_element import vector
-from sage.modules.free_module import FreeModule_generic
+from sage.modules.free_module import FreeModule_base
 from sage.rings.integer_ring import ZZ
 from sage.rings.ideal import Ideal_generic
 
@@ -476,7 +476,7 @@ class MinimalFreeResolution(FreeResolution_generic):
             S = ideal.ring()
             m = ideal
             rank = 1
-        elif isinstance(ideal, FreeModule_generic):
+        elif isinstance(ideal, FreeModule_base):
             S = ideal.base_ring()
             m = ideal.matrix().transpose()
             rank = m.nrows()
@@ -548,7 +548,7 @@ class MinimalFreeResolution(FreeResolution_generic):
             S = ideal.ring()
             M = S**1
             N = M.submodule([vector([g]) for g in ideal.gens()])
-        elif isinstance(ideal, FreeModule_generic):
+        elif isinstance(ideal, FreeModule_base):
             S = ideal.base_ring()
             M = ideal.ambient_module()
             N = ideal
