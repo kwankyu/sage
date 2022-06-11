@@ -82,13 +82,13 @@ from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
 from sage.rings.qqbar import QQbar, number_field_elements_from_algebraics
 from sage.rings.quotient_ring import QuotientRing_generic
 from sage.rings.rational_field import QQ
-from sage.resolutions.graded import GradedFreeResolution
 from sage.modules.free_module_element import vector
 from sage.schemes.generic.morphism import SchemeMorphism_polynomial
 from sage.categories.finite_fields import FiniteFields
 from sage.categories.number_fields import NumberFields
 from sage.categories.homset import Hom, End
 from sage.categories.fields import Fields
+from sage.homology.graded_resolution import GradedFreeResolution
 
 _NumberFields = NumberFields()
 _FiniteFields = FiniteFields()
