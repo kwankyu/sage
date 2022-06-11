@@ -99,11 +99,11 @@ from sage.rings.integer_ring import ZZ
 from sage.rings.polynomial.laurent_polynomial_ring import LaurentPolynomialRing
 from sage.rings.ideal import Ideal_generic
 
-from sage.homology.free_resolution import FreeResolution_generic
+from sage.homology.free_resolution import FreeResolution
 from sage.homology.free_resolution cimport singular_monomial_exponents
 
 
-class GradedFreeResolution(FreeResolution_generic):
+class GradedFreeResolution(FreeResolution):
     """
     Graded free resolutions of ideals of multi-variate polynomial rings.
 
@@ -247,7 +247,7 @@ class GradedFreeResolution(FreeResolution_generic):
             res_shifts.append(new_shifts)
             prev_shifts = new_shifts
 
-        super(FreeResolution_generic, self).__init__(S, res_mats, name=name)
+        super(FreeResolution, self).__init__(S, res_mats, name=name)
 
         self._ideal = ideal
         self._shifts = shifts
