@@ -31,6 +31,8 @@ from sphinx import highlighting
 import sphinx.ext.intersphinx as intersphinx
 from IPython.lib.lexers import IPythonConsoleLexer, IPyLexer
 
+# Load configuration shared with sage.misc.sphinxify
+from sage.misc.sagedoc_conf import *
 
 # General configuration
 # ---------------------
@@ -165,9 +167,6 @@ release = sage.version.version
 # relative to the source directory, using slashes as directory
 # separators on all platforms.
 exclude_patterns = ['.build']
-
-# The reST default role (used for this markup: `text`) to use for all documents.
-default_role = 'math'
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
 #add_function_parentheses = True
