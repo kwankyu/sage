@@ -525,7 +525,7 @@ cpdef canonical_form(G, partition=None, return_graph=False, use_edge_labels=True
     if partition:
         from itertools import chain
         int2vert = list(chain(*partition))
-        # We check that the partition constains only vertices of the graph
+        # We check that the partition contains only vertices of the graph
         # and that it is actually a partition
         seen = set()
         for u in int2vert:
@@ -743,7 +743,6 @@ cpdef automorphism_group(G, partition=None, use_edge_labels=True):
         ....:         G.set_edge_label(i, j, "B")                               # optional - bliss
         ....:     if 6 <= i < 8:                                                # optional - bliss
         ....:         G.set_edge_label(i, j, "C")                               # optional - bliss
-        ....:
         sage: automorphism_group(G).cardinality() == prod( factorial(n) for n in [3,3,2,8,8,5,2] )  # optional - bliss
         True
         sage: automorphism_group(G, use_edge_labels=False).cardinality() == prod( factorial(n) for n in [8,8,8,5,3] )  # optional - bliss

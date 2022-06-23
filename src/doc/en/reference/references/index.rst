@@ -881,6 +881,14 @@ REFERENCES:
             Anal. Appl. 15 (1994) 804-823.
             :doi:`10.1137/S0895479892230031`
 
+.. [BHMPW20a] Tom Braden, June Huh, Jacob P. Matherne, Nicholas Proudfoot,
+             and Botong Wang, *A semi-small decomposition of the Chow
+             ring of a matroid*, :arxiv:`2002.03341` (2020).
+
+.. [BHMPW20b] Tom Braden, June Huh, Jacob P. Matherne, Nicholas Proudfoot,
+             and Botong Wang, *Singular Hodge theory for combinatorial
+             geometries*, :arxiv:`2010.06088` (2020).
+
 .. [BMP2007] \S. Brlek, G. Melançon, G. Paquin, Properties of the
              extremal infinite smooth words, Discrete
              Math. Theor. Comput. Sci. 9 (2007) 33--49.
@@ -960,7 +968,7 @@ REFERENCES:
 .. [BDGRTW2019] Bonderson, Delaney, Galindo, Rowell, Tran, and Wang,
         On invariants of modular categories beyond modular data.
         J. Pure Appl. Algebra 223 (2019), no. 9, 4065–4088.
-        :arXiv:`1805.05736`.
+        :arxiv:`1805.05736`.
 
 .. [BM2004] John M. Boyer and Wendy J. Myrvold, *On the Cutting Edge:
             *Simplified `O(n)` Planarity by Edge Addition*. Journal of Graph
@@ -989,6 +997,9 @@ REFERENCES:
 .. [BMBL2008] A. Blondin-Massé, S. Brlek, S. Labbé, *Palindromic
               lacunas of the Thue-Morse word*, Proc. GASCOM 2008 (June
               16-20 2008, Bibbiena, Arezzo-Italia), 53--67.
+
+.. [BMFPR] \M. Bousquet-Melou, E. Fusy, L.-F. Preville Ratelle.
+           *The number of intervals in the m-Tamari lattices*. :arxiv:`1106.1498`
 
 .. [BMS2006] Bugeaud, Mignotte, and Siksek. "Classical and modular
              approaches to exponential Diophantine
@@ -1483,6 +1494,9 @@ REFERENCES:
 .. [Chu2007] \F. Chung, *Random walks and local cuts in graphs*, Linear Algebra
              and its Applications 423 (2007), no. 1, 22-32.
 
+.. [Chu2012] \T. Church *Homological stability for configuration spaces of
+             manifolds*, Inventiones Mathematicae, 2012(188), pp. 465-504.
+
 .. [CHPSS18] \C. Cid, T. Huang, T. Peyrin, Y. Sasaki, L. Song.
              *Boomerang Connectivity Table: A New Cryptanalysis Tool* (2018)
              IACR Transactions on Symmetric Cryptology. Vol 2017, Issue 4.
@@ -1767,6 +1781,9 @@ REFERENCES:
             Proceedings: F.Hess, S.Pauli and M.Pohst (eds.), ANTS VII, Lecture
             Notes in Computer Science 4076 (2006), pages 275-286.
 
+.. [CS2018] Craig Costello and Benjamin Smith: Montgomery curves and
+            their arithmetic. J. Cryptogr. Eng. 8 (2018), 227-240.
+
 .. [CST2010] Tullio Ceccherini-Silberstein, Fabio Scarabotti,
              Filippo Tolli.
              *Representation Theory of the Symmetric Groups: The
@@ -2046,7 +2063,7 @@ REFERENCES:
 .. [Dragan2018] Feodor Dragan, Michel Habib, Laurent Viennot.
                *Revisiting Radius, Diameter, and all Eccentricity Computation
                in Graphs through Certificates*.
-               http://arxiv.org/abs/1803.04660
+               :arxiv:`1803.04660`
 
 .. [Dro1987] Carl Droms. *Isomorphisms of graph groups*. Proc. of the
              Amer. Math. Soc. **100**
@@ -3006,6 +3023,12 @@ REFERENCES:
              `J`-Ideals of a Matrix Over a Principal Ideal Domain",
              :arxiv:`1611.10308`, 2016.
 
+.. [HR2017] Patricia Hersh and Victor Reiner, "Representation Stability
+             for Cohomology of Configuration Spaces in `\mathbb{R}^d`",
+             International Mathematics Research Notices, Vol 2017, No. 5,
+             pp. 1433-1486.
+             :doi:`10.1093/imrn/rnw060`
+
 .. [HRS1993] \C. D. Hodgson, I. Rivin and W. D. Smith.
              *A characterization of convex hyperbolic polyhedra
              and of convex polyhedra inscribed in the sphere.*
@@ -3578,7 +3601,7 @@ REFERENCES:
             Springer-Verlag, 2011.
 
 .. [KP2020] Lars Kastner and Marta Panizzut, *Hyperplane arrangements
-            in polymake*, arxiv:`2003.13548`.
+            in polymake*, :arxiv:`2003.13548`.
 
 .. [KPRWZ2010] \M. H. Klin, C. Pech, S. Reichard, A. Woldar, M. Zvi-Av,
                *Examples of computer experimentation in algebraic
@@ -3775,6 +3798,12 @@ REFERENCES:
              of three spherical harmonics', Comput. Phys. Commun.,
              Volume 25, pp. 81-85 (1982)
 
+.. [LD2021] David Lowry-Duda.
+            *Visualizing modular forms*.
+            Arithmetic Geometry, Number Theory, and Computation.
+            Simons Symposia, Springer, 2021.
+            :arxiv:`2002.05234`
+
 .. [Lee2016] Kwankyu Lee, *Decoding of differential AG codes*, Advances in
              Mathematics of Communications, vol. 10, no. 2 (2016), pp. 307-–319.
 
@@ -3801,9 +3830,6 @@ REFERENCES:
 
 .. [Lew2000] Robert Edward Lewand. *Cryptological Mathematics*. The
              Mathematical Association of America, 2000.
-
-.. [LS1998] Pierre Liardet, Pierre Stambul *Algebraic Computation
-            with Continued Fractions.* J. Number Th. 73, 92-121, 1998.
 
 .. [Li1995] Peter Littelmann, Crystal graphs and Young
             tableaux, J. Algebra 175 (1995), no. 1, 65--87.
@@ -3991,6 +4017,11 @@ REFERENCES:
                and of planar binary trees.
                :arxiv:`math/0102066v1`.
 
+.. [LR2004] Dingjun Lou and Dongning Rao.
+            *Characterizing factor critical graphs and an algorithm*,
+            The Australasian Journal of Combinatorics, 30: 51–56, 2004.
+            http://ajc.maths.uq.edu.au/pdf/30/ajc_v30_p051.pdf
+
 .. [LRS2017] Julien Leroy, Michel Rigo, Manon Stipulanti, *Counting the
              number of non-zero coefficients in rows of generalized Pascal
              triangles*, Discrete Math. 340 (2017), no. 5, 862--881.
@@ -4005,6 +4036,12 @@ REFERENCES:
             Combinatorica, 1(1), 1981, 63-73.
             :doi:`10.1007/BF02579178`.
 
+.. [LS1986] \G. I. Lehrer, L. Solomon,
+            *On the action of the symmetric group on the cohomology of
+            the complement of its reflecting hyperplanes*.
+            J. Algebra, 104(2), 1986, 410-424.
+            :doi:`10.1016/0021-8693(86)90225-5`.
+
 .. [LS1990] \A. Lascoux, M.-P. Schutzenberger.
             Keys and standard bases, invariant theory and tableaux.
             IMA Volumes in Math and its Applications (D. Stanton, ED.).
@@ -4014,6 +4051,9 @@ REFERENCES:
             *Internal addresses in the Mandelbrot set and irreducibility of
             polynomials*. Stony Brook Preprint #19 (1994).
             https://www.math.stonybrook.edu/theses/thesis94-2/part1.pdf
+
+.. [LS1998] Pierre Liardet, Pierre Stambul *Algebraic Computation
+            with Continued Fractions.* J. Number Th. 73, 92-121, 1998.
 
 .. [LS2007] Thomas Lam and Mark Shimozono.  *Dual graded graphs for
             Kac-Moody algebras*.  Algebra & Number Theory 1.4 (2007)
@@ -4320,6 +4360,9 @@ REFERENCES:
 .. [Mon2010] \T. Monteil, The asymptotic language of smooth curves, talk
              at LaCIM2010.
 
+.. [Mont1987] Peter L. Montgomery: Speeding the Pollard and elliptic curve
+              methods of factorization. Math. Comp. 48 (1987), 243-264.
+
 .. [Mo2009] \D. Moody, Des. Codes Cryptogr. (2009)
             52: 381. :doi:`10.1007/s10623-009-9287-x`
 
@@ -4452,7 +4495,12 @@ REFERENCES:
 
 .. [NaiRow2011] Naidu and Rowell, A finiteness property for braided fusion
                 categories. Algebr. Represent. Theory 14 (2011), no. 5, 837–855.
-                :arXiv:`0903.4157`.
+                :arxiv:`0903.4157`.
+
+.. [NAR2018] Jamie R. Nunez, Christopher R. Anderson, Ryan S. Renslow
+             *Optimizing colormaps with consideration for color vision
+             deficiency to enable accurate interpretation of scientific data*.
+             PLoS ONE 13(7), 2018: e0199239.
 
 .. [Nas1950] John Nash. *Equilibrium points in n-person games.*
              Proceedings of the National Academy of Sciences 36.1
@@ -4747,6 +4795,10 @@ REFERENCES:
              *PICARO - a block cipher allowing efficient higher-order side-channel
              resistance*; in ACNS, (2012), pp. 311-328.
 
+.. [PRV2017] \L.-F. Préville-Ratelle and X. Viennot,
+             *The enumeration of generalized Tamari intervals*.
+             Trans. Amer. Math. Soc. 369 (2017), pp 5219--5239
+
 .. [Prototype_pattern] Prototype pattern,
                        :wikipedia:`Prototype_pattern`
 
@@ -4963,7 +5015,7 @@ REFERENCES:
 .. [Row2006] Eric Rowell, *From quantum groups to unitary modular tensor categories*.
              In Representations of algebraic groups, quantum groups, and Lie algebras,
              Contemp. Math., **413**, Amer. Math. Soc., Providence, RI, 2006.
-             :arXiv:`math/0503226`.
+             :arxiv:`math/0503226`.
 
 .. [RoStWa2009] Eric Rowell, Richard Stong and Zhenghan Wang, *On classification
         of modular tensor categories*, Comm. Math. Phys. 292, 343--389, 2009.
@@ -5048,7 +5100,7 @@ REFERENCES:
 
 .. [Sag2011] Bruce E. Sagan,
              *The cyclic sieving phenomenon: a survey*,
-             :arXiv:`1008.0790v3`
+             :arxiv:`1008.0790v3`
 
 .. [Sah2000] Sartaj Sahni. *Data Structures, Algorithms, and Applications
              in Java*. McGraw-Hill, 2000.
@@ -5061,12 +5113,11 @@ REFERENCES:
              York, 1958.
 
 .. [Sal1965] \G. Salmon: "A Treatise on the Analytic Geometry of Three
-             Dimensions", Vol II, Chelsea Publishing Co., New
-             York, 1965.
+             Dimensions", Vol II, Chelsea Publishing Co., New York, 1965.
 
 .. [Sal2014] \B. Salisbury.
              The flush statistic on semistandard Young tableaux.
-             :arXiv:`1401.1185`
+             :arxiv:`1401.1185`
 
 .. [Sam2012] \P. Samanta: *Antipodal Graphs*
              :doi:`10.13140/RG.2.2.28238.46409`
@@ -5494,6 +5545,10 @@ REFERENCES:
                 *Inserting rim-hooks into reverse plane partitions*,
                 :arxiv:`1710.09695v1`.
 
+.. [Sun1994] Sheila Sundaram, *The Homology Representations of the Symmetric
+             Group on Cohen-Macaulay Subposets of the Partition Lattice*,
+             Advances in Mathematics, 1994 (104), 225-296.
+
 .. [Sun2010] Yi Sun. *The McKay correspondence*.
              http://www.math.miami.edu/~armstrong/686sp13/McKay_Yi_Sun.pdf
              2010
@@ -5822,6 +5877,10 @@ REFERENCES:
 
 .. [Web2007] James Webb. *Game theory: decisions, interaction and
              Evolution*. Springer Science & Business Media, 2007.
+
+.. [WegSem2010] Elias Wegert and Gunter Semmler.
+                *Phase plots of complex functions: a journey in illustration*.
+                Notices of the AMS, 58: 768--780, 2010.
 
 .. [Weh1998] \J. Wehler. Hypersurfaces of the Flag Variety: Deformation
              Theory and the Theorems of Kodaira-Spencer, Torelli,

@@ -195,7 +195,6 @@ class SphericalHarmonic(BuiltinFunction):
     The convention regarding the Condon-Shortley phase `(-1)^m` is the same
     as for SymPy's spherical harmonics and :wikipedia:`Spherical_harmonics`::
 
-        sage: assume(sin(x)>=0)
         sage: spherical_harmonic(1, 1, x, y)
         -1/4*sqrt(3)*sqrt(2)*e^(I*y)*sin(x)/sqrt(pi)
         sage: from sympy import Ynm
@@ -238,7 +237,7 @@ class SphericalHarmonic(BuiltinFunction):
         BuiltinFunction.__init__(self, 'spherical_harmonic', nargs=4,
                                  conversions=dict(
                                     maple='SphericalY',
-                                    mathematica= 'SphericalHarmonicY',
+                                    mathematica='SphericalHarmonicY',
                                     maxima='spherical_harmonic',
                                     sympy='Ynm'))
 
@@ -279,6 +278,13 @@ class SphericalHarmonic(BuiltinFunction):
             sage: maxima.spherical_harmonic(1, -1, pi/3, pi/6).n() # abs tol 1e-14
             -0.259120612103502 + 0.149603355150537*I
 
+        Check that :trac:`33501` is fixed::
+
+            sage: spherical_harmonic(2, 1, x, y)
+            -1/4*sqrt(6)*sqrt(5)*cos(x)*e^(I*y)*sin(x)/sqrt(pi)
+            sage: spherical_harmonic(5, -3, x, y)
+            -1/32*(9*sqrt(385)*sin(x)^4 - 8*sqrt(385)*sin(x)^2)*e^(-3*I*y)*sin(x)/sqrt(pi)
+
         """
         if n in ZZ and m in ZZ and n > -1:
             if abs(m) > n:
@@ -288,9 +294,11 @@ class SphericalHarmonic(BuiltinFunction):
             from sage.arith.misc import factorial
             from sage.functions.trig import cos
             from sage.functions.orthogonal_polys import gen_legendre_P
-            return (sqrt(factorial(n-m) * (2*n+1) / (4*pi * factorial(n+m)))
+            res = (sqrt(factorial(n-m) * (2*n+1) / (4*pi * factorial(n+m)))
                     * gen_legendre_P(n, m, cos(theta))
                     * exp(I*m*phi)).simplify_trig()
+            res = res.substitute({sqrt(sin(theta)**2): sin(theta)})
+            return res
 
     def _evalf_(self, n, m, theta, phi, parent, **kwds):
         r"""
@@ -300,6 +308,15 @@ class SphericalHarmonic(BuiltinFunction):
             -0.35115433730748836508201061672 - 0.41556223397536866209990358597*I
             sage: spherical_harmonic(I, I, I, I).n()
             7.66678546069894 - 0.265754432549751*I
+
+        Consistency with ``_eval_``::
+
+            sage: d = lambda a, b: abs(spherical_harmonic(a, b, 1., 2.)
+            ....:                      - spherical_harmonic(a, b, 1, 2).n())
+            sage: ab = [(0, 0), (1, -1), (1, 0), (1, 1), (3, 2), (3, 3)]
+            sage: all(d(a, b) < 1e-14 for a, b in ab)
+            True
+
         """
         from mpmath import spherharm
         return mpmath_utils.call(spherharm, n, m, theta, phi, parent=parent)
@@ -319,7 +336,6 @@ class SphericalHarmonic(BuiltinFunction):
 
         Check that :trac:`33117` is fixed::
 
-            sage: assume(sin(theta)>=0)
             sage: DY_theta.subs({n: 1, m: 0})
             -1/2*sqrt(3)*sin(theta)/sqrt(pi)
             sage: Ynm.subs({n: 1, m: 0}).diff(theta)
@@ -592,6 +608,16 @@ class EllipticEC(BuiltinFunction):
             elliptic_ec
             sage: elliptic_ec(x)._sympy_()
             elliptic_e(x)
+
+        TESTS::
+
+            sage: fricas(elliptic_ec(x))  # optional - fricas
+            ellipticE(x)
+
+            sage: elliptic_ec(0.5)  # abs tol 1e-8
+            1.35064388104768
+            sage: fricas.ellipticE(0.5).sage()  # abs tol 1e-8 # optional - fricas
+            1.3506438810476755025201749
         """
         BuiltinFunction.__init__(self, 'elliptic_ec', nargs=1, latex_name='E',
                                  conversions=dict(mathematica='EllipticE',
@@ -806,6 +832,7 @@ class EllipticF(BuiltinFunction):
         BuiltinFunction.__init__(self, 'elliptic_f', nargs=2,
                                  conversions=dict(mathematica='EllipticF',
                                                   maxima='elliptic_f',
+                                                  # fricas='ellipticF', buggy
                                                   sympy='elliptic_f'))
 
     def _eval_(self, z, m):
@@ -909,6 +936,16 @@ class EllipticKC(BuiltinFunction):
             elliptic_kc
             sage: elliptic_kc(x)._sympy_()
             elliptic_k(x)
+
+        TESTS::
+
+            sage: fricas(elliptic_kc(x))  # optional - fricas
+            ellipticK(x)
+
+            sage: elliptic_kc(0.3)  # abs tol 1e-8
+            1.71388944817879
+            sage: fricas.ellipticK(0.3).sage()  # abs tol 1e-3 # optional - fricas
+            1.7138894481787910555457043
         """
         BuiltinFunction.__init__(self, 'elliptic_kc', nargs=1, latex_name='K',
                                  conversions=dict(mathematica='EllipticK',
@@ -1014,6 +1051,7 @@ class EllipticPi(BuiltinFunction):
         BuiltinFunction.__init__(self, 'elliptic_pi', nargs=3,
                                  conversions=dict(mathematica='EllipticPi',
                                                   maxima='EllipticPi',
+                                                  # fricas='ellipticPi', doubt
                                                   sympy='elliptic_pi'))
 
     def _eval_(self, n, z, m):

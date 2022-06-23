@@ -109,7 +109,7 @@ def get_basename(path):
     return fully_qualified_path.replace(os.path.sep, '.')
 
 
-class DocTestSource(object):
+class DocTestSource():
     """
     This class provides a common base class for different sources of doctests.
 
@@ -505,7 +505,7 @@ class FileDocTestSource(DocTestSource):
         Traceback (most recent call last):
         ...
         ValueError: unknown extension for the file to test (=...txtt),
-        valid extensions are: .py, .pyx, .pxd, .pxi, .sage, .spyx, .tex, .rst
+        valid extensions are: .py, .pyx, .pxd, .pxi, .sage, .spyx, .tex, .rst, .rst.txt
 
     """
     def __init__(self, path, options):
@@ -525,7 +525,10 @@ class FileDocTestSource(DocTestSource):
         """
         self.path = path
         DocTestSource.__init__(self, options)
-        base, ext = os.path.splitext(path)
+        if path.endswith('.rst.txt'):
+            ext = '.rst.txt'
+        else:
+            base, ext = os.path.splitext(path)
         valid_code_ext = ('.py', '.pyx', '.pxd', '.pxi', '.sage', '.spyx')
         if ext in valid_code_ext:
             self.__class__ = dynamic_class('PythonFileSource',(FileDocTestSource,PythonSource))
@@ -533,11 +536,11 @@ class FileDocTestSource(DocTestSource):
         elif ext == '.tex':
             self.__class__ = dynamic_class('TexFileSource',(FileDocTestSource,TexSource))
             self.encoding = "utf-8"
-        elif ext == '.rst':
+        elif ext == '.rst' or ext == '.rst.txt':
             self.__class__ = dynamic_class('RestFileSource',(FileDocTestSource,RestSource))
             self.encoding = "utf-8"
         else:
-            valid_ext = ", ".join(valid_code_ext + ('.tex', '.rst'))
+            valid_ext = ", ".join(valid_code_ext + ('.tex', '.rst', '.rst.txt'))
             raise ValueError("unknown extension for the file to test (={}),"
                     " valid extensions are: {}".format(path, valid_ext))
 
@@ -1062,7 +1065,7 @@ class PythonSource(SourceLanguage):
             sage: FDS.ending_docstring("'''")
             <...Match object...>
             sage: FDS.qualified_name = NestedName(FDS.basename)
-            sage: FDS.starting_docstring("class MyClass(object):")
+            sage: FDS.starting_docstring("class MyClass():")
             sage: FDS.starting_docstring("    def hello_world(self):")
             sage: FDS.starting_docstring("        '''")
             <...Match object...>
@@ -1070,7 +1073,7 @@ class PythonSource(SourceLanguage):
             sage.doctest.sources.MyClass.hello_world
             sage: FDS.ending_docstring("    '''")
             <...Match object...>
-            sage: FDS.starting_docstring("class NewClass(object):")
+            sage: FDS.starting_docstring("class NewClass():")
             sage: FDS.starting_docstring("    '''")
             <...Match object...>
             sage: FDS.ending_docstring("    '''")
@@ -1553,10 +1556,11 @@ class RestSource(SourceLanguage):
         PythonStringSource = dynamic_class("sage.doctest.sources.PythonStringSource",
                                            (StringDocTestSource, PythonSource))
         min_indent = self.parser._min_indent(docstring)
-        pysource = '\n'.join([l[min_indent:] for l in docstring.split('\n')])
+        pysource = '\n'.join(l[min_indent:] for l in docstring.split('\n'))
         inner_source = PythonStringSource(self.basename, pysource,
                                           self.options,
-                                          self.printpath, lineno_shift=start+1)
+                                          self.printpath,
+                                          lineno_shift=start + 1)
         inner_doctests, _ = inner_source._create_doctests(namespace, True)
         safe_docstring = inner_source._neutralize_doctests(min_indent)
         outer_doctest = self.parser.get_doctest(safe_docstring, namespace,

@@ -1258,7 +1258,7 @@ class AlgebraicRealField(Singleton, AlgebraicField_common, sage.rings.abc.Algebr
             False
         """
         try:
-            return im_gens[0] == codomain._coerce_(self.gen(0))
+            return im_gens[0] == codomain.coerce(self.gen(0))
         except TypeError:
             return False
 
@@ -4059,7 +4059,7 @@ class AlgebraicNumber_base(sage.structure.element.FieldElement):
         self.exactify()
         return bool(self)
 
-    __nonzero__ = __bool__
+    
 
     def is_square(self):
         """

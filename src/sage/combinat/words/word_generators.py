@@ -54,6 +54,7 @@ EXAMPLES::
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 
+from collections.abc import Iterable
 from itertools import cycle, count
 from random import randint
 from sage.misc.cachefunc import cached_method
@@ -309,7 +310,7 @@ class LowerChristoffelWord(FiniteWord_list):
         """
         return self.__class__, (self.__p, self.__q, self.parent().alphabet())
 
-class WordGenerator(object):
+class WordGenerator():
     r"""
     Constructor of several famous words.
 
@@ -889,7 +890,7 @@ class WordGenerator(object):
             else:
                 parent = FiniteWords(alphabet)
             cf = iter(cf)
-        elif hasattr(slope, '__iter__'):
+        elif isinstance(slope, Iterable):
             cf = iter(slope)
             parent = InfiniteWords(alphabet)
         else:
@@ -1557,7 +1558,7 @@ class WordGenerator(object):
         DEFINITION (from [Fogg]_):
 
         Let `w` be a infinite word over an alphabet `A = A_0`. A
-        standard representation of $w$ is obtained from a sequence of
+        standard representation of `w` is obtained from a sequence of
         substitutions `\sigma_k : A_{k+1} \to A_k` and a sequence of letters
         `a_k \in A_k` such that:
 
@@ -1892,7 +1893,7 @@ class WordGenerator(object):
             seq = sequence
         elif hasattr(morphisms, '__getitem__'):
             seq = (morphisms[i] for i in sequence)
-        elif hasattr(morphisms, '__call__'):
+        elif callable(morphisms):
             seq = (morphisms(i) for i in sequence)
         else:
             raise TypeError("morphisms (=%s) must be None, callable or provide a __getitem__ method" % morphisms)

@@ -261,8 +261,8 @@ cdef class UniqueFactory(SageObject):
     even though the "factory data" are now available (this is not the case
     on Python 3 which *only* has new style classes)::
 
-        sage: loads(dumps(d)) is d  # py2
-        False
+        sage: loads(dumps(d)) is d
+        True
         sage: d._factory_data
         (<__main__.MyFactory object at ...>,
          (...),
@@ -590,7 +590,7 @@ def register_factory_unpickle(name, callable):
 
         sage: from sage.structure.factory import UniqueFactory, register_factory_unpickle
         sage: import __main__
-        sage: class OldStuff(object):
+        sage: class OldStuff():
         ....:     def __init__(self, n, **extras):
         ....:         self.n = n
         ....:     def __repr__(self):
@@ -661,7 +661,7 @@ def generic_factory_unpickle(factory, *args):
 
         sage: from sage.structure.factory import UniqueFactory
         sage: import __main__
-        sage: class OldStuff(object):
+        sage: class OldStuff():
         ....:     def __init__(self, n, **extras):
         ....:         self.n = n
         ....:     def __repr__(self):

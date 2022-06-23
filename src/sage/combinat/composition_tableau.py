@@ -642,7 +642,7 @@ class CompositionTableaux_size(CompositionTableaux):
             sage: CompositionTableaux(3)
             Composition Tableaux of size 3 and maximum entry 3
         """
-        return "Composition Tableaux of size %s and maximum entry %s"%(str(self.size), str(self.max_entry))
+        return "Composition Tableaux of size %s and maximum entry %s" % (str(self.size), str(self.max_entry))
 
     def _an_element_(self):
         r"""
@@ -817,7 +817,7 @@ class CompositionTableauxBacktracker(GenericBacktracker):
 
         # Get the next state
         new_state = self.get_next_pos(i, j)
-        yld = True if new_state is None else False
+        yld = bool(new_state is None)
 
         for k in range(1,self.max_entry +1):
             #We check to make sure that k does not violate the rule weak decrease in rows
@@ -859,4 +859,3 @@ class CompositionTableauxBacktracker(GenericBacktracker):
                 return ii, j
 
         return ii+1, 0
-

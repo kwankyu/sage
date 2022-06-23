@@ -202,7 +202,7 @@ from sage.interfaces.tab_completion import ExtraTabCompletion
 from sage.interfaces.expect import Expect, ExpectElement, FunctionElement, ExpectFunction
 from sage.misc.misc import SAGE_TMP_INTERFACE
 from sage.env import DOT_SAGE, LOCAL_IDENTIFIER
-from sage.docs.instancedoc import instancedoc
+from sage.misc.instancedoc import instancedoc
 from sage.rings.integer_ring import ZZ
 from sage.rings.rational_field import QQ
 from sage.misc.lazy_import import lazy_import
@@ -1145,7 +1145,7 @@ class FriCASElement(ExpectElement):
         P = self._check_valid()
         return not P.new("zero?(%s)" % self._name).sage()
 
-    __nonzero__ = __bool__
+    
 
     def __float__(self):
         """

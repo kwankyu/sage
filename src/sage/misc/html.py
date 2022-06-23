@@ -25,7 +25,7 @@ from sage.misc.latex import latex
 from sage.misc.sage_eval import sage_eval
 from sage.structure.sage_object import SageObject
 
-macro_regex = re.compile(r'\\newcommand{(?P<name>\\[a-zA-Z]+)}')
+macro_regex = re.compile(r'\\newcommand{(?P<name>\\[a-zA-Z]+)}(\[.+\])?{(?P<definition>.+)}')
 
 
 class HtmlFragment(str, SageObject):
@@ -299,6 +299,12 @@ class MathJax:
             <html>\(3\)</html>
             sage: MathJax().eval(type(3), mode='inline')
             <html>\(\verb|&lt;class|\verb| |\verb|'sage.rings.integer.Integer'>|\)</html>
+
+        TESTS:
+
+            sage: from sage.misc.html import MathJax
+            sage: MathJax().eval(IntegerModRing(6))
+            <html>\[\newcommand{\ZZ}{\Bold{Z}}\newcommand{\Bold}[1]{\mathbf{#1}}\ZZ/6\ZZ\]</html>
         """
         # Get a regular LaTeX representation of x
         x = latex(x, combine_all=combine_all)
@@ -353,10 +359,16 @@ class MathJax:
 
         # add a macro definition only if it appears in the latex string
         macros_string = ''
-        for line in sage_latex_macros():
-            m = macro_regex.match(line)
-            if m['name'] in latex_string:
-                macros_string += line
+        latex_macros = sage_latex_macros()
+        test_string = latex_string
+        while test_string:
+            new_test_string = ''
+            for line in latex_macros:
+                m = macro_regex.match(line)
+                if m['name'] in test_string:
+                    macros_string += line
+                    new_test_string += '{' + m['definition'] + '}'
+            test_string = new_test_string
 
         latex_string = macros_string + latex_string
 
@@ -365,10 +377,12 @@ class MathJax:
             html = r'<html>\[{0}\]</html>'
         elif mode == 'inline':
             html = r'<html>\({0}\)</html>'
+        elif mode == 'display_left':
+            html = r'<html>\(\displaystyle {0}\)</html>'
         elif mode == 'plain':
             return mathjax_string
         else:
-            raise ValueError("mode must be either 'display', 'inline', or 'plain'")
+            raise ValueError("mode must be either 'display', 'inline', 'display_left' or 'plain'")
         return MathJaxExpr(html.format(mathjax_string))
 
 
@@ -416,13 +430,27 @@ class HTMLFragmentFactory(SageObject):
             <class 'sage.misc.html.HtmlFragment'>
 
             sage: html(1/2)
-            <html>\[\frac{1}{2}\]</html>
+            <html>\(\displaystyle \frac{1}{2}\)</html>
 
             sage: html('<a href="http://sagemath.org">sagemath</a>')
             <a href="http://sagemath.org">sagemath</a>
 
             sage: html('<a href="http://sagemath.org">sagemath</a>', strict=True)
-            <html>\[\verb|&lt;a|\verb| |\verb|href="http://sagemath.org">sagemath&lt;/a>|\]</html>
+            <html>\(\displaystyle \verb|&lt;a|\verb| |\verb|href="http://sagemath.org">sagemath&lt;/a>|\)</html>
+
+        Display preference ``align_latex`` affects rendering of LaTeX expressions::
+
+            sage: from sage.repl.rich_output.display_manager import get_display_manager
+            sage: dm = get_display_manager()
+            sage: dm.preferences.align_latex = 'left'
+            sage: html(1/2)
+            <html>\(\displaystyle \frac{1}{2}\)</html>
+            sage: dm.preferences.align_latex = 'center'
+            sage: html(1/2)
+            <html>\[\frac{1}{2}\]</html>
+            sage: dm.preferences.align_latex = None  # same with left
+            sage: html(1/2)
+            <html>\(\displaystyle \frac{1}{2}\)</html>
         """
         # string obj is interpreted as an HTML in not strict mode
         if isinstance(obj, str) and not strict:
@@ -435,13 +463,22 @@ class HTMLFragmentFactory(SageObject):
         except AttributeError:
             pass
 
+        from sage.repl.rich_output.display_manager import get_display_manager
+        dm = get_display_manager()
+        if dm.preferences.align_latex == 'center':
+            mode = 'display'
+        elif dm.preferences.align_latex == 'left':
+            mode = 'display_left'
+        else:
+            mode = 'display_left'
+
         # otherwise convert latex to html
         if concatenate:
             if isinstance(obj, (tuple, list)):
                 obj = tuple(obj)
-            result = MathJax().eval(obj, mode='display', combine_all=True)
+            result = MathJax().eval(obj, mode=mode, combine_all=True)
         else:
-            result = MathJax().eval(obj, mode='display', combine_all=False)
+            result = MathJax().eval(obj, mode=mode, combine_all=False)
         return HtmlFragment(result)
 
     def eval(self, s, locals=None):

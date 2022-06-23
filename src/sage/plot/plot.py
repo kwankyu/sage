@@ -690,7 +690,7 @@ def SelectiveFormatter(formatter, skip_values):
         from matplotlib.ticker import Formatter
 
         class _SelectiveFormatterClass(Formatter):
-            def __init__(self, formatter,skip_values):
+            def __init__(self, formatter, skip_values):
                 """
                 Initialize a SelectiveFormatter object.
 
@@ -717,6 +717,7 @@ def SelectiveFormatter(formatter, skip_values):
                 """
                 self.formatter=formatter
                 self.skip_values=skip_values
+
             def set_locs(self, locs):
                 """
                 Set the locations for the ticks that are not skipped.
@@ -729,6 +730,7 @@ def SelectiveFormatter(formatter, skip_values):
                     sage: formatter.set_locs([i*100 for i in range(10)])
                 """
                 self.formatter.set_locs([l for l in locs if l not in self.skip_values])
+
             def __call__(self, x, *args, **kwds):
                 """
                 Return the format for tick val *x* at position *pos*
@@ -2375,7 +2377,7 @@ def _plot(funcs, xrange, parametric=False,
                 base_level = min(t[1] for t in data)
             elif fill == 'max':
                 base_level = max(t[1] for t in data)
-            elif hasattr(fill, '__call__'):
+            elif callable(fill):
                 if fill == max or fill == min:
                     if fill == max:
                         fstr = 'max'
@@ -2403,7 +2405,7 @@ def _plot(funcs, xrange, parametric=False,
                 except TypeError:
                     base_level = 0
 
-            if not hasattr(fill, '__call__') and polar:
+            if not callable(fill) and polar:
                 filldata = generate_plot_points(lambda x: base_level,
                                                 xrange,
                                                 plot_points,
@@ -2413,7 +2415,7 @@ def _plot(funcs, xrange, parametric=False,
                                                 imaginary_tolerance=imag_tol)
                 filldata.reverse()
                 filldata += data
-            if not hasattr(fill, '__call__') and not polar:
+            if not callable(fill) and not polar:
                 filldata = [(data[0][0], base_level)] + data + [(data[-1][0], base_level)]
 
         if fillcolor == 'automatic':

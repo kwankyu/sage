@@ -62,7 +62,7 @@ from sage.structure.element import RingElement
 from sage.misc.misc import SAGE_TMP_INTERFACE
 from sage.env import SAGE_EXTCODE, LOCAL_IDENTIFIER
 from sage.misc.object_multiplexer import Multiplex
-from sage.docs.instancedoc import instancedoc
+from sage.misc.instancedoc import instancedoc
 
 from sage.cpython.string import str_to_bytes, bytes_to_str
 
@@ -87,7 +87,7 @@ BAD_SESSION = -2
 # "return", "break", or "continue", raising an exception, ...)
 
 
-class gc_disabled(object):
+class gc_disabled():
     """
     This is a "with" statement context manager. Garbage collection is
     disabled within its scope. Nested usage is properly handled.
@@ -497,6 +497,12 @@ If this all works, you can then make calls like:
                         # Work around https://bugs.python.org/issue1652
                         preexec_fn=lambda: signal.signal(signal.SIGPIPE, signal.SIG_DFL),
                         quit_string=self._quit_string())
+
+                # Attempt to shutdown the running process gracefully
+                # when sage terminates.
+                import atexit
+                atexit.register(self.quit)
+
             except (ExceptionPexpect, pexpect.EOF) as e:
                 # Change pexpect errors to RuntimeError
                 raise RuntimeError("unable to start %s because the command %r failed: %s\n%s" %

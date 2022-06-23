@@ -505,15 +505,16 @@ cdef class SageObject:
             sage: CC._test_category()
             Traceback (most recent call last):
             ...
-            AssertionError: False is not true
+            AssertionError: 3 is not an instance of
+            <class 'sage.categories.category.Category'>
         """
         from sage.categories.category import Category
         from sage.categories.objects import Objects
         tester = self._tester(**options)
         category = self.category()
-        tester.assertTrue(isinstance(category, Category))
+        tester.assertIsInstance(category, Category)
         tester.assertTrue(category.is_subcategory(Objects()))
-        tester.assertTrue(self in category)
+        tester.assertIn(self, category)
 
     def parent(self):
         """
@@ -933,13 +934,13 @@ cdef class SageObject:
         I = sage.interfaces.r.r
         return self._interface_init_(I)
 
-    def _singular_(self, G=None, have_ring=False):
+    def _singular_(self, G=None):
         if G is None:
             import sage.interfaces.singular
             G = sage.interfaces.singular.singular
         return self._interface_(G)
 
-    def _singular_init_(self, have_ring=False):
+    def _singular_init_(self):
         import sage.interfaces.singular
         I = sage.interfaces.singular.singular
         return self._interface_init_(I)

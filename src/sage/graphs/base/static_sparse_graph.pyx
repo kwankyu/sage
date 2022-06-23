@@ -236,7 +236,7 @@ cdef int init_short_digraph(short_digraph g, G, edge_labelled=False, vertex_list
     if isinstance(G, DiGraph):
         isdigraph = 1
     elif isinstance(G, Graph):
-         isdigraph = 0
+        isdigraph = 0
     else:
         raise ValueError("The source graph must be either a DiGraph or a Graph object !")
 
@@ -1215,7 +1215,9 @@ def spectral_radius(G, prec=1e-10):
                     v2[i] += v1[p[0]]
                     p += 1
                 s += v2[i]
-            v3 = v1; v1 = v2; v2 = v3
+            v3 = v1
+            v1 = v2
+            v2 = v3
 
         sig_off()
     finally:
