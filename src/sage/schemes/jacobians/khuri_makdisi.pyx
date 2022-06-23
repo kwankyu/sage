@@ -1,7 +1,7 @@
 r"""
 Khuri-Makdisi algorithms for arithmetic in Jacobians
 
-This module implements algorithms from ...
+This module implements Khuri-Makdisi's algorithms of [Khu2004]_.
 
 EXAMPLES::
 

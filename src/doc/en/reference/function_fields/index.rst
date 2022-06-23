@@ -24,8 +24,8 @@ algebraic closure of `\QQ`.
 
 A basic reference for the theory of algebraic function fields is [Stich2009]_.
 
-Jacobians of Function Fields
-----------------------------
+Algebraic Jacobians
+-------------------
 
 Arithmetic in Jacobians of function fields are available in two flavors.
 

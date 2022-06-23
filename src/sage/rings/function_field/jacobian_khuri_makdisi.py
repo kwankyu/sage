@@ -1,5 +1,5 @@
 r"""
-Jacobians of function fields (Khuri-Makdisi model)
+Algebraic Jacobians -- Khuri-Makdisi model
 
 This module implements Jacobian arithmetic by Khuri-Makdisi's algorithms
 [Khu2004]_ based on divisor representation by linear spaces.

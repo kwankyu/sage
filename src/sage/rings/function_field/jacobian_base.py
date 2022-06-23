@@ -1,5 +1,5 @@
 r"""
-Jacobians of function fields
+Algebraic Jacobians
 
 This module provides base classes for Jacobians of function fields.
 

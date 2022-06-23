@@ -1,5 +1,5 @@
 r"""
-Jacobians of function fields (Hess model)
+Algebraic Jacobians -- Hess model
 
 This module implements Jacobian arithmetic based on divisor representation by
 ideals. This approach to Jacobian arithmetic implementation is attributed to
