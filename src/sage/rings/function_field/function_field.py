@@ -3400,24 +3400,23 @@ class FunctionField_global(FunctionField_simple):
 @handle_AA_and_QQbar
 def _singular_normal(ideal):
     r"""
-    Compute the normalization of the affine algebra defined by ``ideal`` using
-    Singular.
+    Compute the normalization of the affine domain defined by the prime
+    ``ideal`` using Singular's ``normal`` algorithm.
 
-    The affine algebra is the quotient algebra of a multivariate polynomial
-    ring `R` by the ideal. The normalization is by definition the integral
-    closure of the algebra in its total ring of fractions.
+    The affine domain is the quotient of a multivariate polynomial
+    ring `R` by the prime ideal. The normalization is by definition the integral
+    closure of the affine domain in its ring of fractions.
 
     INPUT:
 
-    - ``ideal`` -- a radical ideal in a multivariate polynomial ring
+    - ``ideal`` -- a prime ideal in a multivariate polynomial ring
 
     OUTPUT:
 
-    a list of lists, one list for each ideal in the equidimensional
-    decomposition of the ``ideal``, each list giving a set of generators of the
-    normalization of each ideal as an R-module by dividing all elements of the
-    list by the final element. Thus the list ``[x, y]`` means that `\{x/y, 1\}`
-    is the set of generators of the normalization of `R/(x,y)`.
+    a list giving a set of generators of the normalization of the affine domain
+    as an `R`-module by dividing all elements of the list by the final element.
+    Thus the list ``[x, y]`` means that `\{x/y, 1\}` is the set of generators
+    of the normalization of `R/(x,y)`.
 
     ALGORITHM:
 
@@ -3431,30 +3430,66 @@ def _singular_normal(ideal):
 
         sage: f = (x^2-y^3) * x
         sage: _singular_normal(ideal(f))
-        [[x, y], [1]]
+        ...
+        [x, y]
 
         sage: f = (y^2-x)
         sage: _singular_normal(ideal(f))
-        [[1]]
+        ...
+        [1]
     """
     from sage.libs.singular.function import singular_function, lib
     lib('normal.lib')
     normal = singular_function('normal')
-    execute = singular_function('execute')
-
-    try:
-        get_printlevel = singular_function('get_printlevel')
-    except NameError:
-        execute('proc get_printlevel {return (printlevel);}')
-        get_printlevel = singular_function('get_printlevel')
-
-    # It's fairly verbose unless printlevel is -1.
-    saved_printlevel = get_printlevel()
-    execute('printlevel=-1')
     nor = normal(ideal)
-    execute('printlevel={}'.format(saved_printlevel))
+    return nor[1][0]
 
-    return nor[1]
+@handle_AA_and_QQbar
+def _singular_locnormal(ideal):
+    """
+    Compute the normalization of the affine domain defined by the prime
+    ``ideal`` using Singular's ``locnormal`` algorithm.
+
+    The affine domain is the quotient of a multivariate polynomial
+    ring `R` by the prime ideal. The normalization is by definition the integral
+    closure of the affine domain in its ring of fractions.
+
+    INPUT:
+
+    - ``ideal`` -- a prime ideal in a multivariate polynomial ring
+
+    OUTPUT:
+
+    a list giving a set of generators of the normalization of the affine domain
+    as an `R`-module by dividing all elements of the list by the final element.
+    Thus the list ``[x, y]`` means that `\{x/y, 1\}` is the set of generators
+    of the normalization of `R/(x,y)`.
+
+    ALGORITHM:
+
+    Singular's implementation of the normalization algorithm described in G.-M.
+    Greuel, S. Laplagne, F. Seelisch: Normalization of Rings (2009).
+
+    EXAMPLES::
+
+        sage: from sage.rings.function_field.function_field import _singular_normal
+        sage: R.<x,y> = QQ[]
+
+        sage: f = (x^2-y^3) * x
+        sage: _singular_normal(ideal(f))
+        ...
+        [x, y]
+
+        sage: f = (y^2-x)
+        sage: _singular_normal(ideal(f))
+        ...
+        [1]
+    """
+    from sage.libs.singular.function import singular_function, lib
+    lib('locnormal.lib')
+    normalize = singular_function('locNormal')
+    U, d = normalize(ideal)
+    return list(U) + [d]
 
 
 class FunctionField_integral(FunctionField_simple):
@@ -3465,9 +3500,24 @@ class FunctionField_integral(FunctionField_simple):
     polynomial, which is integral over the maximal order of the base rational
     function field.
     """
-    def _maximal_order_basis(self):
+    def _maximal_order_basis(self, algorithm=None):
         """
         Return a basis of the maximal order of the function field.
+
+        INPUT:
+
+        - ``algorithm`` -- Singular's normalization algorithm; one of
+          ``'normal'``, ``'locnormal'``
+
+        Different normalization algorithms are used depending on the constant
+        base field.
+
+        For finite fields, there is no choice and Singular's
+        ``normalP`` algorithm is used.
+
+        For number fields, Singular's ``locnormal`` algorithm is used by
+        default.  If ``algorithm`` is ``normal``, then Singular's ``normal``
+        algorithm is used.
 
         EXAMPLES::
 
@@ -3482,6 +3532,7 @@ class FunctionField_integral(FunctionField_simple):
         """
         from sage.matrix.constructor import matrix
         from .hermite_form_polynomial import reversed_hermite_form
+        from sage.libs.singular.function import singular_function, lib
 
         k = self.constant_base_field()
         K = self.base_field() # rational function field
@@ -3495,12 +3546,11 @@ class FunctionField_integral(FunctionField_simple):
         g = sum([v[i].numerator().subs(x) * y**i for i in range(len(v))])
 
         if self.is_global():
-            from sage.libs.singular.function import singular_function, lib
             from sage.env import SAGE_EXTCODE
             lib(SAGE_EXTCODE + '/singular/function_field/core.lib')
             normalize = singular_function('core_normalize')
 
-            # Singular "normalP" algorithm assumes affine domain over
+            # Singular's normalP algorithm assumes affine domain over
             # a prime field. So we construct gflat lifting g as in
             # k_prime[yy,xx,zz]/(k_poly) where k = k_prime[zz]/(k_poly)
             R = PolynomialRing(k.prime_subfield(), names='yy,xx,zz')
@@ -3518,9 +3568,24 @@ class FunctionField_integral(FunctionField_simple):
             h = R.hom([y,x,k.gen()],S)
             pols_in_S = [h(f) for f in pols_in_R]
         else:
-            # Call Singular. Singular's "normal" function returns a basis
+            # Singular is fairly verbose unless printlevel is -1.
+            execute = singular_function('execute')
+            try:
+                get_printlevel = singular_function('get_printlevel')
+            except NameError:
+                execute('proc get_printlevel {return (printlevel);}')
+                get_printlevel = singular_function('get_printlevel')
+            saved_printlevel = get_printlevel()
+            execute('printlevel=-1')
+
+            # Call Singular's normalization function that returns a basis
             # of the integral closure of k(x,y)/(g) as a k[x,y]-module.
-            pols_in_S = _singular_normal(S.ideal(g))[0]
+            if algorithm is None or algorithm == 'locnormal':
+                pols_in_S = _singular_locnormal(S.ideal(g))
+            elif algorithm == 'normal':
+                pols_in_S = _singular_normal(S.ideal(g))
+
+            execute('printlevel={}'.format(saved_printlevel))
 
         # reconstruct the polynomials in the function field
         x = K.gen()
