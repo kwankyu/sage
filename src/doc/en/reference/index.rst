@@ -11,11 +11,14 @@ This documentation is licensed under the `Creative Commons Attribution-Share Ali
 
 __ http://creativecommons.org/licenses/by-sa/3.0/
 
+
 User Interfaces
 ===============
 
-* :doc:`Command Line Interface <repl/index>`
-* `Jupyter Notebook Interface <https://jupyter-notebook.readthedocs.io/en/latest/notebook.html>`_
+.. toctree::
+
+    :doc:`Command Line Interface <repl/index>`
+    `Jupyter Notebook Interface <https://jupyter-notebook.readthedocs.io/en/latest/notebook.html>`_
 
 Graphics
 ========
