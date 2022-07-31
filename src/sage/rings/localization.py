@@ -1017,4 +1017,4 @@ class Localization(IntegralDomain, UniqueRepresentation):
                     return False
             except NotImplementedError:
                 pass
-        return super(Localization, self).is_field(proof=proof)
+        return super().is_field(proof=proof)
