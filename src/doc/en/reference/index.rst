@@ -15,10 +15,8 @@ __ http://creativecommons.org/licenses/by-sa/3.0/
 User Interfaces
 ===============
 
-.. toctree::
-
-    :doc:`Command Line Interface <repl/index>`
-    `Jupyter Notebook Interface <https://jupyter-notebook.readthedocs.io/en/latest/notebook.html>`_
+* :doc:`Command Line Interface <repl/index>`
+* `Jupyter Notebook Interface <https://jupyter-notebook.readthedocs.io/en/latest/notebook.html>`_
 
 Graphics
 ========
