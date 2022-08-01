@@ -21,7 +21,7 @@ doctree files in ``local/share/doctree`` and ``inventory.inv`` inventory files
 in ``local/share/inventory``.
 
 The reference manual is built in two passes, first by :class:`ReferenceBuilder`
-with ``inventory`` output type and secondly with``html`` output type. The
+with ``inventory`` output type and secondly with ``html`` output type. The
 :class:`ReferenceBuilder` itself uses :class:`ReferenceTopBuilder` and
 :class:`ReferenceSubBuilder` to build subcomponents of the reference manual.
 The :class:`ReferenceSubBuilder` examines the modules included in the

@@ -7,6 +7,7 @@ Sage Doc Builders
 .. toctree::
    :maxdepth: 1
 
+   overview
    sage_docbuild/__main__
    sage_docbuild/builders
    sage_docbuild/build_options
