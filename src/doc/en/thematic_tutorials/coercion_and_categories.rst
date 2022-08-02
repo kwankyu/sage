@@ -15,11 +15,10 @@ Sage's category and coercion framework
 --------------------------------------
 
 .. MODULEAUTHOR::
-
-   Simon King,
-   Friedrich\-Schiller\-Universität Jena,
-   <simon.king@uni-jena.de>
-   © 2011/2013
+    Simon King,
+    Friedrich\-Schiller\-Universität Jena,
+    <simon.king@uni-jena.de>
+    © 2011/2013
 
 .. linkall
 
