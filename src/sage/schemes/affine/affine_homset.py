@@ -25,12 +25,12 @@ AUTHORS:
 """
 
 # *****************************************************************************
-#       Copyright (C) 2006 William Stein <wstein@gmail.com>
+#        Copyright (C) 2006 William Stein <wstein@gmail.com>
 #
-#  Distributed under the terms of the GNU General Public License (GPL)
-#  as published by the Free Software Foundation; either version 2 of
-#  the License, or (at your option) any later version.
-#                  http://www.gnu.org/licenses/
+#   Distributed under the terms of the GNU General Public License (GPL)
+#   as published by the Free Software Foundation; either version 2 of
+#   the License, or (at your option) any later version.
+#                   http://www.gnu.org/licenses/
 # *****************************************************************************
 
 from copy import copy
@@ -47,7 +47,7 @@ from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
 from sage.schemes.generic.homset import SchemeHomset_points, SchemeHomset_generic
 
 # *******************************************************************
-# Affine varieties
+#  Affine varieties
 # *******************************************************************
 
 class SchemeHomset_points_spec(SchemeHomset_generic):
@@ -87,7 +87,7 @@ class SchemeHomset_points_spec(SchemeHomset_generic):
               Defn: Ring endomorphism of Rational Field
                       Defn: 1 |--> 1
         """
-        return SchemeHomset_generic._element_constructor_(self, *args, **kwds)
+        return super()._element_constructor_(*args, **kwds)
 
     def _repr_(self):
         """
@@ -138,8 +138,9 @@ class SchemeHomset_polynomial_affine_space(SchemeHomset_generic):
         else:
             raise TypeError("identity map is only defined for endomorphisms")
 
+
 # *******************************************************************
-# Affine varieties
+#  Affine varieties
 # *******************************************************************
 
 class SchemeHomset_points_affine(SchemeHomset_points):
