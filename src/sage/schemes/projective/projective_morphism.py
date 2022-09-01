@@ -2279,7 +2279,6 @@ class SchemeMorphism_polynomial_projective_subscheme_field(SchemeMorphism_polyno
                 return super(SchemeMorphism_polynomial_projective_subscheme_field, m).__call__(x)
             except ValueError:
                 pass
-
         raise ValueError('the morphism is not defined at this point')
 
     @cached_method
@@ -2376,10 +2375,6 @@ class SchemeMorphism_polynomial_projective_subscheme_field(SchemeMorphism_polyno
         """
         X = self.domain()
         Y = self.codomain()
-
-        if not (X.base_ring() in _NumberFields or
-                X.base_ring() in _FiniteFields):
-            raise NotImplementedError("base ring {} is not supported by Singular".format(X.base_ring()))
 
         if not Y.is_projective():  # Y is affine
             emb = Y.projective_embedding(0)

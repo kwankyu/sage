@@ -29,13 +29,13 @@ AUTHORS:
 """
 
 # *****************************************************************************
-#       Copyright (C) 2011 Volker Braun <vbraun.name@gmail.com>
-#       Copyright (C) 2006 William Stein <wstein@gmail.com>
+#        Copyright (C) 2011 Volker Braun <vbraun.name@gmail.com>
+#        Copyright (C) 2006 William Stein <wstein@gmail.com>
 #
-#  Distributed under the terms of the GNU General Public License (GPL)
-#  as published by the Free Software Foundation; either version 2 of
-#  the License, or (at your option) any later version.
-#                  http://www.gnu.org/licenses/
+#   Distributed under the terms of the GNU General Public License (GPL)
+#   as published by the Free Software Foundation; either version 2 of
+#   the License, or (at your option) any later version.
+#                   http://www.gnu.org/licenses/
 # *****************************************************************************
 
 from sage.rings.integer_ring import ZZ
@@ -54,7 +54,7 @@ from sage.schemes.generic.algebraic_scheme import AlgebraicScheme_subscheme
 from copy import copy
 
 # *******************************************************************
-# Projective varieties
+#  Projective varieties
 # *******************************************************************
 
 class SchemeHomset_points_projective_field(SchemeHomset_points):
@@ -564,7 +564,7 @@ class SchemeHomset_polynomial_projective_space(SchemeHomset_generic):
 
 
 # *******************************************************************
-# Abelian varieties
+#  Abelian varieties
 # *******************************************************************
 
 class SchemeHomset_points_abelian_variety_field(SchemeHomset_points_projective_field):
