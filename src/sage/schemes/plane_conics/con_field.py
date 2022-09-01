@@ -9,19 +9,19 @@ AUTHORS:
 
 """
 # *****************************************************************************
-#       Copyright (C) 2008 Nick Alexander <ncalexander@gmail.com>
-#       Copyright (C) 2009/2010 Marco Streng <marco.streng@gmail.com>
+#        Copyright (C) 2008 Nick Alexander <ncalexander@gmail.com>
+#        Copyright (C) 2009/2010 Marco Streng <marco.streng@gmail.com>
 #
-#  Distributed under the terms of the GNU General Public License (GPL)
+#   Distributed under the terms of the GNU General Public License (GPL)
 #
-#    This code is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-#    General Public License for more details.
+#     This code is distributed in the hope that it will be useful,
+#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#     General Public License for more details.
 #
-#  The full text of the GPL is available at:
+#   The full text of the GPL is available at:
 #
-#                  http://www.gnu.org/licenses/
+#                   http://www.gnu.org/licenses/
 # *****************************************************************************
 
 from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing

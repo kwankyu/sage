@@ -680,7 +680,7 @@ class SchemeHomset_points_abelian_variety_field(SchemeHomset_points_projective_f
             Abelian group of points on Elliptic Curve defined
             by y^2 + y = x^3 - x over Rational Field
             sage: Hom.base_ring()
-            Integer Ring
+            Rational Field
             sage: Hom.base_extend(QQ)
             Traceback (most recent call last):
             ...
