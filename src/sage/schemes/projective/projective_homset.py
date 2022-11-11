@@ -53,6 +53,7 @@ from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
 from sage.schemes.generic.algebraic_scheme import AlgebraicScheme_subscheme
 from copy import copy
 
+
 # *******************************************************************
 #  Projective varieties
 # *******************************************************************
@@ -543,7 +544,7 @@ class SchemeHomset_polynomial_projective_space(SchemeHomset_generic):
     """
     def identity(self):
         """
-        Return the identity morphism of this homset.
+        Return the identity morphism of this hom-set.
 
         EXAMPLES::
 
@@ -559,8 +560,7 @@ class SchemeHomset_polynomial_projective_space(SchemeHomset_generic):
         if self.is_endomorphism_set():
             from sage.schemes.generic.morphism import SchemeMorphism_polynomial_id
             return SchemeMorphism_polynomial_id(self.domain())
-        else:
-            raise TypeError("identity map is only defined for endomorphisms")
+        raise TypeError("identity map is only defined for endomorphisms")
 
 
 # *******************************************************************

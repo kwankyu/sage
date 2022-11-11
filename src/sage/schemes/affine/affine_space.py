@@ -367,7 +367,7 @@ class AffineSpace_generic(AmbientSpace, AffineScheme):
 
     def _homset(self, *args, **kwds):
         """
-        Construct the Hom-set
+        Construct the Hom-set.
 
         EXAMPLES::
 
@@ -378,19 +378,6 @@ class AffineSpace_generic(AmbientSpace, AffineScheme):
               To:   Affine Space of dimension 2 over Rational Field
         """
         return SchemeHomset_polynomial_affine_space(*args, **kwds)
-
-    def identity_morphism(self):
-        """
-        Return the identity morphism of this affine space.
-
-        EXAMPLES::
-
-            sage: A.<x,y> = AffineSpace(2, QQ)
-            sage: A.identity_morphism()
-            Scheme endomorphism of Affine Space of dimension 2 over Rational Field
-              Defn: Identity map
-        """
-        return Hom(self, self).identity()
 
     def _point_homset(self, *args, **kwds):
         """

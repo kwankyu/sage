@@ -1751,19 +1751,19 @@ class SchemeMorphism_polynomial(SchemeMorphism):
         return homset([p(*opolys) for p in self._polys])
 
 
-class SchemeMorphism_polynomial_id(SchemeMorphism_polynomial, SchemeMorphism_id):
+class SchemeMorphism_polynomial_id(SchemeMorphism_id, SchemeMorphism_polynomial):
     """
-    Return the identity morphism from `X` to itself defined by polynomials.
+    Return the identity morphism from `X` to itself.
 
     INPUT:
 
-    - ``X`` -- a scheme
+    - ``X`` -- an affine or projective scheme
 
     EXAMPLES::
 
-        sage: A.<x,y> = AffineSpace(2, QQ)
-        sage: A.identity_morphism()
-        Scheme endomorphism of Affine Space of dimension 2 over Rational Field
+        sage: X = Spec(ZZ)
+        sage: X.identity_morphism()  # indirect doctest
+        Scheme endomorphism of Spectrum of Integer Ring
           Defn: Identity map
     """
     def __init__(self, X):
@@ -1772,24 +1772,13 @@ class SchemeMorphism_polynomial_id(SchemeMorphism_polynomial, SchemeMorphism_id)
 
         TESTS::
 
-            sage: A.<x,y> = AffineSpace(2, QQ)
-            sage: I = A.identity_morphism()
-            sage: TestSuite(_).run(skip=['_test_category', '_test_pickling'])
+            sage: A = AffineSpace(2, GF(3))
+            sage: A.identity_morphism().defining_polynomials()
+            (x0, x1)
         """
-        super().__init__(X.Hom(X), X.gens())
-
-    def _repr_defn(self):
-        r"""
-        Return a string representation of this identity morphism.
-
-        EXAMPLES::
-
-            sage: P.<x,y,z> = ProjectiveSpace(2, QQ)
-            sage: P.identity_morphism()
-            Scheme endomorphism of Projective Space of dimension 2 over Rational Field
-              Defn: Identity map
-        """
-        return super(SchemeMorphism_polynomial, self)._repr_defn()
+        super().__init__(X)
+        variables = X.ambient_space().coordinate_ring().gens()
+        SchemeMorphism_polynomial.__init__(self, X.Hom(X), variables, check=False)
 
 
 ############################################################################

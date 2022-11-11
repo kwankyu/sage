@@ -755,19 +755,6 @@ class ProjectiveSpace_ring(UniqueRepresentation, AmbientSpace):
         """
         return SchemeHomset_polynomial_projective_space(*args, **kwds)
 
-    def identity_morphism(self):
-        """                                          ii
-        Return the identity morphism of this projective space.
-
-        EXAMPLES::
-
-            sage: P.<x,y,z> = ProjectiveSpace(2, QQ)
-            sage: P.identity_morphism()
-            Scheme endomorphism of Projective Space of dimension 2 over Rational Field
-              Defn: Identity map
-        """
-        return Hom(self, self).identity()
-
     def _point_homset(self, *args, **kwds):
         """
         Construct a point Hom-set.

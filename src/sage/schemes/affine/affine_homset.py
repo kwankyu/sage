@@ -102,7 +102,7 @@ class SchemeHomset_points_spec(SchemeHomset_generic):
             sage: S._repr_()
             'Set of rational points of Spectrum of Rational Field'
         """
-        return 'Set of rational points of '+str(self.codomain())
+        return 'Set of rational points of {}'.format(self.codomain())
 
 
 class SchemeHomset_polynomial_affine_space(SchemeHomset_generic):
@@ -135,8 +135,7 @@ class SchemeHomset_polynomial_affine_space(SchemeHomset_generic):
         if self.is_endomorphism_set():
             from sage.schemes.generic.morphism import SchemeMorphism_polynomial_id
             return SchemeMorphism_polynomial_id(self.domain())
-        else:
-            raise TypeError("identity map is only defined for endomorphisms")
+        raise TypeError("identity map is only defined for endomorphisms")
 
 
 # *******************************************************************

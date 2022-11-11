@@ -6363,7 +6363,6 @@ cdef class Expression(Expression_abc):
             sage: type(u._unpack_operands()[0])
             <... 'tuple'>
         """
-        from sage.symbolic.expression import unpack_operands
         return unpack_operands(self)
 
     def operands(self):
@@ -11901,7 +11900,7 @@ cdef class Expression(Expression_abc):
 
         Check that :trac:`33640` is fixed::
 
-            sage: ((x + 1)^2 - 2*x - 1).factor() 
+            sage: ((x + 1)^2 - 2*x - 1).factor()
             x^2
         """
         from sage.calculus.calculus import symbolic_expression_from_maxima_string
@@ -14147,3 +14146,15 @@ include "pynac_constant_impl.pxi"
 include "pynac_function_impl.pxi"
 include "series_impl.pxi"
 include "substitution_map_impl.pxi"
+
+
+# ------------------------------------------------------------
+# Trac #26254: Inject symbolic-function-related functions into
+# sage.symbolic.function
+# ------------------------------------------------------------
+import sage.symbolic.function
+sage.symbolic.function.call_registered_function = call_registered_function
+sage.symbolic.function.find_registered_function = find_registered_function
+sage.symbolic.function.register_or_update_function = register_or_update_function
+sage.symbolic.function.get_sfunction_from_hash = get_sfunction_from_hash
+sage.symbolic.function.get_sfunction_from_serial = get_sfunction_from_serial
