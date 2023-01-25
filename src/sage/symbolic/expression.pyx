@@ -6999,7 +6999,7 @@ cdef class Expression(Expression_abc):
         # the following is a temporary fix for GiNaC bug #9505
         if is_a_mul(ss._gobj): # necessarily n=1 here
             res = self
-            for i from 0 <= i < ss._gobj.nops():
+            for i in range(ss._gobj.nops()):
                 res = res.coefficient(new_Expression_from_GEx(self._parent, ss._gobj.op(i)))
             return res
         sig_on()
@@ -10134,7 +10134,7 @@ cdef class Expression(Expression_abc):
                 sig_off()
             return new_Expression_from_GEx(self._parent, ex)
         elif is_a_mul(self._gobj):
-            for i from 0 <= i < self._gobj.nops():
+            for i in range(self._gobj.nops()):
                 oper = self._gobj.op(i)
                 if not is_a_power(oper):
                     vec.push_back(oper)
@@ -10224,7 +10224,7 @@ cdef class Expression(Expression_abc):
                 sig_off()
             return new_Expression_from_GEx(self._parent, ex)
         elif is_a_mul(self._gobj):
-            for i from 0 <= i < self._gobj.nops():
+            for i in range(self._gobj.nops()):
                 oper = self._gobj.op(i)
                 if is_a_power(oper):
                     ex = oper.op(0)
@@ -10317,7 +10317,7 @@ cdef class Expression(Expression_abc):
             return (new_Expression_from_GEx(self._parent, ex.op(0)),
                     new_Expression_from_GEx(self._parent, ex.op(1)))
         elif is_a_mul(self._gobj):
-            for i from 0 <= i < self._gobj.nops():
+            for i in range(self._gobj.nops()):
                 oper = self._gobj.op(i)
                 if is_a_power(oper):   # oper = ex^power
                     ex = oper.op(0)
