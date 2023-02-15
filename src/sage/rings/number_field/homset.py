@@ -51,8 +51,7 @@ class NumberFieldHomset(RingHomset_generic):
             Category of homsets of number fields
         """
         if category is None:
-            from sage.categories.fields import Fields
-            from sage.categories.number_fields import NumberFields
+            from sage.categories.all import Fields, NumberFields
             if S in NumberFields():
                 category = NumberFields()
             elif S in Fields():
@@ -103,8 +102,7 @@ class NumberFieldHomset(RingHomset_generic):
         """
         if not isinstance(x, NumberFieldHomomorphism_im_gens):
             return self.element_class(self, x, check=check)
-        from sage.categories.number_fields import NumberFields
-        from sage.categories.rings import Rings
+        from sage.categories.all import NumberFields, Rings
         if (x.parent() == self or
             (x.domain() == self.domain() and x.codomain() == self.codomain() and
              # This would be the better check, however it returns False currently:

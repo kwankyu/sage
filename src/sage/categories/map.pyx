@@ -11,15 +11,16 @@ AUTHORS:
 - Sebastian Oehms   (2019-01-19): :meth:`section` added to :class:`FormalCompositeMap`.
   See :trac:`27081`.
 """
-# ****************************************************************************
+
+#*****************************************************************************
 #       Copyright (C) 2008 Robert Bradshaw <robertwb@math.washington.edu>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 2 of the License, or
 # (at your option) any later version.
-#                  https://www.gnu.org/licenses/
-# ****************************************************************************
+#                  http://www.gnu.org/licenses/
+#*****************************************************************************
 
 from . import homset
 import weakref
@@ -51,7 +52,6 @@ def unpickle_map(_class, parent, _dict, _slots):
         mor.__dict__ = _dict
     return mor
 
-
 def is_Map(x):
     """
     Auxiliary function: Is the argument a map?
@@ -65,7 +65,6 @@ def is_Map(x):
         True
     """
     return isinstance(x, Map)
-
 
 cdef class Map(Element):
     """
@@ -1215,7 +1214,7 @@ cdef class Map(Element):
             sage: psi^2
             Traceback (most recent call last):
             ...
-            TypeError: self must be an endomorphism
+            TypeError: self must be an endomorphism.
 
             sage: K.<a> = NumberField(x^4 - 5*x + 5)
             sage: C5.<z> = CyclotomicField(5)
@@ -1231,7 +1230,7 @@ cdef class Map(Element):
               Defn: z |--> 3/11*a^3 + 4/11*a^2 + 9/11*a - 14/11
         """
         if self.domain() is not self._codomain and n != 1 and n != -1:
-            raise TypeError("self must be an endomorphism")
+            raise TypeError("self must be an endomorphism.")
         if n == 0:
             from sage.categories.morphism import IdentityMorphism
             return IdentityMorphism(self._parent)
@@ -1871,7 +1870,7 @@ cdef class FormalCompositeMap(Map):
             sage: c2.is_injective()
             Traceback (most recent call last):
             ...
-            NotImplementedError: not enough information to deduce injectivity
+            NotImplementedError: Not enough information to deduce injectivity.
 
         If the first map is surjective and the second map is not injective,
         then the composition is not injective::
@@ -1912,7 +1911,7 @@ cdef class FormalCompositeMap(Map):
         if all(f.is_surjective() for f in injectives):
             return False
 
-        raise NotImplementedError("not enough information to deduce injectivity")
+        raise NotImplementedError("Not enough information to deduce injectivity.")
 
     def is_surjective(self):
         """
@@ -1954,7 +1953,7 @@ cdef class FormalCompositeMap(Map):
             ....:     V2.hom(Matrix([[1], [1]]), V1)).is_surjective()
             Traceback (most recent call last):
             ...
-            NotImplementedError: not enough information to deduce surjectivity
+            NotImplementedError: Not enough information to deduce surjectivity.
         """
         try:
             # we try the category first
@@ -1978,7 +1977,7 @@ cdef class FormalCompositeMap(Map):
         if all(f.is_injective() for f in surjectives):
             return False
 
-        raise NotImplementedError("not enough information to deduce surjectivity")
+        raise NotImplementedError("Not enough information to deduce surjectivity.")
 
     def domains(self):
         """

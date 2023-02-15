@@ -8,7 +8,7 @@
 #                  http://www.gnu.org/licenses/
 #*****************************************************************************
 
-from sage.rings.real_mpfr import RealField
+from sage.rings.all import RealField
 from .string_monoid_element import StringMonoidElement
 
 def strip_encoding(S):

@@ -374,7 +374,8 @@ def _giac(s):
 
         sage: x = libgiac('x')
         sage: (1+2*sin(3*x)).solve(x).simplify()
-        ...list[-pi/18,7*pi/18]
+        Warning, argument is not an equation, solving 1+2*sin(3*x)=0
+        list[-pi/18,7*pi/18]
 
         sage: libgiac.solve('sin(3*x)>2*sin(x)',x)
         Traceback (most recent call last):

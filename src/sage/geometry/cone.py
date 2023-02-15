@@ -205,8 +205,7 @@ from collections.abc import Hashable, Iterable, Container
 from copy import copy
 from warnings import warn
 
-from sage.arith.misc import GCD as gcd
-from sage.arith.functions import lcm
+from sage.arith.all import gcd, lcm
 from sage.combinat.posets.posets import FinitePoset
 from sage.geometry.point_collection import PointCollection
 from sage.geometry.polyhedron.constructor import Polyhedron

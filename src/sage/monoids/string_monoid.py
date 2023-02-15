@@ -521,7 +521,7 @@ class AlphabeticStringMonoid(StringMonoid_class):
             sage: S([ i for i in range(26) ])
             ABCDEFGHIJKLMNOPQRSTUVWXYZ
         """
-        from sage.rings.real_mpfr import RealField
+        from sage.rings.all import RealField
         RR = RealField()
         # The characteristic frequency probability distribution of
         # Robert Edward Lewand.

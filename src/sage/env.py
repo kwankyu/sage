@@ -11,8 +11,7 @@ environment variables, and has the same ``SAGE_ROOT`` and ``SAGE_LOCAL``
 
     sage: env = {k:v for (k,v) in os.environ.items() if not k.startswith("SAGE_")}
     sage: from subprocess import check_output
-    sage: environment = "sage.all"
-    sage: cmd = f"from {environment} import SAGE_ROOT, SAGE_LOCAL; print((SAGE_ROOT, SAGE_LOCAL))"
+    sage: cmd = "from sage.all import SAGE_ROOT, SAGE_LOCAL; print((SAGE_ROOT, SAGE_LOCAL))"
     sage: out = check_output([sys.executable, "-c", cmd], env=env).decode().strip()   # long time
     sage: out == repr((SAGE_ROOT, SAGE_LOCAL))                                        # long time
     True
@@ -184,6 +183,10 @@ SAGE_SRC = var("SAGE_SRC", join(SAGE_ROOT, "src"), SAGE_LIB)
 SAGE_DOC_SRC = var("SAGE_DOC_SRC", join(SAGE_ROOT, "src", "doc"), SAGE_DOC)
 SAGE_PKGS = var("SAGE_PKGS", join(SAGE_ROOT, "build", "pkgs"))
 SAGE_ROOT_GIT = var("SAGE_ROOT_GIT", join(SAGE_ROOT, ".git"))
+
+# Sage doc server (local server with PORT if URL is not given)
+SAGE_DOC_SERVER_URL = var("SAGE_DOC_SERVER_URL")
+SAGE_DOC_LOCAL_PORT = var("SAGE_DOC_LOCAL_PORT", "8000")
 
 # ~/.sage
 DOT_SAGE = var("DOT_SAGE", join(os.environ.get("HOME"), ".sage"))

@@ -93,8 +93,7 @@ def integer_mod_ring():
         sage: R.cardinality() <= 50000
         True
     """
-    from sage.rings.integer_ring import ZZ
-    from sage.rings.finite_rings.integer_mod_ring import IntegerModRing
+    from sage.all import ZZ, IntegerModRing
     n = ZZ.random_element(x=2, y=50000)
     return IntegerModRing(n)
 
@@ -110,8 +109,7 @@ def padic_field():
         sage: sage.rings.tests.padic_field()
         ...-adic Field with capped relative precision ...
     """
-    from sage.rings.integer_ring import ZZ
-    from sage.rings.padics.factory import Qp
+    from sage.all import ZZ, Qp
     prec = ZZ.random_element(x=10, y=100)
     p = ZZ.random_element(x=2, y=10**4 - 30).next_prime()
     return Qp(p, prec)
@@ -127,8 +125,7 @@ def quadratic_number_field():
         sage: K = sage.rings.tests.quadratic_number_field(); K
         Number Field in a with defining polynomial x^2 ... with a = ...
     """
-    from sage.rings.integer_ring import ZZ
-    from sage.rings.number_field.number_field import QuadraticField
+    from sage.all import ZZ, QuadraticField
     while True:
         d = ZZ.random_element(x=-10**5, y=10**5)
         if not d.is_square():
@@ -147,8 +144,7 @@ def absolute_number_field(maxdeg=10):
         sage: K.degree() <= 10
         True
     """
-    from sage.rings.integer_ring import ZZ
-    from sage.rings.number_field.number_field import NumberField
+    from sage.all import ZZ, NumberField
     R = ZZ['x']
     while True:
         f = R.random_element(degree=ZZ.random_element(x=1, y=maxdeg),
@@ -235,8 +231,7 @@ def rings0():
         sage: type(sage.rings.tests.rings0())
         <... 'list'>
     """
-    from sage.rings.integer_ring import IntegerRing
-    from sage.rings.rational_field import RationalField
+    from sage.all import IntegerRing, RationalField
     v = [(IntegerRing, 'ring of integers'),
          (RationalField, 'field of rational numbers'),
          (integer_mod_ring, 'integers modulo n for n at most 50000'),
@@ -275,10 +270,8 @@ def rings1():
     """
     v = rings0()
     X = random_rings(level=0)
-    from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
-    from sage.rings.power_series_ring import PowerSeriesRing
-    from sage.rings.polynomial.laurent_polynomial_ring import LaurentPolynomialRing
-    from sage.rings.integer_ring import ZZ
+    from sage.all import (PolynomialRing, PowerSeriesRing,
+                          LaurentPolynomialRing, ZZ)
     v = [(lambda: PolynomialRing(next(X), names='x'),
           'univariate polynomial ring over level 0 ring'),
          (lambda: PowerSeriesRing(next(X), names='x'),
@@ -455,8 +448,7 @@ def test_karatsuba_multiplication(base_ring, maxdeg1, maxdeg2,
         sage: sage.rings.tests.test_karatsuba_multiplication(ZZ, 10000, 10000, ref_mul=lambda f,g: f*g, base_ring_random_elt_args=[100000])
 
     """
-    from sage.misc.prandom import randint
-    from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
+    from sage.all import randint, PolynomialRing
     threshold = randint(0, min(maxdeg1, maxdeg2))
     R = PolynomialRing(base_ring, 'x')
     if verbose:

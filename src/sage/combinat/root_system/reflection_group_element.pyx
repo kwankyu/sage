@@ -71,21 +71,8 @@ cdef class ComplexReflectionGroupElement(PermutationGroupElement):
 
             sage: WB_hash.intersection(WC_hash)                     # optional - gap3
             set()
-
-        Check that :trac:`34912` is fixed::
-
-            sage: G4 = ReflectionGroup(4)                           # optional - gap3
-            sage: g0, g1 = G4.gens()                                # optional - gap3
-            sage: elt = g0^2 * g1 * g0^2 * g1                       # optional - gap3
-            sage: elt                                               # optional - gap3
-            (1,12)(2,24)(3,19)(4,22)(5,17)(6,20)(7,23)(8,9)(10,21)(11,13)(14,18)(15,16)
-            sage: y = (elt * G4.gen(1)) * G4.gen(1) * G4.gen(1)     # optional - gap3
-            sage: elt == y                                          # optional - gap3
-            True
-            sage: hash(elt) == hash(y)                              # optional - gap3
-            True
         """
-        return hash(self._parent) | super().__hash__()
+        return hash(self._parent) | hash(tuple(self._reduced_word))
 
     def reduced_word(self):
         r"""
@@ -149,7 +136,7 @@ cdef class ComplexReflectionGroupElement(PermutationGroupElement):
         EXAMPLES::
 
             sage: W = ReflectionGroup(4)                            # optional - gap3
-            sage: for w in W.iteration_tracking_words():            # optional - gap3
+            sage: for w in W:                                       # optional - gap3
             ....:     print("{} {}".format(w.reduced_word(), w.length()))
             [] 0
             [1] 1
@@ -175,11 +162,6 @@ cdef class ComplexReflectionGroupElement(PermutationGroupElement):
             [1, 2, 2, 1, 1] 5
             [1, 1, 2, 1, 1, 2] 6
             [1, 1, 2, 2, 1, 1] 6
-
-            sage: data = {w: (len(w.reduced_word()), w.length())    # optional - gap3
-            ....:         for w in W.iteration_tracking_words()}
-            sage: for w in W:                                       # optional - gap3
-            ....:     assert data[w] == (w.length(), w.length()), w
         """
         return ZZ(len(self.reduced_word()))
 
@@ -196,13 +178,10 @@ cdef class ComplexReflectionGroupElement(PermutationGroupElement):
 
         EXAMPLES::
 
-            sage: W = ReflectionGroup((3,1,2))            # optional - gap3
-            sage: data = {w: [w.to_matrix(), w.to_matrix(on_space="dual")] for w in W}  # optional - gap3
-            sage: for w in W.iteration_tracking_words():  # optional - gap3
-            ....:     w.reduced_word()                    # optional - gap3
-            ....:     mats = [w.to_matrix(), w.to_matrix(on_space="dual")]  # optional - gap3
-            ....:     mats
-            ....:     assert data[w] == mats
+            sage: W = ReflectionGroup((3,1,2))          # optional - gap3
+            sage: for w in W:                           # optional - gap3
+            ....:     w.reduced_word()                  # optional - gap3
+            ....:     [w.to_matrix(), w.to_matrix(on_space="dual")] # optional - gap3
             []
             [
             [1 0]  [1 0]
@@ -546,8 +525,7 @@ cdef class ComplexReflectionGroupElement(PermutationGroupElement):
         EXAMPLES::
 
             sage: W = ReflectionGroup(4)                            # optional - gap3
-            sage: for w in W.iteration_tracking_words():            # optional - gap3
-            ....:      w.reflection_eigenvalues()
+            sage: for w in W: w.reflection_eigenvalues()            # optional - gap3
             [0, 0]
             [1/3, 0]
             [1/3, 0]
@@ -572,10 +550,6 @@ cdef class ComplexReflectionGroupElement(PermutationGroupElement):
             [2/3, 0]
             [1/2, 1/2]
             [1/4, 3/4]
-
-            sage: data = {w: w.reflection_eigenvalues() for w in W}  # optional - gap3
-            sage: all(w.reflection_eigenvalues() == data[w] for w in W.iteration_tracking_words())  # optional - gap3
-            True
         """
         return self._parent.reflection_eigenvalues(self, is_class_representative=is_class_representative)
 
@@ -587,8 +561,7 @@ cdef class ComplexReflectionGroupElement(PermutationGroupElement):
         EXAMPLES::
 
             sage: W = ReflectionGroup(4)                            # optional - gap3
-            sage: for w in W.iteration_tracking_words():            # optional - gap3
-            ....:     print(w.galois_conjugates())
+            sage: for w in W: print(w.galois_conjugates())          # optional - gap3
             [[1 0]
              [0 1]]
             [[   1    0]
@@ -677,10 +650,6 @@ cdef class ComplexReflectionGroupElement(PermutationGroupElement):
              [ 2/3*E(3) - 2/3*E(3)^2  1/3*E(3) - 1/3*E(3)^2],
              [ 1/3*E(3) - 1/3*E(3)^2 -1/3*E(3) + 1/3*E(3)^2]
              [-2/3*E(3) + 2/3*E(3)^2 -1/3*E(3) + 1/3*E(3)^2]]
-
-            sage: data = {w: w.galois_conjugates() for w in W}      # optional - gap3
-            sage: all(w.galois_conjugates() == data[w] for w in W.iteration_tracking_words())  # optional - gap3
-            True
         """
         rk = self._parent.rank()
         M = self.to_matrix().list()
