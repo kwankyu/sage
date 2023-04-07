@@ -204,7 +204,7 @@ cdef class Matrix(sage.structure.element.Matrix):
         cdef Py_ssize_t i, j
 
         x = self.fetch('list')
-        if not x is None:
+        if x is not None:
             return x
         x = []
         for i from 0 <= i < self._nrows:
@@ -247,6 +247,22 @@ cdef class Matrix(sage.structure.element.Matrix):
         return self._dict()
 
     monomial_coefficients = dict
+
+    def items(self):
+        r"""
+        Return an iterable of ``((i,j), value)`` elements.
+
+        This may (but is not guaranteed to) suppress zero values.
+
+        EXAMPLES::
+
+            sage: a = matrix(QQ['x,y'], 2, range(6), sparse=True); a
+            [0 1 2]
+            [3 4 5]
+            sage: list(a.items())
+            [((0, 1), 1), ((0, 2), 2), ((1, 0), 3), ((1, 1), 4), ((1, 2), 5)]
+        """
+        return self._dict().items()
 
     def _dict(self):
         """
@@ -293,7 +309,7 @@ cdef class Matrix(sage.structure.element.Matrix):
             [   3    4   10]
         """
         d = self.fetch('dict')
-        if not d is None:
+        if d is not None:
             return d
 
         cdef Py_ssize_t i, j
@@ -521,11 +537,22 @@ cdef class Matrix(sage.structure.element.Matrix):
         """
         raise NotImplementedError("this must be defined in the derived type.")
 
-    cdef bint get_is_zero_unsafe(self, Py_ssize_t i, Py_ssize_t j):
+    cdef bint get_is_zero_unsafe(self, Py_ssize_t i, Py_ssize_t j) except -1:
         """
         Return 1 if the entry ``(i, j)`` is zero, otherwise 0.
 
         Might/should be optimized for derived type.
+
+        TESTS::
+
+            sage: class MyAlgebraicNumber(sage.rings.qqbar.AlgebraicNumber):
+            ....:     def __bool__(self):
+            ....:         raise ValueError
+            sage: mat = matrix(1,1,MyAlgebraicNumber(1))
+            sage: bool(mat)
+            Traceback (most recent call last):
+            ...
+            ValueError
         """
         if self.get_unsafe(i, j):
             return 0
@@ -1434,7 +1461,7 @@ cdef class Matrix(sage.structure.element.Matrix):
             row_list = normalize_index(row_index, nrows)
             row_list_len = len(row_list)
             if row_list_len==0:
-               return
+                return
 
         if single_row and single_col and not no_col_index:
             self.set_unsafe(row, col, self._coerce_element(value))
@@ -1656,13 +1683,12 @@ cdef class Matrix(sage.structure.element.Matrix):
 
         EXAMPLES::
 
-            sage: a=matrix([[1,2],[3,4]])
+            sage: a = matrix([[1,2],[3,4]])
             sage: a._test_change_ring()
-
         """
         tester = self._tester(**options)
         # Test to make sure the returned matrix is a copy
-        tester.assertTrue(self.change_ring(self.base_ring()) is not self)
+        tester.assertIsNot(self.change_ring(self.base_ring()), self)
 
     def _matrix_(self, R=None):
         """
@@ -2292,7 +2318,7 @@ cdef class Matrix(sage.structure.element.Matrix):
     # Functions
     ###################################################
     def act_on_polynomial(self, f):
-        """
+        r"""
         Return the polynomial f(self\*x).
 
         INPUT:
@@ -2358,7 +2384,7 @@ cdef class Matrix(sage.structure.element.Matrix):
     # Arithmetic
     ###################################################
     def commutator(self, other):
-        """
+        r"""
         Return the commutator self\*other - other\*self.
 
         EXAMPLES::
@@ -4586,7 +4612,8 @@ cdef class Matrix(sage.structure.element.Matrix):
             (0, 1)
         """
         x = self.fetch('pivots')
-        if not x is None: return tuple(x)
+        if x is not None:
+            return tuple(x)
         self.echelon_form()
         x = self.fetch('pivots')
         if x is None:
@@ -4624,10 +4651,10 @@ cdef class Matrix(sage.structure.element.Matrix):
             ....:                 [8*x^2 + 12*x + 15,  8*x^2 + 9*x + 16] ])
             sage: m.rank()
             2
-
         """
         x = self.fetch('rank')
-        if not x is None: return x
+        if x is not None:
+            return x
         if self._nrows == 0 or self._ncols == 0:
             return 0
         r = len(self.pivots())
@@ -4655,12 +4682,13 @@ cdef class Matrix(sage.structure.element.Matrix):
             (2,)
         """
         x = self.fetch('nonpivots')
-        if not x is None: return tuple(x)
+        if x is not None:
+            return tuple(x)
 
         X = set(self.pivots())
         np = []
         for j in xrange(self.ncols()):
-            if not (j in X):
+            if j not in X:
                 np.append(j)
         np = tuple(np)
         self.cache('nonpivots',np)
@@ -4720,16 +4748,16 @@ cdef class Matrix(sage.structure.element.Matrix):
             [(0, 0), (1, 1)]
         """
         x = self.fetch('nonzero_positions')
-        if not x is None:
+        if x is not None:
             if copy:
                 return list(x)
             return x
         cdef Py_ssize_t i, j
         nzp = []
         for i from 0 <= i < self._nrows:
-           for j from 0 <= j < self._ncols:
-                if not self.get_is_zero_unsafe(i,j):
-                    nzp.append((i,j))
+            for j from 0 <= j < self._ncols:
+                if not self.get_is_zero_unsafe(i, j):
+                    nzp.append((i, j))
         self.cache('nonzero_positions', nzp)
         if copy:
             return list(nzp)
@@ -4751,7 +4779,7 @@ cdef class Matrix(sage.structure.element.Matrix):
             [(0, 0), (1, 0), (1, 1), (0, 2)]
         """
         x = self.fetch('nonzero_positions_by_column')
-        if not x is None:
+        if x is not None:
             if copy:
                 return list(x)
             return x
@@ -4971,9 +4999,9 @@ cdef class Matrix(sage.structure.element.Matrix):
             fac = o1.factor()
             S = sum((pi - 1) * pi**(ei - 1) for pi, ei in fac)
             if fac[0] == (2, 1):
-               impossible_order = not(S <= n + 1)
+                impossible_order = not(S <= n + 1)
             else:
-               impossible_order = not(S <= n)
+                impossible_order = not(S <= n)
             if impossible_order:
                 return Infinity
 
@@ -4994,7 +5022,7 @@ cdef class Matrix(sage.structure.element.Matrix):
     # Arithmetic
     ###################################################
     cdef _vector_times_matrix_(self, Vector v):
-        """
+        r"""
         Return the vector times matrix product.
 
         INPUT:
@@ -6040,7 +6068,7 @@ cdef class Matrix(sage.structure.element.Matrix):
         """
         raise NotImplementedError  # this is defined in the derived classes
 
-    def __nonzero__(self):
+    def __bool__(self):
         """
         EXAMPLES::
 
@@ -6113,7 +6141,7 @@ def set_max_rows(n):
         sage: from sage.matrix.matrix0 import set_max_rows
         sage: set_max_rows(20)
         doctest:...: DeprecationWarning: 'set_max_rows' is replaced by 'matrix.options.max_rows'
-        See https://trac.sagemath.org/30552 for details.
+        See https://github.com/sagemath/sage/issues/30552 for details.
 
     """
     from sage.misc.superseded import deprecation
@@ -6130,7 +6158,7 @@ def set_max_cols(n):
         sage: from sage.matrix.matrix0 import set_max_cols
         sage: set_max_cols(50)
         doctest:...: DeprecationWarning: 'set_max_cols' is replaced by 'matrix.options.max_cols'
-        See https://trac.sagemath.org/30552 for details.
+        See https://github.com/sagemath/sage/issues/30552 for details.
 
     """
     from sage.misc.superseded import deprecation

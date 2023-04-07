@@ -10,7 +10,7 @@ Examples of a finite dimensional Lie algebra with basis
 
 from sage.misc.cachefunc import cached_method
 from sage.sets.family import Family
-from sage.categories.all import LieAlgebras
+from sage.categories.lie_algebras import LieAlgebras
 from sage.modules.free_module import FreeModule
 from sage.structure.parent import Parent
 from sage.structure.unique_representation import UniqueRepresentation
@@ -76,8 +76,7 @@ class AbelianLieAlgebra(Parent, UniqueRepresentation):
         else:
             M = M.change_ring(R)
             n = M.dimension()
-        return super(AbelianLieAlgebra, cls).__classcall__(cls, R, n=n, M=M,
-                                                           ambient=ambient)
+        return super().__classcall__(cls, R, n=n, M=M, ambient=ambient)
 
     def __init__(self, R, n=None, M=None, ambient=None):
         """
@@ -219,7 +218,7 @@ class AbelianLieAlgebra(Parent, UniqueRepresentation):
             False
         """
         if not isinstance(A, AbelianLieAlgebra):
-            return super(AbelianLieAlgebra, self).is_ideal(A)
+            return super().is_ideal(A)
         if A == self or A == self._ambient:
             return True
         if self._ambient != A._ambient:
@@ -405,4 +404,3 @@ class AbelianLieAlgebra(Parent, UniqueRepresentation):
             return self.value.monomial_coefficients(copy)
 
 Example = AbelianLieAlgebra
-

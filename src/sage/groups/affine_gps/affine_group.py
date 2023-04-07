@@ -21,8 +21,8 @@ from sage.groups.group import Group
 from sage.categories.groups import Groups
 from sage.groups.matrix_gps.linear import GL
 from sage.categories.rings import Rings
-from sage.matrix.all import MatrixSpace
-from sage.modules.all import FreeModule
+from sage.matrix.matrix_space import MatrixSpace
+from sage.modules.free_module import FreeModule
 from sage.structure.unique_representation import UniqueRepresentation
 from sage.misc.cachefunc import cached_method
 
@@ -178,7 +178,7 @@ class AffineGroup(UniqueRepresentation, Group):
                 from sage.rings.finite_rings.finite_field_constructor import FiniteField
                 var = kwds.get('var', 'a')
                 ring = FiniteField(ring, var)
-        return super(AffineGroup, cls).__classcall__(cls, degree, ring)
+        return super().__classcall__(cls, degree, ring)
 
     def __init__(self, degree, ring):
         """

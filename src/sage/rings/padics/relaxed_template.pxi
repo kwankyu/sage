@@ -702,7 +702,7 @@ cdef class RelaxedElement(pAdicGenericElement):
           use the default halting precision of the parent
 
         - ``secure`` -- a boolean (default: ``False`` if ``prec`` is given,
-          ``True`` otherwise); when the elements cannot be distingiushed
+          ``True`` otherwise); when the elements cannot be distinguished
           at the given precision, raise an error if ``secure`` is ``True``,
           return ``True`` otherwise.
 
@@ -809,7 +809,7 @@ cdef class RelaxedElement(pAdicGenericElement):
             return a == b
         return self.is_equal_to(other, secure=self._parent.is_secure())
 
-    def __nonzero__(self):
+    def __bool__(self):
         r"""
         Return ``True`` if this element is indistinguishable from zero.
 
@@ -4030,7 +4030,7 @@ cdef class RelaxedElement_zeroone(RelaxedElementWithDigits):
         return ERROR_NOTDEFINED
 
 
-cdef class ExpansionIter(object):
+cdef class ExpansionIter():
     """
     An iterator over a `p`-adic expansion.
 

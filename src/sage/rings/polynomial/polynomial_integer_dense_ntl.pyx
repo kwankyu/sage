@@ -51,8 +51,6 @@ from sage.rings.integer_ring import IntegerRing
 from sage.rings.integer_ring cimport IntegerRing_class
 ZZ_sage = IntegerRing()
 
-from sage.rings.polynomial.polynomial_element import is_Polynomial
-
 from sage.libs.ntl.ntl_ZZX cimport ntl_ZZX
 
 from sage.rings.integer_ring import ZZ
@@ -67,7 +65,7 @@ from sage.structure.factorization import Factorization
 from sage.structure.element import coerce_binop
 
 from sage.rings.fraction_field_element import FractionFieldElement
-from sage.arith.all import lcm
+from sage.arith.functions import lcm
 import sage.rings.polynomial.polynomial_ring
 
 from sage.libs.ntl.ZZX cimport *
@@ -757,7 +755,7 @@ cdef class Polynomial_integer_dense_ntl(Polynomial):
             sage: g // f
             x - 6
         """
-        if is_Polynomial(right) and right.is_constant() and right[0] in ZZ:
+        if isinstance(right, Polynomial) and right.is_constant() and right[0] in ZZ:
             d = ZZ(right[0])
             return self.parent()([c // d for c in self.list()], construct=True)
         elif (right in self.parent().base_ring()):
@@ -1136,7 +1134,7 @@ cdef class Polynomial_integer_dense_ntl(Polynomial):
             sage: r.parent() is ZZ
             True
         """
-        cdef Polynomial_integer_dense_ntl _other = <Polynomial_integer_dense_ntl>(self.parent()._coerce_(other))
+        cdef Polynomial_integer_dense_ntl _other = <Polynomial_integer_dense_ntl>(self.parent().coerce(other))
         cdef ZZ_c* temp = ZZX_resultant(&self.__poly, &_other.__poly, proof)
         cdef Integer x = Integer.__new__(Integer)
         ZZ_to_mpz(x.value, temp)

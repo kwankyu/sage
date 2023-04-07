@@ -5,16 +5,16 @@ Common words
 AUTHORS:
 
 - Franco Saliola (2008-12-17): merged into sage
-- Sebastien Labbe (2008-12-17): merged into sage
+- Sébastien Labbé (2008-12-17): merged into sage
 - Arnaud Bergeron (2008-12-17): merged into sage
 - Amy Glen (2008-12-17): merged into sage
 - Sébastien Labbé (2009-12-19): Added S-adic words (:trac:`7543`)
 
 USE:
 
-To see a list of all word constructors, type ``words.`` and then press the tab
-key. The documentation for each constructor includes information about each
-word, which provides a useful reference.
+To see a list of all word constructors, type ``words.`` and then press
+the :kbd:`Tab` key. The documentation for each constructor includes
+information about each word, which provides a useful reference.
 
 REFERENCES:
 
@@ -22,11 +22,11 @@ REFERENCES:
    numbers with a regular expansion, J. Number Theory 103 (2003)
    27--37.
 
-.. [BmBGL07] \A. Blondin-Masse, S. Brlek, A. Glen, and S. Labbe. On the
+.. [BmBGL07] \A. Blondin-Massé, S. Brlek, A. Glen, and S. Labbé. On the
    critical exponent of generalized Thue-Morse words. *Discrete Math.
    Theor. Comput.  Sci.* 9 (1):293--304, 2007.
 
-.. [BmBGL09] \A. Blondin-Masse, S. Brlek, A. Garon, and S. Labbe. Christoffel
+.. [BmBGL09] \A. Blondin-Massé, S. Brlek, A. Garon, and S. Labbé. Christoffel
    and Fibonacci Tiles, DGCI 2009, Montreal, to appear in LNCS.
 
 .. [Loth02] \M. Lothaire, Algebraic Combinatorics On Words, vol. 90 of
@@ -54,6 +54,7 @@ EXAMPLES::
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 
+from collections.abc import Iterable
 from itertools import cycle, count
 from random import randint
 from sage.misc.cachefunc import cached_method
@@ -65,7 +66,7 @@ from sage.combinat.words.word import FiniteWord_list
 from sage.combinat.words.finite_word import FiniteWord_class, Factorization
 from sage.combinat.words.words import FiniteWords, InfiniteWords
 from sage.combinat.words.morphism import WordMorphism
-from sage.arith.all import gcd
+from sage.arith.misc import gcd
 from sage.misc.decorators import rename_keyword
 
 
@@ -102,6 +103,7 @@ def _build_tab(sym, tab, W):
         w = w.delta_inv(W, tab[i])
         res.append((w[-1] % c) + 1)
     return res
+
 
 class LowerChristoffelWord(FiniteWord_list):
     r"""
@@ -221,13 +223,13 @@ class LowerChristoffelWord(FiniteWord_list):
                 w = u + v
         else:
             raise ValueError('Unknown algorithm (=%s)' % algorithm)
-        super(LowerChristoffelWord, self).__init__(FiniteWords(alphabet), w)
+        super().__init__(FiniteWords(alphabet), w)
         self.__p = p
         self.__q = q
 
     def markoff_number(self):
         r"""
-        Returns the Markoff number associated to the Christoffel word self.
+        Return the Markoff number associated to the Christoffel word ``self``.
 
         The *Markoff number* of a Christoffel word `w` is `trace(M(w))/3`,
         where `M(w)` is the `2\times 2` matrix obtained by applying the
@@ -309,7 +311,8 @@ class LowerChristoffelWord(FiniteWord_list):
         """
         return self.__class__, (self.__p, self.__q, self.parent().alphabet())
 
-class WordGenerator(object):
+
+class WordGenerator():
     r"""
     Constructor of several famous words.
 
@@ -350,7 +353,7 @@ class WordGenerator(object):
     .. NOTE::
 
         To see a list of all word constructors, type ``words.`` and then
-        hit the TAB key. The documentation for each constructor
+        hit the :kbd:`Tab` key. The documentation for each constructor
         includes information about each word, which provides a useful
         reference.
 
@@ -889,7 +892,7 @@ class WordGenerator(object):
             else:
                 parent = FiniteWords(alphabet)
             cf = iter(cf)
-        elif hasattr(slope, '__iter__'):
+        elif isinstance(slope, Iterable):
             cf = iter(slope)
             parent = InfiniteWords(alphabet)
         else:
@@ -1274,7 +1277,7 @@ class WordGenerator(object):
         if not isinstance(directive_word, Word_class):
             raise TypeError("directive_word is not a word, so it cannot be used to build an episturmian word")
         epistandard = directive_word.parent()(\
-                self._StandardEpisturmianWord_LetterIterator(directive_word), \
+                self._StandardEpisturmianWord_LetterIterator(directive_word),
                 datatype='iter')
         return epistandard
 
@@ -1493,7 +1496,7 @@ class WordGenerator(object):
 
         [BmBGL09]_
         """
-        from sage.combinat.words.all import WordMorphism
+        from sage.combinat.words.morphism import WordMorphism
         W = FiniteWords([0,1,2,3])
         bar = WordMorphism({0:0,1:3,3:1,2:2},codomain=W)
         if n==0:
@@ -1557,7 +1560,7 @@ class WordGenerator(object):
         DEFINITION (from [Fogg]_):
 
         Let `w` be a infinite word over an alphabet `A = A_0`. A
-        standard representation of $w$ is obtained from a sequence of
+        standard representation of `w` is obtained from a sequence of
         substitutions `\sigma_k : A_{k+1} \to A_k` and a sequence of letters
         `a_k \in A_k` such that:
 
@@ -1892,7 +1895,7 @@ class WordGenerator(object):
             seq = sequence
         elif hasattr(morphisms, '__getitem__'):
             seq = (morphisms[i] for i in sequence)
-        elif hasattr(morphisms, '__call__'):
+        elif callable(morphisms):
             seq = (morphisms(i) for i in sequence)
         else:
             raise TypeError("morphisms (=%s) must be None, callable or provide a __getitem__ method" % morphisms)
@@ -2040,5 +2043,6 @@ class WordGenerator(object):
         outer = WordMorphism('a->00,b->01,c->10,d->11')
         inner = WordMorphism('a->aa,b->cb,c->ba,d->db')
         return outer(inner.fixed_point('d'))
+
 
 words = WordGenerator()

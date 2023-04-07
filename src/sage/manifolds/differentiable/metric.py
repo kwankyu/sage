@@ -41,15 +41,17 @@ REFERENCES:
 #  the License, or (at your option) any later version.
 #                  https://www.gnu.org/licenses/
 # *****************************************************************************
-
 from __future__ import annotations
-from typing import TYPE_CHECKING
-from sage.rings.integer import Integer
+
+from typing import TYPE_CHECKING, overload
+
 from sage.manifolds.differentiable.tensorfield import TensorField
 from sage.manifolds.differentiable.tensorfield_paral import TensorFieldParal
+from sage.rings.integer import Integer
 
 if TYPE_CHECKING:
     from sage.manifolds.differentiable.diff_form import DiffForm
+
 
 class PseudoRiemannianMetric(TensorField):
     r"""
@@ -445,7 +447,7 @@ class PseudoRiemannianMetric(TensorField):
         """
         return type(self)(self._vmodule, 'unnamed metric',
                           signature=self._signature,
-                          latex_name=r'\mbox{unnamed metric}')
+                          latex_name=r'\text{unnamed metric}')
 
     def _init_derived(self):
         r"""
@@ -645,7 +647,7 @@ class PseudoRiemannianMetric(TensorField):
             raise TypeError("the argument must be a tensor field")
         if symbiform._tensor_type != (0,2):
             raise TypeError("the argument must be of tensor type (0,2)")
-        if symbiform._sym != [(0,1)]:
+        if symbiform._sym != ((0,1),):
             raise TypeError("the argument must be symmetric")
         if not symbiform._domain.is_subset(self._domain):
             raise TypeError("the symmetric bilinear form is not defined " +
@@ -659,7 +661,6 @@ class PseudoRiemannianMetric(TensorField):
             for dom, symbiform_rst in symbiform._restrictions.items():
                 rst = self.restrict(dom)
                 rst.set(symbiform_rst)
-
 
     def inverse(self, expansion_symbol=None, order=1):
         r"""
@@ -877,7 +878,6 @@ class PseudoRiemannianMetric(TensorField):
             frame = chart._frame
         return self.connection().coef(frame)
 
-
     def christoffel_symbols_display(self, chart=None, symbol=None,
                 latex_symbol=None, index_labels=None, index_latex_labels=None,
                 coordinate_labels=True, only_nonzero=True,
@@ -1067,7 +1067,6 @@ class PseudoRiemannianMetric(TensorField):
         """
         return self.connection().riemann(name, latex_name)
 
-
     def ricci(self, name=None, latex_name=None):
         r"""
         Return the Ricci tensor associated with the metric.
@@ -1218,15 +1217,13 @@ class PseudoRiemannianMetric(TensorField):
              3-dimensional differentiable manifold H^3
             sage: C == 0
             True
-
         """
         if self._weyl is None:
             n = self._ambient_domain.dimension()
             if n < 3:
                 raise ValueError("the Weyl tensor is not defined for a " +
                                  "manifold of dimension n <= 2")
-            delta = self._domain.tangent_identity_field(dest_map=
-                                                       self._vmodule._dest_map)
+            delta = self._domain.tangent_identity_field(dest_map=self._vmodule._dest_map)
             riem = self.riemann()
             ric = self.ricci()
             rscal = self.ricci_scalar()
@@ -1624,7 +1621,11 @@ class PseudoRiemannianMetric(TensorField):
             self._sqrt_abs_dets[frame] = resu
         return self._sqrt_abs_dets[frame]
 
-    def volume_form(self, contra: int = 0) -> TensorField:
+    @overload
+    def volume_form(self) -> DiffForm: ...
+    @overload
+    def volume_form(self, contra: int) -> TensorField: ...
+    def volume_form(self, contra=0):
         r"""
         Volume form (Levi-Civita tensor) `\epsilon` associated with the metric.
 
@@ -2267,7 +2268,6 @@ class PseudoRiemannianMetricParal(PseudoRiemannianMetric, TensorFieldParal):
             self._restrictions[subdomain] = resu
         return self._restrictions[subdomain]
 
-
     def set(self, symbiform):
         r"""
         Define the metric from a field of symmetric bilinear forms.
@@ -2295,7 +2295,7 @@ class PseudoRiemannianMetricParal(PseudoRiemannianMetric, TensorFieldParal):
                             "values on a parallelizable domain")
         if symbiform._tensor_type != (0,2):
             raise TypeError("the argument must be of tensor type (0,2)")
-        if symbiform._sym != [(0,1)]:
+        if symbiform._sym != ((0,1),):
             raise TypeError("the argument must be symmetric")
         if symbiform._vmodule is not self._vmodule:
             raise TypeError("the symmetric bilinear form and the metric are " +
@@ -2702,7 +2702,7 @@ class DegenerateMetric(TensorField):
         """
         return type(self)(self._vmodule, 'unnamed metric',
                           signature=self._signature,
-                          latex_name=r'\mbox{unnamed metric}')
+                          latex_name=r'\text{unnamed metric}')
 
     def signature(self):
         r"""
@@ -2775,7 +2775,7 @@ class DegenerateMetric(TensorField):
             raise TypeError("the argument must be a tensor field")
         if symbiform._tensor_type != (0,2):
             raise TypeError("the argument must be of tensor type (0,2)")
-        if symbiform._sym != [(0,1)]:
+        if symbiform._sym != ((0,1),):
             raise TypeError("the argument must be symmetric")
         if not symbiform._domain.is_subset(self._domain):
             raise TypeError("the symmetric bilinear form is not defined " +
@@ -3013,7 +3013,7 @@ class DegenerateMetricParal(DegenerateMetric, TensorFieldParal):
                             "values on a parallelizable domain")
         if symbiform._tensor_type != (0,2):
             raise TypeError("the argument must be of tensor type (0,2)")
-        if symbiform._sym != [(0,1)]:
+        if symbiform._sym != ((0,1),):
             raise TypeError("the argument must be symmetric")
         if symbiform._vmodule is not self._vmodule:
             raise TypeError("the symmetric bilinear form and the metric are " +

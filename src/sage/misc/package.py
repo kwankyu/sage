@@ -26,8 +26,7 @@ command inside Sage::
      'alabaster',
      'arb',
      ...
-     'zlib',
-     'zn_poly']
+     'zlib']
 
 Functions
 ---------
@@ -51,7 +50,7 @@ import sys
 from pathlib import Path
 from urllib.request import urlopen
 from urllib.error import URLError
-from ssl import SSLContext
+from ssl import create_default_context as default_context
 
 DEFAULT_PYPI = 'https://pypi.org/pypi'
 
@@ -110,7 +109,7 @@ def pip_remote_version(pkg, pypi_url=DEFAULT_PYPI, ignore_URLError=False):
     url = '{pypi_url}/{pkg}/json'.format(pypi_url=pypi_url, pkg=pkg)
 
     try:
-        f = urlopen(url, context=SSLContext())
+        f = urlopen(url, context=default_context())
         text = f.read()
         f.close()
     except URLError:
@@ -142,19 +141,18 @@ def pip_installed_packages(normalization=None):
     EXAMPLES::
 
         sage: from sage.misc.package import pip_installed_packages
-        sage: d = pip_installed_packages()  # optional - sage_spkg
-        sage: 'scipy' in d  # optional - sage_spkg
+        sage: d = pip_installed_packages()                      # optional - sage_spkg
+        sage: 'scipy' in d or 'SciPy' in d                      # optional - sage_spkg
         True
-        sage: d['scipy']  # optional - sage_spkg
+        sage: d['beautifulsoup4']                               # optional - sage_spkg beautifulsoup4
         '...'
-        sage: d['beautifulsoup4']   # optional - sage_spkg beautifulsoup4
-        '...'
-        sage: d['prompt-toolkit']   # optional - sage_spkg
+        sage: d['prompt-toolkit']                               # optional - sage_spkg
         '...'
         sage: d = pip_installed_packages(normalization='spkg')  # optional - sage_spkg
-        sage: d['prompt_toolkit']   # optional - sage_spkg
+        sage: d['prompt_toolkit']                               # optional - sage_spkg
         '...'
-
+        sage: d['scipy']                                        # optional - sage_spkg
+        '...'
     """
     with open(os.devnull, 'w') as devnull:
         proc = subprocess.Popen(
@@ -205,7 +203,7 @@ class PackageInfo(NamedTuple):
             sage: package["name"]
             doctest:warning...
             dict-like access is deprecated, use pkg.name instead of pkg['name'], for example
-            See https://trac.sagemath.org/31013 for details.
+            See https://github.com/sagemath/sage/issues/31013 for details.
             'test_package'
             sage: package[0]
             'test_package'
@@ -266,7 +264,7 @@ def list_packages(*pkg_types: str, pkg_sources: List[str] = ['normal', 'pip', 's
          'arb',
          'babel',
          ...
-         'zn_poly']
+         'zlib']
         sage: sage_conf_info = L['sage_conf']  # optional - sage_spkg
         sage: sage_conf_info.type              # optional - sage_spkg
         'standard'
@@ -276,10 +274,10 @@ def list_packages(*pkg_types: str, pkg_sources: List[str] = ['normal', 'pip', 's
         'script'
 
         sage: L = list_packages(pkg_sources=['pip'], local=True)  # optional - sage_spkg internet
-        sage: bs4_info = L['beautifulsoup4'] # optional - sage_spkg internet
-        sage: bs4_info.type                    # optional - sage_spkg internet
+        sage: bp_info = L['biopython']         # optional - sage_spkg internet
+        sage: bp_info.type                     # optional - sage_spkg internet
         'optional'
-        sage: bs4_info.source                  # optional - sage_spkg internet
+        sage: bp_info.source                   # optional - sage_spkg internet
         'pip'
 
     Check the option ``exclude_pip``::
@@ -400,7 +398,7 @@ def installed_packages(exclude_pip=True):
     installed = {}
     if not exclude_pip:
         installed.update(pip_installed_packages(normalization='spkg'))
-    # Sage packages should override pip packages (Trac #23997)
+    # Sage packages should override pip packages (Issue #23997)
 
     for inst_dir in _spkg_inst_dirs():
         try:
@@ -499,8 +497,8 @@ def package_versions(package_type, local=False):
         sage: std = package_versions('standard', local=True)  # optional - sage_spkg
         sage: 'gap' in std  # optional - sage_spkg
         True
-        sage: std['zn_poly']  # optional - sage_spkg, random
-        ('0.9.p12', '0.9.p12')
+        sage: std['zlib']  # optional - sage_spkg, random
+        ('1.2.11.p0', '1.2.11.p0')
     """
     return {pkg.name: (pkg.installed_version, pkg.remote_version) for pkg in list_packages(package_type, local=local).values()}
 
@@ -561,10 +559,9 @@ def optional_packages():
         sage: from sage.misc.package import optional_packages
         sage: installed, not_installed = optional_packages()  # optional - sage_spkg
         doctest:...: DeprecationWarning: ...
-        sage: 'beautifulsoup4' in installed+not_installed  # optional - sage_spkg
+        sage: 'biopython' in installed + not_installed        # optional - sage_spkg
         True
-
-        sage: 'beautifulsoup4' in installed   # optional - sage_spkg beautifulsoup4
+        sage: 'biopython' in installed                        # optional - sage_spkg biopython
         True
     """
     from sage.misc.superseded import deprecation

@@ -20,7 +20,10 @@ AUTHORS:
 """
 
 from sage.structure.sage_object     import SageObject
-from sage.rings.all                 import ZZ, QQbar, PolynomialRing, polygen
+from sage.rings.integer_ring        import ZZ
+from sage.rings.polynomial.polynomial_ring import polygen
+from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
+from sage.rings.qqbar               import QQbar
 from sage.misc.abstract_method      import abstract_method
 from sage.misc.cachefunc            import cached_method
 from sage.misc.verbose              import verbose
@@ -882,9 +885,8 @@ class PrimitiveSupercuspidal(PrimitiveLocalComponent):
                     G = G.base_extend(F)
                 c1q2, c2q2 = flatten([[x]*e for x,e in theta_poly.roots(G.base_ring())])
 
-
-                pairA = [ [c1q, c1q2], [c2q,c2q2] ]
-                pairB = [ [c1q, c2q2], [c2q, c1q2] ]
+                pairA = [[c1q, c1q2], [c2q, c2q2]]
+                pairB = [[c1q, c2q2], [c2q, c1q2]]
 
                 A_fail = 0
                 B_fail = 0

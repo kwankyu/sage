@@ -114,7 +114,6 @@ from sage.cpython.type cimport can_assign_class
 cimport sage.categories.morphism as morphism
 cimport sage.categories.map as map
 from sage.structure.debug_options cimport debug
-from sage.structure.richcmp cimport rich_to_bool
 from sage.structure.sage_object cimport SageObject
 from sage.misc.cachefunc import cached_method
 from sage.misc.lazy_attribute import lazy_attribute
@@ -1040,7 +1039,7 @@ cdef class Parent(sage.structure.category_object.CategoryObject):
             return NotImplemented
         try:
             # get __pow__ from super class
-            meth = super(Parent, (<Parent> self)).__pow__
+            meth = super().__pow__
         except AttributeError:
             # get __pow__ from category in case the parent is a Cython class
             try:
@@ -1214,7 +1213,7 @@ cdef class Parent(sage.structure.category_object.CategoryObject):
         else:
             return (<map.Map>mor)._call_(x)
 
-    def __nonzero__(self):
+    def __bool__(self):
         """
         By default, all Parents are treated as ``True`` when used in an if
         statement. Override this method if other behavior is desired
@@ -1265,7 +1264,7 @@ cdef class Parent(sage.structure.category_object.CategoryObject):
             'coucou'
         """
         try:
-            meth = super(Parent, self).__getitem__
+            meth = super().__getitem__
         except AttributeError:
             # needed when self is a Cython object
             try:
@@ -1740,7 +1739,7 @@ cdef class Parent(sage.structure.category_object.CategoryObject):
                 raise ValueError("Map's codomain must be self")
             self._convert_from_list.append(mor)
             self._convert_from_hash.set(mor.domain(), mor)
-        elif isinstance(mor, Parent) or isinstance(mor, type):
+        elif isinstance(mor, (Parent, type)):
             t = mor
             mor = self._generic_convert_map(mor)
             self._convert_from_list.append(mor)
@@ -1991,8 +1990,7 @@ cdef class Parent(sage.structure.category_object.CategoryObject):
         S may appear in the list, in which case algorithm will never progress
         beyond that point.
 
-        This is similar in spirit to the old {{{_coerce_try}}}, and useful when
-        defining _coerce_map_from_
+        This is useful when defining _coerce_map_from_.
 
         INPUT:
 
@@ -2652,7 +2650,7 @@ cdef class Parent(sage.structure.category_object.CategoryObject):
                     #
                     # TODO: this makes sense in a few cases that we want
                     # to support. But in general this should not be
-                    # allowed. See Trac #15709
+                    # allowed. See Issue #15709
                     S_is_int = True
             if S_is_int:
                 from sage.structure.coerce_actions import IntegerPowAction
@@ -2742,7 +2740,7 @@ cdef class Parent(sage.structure.category_object.CategoryObject):
             EmptySetError
         """
         try:
-            return super(Parent, self)._an_element_()
+            return super()._an_element_()
         except EmptySetError:
             raise
         except Exception:
@@ -2864,7 +2862,7 @@ cdef class Set_generic(Parent):
     TESTS::
 
         sage: Set(QQ).category()
-        Category of sets
+        Category of infinite sets
 
     """
     def object(self):
@@ -2878,7 +2876,7 @@ cdef class Set_generic(Parent):
         """
         return self
 
-    def __nonzero__(self):
+    def __bool__(self):
         """
         A set is considered True unless it is empty, in which case it is
         considered to be False.

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-Piecewise-defined Functions
+Piecewise functions
 
 This module implement piecewise functions in a single variable. See
 :mod:`sage.sets.real_set` for more information about how to construct
@@ -108,7 +108,7 @@ class PiecewiseFunction(BuiltinFunction):
           domain and a symbolic function.
 
         - ``var=x`` -- a symbolic variable or ``None`` (default). The
-        real variable in which the function is piecewise in.
+          real variable in which the function is piecewise in.
 
         OUTPUT:
 
@@ -315,7 +315,7 @@ class PiecewiseFunction(BuiltinFunction):
                           for domain, func in parameters],
                          var=variable)
 
-    class EvaluationMethods(object):
+    class EvaluationMethods():
 
         def __pow__(self, parameters, variable, n):
             """
@@ -1089,7 +1089,9 @@ class PiecewiseFunction(BuiltinFunction):
                 sage: f.laplace(t,s)
                 (s + 1)*e^(-s)/s^2 + 2*e^(-s)/s - 1/s^2
             """
-            from sage.all import assume, exp, forget
+            from sage.symbolic.assumptions import assume, forget
+            from sage.functions.log import exp
+
             x = SR.var(x)
             s = SR.var(s)
             assume(s>0)
@@ -1180,7 +1182,8 @@ class PiecewiseFunction(BuiltinFunction):
                 -3/5/pi
 
             """
-            from sage.all import cos, pi
+            from sage.functions.trig import cos
+            from sage.symbolic.constants import pi
             L0 = (self.domain().sup() - self.domain().inf()) / 2
             if not L:
                 L = L0
@@ -1270,7 +1273,8 @@ class PiecewiseFunction(BuiltinFunction):
                 4/3/pi
 
             """
-            from sage.all import sin, pi
+            from sage.functions.trig import sin
+            from sage.symbolic.constants import pi
             L0 = (self.domain().sup() - self.domain().inf()) / 2
             if not L:
                 L = L0
@@ -1358,7 +1362,10 @@ class PiecewiseFunction(BuiltinFunction):
                  - 4/9*sin(3*pi*x)/pi^2 + 4*sin(pi*x)/pi^2 + 1/4
 
             """
-            from sage.all import pi, sin, cos, srange
+            from sage.symbolic.constants import pi
+            from sage.functions.trig import cos, sin
+            from sage.arith.srange import srange
+
             if not L:
                 L = (self.domain().sup() - self.domain().inf()) / 2
             x = self.default_variable()
@@ -1402,21 +1409,28 @@ class PiecewiseFunction(BuiltinFunction):
 
                 sage: ex = piecewise([((0, 1), pi), ([1, 2], x)])
                 sage: f = ex._giac_(); f
-                piecewise([((sageVARx>0) and (1>sageVARx)),pi,((sageVARx>=1) and (2>=sageVARx)),sageVARx])
+                piecewise(((sageVARx>0) and (1>sageVARx)),pi,((sageVARx>=1) and (2>=sageVARx)),sageVARx)
                 sage: f.diff(x)
-                piecewise([((sageVARx>0) and (1>sageVARx)),0,((sageVARx>=1) and (2>=sageVARx)),1])
+                piecewise(((sageVARx>0) and (1>sageVARx)),0,((sageVARx>=1) and (2>=sageVARx)),1)
 
                 sage: ex = piecewise([((-100, -2), 1/x), ((1, +oo), cos(x))])
                 sage: g = ex._giac_(); g
-                piecewise([((sageVARx>-100) and ((-2)>sageVARx)),1/sageVARx,sageVARx>1,cos(sageVARx)])
+                piecewise(((sageVARx>-100) and ((-2)>sageVARx)),1/sageVARx,sageVARx>1,cos(sageVARx))
                 sage: g.diff(x)
-                piecewise([((sageVARx>-100) and ((-2)>sageVARx)),-1/sageVARx^2,sageVARx>1,-sin(sageVARx)])
+                piecewise(((sageVARx>-100) and ((-2)>sageVARx)),-1/sageVARx^2,sageVARx>1,-sin(sageVARx))
+
+            TESTS::
+
+                sage: f = piecewise([([0,1],x),((1,2),3*x)])
+                sage: a = libgiac(f) # random because verbose
+                sage: a
+                piecewise(((sageVARx>=0) and (1>=sageVARx)),sageVARx,((sageVARx>1) and (2>sageVARx)),sageVARx*3)
             """
             from sage.misc.flatten import flatten
             args = [(domain._giac_condition_(variable),
                      func._giac_init_())
                     for domain, func in parameters]
-            args = flatten(args)
+            args = ",".join(a for a in flatten(args))
             return f"piecewise({args})"
 
 

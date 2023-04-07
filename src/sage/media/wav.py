@@ -31,7 +31,7 @@ EXAMPLES::
     sage: import sage.media
     doctest:warning...
     DeprecationWarning: the package sage.media is deprecated
-    See http://trac.sagemath.org/12673 for details.
+    See https://github.com/sagemath/sage/issues/12673 for details.
 """
 
 import math
@@ -70,8 +70,8 @@ class Wave(SageObject):
 
     Indexing:
 
-        Getting the $n$th item in a Wave object will give you the value
-        of the $n$th frame.
+        Getting the `n`-th item in a Wave object will give you the value
+        of the `n`-th frame.
     """
     def __init__(self, data=None, **kwds):
         if data is not None:
@@ -101,7 +101,6 @@ class Wave(SageObject):
                 raise KeyError(msg + " invalid input to Wave initializer")
         else:
             raise ValueError("Must give a filename")
-
 
     def save(self, filename='sage.wav'):
         r"""
@@ -197,7 +196,7 @@ class Wave(SageObject):
 
     def readframes(self, n):
         """
-        Read out the raw data for the first $n$ frames of this wave object.
+        Read out the raw data for the first `n` frames of this wave object.
 
         INPUT:
 
@@ -297,9 +296,8 @@ class Wave(SageObject):
 
         a plot object that can be shown.
         """
-
-        domain = self.domain(npoints = npoints)
-        values = self.values(npoints=npoints, channel = channel)
+        domain = self.domain(npoints=npoints)
+        values = self.values(npoints=npoints, channel=channel)
         points = zip(domain, values)
 
         L = list_plot(points, plotjoined=plotjoined, **kwds)
@@ -373,13 +371,13 @@ class Wave(SageObject):
         channels_sliced = [self._channel_data[i][start:stop] for i in range(self._nchannels)]
         print(stop - start)
 
-        return Wave(nchannels = self._nchannels,
-                    width = self._width,
-                    framerate = self._framerate,
-                    bytes = self._bytes[start:stop],
-                    nframes = stop - start,
-                    channel_data = channels_sliced,
-                    name = self._name)
+        return Wave(nchannels=self._nchannels,
+                    width=self._width,
+                    framerate=self._framerate,
+                    bytes=self._bytes[start:stop],
+                    nframes=stop - start,
+                    channel_data=channels_sliced,
+                    name=self._name)
 
     def __copy__(self):
         return self._copy(0, self._nframes)

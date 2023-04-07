@@ -38,13 +38,15 @@ REFERENCES:
 #******************************************************************************
 
 from __future__ import annotations
-from typing import Union, TYPE_CHECKING
+
+from typing import TYPE_CHECKING, Union
+
 from sage.manifolds.scalarfield import ScalarField
 
 if TYPE_CHECKING:
     from sage.manifolds.differentiable.diff_form import DiffForm
-    from sage.manifolds.differentiable.symplectic_form import SymplecticForm
     from sage.manifolds.differentiable.metric import PseudoRiemannianMetric
+    from sage.manifolds.differentiable.symplectic_form import SymplecticForm
 
 
 class DiffScalarField(ScalarField):
@@ -713,7 +715,7 @@ class DiffScalarField(ScalarField):
         """
         return self._tensor_type
 
-    def differential(self):
+    def differential(self) -> DiffForm:
         r"""
         Return the differential of ``self``.
 
@@ -817,7 +819,6 @@ class DiffScalarField(ScalarField):
     derivative = differential  # allows one to use functional notation,
                                # e.g. diff(f) for f.differential()
 
-
     def lie_derivative(self, vector):
         r"""
         Compute the Lie derivative with respect to a vector field.
@@ -890,7 +891,7 @@ class DiffScalarField(ScalarField):
         self, nondegenerate_tensor: Union[PseudoRiemannianMetric, SymplecticForm]
     ) -> DiffForm:
         r"""
-        Compute the Hodge dual of the scalar field with respect to to some non-degenerate
+        Compute the Hodge dual of the scalar field with respect to some non-degenerate
         bilinear form (Riemannian metric or symplectic form).
 
         If `M` is the domain of the scalar field (denoted by `f`), `n` is the

@@ -1,13 +1,27 @@
-# -*- coding: utf-8 -*-
 r"""
 Features for testing the presence of various databases
 """
+
+# *****************************************************************************
+#       Copyright (C) 2016      Julian Rüth
+#                     2018-2019 Jeroen Demeyer
+#                     2018      Timo Kaufmann
+#                     2020-2022 Matthias Koeppe
+#                     2020-2022 Sebastian Oehms
+#                     2021      Kwankyu Lee
+#
+#  Distributed under the terms of the GNU General Public License (GPL)
+#  as published by the Free Software Foundation; either version 2 of
+#  the License, or (at your option) any later version.
+#                  https://www.gnu.org/licenses/
+# *****************************************************************************
 
 
 from . import StaticFile, PythonModule
 from sage.env import (
     CONWAY_POLYNOMIALS_DATA_DIR,
-    CREMONA_MINI_DATA_DIR, CREMONA_LARGE_DATA_DIR)
+    CREMONA_MINI_DATA_DIR, CREMONA_LARGE_DATA_DIR,
+    POLYTOPE_DATA_DIR)
 
 
 class DatabaseConwayPolynomials(StaticFile):
@@ -126,9 +140,58 @@ class DatabaseKnotInfo(PythonModule):
         """
         PythonModule.__init__(self, 'database_knotinfo', spkg='database_knotinfo')
 
+class DatabaseCubicHecke(PythonModule):
+    r"""
+    A :class:`~sage.features.Feature` which describes the presence of the databases at the
+    web-page `Cubic Hecke algebra on 4 strands <http://www.lamfa.u-picardie.fr/marin/representationH4-en.html>`__
+    of Ivan Marin.
+
+    EXAMPLES::
+
+        sage: from sage.features.databases import DatabaseCubicHecke
+        sage: DatabaseCubicHecke().is_present()  # optional - database_cubic_hecke
+        FeatureTestResult('database_cubic_hecke', True)
+    """
+    def __init__(self):
+        r"""
+        TESTS::
+
+            sage: from sage.features.databases import DatabaseCubicHecke
+            sage: isinstance(DatabaseCubicHecke(), DatabaseCubicHecke)
+            True
+        """
+        PythonModule.__init__(self, 'database_cubic_hecke', spkg='database_cubic_hecke')
+
+class DatabaseReflexivePolytopes(StaticFile):
+    r"""
+    A :class:`~sage.features.Feature` which describes the presence of the PALP database
+    of reflexive lattice polytopes.
+
+    EXAMPLES::
+
+        sage: from sage.features.databases import DatabaseReflexivePolytopes
+        sage: bool(DatabaseReflexivePolytopes().is_present())                              # optional - polytopes_db
+        True
+        sage: bool(DatabaseReflexivePolytopes('polytopes_db_4d', 'Hodge4d').is_present())  # optional - polytopes_db_4d
+        True
+    """
+    def __init__(self, name='polytopes_db', dirname='Full3D'):
+        """
+        TESTS::
+
+            sage: from sage.features.databases import DatabaseReflexivePolytopes
+            sage: isinstance(DatabaseReflexivePolytopes(), DatabaseReflexivePolytopes)
+            True
+        """
+        StaticFile.__init__(self, name, dirname,
+                            search_path=[POLYTOPE_DATA_DIR])
+
 
 def all_features():
     return [DatabaseConwayPolynomials(),
             DatabaseCremona(), DatabaseCremona('cremona_mini'),
             DatabaseJones(),
-            DatabaseKnotInfo()]
+            DatabaseKnotInfo(),
+            DatabaseCubicHecke(),
+            DatabaseReflexivePolytopes(),
+            DatabaseReflexivePolytopes('polytopes_db_4d', 'Hodge4d')]

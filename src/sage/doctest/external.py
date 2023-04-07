@@ -370,7 +370,7 @@ def external_software():
 external_software = external_software()
 
 
-class AvailableSoftware(object):
+class AvailableSoftware():
     """
     This class keeps the set of available software whose availability is detected lazily
     from the list of external software.
@@ -380,6 +380,7 @@ class AvailableSoftware(object):
         sage: from sage.doctest.external import external_software, available_software
         sage: external_software
         ['cplex',
+         'dvips',
          'ffmpeg',
          'gurobi',
          'internet',
@@ -471,8 +472,8 @@ class AvailableSoftware(object):
         Return the list of names of those features for which testing their presence is allowed.
         """
         return [feature.name
-                for feature in self._features
-                if self._allow_external or feature not in self._external_features]
+                for feature, seen in zip(self._features, self._seen)
+                if seen >= 0 and (self._allow_external or feature not in self._external_features)]
 
     def seen(self):
         """

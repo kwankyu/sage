@@ -644,6 +644,7 @@ class GrowthDiagram(SageObject):
         0  0  0  1
         1  0
     """
+
     def __init__(self, rule, filling=None, shape=None, labels=None):
         r"""
         Initialize ``self``.
@@ -1610,6 +1611,7 @@ class GrowthDiagram(SageObject):
 # ABC for rules of growth diagrams
 ######################################################################
 
+
 class Rule(UniqueRepresentation):
     r"""
     Generic base class for a rule for a growth diagram.
@@ -2194,13 +2196,12 @@ class RuleShiftedShapes(Rule):
                     g, z = 1, _make_partition(y).add_cell(row) # black
                 else:
                     g, z = 2, _make_partition(y).add_cell(row) # blue
-            elif x == y != t and f in [1, 3]: # black or red
+            elif x == y != t and f in [1, 3]:  # black or red
                 c = SkewPartition([x, t]).cells()[0]
                 col = c[0] + c[1] + 1
-                # print y, t, x, c, col
                 for i in range(len(y)):
                     if i + y[i] == col:
-                        z = y[:i] + [y[i]+1] + y[i+1:]
+                        z = y[:i] + [y[i] + 1] + y[i + 1:]
                         break
                 g = 3
             else:
@@ -2293,6 +2294,7 @@ class RuleShiftedShapes(Rule):
                                 t = y[:i] + [y[i]-1] + y[i+1:]
                                 return (0, t, 3, 0)
                     raise ValueError("this should not happen")
+
 
 class RuleLLMS(Rule):
     r"""
@@ -2612,6 +2614,7 @@ class RuleLLMS(Rule):
 
         return g, z, h
 
+
 class RuleBinaryWord(Rule):
     r"""
     A rule modelling a Schensted-like correspondence for binary words.
@@ -2873,6 +2876,7 @@ class RuleBinaryWord(Rule):
             else:
                 return (x[:-1], 0)
 
+
 class RuleSylvester(Rule):
     r"""
     A rule modelling a Schensted-like correspondence for binary trees.
@@ -2963,7 +2967,7 @@ class RuleSylvester(Rule):
         sage: list(Sylvester(labels=G.out_labels())) == list(G)
         True
     """
-    zero = BinaryTree()  # type: ignore
+    zero = BinaryTree()  # type:ignore
 
     def normalize_vertex(self, v):
         r"""
@@ -3156,7 +3160,6 @@ class RuleSylvester(Rule):
             S, T = Q_chain[i-1], Q_chain[i]
             L = add_label(L, S, T, i)
         return L
-
 
     @staticmethod
     def _delete_right_most_node(b):
@@ -3353,6 +3356,7 @@ class RuleSylvester(Rule):
             else:
                 t = RuleSylvester._delete_right_most_node(y)
                 return (t, 0)
+
 
 class RuleYoungFibonacci(Rule):
     r"""
@@ -3597,6 +3601,7 @@ class RuleYoungFibonacci(Rule):
             elif z[0] == 2:
                 return (z[1:], 0)
 
+
 class RulePartitions(Rule):
     r"""
     A rule for growth diagrams on Young's lattice on integer
@@ -3681,6 +3686,7 @@ class RulePartitions(Rule):
         """
         return SkewTableau(chain=Q_chain)
 
+
 class RuleRSK(RulePartitions):
     r"""
     A rule modelling Robinson-Schensted-Knuth insertion.
@@ -3736,14 +3742,15 @@ class RuleRSK(RulePartitions):
         sage: [G.P_symbol(), G.Q_symbol()] == RSK(m.transpose())
         True
 
-        sage: n=5; l=[(pi, RuleRSK(pi)) for pi in Permutations(n)]
+        sage: n = 5; l = [(pi, RuleRSK(pi)) for pi in Permutations(n)]
         sage: all([G.P_symbol(), G.Q_symbol()] == RSK(pi) for pi, G in l)
         True
 
-        sage: n=5; l=[(w, RuleRSK(w)) for w in Words([1,2,3], 5)]
+        sage: n = 5; l = [(w, RuleRSK(w)) for w in Words([1,2,3], 5)]
         sage: all([G.P_symbol(), G.Q_symbol()] == RSK(pi) for pi, G in l)
         True
     """
+
     def forward_rule(self, y, t, x, content):
         r"""
         Return the output shape given three shapes and the content.
@@ -3895,6 +3902,7 @@ class RuleBurge(RulePartitions):
     sequences of cells with weakly decreasing row indices and weakly
     increasing column indices.
     """
+
     def forward_rule(self, y, t, x, content):
         r"""
         Return the output shape given three shapes and the content.
@@ -3987,6 +3995,7 @@ class RuleBurge(RulePartitions):
             carry += -s + la_i - max(mu_i, nu_i)
         t.reverse()
         return (_make_partition(t), carry)
+
 
 class RuleDomino(Rule):
     r"""
@@ -4332,7 +4341,8 @@ class RuleDomino(Rule):
 ## Set the rules available from GrowthDiagram.rules.<tab>
 #####################################################################
 
-class Rules(object):
+
+class Rules():
     """
     Catalog of rules for growth diagrams.
     """
@@ -4344,5 +4354,6 @@ class Rules(object):
     RSK = RuleRSK
     Burge = RuleBurge
     Domino = RuleDomino
+
 
 GrowthDiagram.rules = Rules

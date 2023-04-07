@@ -172,7 +172,7 @@ def is_ComplexField(x):
         doctest:warning...
         DeprecationWarning: is_ComplexField is deprecated;
         use isinstance(..., sage.rings.abc.ComplexField) instead
-        See https://trac.sagemath.org/32610 for details.
+        See https://github.com/sagemath/sage/issues/32610 for details.
         True
         sage: is_CF(ComplexField(12))
         True
@@ -206,7 +206,7 @@ def ComplexField(prec=53, names=None):
     if prec in cache:
         X = cache[prec]
         C = X()
-        if not C is None:
+        if C is not None:
             return C
     C = ComplexField_class(prec)
     cache[prec] = weakref.ref(C)
@@ -420,18 +420,18 @@ class ComplexField_class(sage.rings.abc.ComplexField):
         return self._prec == other._prec
 
     def __hash__(self):
-         """
-         Return the hash.
+        """
+        Return the hash.
 
-         EXAMPLES::
+        EXAMPLES::
 
-             sage: C = ComplexField(200)
-             sage: from sage.rings.complex_mpfr import ComplexField_class
-             sage: D = ComplexField_class(200)
-             sage: hash(C) == hash(D)
-             True
-         """
-         return hash((self.__class__, self._prec))
+            sage: C = ComplexField(200)
+            sage: from sage.rings.complex_mpfr import ComplexField_class
+            sage: D = ComplexField_class(200)
+            sage: hash(C) == hash(D)
+            True
+        """
+        return hash((self.__class__, self._prec))
 
     def __ne__(self, other):
         """
@@ -958,7 +958,7 @@ cdef class ComplexNumber(sage.structure.element.FieldElement):
                 real, imag = (<ComplexNumber>real).real(), (<ComplexNumber>real).imag()
             elif isinstance(real, sage.libs.pari.all.pari_gen):
                 real, imag = real.real(), real.imag()
-            elif isinstance(real, list) or isinstance(real, tuple):
+            elif isinstance(real, (list, tuple)):
                 re, imag = real
                 real = re
             elif isinstance(real, complex):
@@ -976,8 +976,7 @@ cdef class ComplexNumber(sage.structure.element.FieldElement):
         except TypeError:
             raise TypeError("unable to coerce to a ComplexNumber: %s" % type(real))
 
-
-    def  __dealloc__(self):
+    def __dealloc__(self):
         """
         TESTS:
 
@@ -1714,7 +1713,7 @@ cdef class ComplexNumber(sage.structure.element.FieldElement):
             sage: float(5)^(0.5 + 14.1347251*I)
             -1.62414637645790 - 1.53692828324508*I
         """
-        if isinstance(right, (int, long, Integer)):
+        if isinstance(right, (int, Integer)):
             return RingElement.__pow__(self, right)
 
         try:
@@ -1757,7 +1756,7 @@ cdef class ComplexNumber(sage.structure.element.FieldElement):
                                       real_string, digit_precision_bound,
                                       imag_string, digit_precision_bound)
 
-    def __nonzero__(self):
+    def __bool__(self):
         """
         Return ``True`` if ``self`` is not zero. This is an internal function;
         use :meth:`is_zero()` instead.
@@ -2066,7 +2065,7 @@ cdef class ComplexNumber(sage.structure.element.FieldElement):
             return Integer(4)
         elif self == -self._parent.gen():
             return Integer(4)
-        elif not self._multiplicative_order is None:
+        elif self._multiplicative_order is not None:
             return Integer(self._multiplicative_order)
         elif abs(abs(self) - 1) > 0.1:  # clearly not a root of unity
             return infinity.infinity
@@ -2549,7 +2548,7 @@ cdef class ComplexNumber(sage.structure.element.FieldElement):
 
     # Other special functions
     def agm(self, right, algorithm="optimal"):
-        """
+        r"""
         Return the Arithmetic-Geometric Mean (AGM) of ``self`` and ``right``.
 
         INPUT:
@@ -3279,7 +3278,7 @@ cdef class ComplexNumber(sage.structure.element.FieldElement):
             sage: p(z)
             1.11022302462516e-16
         """
-        from sage.arith.all import algdep
+        from sage.arith.misc import algdep
         return algdep(self, n, **kwds)
 
     # Alias

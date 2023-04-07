@@ -725,7 +725,7 @@ def forget(*args):
             try:
                 x.forget()
             except KeyError:
-                raise TypeError("forget not defined for objects of type '%s'"%type(x))
+                raise TypeError("forget not defined for objects of type '%s'" % type(x))
 
 
 def assumptions(*args):
@@ -782,11 +782,11 @@ def assumptions(*args):
     result = []
     if len(args) == 1:
         result.extend([statement for statement in _assumptions
-            if statement.has(args[0])])
+                       if statement.has(args[0])])
     else:
         for v in args:
-            result += [ statement for statement in list(_assumptions) \
-                            if str(v) in str(statement) ]
+            result += [statement for statement in list(_assumptions)
+                       if str(v) in str(statement)]
     return result
 
 
@@ -883,7 +883,6 @@ class assuming:
         [x == -2, x == 2]
         sage: with assuming(x > 0):
         ....:     solve(x^2 == 4,x)
-        ....:     
         [x == 2]
         sage: assumptions()
         []
@@ -939,12 +938,11 @@ class assuming:
         EXAMPLES::
 
             sage: forget()
-            sage: foo=assuming(x>0)
+            sage: foo = assuming(x>0)
             sage: foo.Ass
             (x > 0,)
             sage: bool(x>-1)
             False
-
         """
         self.replace=kwds.pop("replace",False)
         self.Ass=args
@@ -954,7 +952,7 @@ class assuming:
         EXAMPLES::
 
             sage: forget()
-            sage: foo=assuming(x>0)
+            sage: foo = assuming(x>0)
             sage: bool(x>-1)
             False
             sage: foo.__enter__()
@@ -963,7 +961,6 @@ class assuming:
             sage: foo.__exit__()
             sage: bool(x>-1)
             False
-
         """
         if self.replace:
             self.OldAss=assumptions()
@@ -975,7 +972,7 @@ class assuming:
         EXAMPLES::
 
             sage: forget()
-            sage: foo=assuming(x>0)
+            sage: foo = assuming(x>0)
             sage: bool(x>-1)
             False
             sage: foo.__enter__()
@@ -985,7 +982,6 @@ class assuming:
             sage: bool(x>-1)
             False
             sage: forget()
-
         """
         if self.replace:
             forget(assumptions())

@@ -211,6 +211,8 @@ AUTHORS:
 #
 ##############################################################################
 
+from pathlib import Path
+
 from .gap_includes cimport *
 from .util cimport *
 from .element cimport *
@@ -309,6 +311,8 @@ class Gap(Parent):
             return make_GapElement_Integer(self, make_gap_integer(x))
         elif isinstance(x, basestring):
             return make_GapElement_String(self, make_gap_string(x))
+        elif isinstance(x, Path):
+            return make_GapElement_String(self, make_gap_string(str(x)))
         else:
             try:
                 return x._libgap_()
@@ -691,7 +695,7 @@ class Gap(Parent):
             sage: libgap.List
             <Gap function "List">
             sage: libgap.GlobalRandomSource
-            <RandomSource in IsGlobalRandomSource>
+            <RandomSource in IsGAPRandomSource>
         """
         if name in dir(self.__class__):
             return getattr(self.__class__, name)

@@ -770,7 +770,7 @@ cdef class IntegerMulAction(IntegerAction):
 
         Check that large multiplications can be interrupted::
 
-            sage: alarm(0.5); (2^(10^6)) * P
+            sage: alarm(0.001); 2^(10^7) * P
             Traceback (most recent call last):
             ...
             AlarmInterrupt
@@ -924,7 +924,7 @@ cdef inline fast_mul(a, n):
 
 cdef inline fast_mul_long(a, long s):
     # It's important to change the signed s to an unsigned n,
-    # since -LONG_MIN = LONG_MIN.  See Trac #17844.
+    # since -LONG_MIN = LONG_MIN.  See Issue #17844.
     cdef unsigned long n
     if s < 0:
         n = -s

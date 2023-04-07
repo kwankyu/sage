@@ -6,21 +6,40 @@
 Sage Development Process
 ========================
 
+.. WARNING::
+
+    **Sage development is scheduled to move to GitHub in February 2023.** The exact
+    date will be announced in `<https://groups.google.com/g/sage-devel>`_. After
+    the transition, some parts of this guide (especially those related with `the
+    Sage Trac server <https://trac.sagemath.org>`_) will become obsolete and be
+    updated according to the new workflow on GitHub. See our `transition guide from Trac to
+    GitHub
+    <https://github.com/sagemath/trac-to-github/blob/master/docs/Migration-Trac-to-Github.md>`_
+    for the preliminary version of the workflow.
+
 This section is a concise overview of the Sage development process. In
 it, we will see how to make changes to the Sage source code and record
 them in the ``git`` revision control system.
 
-In the following section on :ref:`chapter-git_trac` we will look at
-communicating these changes back to the Sage project.  We also have a handy
-`one-page "cheat sheet"
+We also have a handy `one-page "cheat sheet"
 <http://github.com/sagemath/git-trac-command/raw/master/doc/git-cheat-sheet.pdf>`_
 of commonly used git commands that you can print out and leave on your
 desk.  We have some :ref:`recommended references and tutorials
 <section-git-tutorials>` as well.
 
-You can alternatively fork and create a merge request at
-`GitLab <https://gitlab.com/sagemath/sage>`_ which will automatically fetch
-your code and open a ticket on our trac server.
+In the following sections on :ref:`chapter-sage-trac` and
+:ref:`section-git-tricks-and-tips` we will look at communicating these
+changes back to the Sage project.  All changes to Sage source code
+have to go through the `Sage Trac development server
+<https://trac.sagemath.org>`_.
+
+As an alternative to using the Trac server directly, you can fork and
+create a Merge Request (MR) at `GitLab <https://gitlab.com/sagemath/sage>`_
+which will automatically fetch your code and open a ticket on our trac
+server.
+
+Pull Requests (PR) on GitHub are currently not supported by the
+SageMath project.
 
 
 .. _section-walkthrough-setup-git:
@@ -86,8 +105,11 @@ to the develop branch (latest development release)::
 
 Next, compile Sage, following the instruction in the file
 `README.md <https://github.com/sagemath/sage/#readme>`_ in ``SAGE_ROOT``.
-Additional details can be found in `the Sage installation guide
-<http://doc.sagemath.org/html/en/installation/source.html>`_.
+Additional details can be found in the
+`section on installation from source <../installation/source.html>`_
+in the Sage installation guide.
+If you wish to use conda-forge, see the `section on conda
+<../installation/conda.html>`_.
 
 .. NOTE::
 
@@ -100,6 +122,11 @@ For the experts, note that the repository at
 `git.sagemath.org <http://git.sagemath.org>`_ is where development
 actually takes place.
 
+.. WARNING::
+
+    **Sage development is scheduled to move to GitHub in February 2023.**
+    After the move, https://github.com/sagemath/sage.git will be the
+    primary repository.
 
 .. _section-walkthrough-branch:
 
@@ -113,7 +140,7 @@ Sage source code and which you can upload to trac tickets.
 
 To begin with, type the command ``git branch``. You will see the following::
 
-    [user@localhost]$ git branch
+    [user@localhost sage]$ git branch
     * develop
       master
 
@@ -141,7 +168,7 @@ to it. For this, you have to use ``git checkout``::
 
 Now if you use the command ``git branch``, you will see the following::
 
-    [user@localhost]$ git branch
+    [user@localhost sage]$ git branch
       develop
     * last_twin_prime
       master

@@ -29,29 +29,7 @@ from collections import defaultdict
 from sage.repl.preparse import preparse, strip_string_literals
 from functools import reduce
 
-
 from .external import available_software
-
-float_regex = re.compile(r'\s*([+-]?\s*((\d*\.?\d+)|(\d+\.?))([eE][+-]?\d+)?)')
-optional_regex = re.compile(r'(arb216|arb218|py2|long time|not implemented|not tested|known bug)|([^ a-z]\s*optional\s*[:-]*((\s|\w|[.])*))')
-# Version 4.65 of glpk prints the warning "Long-step dual simplex will
-# be used" frequently. When Sage uses a system installation of glpk
-# which has not been patched, we need to ignore that message.
-# See :trac:`29317`.
-glpk_simplex_warning_regex = re.compile(r'(Long-step dual simplex will be used)')
-# :trac:`31204` -- suppress warning about ld and OS version for dylib files.
-ld_warning_regex = re.compile(r'^.*dylib.*was built for newer macOS version.*than being linked.*')
-find_sage_prompt = re.compile(r"^(\s*)sage: ", re.M)
-find_sage_continuation = re.compile(r"^(\s*)\.\.\.\.:", re.M)
-find_python_continuation = re.compile(r"^(\s*)\.\.\.([^\.])", re.M)
-python_prompt = re.compile(r"^(\s*)>>>", re.M)
-# The following are used to allow ... at the beginning of output
-ellipsis_tag = "<TEMP_ELLIPSIS_TAG>"
-continuation_tag = "<TEMP_CONTINUATION_TAG>"
-random_marker = re.compile('.*random', re.I)
-tolerance_pattern = re.compile(r'\b((?:abs(?:olute)?)|(?:rel(?:ative)?))? *?tol(?:erance)?\b( +[0-9.e+-]+)?')
-backslash_replacer = re.compile(r"""(\s*)sage:(.*)\\\ *
-\ *(((\.){4}:)|((\.){3}))?\ *""")
 
 _RIFtol = None
 
@@ -85,7 +63,7 @@ def RIFtol(*args):
     if _RIFtol is None:
         try:
             # We need to import from sage.all to avoid circular imports.
-            from sage.all import RealIntervalField
+            from sage.rings.real_mpfi import RealIntervalField
         except ImportError:
             from warnings import warn
             warn("RealIntervalField not available, ignoring all tolerance specifications in doctests")
@@ -100,23 +78,6 @@ def RIFtol(*args):
 
 # This is the correct pattern to match ISO/IEC 6429 ANSI escape sequences:
 ansi_escape_sequence = re.compile(r'(\x1b[@-Z\\-~]|\x1b\[.*?[@-~]|\x9b.*?[@-~])')
-
-
-# Collection of fixups applied in the SageOutputChecker.  Each element in this
-# this list a pair of functions applied to the actual test output ('g' for
-# "got") and the expected test output ('w' for "wanted").  The first function
-# should be a simple fast test on the expected and/or actual output to
-# determine if a fixup should be applied.  The second function is the actual
-# fixup, which is applied if the test function passes.  In most fixups only one
-# of the expected or received outputs are normalized, depending on the
-# application.
-_repr_fixups = [
-    (lambda g, w: "Long-step" in g,
-     lambda g, w: (glpk_simplex_warning_regex.sub('', g), w)),
-
-    (lambda g, w: "dylib" in g,
-     lambda g, w: (ld_warning_regex.sub('', g), w))
-]
 
 
 def parse_optional_tags(string):
@@ -176,6 +137,8 @@ def parse_optional_tags(string):
     # strip_string_literals replaces comments
     comment = "#" + (literals[comment]).lower()
 
+    optional_regex = re.compile(r'(arb216|arb218|py2|long time|not implemented|not tested|known bug)|([^ a-z]\s*optional\s*[:-]*((\s|\w|[.])*))')
+
     tags = []
     for m in optional_regex.finditer(comment):
         cmd = m.group(1)
@@ -217,6 +180,10 @@ def parse_tolerance(source, want):
         sage: marked.abs_tol
         0.010000000000000000000...?
     """
+    # regular expressions
+    random_marker = re.compile('.*random', re.I)
+    tolerance_pattern = re.compile(r'\b((?:abs(?:olute)?)|(?:rel(?:ative)?))? *?tol(?:erance)?\b( +[0-9.e+-]+)?')
+
     safe, literals, state = strip_string_literals(source)
     first_line = safe.split('\n', 1)[0]
     if '#' not in first_line:
@@ -379,7 +346,7 @@ def make_marked_output(s, D):
     return ans
 
 
-class OriginalSource(object):
+class OriginalSource():
     r"""
     Context swapping out the pre-parsed source with the original for
     better reporting.
@@ -630,6 +597,17 @@ class SageDocTestParser(doctest.DocTestParser):
             sage: dte.want
             '...00010\n'
         """
+        # Regular expressions
+        find_sage_prompt = re.compile(r"^(\s*)sage: ", re.M)
+        find_sage_continuation = re.compile(r"^(\s*)\.\.\.\.:", re.M)
+        find_python_continuation = re.compile(r"^(\s*)\.\.\.([^\.])", re.M)
+        python_prompt = re.compile(r"^(\s*)>>>", re.M)
+        backslash_replacer = re.compile(r"""(\s*)sage:(.*)\\\ *
+\ *(((\.){4}:)|((\.){3}))?\ *""")
+
+        # The following are used to allow ... at the beginning of output
+        ellipsis_tag = "<TEMP_ELLIPSIS_TAG>"
+
         # Hack for non-standard backslash line escapes accepted by the current
         # doctest system.
         m = backslash_replacer.search(string)
@@ -802,7 +780,7 @@ class SageOutputChecker(doctest.OutputChecker):
             return wantval
 
     def check_output(self, want, got, optionflags):
-        """
+        r"""
         Checks to see if the output matches the desired output.
 
         If ``want`` is a :class:`MarkedOutput` instance, takes into account the desired tolerance.
@@ -911,48 +889,165 @@ class SageOutputChecker(doctest.OutputChecker):
             ['Fermat',  'Euler']
             sage: c = 'you'; c
             'you'
+
+        This illustrates that :trac:`33588` is fixed::
+
+            sage: from sage.doctest.parsing import SageOutputChecker, SageDocTestParser
+            sage: import doctest
+            sage: optflag = doctest.NORMALIZE_WHITESPACE|doctest.ELLIPSIS
+            sage: DTP = SageDocTestParser(('sage','magma','guava'))
+            sage: OC = SageOutputChecker()
+            sage: example = "sage: 1.3090169943749475 # tol 1e-8\n1.3090169943749475"
+            sage: ex = DTP.parse(example)[1]
+            sage: OC.check_output(ex.want, '1.3090169943749475', optflag)
+            True
+            sage: OC.check_output(ex.want, 'ANYTHING1.3090169943749475', optflag)
+            False
+            sage: OC.check_output(ex.want, 'Long-step dual simplex will be used\n1.3090169943749475', optflag)
+            True
         """
+        # Regular expression for floats
+        float_regex = re.compile(r'\s*([+-]?\s*((\d*\.?\d+)|(\d+\.?))([eE][+-]?\d+)?)')
+
         got = self.human_readable_escape_sequences(got)
 
         if isinstance(want, MarkedOutput):
             if want.random:
                 return True
             elif want.tol or want.rel_tol or want.abs_tol:
-                # First check the doctest without the numbers
+                # First check that the number of occurrences of floats appearing match
                 want_str = [g[0] for g in float_regex.findall(want)]
                 got_str = [g[0] for g in float_regex.findall(got)]
                 if len(want_str) != len(got_str):
                     return False
-                starwant = float_regex.sub('*', want)
-                stargot = float_regex.sub('*', got)
-                if not doctest.OutputChecker.check_output(self, starwant, stargot, optionflags):
-                    return False
 
-                # Now check the numbers
+                # Then check the numbers
                 want_values = [RIFtol(g) for g in want_str]
                 want_intervals = [self.add_tolerance(v, want) for v in want_values]
                 got_values = [RIFtol(g) for g in got_str]
-                # The doctest is successful if the "want" and "got"
-                # intervals have a non-empty intersection
-                return all(a.overlaps(b) for a, b in zip(want_intervals, got_values))
+                # The doctest is not successful if one of the "want" and "got"
+                # intervals have an empty intersection
+                if not all(a.overlaps(b) for a, b in zip(want_intervals, got_values)):
+                    return False
 
-        ok = doctest.OutputChecker.check_output(self, want, got, optionflags)
+                # Then check the part of the doctests without the numbers
+                # Continue the check process with floats replaced by stars
+                want = float_regex.sub('*', want)
+                got = float_regex.sub('*', got)
 
-        if ok:
-            return ok
+        if doctest.OutputChecker.check_output(self, want, got, optionflags):
+            return True
+        else:
+            # Last resort: try to fix-up the got string removing few typical warnings
+            did_fixup, want, got = self.do_fixup(want, got)
+            if did_fixup:
+                return doctest.OutputChecker.check_output(self, want, got, optionflags)
+            else:
+                return False
 
+    def do_fixup(self, want, got):
+        r"""
+        Performs few changes to the strings ``want`` and ``got``.
+
+        For example, remove warnings to be ignored.
+
+        INPUT:
+
+        - ``want`` -- a string or :class:`MarkedOutput`
+        - ``got`` -- a string
+
+        OUTPUT:
+
+        A tuple:
+
+        - bool, ``True`` when some fixup were performed and ``False`` otherwise
+        - string, edited wanted string
+        - string, edited got string
+
+        .. NOTE::
+
+            Currently, the code only possibly changes the string ``got``
+            while keeping ``want`` invariant. We keep open the possibility
+            of adding a regular expression which would also change the
+            ``want`` string. This is why ``want`` is an input and an output
+            of the method even if currently kept invariant.
+
+        EXAMPLES::
+
+            sage: from sage.doctest.parsing import SageOutputChecker
+            sage: OC = SageOutputChecker()
+            sage: OC.do_fixup('1.3090169943749475','1.3090169943749475')
+            (False, '1.3090169943749475', '1.3090169943749475')
+            sage: OC.do_fixup('1.3090169943749475','ANYTHING1.3090169943749475')
+            (False, '1.3090169943749475', 'ANYTHING1.3090169943749475')
+            sage: OC.do_fixup('1.3090169943749475','Long-step dual simplex will be used\n1.3090169943749475')
+            (True, '1.3090169943749475', '\n1.3090169943749475')
+
+        When ``want`` is an instance of class :class:`MarkedOutput`::
+
+            sage: from sage.doctest.parsing import SageOutputChecker, SageDocTestParser
+            sage: import doctest
+            sage: optflag = doctest.NORMALIZE_WHITESPACE|doctest.ELLIPSIS
+            sage: DTP = SageDocTestParser(('sage','magma','guava'))
+            sage: OC = SageOutputChecker()
+            sage: example = "sage: 1.3090169943749475\n1.3090169943749475"
+            sage: ex = DTP.parse(example)[1]
+            sage: ex.want
+            '1.3090169943749475\n'
+            sage: OC.do_fixup(ex.want,'1.3090169943749475')
+            (False, '1.3090169943749475\n', '1.3090169943749475')
+            sage: OC.do_fixup(ex.want,'ANYTHING1.3090169943749475')
+            (False, '1.3090169943749475\n', 'ANYTHING1.3090169943749475')
+            sage: OC.do_fixup(ex.want,'Long-step dual simplex will be used\n1.3090169943749475')
+            (True, '1.3090169943749475\n', '\n1.3090169943749475')
+
+        """
         did_fixup = False
-        for quick_check, fixup in _repr_fixups:
-            do_fixup = quick_check(got, want)
-            if do_fixup:
-                got, want = fixup(got, want)
-                did_fixup = True
 
-        if not did_fixup:
-            # Return the same result as before
-            return ok
+        # The conditions in the below `if` are simple fast test on the expected
+        # and/or actual output to determine if a fixup should be applied.
 
-        return doctest.OutputChecker.check_output(self, want, got, optionflags)
+        if "Long-step" in got:
+            # Version 4.65 of glpk prints the warning "Long-step dual
+            # simplex will be used" frequently. When Sage uses a system
+            # installation of glpk which has not been patched, we need to
+            # ignore that message. See :trac:`29317`.
+            glpk_simplex_warning_regex = re.compile(r'(Long-step dual simplex will be used)')
+            got = glpk_simplex_warning_regex.sub('', got)
+            did_fixup = True
+
+        if "chained fixups" in got:
+            # :trac:`34533` -- suppress warning on OS X 12.6 about chained fixups
+            chained_fixup_warning_regex = re.compile(r'ld: warning: -undefined dynamic_lookup may not work with chained fixups')
+            got = chained_fixup_warning_regex.sub('', got)
+            did_fixup = True
+
+        if "newer macOS version" in got:
+            # :trac:`34741` -- suppress warning arising after
+            # upgrading from macOS 12.X to 13.X.
+            newer_macOS_version_regex = re.compile(r'.*dylib \(.*\) was built for newer macOS version \(.*\) than being linked \(.*\)')
+            got = newer_macOS_version_regex.sub('', got)
+            did_fixup = True
+
+        if "insufficient permissions" in got:
+            sympow_cache_warning_regex = re.compile(r'\*\*WARNING\*\* /var/cache/sympow/datafiles/le64 yields insufficient permissions')
+            got = sympow_cache_warning_regex.sub('', got)
+            did_fixup = True
+
+        if "dylib" in got:
+            # :trac:`31204` -- suppress warning about ld and OS version for
+            # dylib files.
+            ld_warning_regex = re.compile(r'^.*dylib.*was built for newer macOS version.*than being linked.*')
+            got = ld_warning_regex.sub('', got)
+            did_fixup = True
+
+        if "pie being ignored" in got:
+            # :trac:`30845` -- suppress warning on conda about ld
+            ld_pie_warning_regex = re.compile(r'ld: warning: -pie being ignored. It is only used when linking a main executable')
+            got = ld_pie_warning_regex.sub('', got)
+            did_fixup = True
+
+        return did_fixup, want, got
 
     def output_difference(self, example, got, optionflags):
         r"""
@@ -1083,6 +1178,9 @@ class SageOutputChecker(doctest.OutputChecker):
             Tolerance exceeded:
                 0.0 vs 10.05, tolerance +infinity > 1e-1
         """
+        # Regular expression for floats
+        float_regex = re.compile(r'\s*([+-]?\s*((\d*\.?\d+)|(\d+\.?))([eE][+-]?\d+)?)')
+
         got = self.human_readable_escape_sequences(got)
         want = example.want
         diff = doctest.OutputChecker.output_difference(self, example, got, optionflags)

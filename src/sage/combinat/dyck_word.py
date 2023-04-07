@@ -89,13 +89,14 @@ from sage.structure.parent import Parent
 from sage.structure.unique_representation import UniqueRepresentation
 from sage.categories.finite_enumerated_sets import FiniteEnumeratedSets
 from sage.categories.infinite_enumerated_sets import InfiniteEnumeratedSets
-from sage.categories.all import Posets
+from sage.categories.posets import Posets
 
 from sage.rings.integer_ring import ZZ
 from sage.rings.rational_field import QQ
 from sage.combinat.permutation import Permutation, Permutations
 from sage.combinat.words.word import Word
 from sage.combinat.alternating_sign_matrix import AlternatingSignMatrices
+from sage.combinat.set_partition import SetPartitions
 from sage.misc.latex import latex
 
 open_symbol = 1
@@ -237,7 +238,7 @@ class DyckWord(CombinatorialElement):
         sage: dw.height()
         1
         sage: dw.to_noncrossing_partition()
-        [[1], [2]]
+        {{1}, {2}}
 
     ::
 
@@ -490,7 +491,7 @@ class DyckWord(CombinatorialElement):
             sage: DyckWord('(())')
             [1, 1, 0, 0]
         """
-        return super(DyckWord, self)._repr_()
+        return super()._repr_()
 
     def _repr_lattice(self, type=None, labelling=None, underpath=True) -> str:
         r"""
@@ -894,6 +895,61 @@ class DyckWord(CombinatorialElement):
         res += "\\end{tikzpicture}$}}"
         return res
 
+    def _repr_svg_(self) -> str:
+        """
+        Return the svg picture of ``self``.
+
+        This can be displayed by Jupyter.
+
+        EXAMPLES::
+
+            sage: PP = DyckWords(6).random_element()
+            sage: PP._repr_svg_()
+            '<?xml...</g></svg>'
+        """
+        N = self.length()
+        width = 0.1 if N < 20 else N / 200
+        resu = '<?xml version=\"1.0\" standalone=\"no\"?>'
+        resu += '<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" '
+        resu += '\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">'
+        resu += '<svg xmlns=\"http://www.w3.org/2000/svg\" '
+        resu += 'xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"500\" viewBox='
+
+        resu1 = '<g style=\"stroke-width:{};stroke-linejoin:bevel; '.format(width)
+        resu1 += 'stroke-linecap:butt; stroke:black; fill:snow\">'
+
+        resu3 = '<g style=\"stroke-width:{};stroke-linejoin:bevel;stroke-dasharray:0.25; '.format(width / 2)
+        resu3 += 'stroke-linecap:butt; stroke:gray; fill:none\">'
+
+        horizontal = "<line x1=\"{}\" y1=\"{}\" x2=\"{}\" y2=\"{}\"/>"
+        hori_lines = []
+        path = ['<polyline points=\"0,0']
+        x, y = 0, 0
+        max_y = 0
+        last_seen_level = [0]
+        for e in self:
+            x += 1
+            if e == open_symbol:
+                y += 1
+                last_seen_level.append(x - 1)
+                max_y = max(max_y, y)
+            else:
+                y -= 1
+                old_x = last_seen_level.pop()
+                hori_lines.append(horizontal.format(old_x, -y, x, -y))
+            path.append(f"{x},{-y}")
+        path.append('\"/>')
+        path.append('</g>')
+        resu1 += " ".join(path)
+        hori_lines.append('</g></svg>')
+        resu3 += "".join(hori_lines)
+
+        margin = 2 * width
+        resu += '\"{} {} {} {} \">'.format(-margin, -max_y - margin,
+                                           N + 2 * margin, max_y + 2 * margin)
+
+        return resu + resu1 + resu3
+
     def plot(self, **kwds):
         """
         Plot a Dyck word as a continuous path.
@@ -1175,8 +1231,8 @@ class DyckWord(CombinatorialElement):
                     break
                 j += 1
             else:
-                result.extend([DyckWord([open_symbol] * up),  # type: ignore
-                               DyckWord(self[i:j])])  # type: ignore
+                result.extend([DyckWord([open_symbol] * up),  # type:ignore
+                               DyckWord(self[i:j])])  # type:ignore
                 i = j
                 up = 0
 
@@ -1837,6 +1893,7 @@ class DyckWord_complete(DyckWord):
     For further information on Dyck words, see
     :class:`DyckWords_class<sage.combinat.dyck_word.DyckWord>`.
     """
+
     def semilength(self) -> int:
         r"""
         Return the semilength of ``self``.
@@ -1922,7 +1979,7 @@ class DyckWord_complete(DyckWord):
             sage: DyckWord(area_sequence=[0,0,0]).number_of_parking_functions()
             6
         """
-        from sage.arith.all import multinomial
+        from sage.arith.misc import multinomial
         return multinomial(self.rise_composition())
 
     def list_parking_functions(self):
@@ -1968,7 +2025,7 @@ class DyckWord_complete(DyckWord):
             [3, 4, 2, 1]
         """
         if not self:
-            return Permutation([])  # type: ignore
+            return Permutation([])  # type:ignore
         alist = self.to_area_sequence()
         m = max(alist)
         p1 = Word([m - alist[-i - 1]
@@ -2038,9 +2095,9 @@ class DyckWord_complete(DyckWord):
         from sage.combinat.tableau import Tableau
         n = self.semilength()
         if n == 0:
-            return (Tableau([]), Tableau([]))  # type: ignore
+            return (Tableau([]), Tableau([]))  # type:ignore
         elif self.height() == n:
-            T = Tableau([list(range(1, n + 1))])  # type: ignore
+            T = Tableau([list(range(1, n + 1))])  # type:ignore
             return (T, T)
         else:
             left: list[list[int]] = [[], []]
@@ -2054,7 +2111,7 @@ class DyckWord_complete(DyckWord):
                     right[0].append(pos + 1)
                 else:
                     right[1].append(pos + 1)
-            return (Tableau(left), Tableau(right))  # type: ignore
+            return (Tableau(left), Tableau(right))  # type:ignore
 
     @combinatorial_map(name='to 312 avoiding permutation')
     def to_312_avoiding_permutation(self) -> Permutation:
@@ -2127,7 +2184,7 @@ class DyckWord_complete(DyckWord):
         """
         n = self.semilength()
         if n == 0:
-            return Permutation([])  # type: ignore
+            return Permutation([])  # type:ignore
         D, touch_sequence = pealing(self, return_touches=True)
         pi = list(range(1, n + 1))
         while touch_sequence:
@@ -2137,7 +2194,7 @@ class DyckWord_complete(DyckWord):
                     pi[touches[i] - 1] = pi[touches[i + 1] - 1]
                 pi[touches[-1] - 1] = a
             D, touch_sequence = pealing(D, return_touches=True)
-        return Permutations()(pi, check_input=False)
+        return Permutations()(pi, check=False)
 
     @combinatorial_map(name='to 321 avoiding permutation')
     def to_321_avoiding_permutation(self) -> Permutation:
@@ -2228,7 +2285,7 @@ class DyckWord_complete(DyckWord):
                 v = min(v for v in values if v > n - i - area[n - i - 1])
                 pi.append(v)
                 values.remove(v)
-        return Permutation(pi)  # type: ignore
+        return Permutation(pi)  # type:ignore
 
     def to_permutation(self, map) -> Permutation:
         r"""
@@ -2300,33 +2357,33 @@ class DyckWord_complete(DyckWord):
         EXAMPLES::
 
             sage: DyckWord([]).to_noncrossing_partition()
-            []
+            {}
             sage: DyckWord([1, 0]).to_noncrossing_partition()
-            [[1]]
+            {{1}}
             sage: DyckWord([1, 1, 0, 0]).to_noncrossing_partition()
-            [[1, 2]]
+            {{1, 2}}
             sage: DyckWord([1, 1, 1, 0, 0, 0]).to_noncrossing_partition()
-            [[1, 2, 3]]
+            {{1, 2, 3}}
             sage: DyckWord([1, 0, 1, 0, 1, 0]).to_noncrossing_partition()
-            [[1], [2], [3]]
+            {{1}, {2}, {3}}
             sage: DyckWord([1, 1, 0, 1, 0, 0]).to_noncrossing_partition()
-            [[2], [1, 3]]
+            {{1, 3}, {2}}
             sage: DyckWord([]).to_noncrossing_partition("Stump")
-            []
+            {}
             sage: DyckWord([1, 0]).to_noncrossing_partition("Stump")
-            [[1]]
+            {{1}}
             sage: DyckWord([1, 1, 0, 0]).to_noncrossing_partition("Stump")
-            [[1, 2]]
+            {{1, 2}}
             sage: DyckWord([1, 1, 1, 0, 0, 0]).to_noncrossing_partition("Stump")
-            [[1, 3], [2]]
+            {{1, 3}, {2}}
             sage: DyckWord([1, 0, 1, 0, 1, 0]).to_noncrossing_partition("Stump")
-            [[1], [2], [3]]
+            {{1}, {2}, {3}}
             sage: DyckWord([1, 1, 0, 1, 0, 0]).to_noncrossing_partition("Stump")
-            [[1, 2, 3]]
+            {{1, 2, 3}}
         """
+        P = SetPartitions(len(self) // 2)
         if bijection == "Stump":
-            return [[v for v in c]
-                    for c in self.to_noncrossing_permutation().cycle_tuples()]
+            return P(self.to_noncrossing_permutation().cycle_tuples(), check=False)
         partition = []
         stack = []
         i = 0
@@ -2359,7 +2416,7 @@ class DyckWord_complete(DyckWord):
         if stack:
             raise ValueError("incorrect Dyck word")
 
-        return partition
+        return P(partition, check=False)
 
     def to_Catalan_code(self) -> list:
         r"""
@@ -2526,7 +2583,7 @@ class DyckWord_complete(DyckWord):
             sage: g = DyckWord([1, 1, 0, 0, 1, 0]).to_triangulation_as_graph()
             sage: g
             Graph on 5 vertices
-            sage: g.edges(labels=False)
+            sage: g.edges(sort=True, labels=False)
             [(0, 1), (0, 4), (1, 2), (1, 3), (1, 4), (2, 3), (3, 4)]
             sage: g.show()        # not tested
         """
@@ -3486,6 +3543,7 @@ class DyckWords_all(DyckWords):
     """
     All Dyck words.
     """
+
     def __init__(self):
         """
         Initialize ``self``.
@@ -3560,6 +3618,7 @@ class DyckWordBacktracker(GenericBacktracker):
 
     - Dan Drake (2008-05-30)
     """
+
     def __init__(self, k1, k2):
         r"""
         TESTS::
@@ -3623,6 +3682,7 @@ class DyckWords_size(DyckWords):
     """
     Dyck words with `k_1` openers and `k_2` closers.
     """
+
     def __init__(self, k1, k2):
         r"""
         TESTS:
@@ -3718,7 +3778,7 @@ class DyckWords_size(DyckWords):
             ....:      for p in range(7))
             True
         """
-        from sage.arith.all import binomial
+        from sage.arith.misc import binomial
         return (self.k1 - self.k2 + 1) * binomial(self.k1 + self.k2, self.k2) // (self.k1 + 1)
 
 ################################################################
@@ -3899,6 +3959,7 @@ class CompleteDyckWords_all(CompleteDyckWords, DyckWords_all):
     """
     All complete Dyck words.
     """
+
     def _repr_(self) -> str:
         r"""
         TESTS::
@@ -3942,6 +4003,7 @@ class CompleteDyckWords_all(CompleteDyckWords, DyckWords_all):
 
         This is implemented by comparison of area sequences.
         """
+
         def __init__(self):
             r"""
             TESTS::
@@ -4008,6 +4070,7 @@ class CompleteDyckWords_size(CompleteDyckWords, DyckWords_size):
     """
     All complete Dyck words of a given size.
     """
+
     def __init__(self, k):
         """
         Initialize ``self``.

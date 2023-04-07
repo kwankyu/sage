@@ -88,9 +88,15 @@ SAGE_SPKG_CONFIGURE([gfortran], [
                     ],
                     [1[[3-9]].*], [
                         # Install our own gfortran if the system-provided one is newer than 12.x.
-                        # See https://trac.sagemath.org/ticket/29456, https://trac.sagemath.org/ticket/31838
+                        # See https://github.com/sagemath/sage/issues/29456, https://github.com/sagemath/sage/issues/31838
                         SAGE_MUST_INSTALL_GFORTRAN([$FC is version $GFORTRAN_VERSION, which is too recent for this version of Sage])
                     ])
             ])
     fi
+    AS_CASE([$host],
+            [*-*-cygwin*], [AS_VAR_IF([sage_spkg_install_gfortran], [yes], [
+                                AS_VAR_APPEND([SAGE_SPKG_ERRORS], ["
+  On Cygwin, gfortran must be installed as a system package. This is an error."])
+                            ])
+                           ])
 ])

@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 r"""
-This is Sage's version of the sphinx-build script
+Sphinx build script
 
-We redirect stdout and stderr to our own logger, and remove some unwanted chatter.
+This is Sage's version of the ``sphinx-build`` script. We redirect ``stdout`` and
+``stderr`` to our own logger, and remove some unwanted chatter.
 """
 # ****************************************************************************
 #       Copyright (C) 2013-2014 Volker Braun <vbraun.name@gmail.com>
@@ -35,7 +36,7 @@ def term_width_line(text):
 sphinx.util.console.term_width_line = term_width_line
 
 
-class SageSphinxLogger(object):
+class SageSphinxLogger():
     r"""
     This implements the file object interface to serve as
     ``sys.stdout``/``sys.stderr`` replacement.
@@ -236,7 +237,7 @@ class SageSphinxLogger(object):
         if not skip_this_line:
             # sphinx does produce messages in the current locals which
             # could be non-ascii
-            # see https://trac.sagemath.org/ticket/27706
+            # see https://github.com/sagemath/sage/issues/27706
             self._stream.write(line if isinstance(line, str) else line.encode('utf8'))
             self._stream.flush()
 

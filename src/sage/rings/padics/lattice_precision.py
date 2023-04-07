@@ -9,7 +9,7 @@ TESTS::
 
     sage: R = ZpLC(2)
     doctest:...: FutureWarning: This class/method/function is marked as experimental. It, its functionality or its interface might change without a formal deprecation.
-    See http://trac.sagemath.org/23505 for details.
+    See https://github.com/sagemath/sage/issues/23505 for details.
     sage: prec = R.precision()
     sage: prec
     Precision lattice on 0 objects
@@ -974,7 +974,7 @@ class DifferentialPrecisionGeneric(SageObject):
             [   0 2048]
 
         If the precision module does not project to a lattice,
-        an error is raised.
+        an error is raised. ::
 
             sage: R = ZpLF(2, label='precision_lattice')
             sage: prec = R.precision()
@@ -1306,11 +1306,13 @@ class DifferentialPrecisionGeneric(SageObject):
             0.000009s  oo~~o~o~ooo~o~ooo~o~
             0.014250s  oooooooooooo
 
-        The legend is the following::
+        The legend is the following:
+
         - the symbol ``o`` represents a tracked element,
         - the symbol ``~`` represents an element which is marked for deletion.
 
         On the history, we see:
+
         - 1st line: twenty new elements were created
           (this corresponds to the affectation of the list ``L``);
         - 2nd line: elements at prime positions were marked for deletion
@@ -1489,6 +1491,7 @@ class DifferentialPrecisionGeneric(SageObject):
           a dictionary
 
         Here are the meanings of the keywords above:
+
         - ``add``: time spent in adding new columns to the precision matrix
           (corresponding to the creation of new elements)
         - ``mark``: time spent in marking elements for deletion
@@ -2686,7 +2689,7 @@ class PrecisionModule(UniqueRepresentation, DifferentialPrecisionGeneric):
             [   0 2048]
 
         If the precision module does not project to a lattice,
-        an error is raised.
+        an error is raised. ::
 
             sage: prec.precision_lattice([x, y, u, v])
             Traceback (most recent call last):
@@ -2741,7 +2744,7 @@ class PrecisionModule(UniqueRepresentation, DifferentialPrecisionGeneric):
             M *= self._p ** val
         return M
 
-class pAdicLatticeElementWeakProxy(object):
+class pAdicLatticeElementWeakProxy():
     r"""
     The implementations of :class:`DifferentialPrecisionGeneric` hold
     weak references to :class:`pAdicLatticeElement`. They are stored in

@@ -143,7 +143,7 @@ cdef class ComplexIntervalFieldElement(sage.structure.element.FieldElement):
             mpfi_set_sage(self.__re, NULL, real, parent, base)
             mpfi_set_sage(self.__im, NULL, imag, parent, base)
 
-    def  __dealloc__(self):
+    def __dealloc__(self):
         if self._parent is not None:
             mpfi_clear(self.__re)
             mpfi_clear(self.__im)
@@ -732,7 +732,7 @@ cdef class ComplexIntervalFieldElement(sage.structure.element.FieldElement):
         return x
 
     def norm(self):
-        """
+        r"""
         Return the norm of this complex number.
 
         If `c = a + bi` is a complex number, then the norm of `c` is defined as
@@ -1492,7 +1492,7 @@ cdef class ComplexIntervalFieldElement(sage.structure.element.FieldElement):
         return complex(self.real().n(self._prec),
                        self.imag().n(self._prec))
 
-    def __nonzero__(self):
+    def __bool__(self):
         """
         Return ``True`` if ``self`` is not known to be exactly zero.
 

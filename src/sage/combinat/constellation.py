@@ -183,6 +183,7 @@ class Constellation_class(Element):
     A constellation or a tuple of permutations `(g_0,g_1,...,g_k)`
     such that the product `g_0 g_1 ... g_k` is the identity.
     """
+
     def __init__(self, parent, g, connected, mutable, check):
         r"""
         TESTS::
@@ -775,7 +776,7 @@ class Constellation_class(Element):
 
         # compute canonical labels
         if not self.is_connected():
-            raise ValueError("No canonical labels implemented for"
+            raise ValueError("no canonical labels implemented for"
                              " non connected constellation")
 
         # get the permutations on {0, 1, ..., d-1}
@@ -1222,7 +1223,7 @@ class Constellations_ld(UniqueRepresentation, Parent):
             sage: [x.profile() for x in O[2]]
             [([2, 1], [2, 1], [3]), ([2, 1], [3], [2, 1]), ([3], [2, 1], [2, 1])]
         """
-        return [g.vertices() for g in self.braid_group_action()]
+        return [g.vertices(sort=True) for g in self.braid_group_action()]
 
 
 class Constellations_p(UniqueRepresentation, Parent):
@@ -1271,6 +1272,7 @@ class Constellations_p(UniqueRepresentation, Parent):
         sage: len(C.isomorphism_representatives())
         1
     """
+
     def __init__(self, profile, domain=None, connected=True):
         r"""
         OPTIONS:

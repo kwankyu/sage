@@ -1,7 +1,7 @@
 r"""
-`p`-Adic Floating Point Elements
+`p`-adic Floating Point Elements
 
-Elements of `p`-Adic Rings with Floating Point Precision
+Elements of `p`-adic Rings with Floating Point Precision
 
 AUTHORS:
 
@@ -442,4 +442,3 @@ cdef class pAdicFloatingPointElement(FPElement):
         sig_off()
 
         return ans
-

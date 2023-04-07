@@ -19,14 +19,15 @@ classifiers =
     Operating System :: POSIX
     Operating System :: MacOS :: MacOS X
     Programming Language :: Python :: 3 :: Only
-    Programming Language :: Python :: 3.7
     Programming Language :: Python :: 3.8
     Programming Language :: Python :: 3.9
+    Programming Language :: Python :: 3.10
+    Programming Language :: Python :: 3.11
     Programming Language :: Python :: Implementation :: CPython
     Topic :: Scientific/Engineering :: Mathematics
 
 [options]
-python_requires = >=3.7, <3.11
+python_requires = >=3.8, <3.12
 install_requires =
     esyscmd(`sage-get-system-packages install-requires \
         sage_conf \
@@ -38,13 +39,18 @@ dnl From build/pkgs/sagelib/dependencies
         cysignals      \
         cython         \
         gmpy2          \
+        importlib_metadata \
+        importlib_resources \
         jinja2         \
         jupyter_core   \
+        lrcalc_python  \
+        memory_allocator \
         numpy          \
         pkgconfig      \
         pplpy          \
-        memory_allocator \
+        primecountpy   \
         requests       \
+        typing_extensions \
         | sed "2,\$s/^/    /;"')dnl'
 dnl From Makefile.in: SAGERUNTIME
     esyscmd(`sage-get-system-packages install-requires \
@@ -66,10 +72,13 @@ dnl From Makefile.in: DOC_DEPENDENCIES
         | sed "2,\$s/^/    /;"')dnl'
 dnl Other Python packages that are standard spkg, used in doctests
     esyscmd(`sage-get-system-packages install-requires \
-        rpy2           \
         fpylll         \
         | sed "2,\$s/^/    /;"')dnl'
 dnl pycryptosat  # Sage distribution installs it as part of cryptominisat. According to its README on https://pypi.org/project/pycryptosat/: "The pycryptosat python package compiles while compiling CryptoMiniSat. It cannot be compiled on its own, it must be compiled at the same time as CryptoMiniSat."
+dnl Packages with important upper version bounds
+    esyscmd(`sage-get-system-packages install-requires \
+        ptyprocess     \
+        | sed "2,\$s/^/    /;"')dnl'
 
 scripts =
     # The sage script
@@ -99,7 +108,6 @@ scripts =
     bin/sage-env
     # sage-env-config -- installed by sage_conf
     # sage-env-config.in -- not to be installed
-    bin/sage-gdb-commands
     bin/sage-grep
     bin/sage-grepdoc
     bin/sage-inline-fortran
@@ -155,3 +163,8 @@ sage =
     ext_data/magma/sage/*
     ext_data/valgrind/*
     ext_data/threejs/*
+
+[options.extras_require]
+R = esyscmd(`sage-get-system-packages install-requires \
+        rpy2           \
+        | sed "2,\$s/^/    /;"')dnl'

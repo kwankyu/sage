@@ -205,7 +205,8 @@ from collections.abc import Hashable, Iterable, Container
 from copy import copy
 from warnings import warn
 
-from sage.arith.all import gcd, lcm
+from sage.arith.misc import GCD as gcd
+from sage.arith.functions import lcm
 from sage.combinat.posets.posets import FinitePoset
 from sage.geometry.point_collection import PointCollection
 from sage.geometry.polyhedron.constructor import Polyhedron
@@ -1505,7 +1506,7 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
             True
             sage: TestSuite(sc).run()
         """
-        superinit = super(ConvexRationalPolyhedralCone, self).__init__
+        superinit = super().__init__
         if ambient is None:
             superinit(rays, lattice)
             self._ambient = self
@@ -1893,8 +1894,7 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
             in 2-d lattice N+N
         """
         assert is_Cone(other)
-        rc = super(ConvexRationalPolyhedralCone, self).cartesian_product(
-                                                                other, lattice)
+        rc = super().cartesian_product(other, lattice)
         return ConvexRationalPolyhedralCone(rc.rays(), rc.lattice())
 
     def __neg__(self):
@@ -1918,7 +1918,7 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
             N( 0, -1)
             in 2-d lattice N
         """
-        rc = super(ConvexRationalPolyhedralCone, self).__neg__()
+        rc = super().__neg__()
         return ConvexRationalPolyhedralCone(rc.rays(), rc.lattice())
 
     def __richcmp__(self, right, op):
@@ -2571,7 +2571,7 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
                     # "ray in S" does not work because ray lies in a
                     # toric lattice and S is a "plain" vector space,
                     # and there is only a conversion (no coercion)
-                    # between them as of Trac ticket #10513.
+                    # between them as of Github issue #10513.
                     try:
                         S(ray)
                         subspace_rays.append(i)
@@ -2603,7 +2603,7 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
 
                 self._face_lattice = lattice_from_incidences(
                                     atom_to_facets, facet_to_atoms, ConeFace,
-                                    key = id(self))
+                                    key=id(self))
             else:
                 # Get face lattice as a sublattice of the ambient one
                 allowed_indices = frozenset(self._ambient_ray_indices)
@@ -2643,7 +2643,7 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
                         L.add_edge(face_to_index[face], next_index)
                 D = {i:f for i,f in enumerate(faces)}
                 L.relabel(D)
-                self._face_lattice = FinitePoset(L, faces, key = id(self))
+                self._face_lattice = FinitePoset(L, faces, key=id(self))
         return self._face_lattice
 
     # Internally we use this name for a uniform behaviour of cones and fans.
@@ -2745,17 +2745,16 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
         We also ensure that a call to this function does not break
         :meth:`facets` method (see :trac:`9780`)::
 
-            sage: cone = toric_varieties.dP8().fan().generating_cone(0)
-            sage: cone
+            sage: cone = toric_varieties.dP8().fan().generating_cone(0); cone   # optional - palp
             2-d cone of Rational polyhedral fan in 2-d lattice N
-            sage: for f in cone.facets(): print(f.rays())
+            sage: for f in cone.facets(): print(f.rays())                       # optional - palp
             N(1, 1)
             in 2-d lattice N
             N(0, 1)
             in 2-d lattice N
-            sage: len(cone.faces())
+            sage: len(cone.faces())                                             # optional - palp
             3
-            sage: for f in cone.facets(): print(f.rays())
+            sage: for f in cone.facets(): print(f.rays())                       # optional - palp
             N(1, 1)
             in 2-d lattice N
             N(0, 1)
@@ -3019,6 +3018,13 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
             N( 2, 5)
             in 2-d lattice N
 
+        The intersection can also be expressed using the operator ``&``::
+
+            sage: (cone1 & cone2).rays()
+            N(-1, 3),
+            N( 2, 5)
+            in 2-d lattice N
+
         It is OK to intersect cones living in sublattices of the same ambient
         lattice::
 
@@ -3044,7 +3050,18 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
             N(3, 1),
             N(0, 1)
             in 2-d lattice N
+
+        An intersection with a polyhedron returns a polyhedron::
+
+            sage: cone = Cone([(1,0), (-1,0), (0,1)])
+            sage: p = polytopes.hypercube(2)
+            sage: cone & p
+            A 2-dimensional polyhedron in ZZ^2 defined as the convex hull of 4 vertices
+            sage: sorted(_.vertices_list())
+            [[-1, 0], [-1, 1], [1, 0], [1, 1]]
         """
+        if not isinstance(other, ConvexRationalPolyhedralCone):
+            return self.polyhedron().intersection(other)
         if self._ambient is other._ambient:
             # Cones of the same ambient cone or fan intersect nicely/quickly.
             # Can we maybe even return an element of the cone lattice?..
@@ -3059,6 +3076,8 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
         p = C_Polyhedron(self._PPL_cone())
         p.add_constraints(other._PPL_cone().constraints())
         return _Cone_from_PPL(p, self.lattice().intersection(other.lattice()))
+
+    __and__ = intersection
 
     def is_equivalent(self, other):
         r"""
@@ -3497,7 +3516,7 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
         result += tp.plot_walls(walls)
         return result
 
-    def polyhedron(self):
+    def polyhedron(self, **kwds):
         r"""
         Return the polyhedron associated to ``self``.
 
@@ -3525,7 +3544,7 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
             A 0-dimensional polyhedron in ZZ^2 defined as the convex hull
             of 1 vertex
         """
-        return Polyhedron(rays=self.rays(), vertices=[self.lattice()(0)])
+        return Polyhedron(rays=self.rays(), vertices=[self.lattice()(0)], **kwds)
 
     def an_affine_basis(self):
         r"""
@@ -3535,21 +3554,15 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
 
             sage: quadrant = Cone([(1,0), (0,1)])
             sage: quadrant.an_affine_basis()
-            Traceback (most recent call last):
-            ...
-            NotImplementedError: this function is not implemented for unbounded polyhedra
+            [(0, 0), (1, 0), (0, 1)]
             sage: ray = Cone([(1, 1)])
             sage: ray.an_affine_basis()
-            Traceback (most recent call last):
-            ...
-            NotImplementedError: this function is not implemented for unbounded polyhedra
+            [(0, 0), (1, 1)]
             sage: line = Cone([(1,0), (-1,0)])
             sage: line.an_affine_basis()
-            Traceback (most recent call last):
-            ...
-            NotImplementedError: this function is not implemented for unbounded polyhedra
+            [(1, 0), (0, 0)]
         """
-        return self.polyhedron().an_affine_basis()
+        return [vector(v) for v in self.polyhedron().an_affine_basis()]
 
     @cached_method
     def strict_quotient(self):
@@ -4494,7 +4507,7 @@ class ConvexRationalPolyhedralCone(IntegralRayCollection, Container, ConvexSet_c
 
             def not_in_linear_subspace(x):
                 # "x in linear_subspace" does not work, due to absence
-                # of coercion maps as of Trac ticket #10513.
+                # of coercion maps as of Github issue #10513.
                 try:
                     linear_subspace(x)
                     return False
@@ -6357,7 +6370,7 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=None,
     TESTS:
 
     It's hard to test the output of a random process, but we can at
-    least make sure that we get a cone back.
+    least make sure that we get a cone back::
 
         sage: from sage.geometry.cone import is_Cone
         sage: K = random_cone(max_ambient_dim=6, max_rays=10)
@@ -6445,9 +6458,9 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=None,
     we will loop with an absurd, unattainable, number of rays::
 
         sage: K = random_cone(min_ambient_dim=3, # long time
-        ....:                 max_ambient_dim=3, # long time
-        ....:                 min_rays=7,        # long time
-        ....:                 max_rays=9)        # long time
+        ....:                 max_ambient_dim=3,
+        ....:                 min_rays=7,
+        ....:                 max_rays=9)
         sage: K.nrays() >= 7                     # long time
         True
         sage: K.lattice_dim()                    # long time
@@ -6553,19 +6566,19 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=None,
         # The next three checks prevent an infinite loop (a futile
         # search for more rays) in zero, one, or two dimensions.
         if min_rays > 4 and max_ambient_dim < 3:
-            msg  = 'all cones in zero/one/two dimensions have four or fewer '
+            msg = 'all cones in zero/one/two dimensions have four or fewer '
             msg += 'generators. Please increase max_ambient_dim to at least '
             msg += '3, or decrease min_rays.'
             raise ValueError(msg)
 
         if min_rays > 2 and max_ambient_dim < 2:
-            msg  = 'all cones in zero/one dimensions have two or fewer '
+            msg = 'all cones in zero/one dimensions have two or fewer '
             msg += 'generators. Please increase max_ambient_dim to at least '
             msg += '2, or decrease min_rays.'
             raise ValueError(msg)
 
         if min_rays > 0 and max_ambient_dim == 0:
-            msg  = 'all cones in zero dimensions have no generators. '
+            msg = 'all cones in zero dimensions have no generators. '
             msg += 'Please increase max_ambient_dim to at least 1, or '
             msg += 'decrease min_rays.'
             raise ValueError(msg)
@@ -6580,17 +6593,17 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=None,
     # using its dimension rather than max_ambient_dim as the indicator.
     if lattice is not None:
         if min_rays > 4 and lattice.dimension() < 3:
-            msg  = 'all cones in the given lattice have four or fewer '
+            msg = 'all cones in the given lattice have four or fewer '
             msg += 'generators. Please decrease min_rays.'
             raise ValueError(msg)
 
         if min_rays > 2 and lattice.dimension() < 2:
-            msg  = 'all cones in the given lattice have two or fewer '
+            msg = 'all cones in the given lattice have two or fewer '
             msg += 'generators. Please decrease min_rays.'
             raise ValueError(msg)
 
         if min_rays > 0 and lattice.dimension() == 0:
-            msg  = 'all cones in the given lattice have no generators. '
+            msg = 'all cones in the given lattice have no generators. '
             msg += 'Please decrease min_rays.'
             raise ValueError(msg)
 
@@ -6600,7 +6613,7 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=None,
             msg = 'all cones in this lattice are strictly convex (trivial).'
             raise ValueError(msg)
         if max_rays is not None and max_rays < 2:
-            msg  = 'all cones are strictly convex when ``max_rays`` is '
+            msg = 'all cones are strictly convex when ``max_rays`` is '
             msg += 'less than two.'
             raise ValueError(msg)
 
@@ -6627,7 +6640,7 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=None,
                 msg = 'all cones are solid when max_ambient_dim is zero.'
                 raise ValueError(msg)
             if (max_ambient_dim is not None and
-                    min_rays > 2*(max_ambient_dim - 1)):
+                    min_rays > 2 * (max_ambient_dim - 1)):
                 msg = 'every cone is solid when '
                 msg += 'min_rays > 2*(max_ambient_dim - 1).'
                 raise ValueError(msg)
@@ -6635,11 +6648,10 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=None,
             if lattice.dimension() == 0:
                 msg = 'all cones in the given lattice are solid.'
                 raise ValueError(msg)
-            if  min_rays > 2*(lattice.dimension() - 1):
+            if min_rays > 2 * (lattice.dimension() - 1):
                 msg = 'every cone is solid when min_rays > 2*(d - 1) '
                 msg += 'where d is the dimension of the given lattice.'
                 raise ValueError(msg)
-
 
     # Now that we've sanity-checked our parameters, we can massage the
     # min/maxes for (non-)solid cones. It doesn't violate the user's
@@ -6734,7 +6746,7 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=None,
         # maximum number of rays is unbounded, then r could be enormous
         # Ultimately that won't be a problem, because almost all of
         # those rays will be thrown out. However, as we discovered in
-        # Trac #24517, simply generating the random rays in the first
+        # Issue #24517, simply generating the random rays in the first
         # place (and storing them in a list) is problematic.
         #
         # Since the returns fall off around 2*d, we start with the
@@ -6766,7 +6778,6 @@ def random_cone(lattice=None, min_ambient_dim=0, max_ambient_dim=None,
             rays.append(L.random_element())
             K = Cone(rays, lattice=L)
             rays = list(K.rays()) # Avoid re-normalizing next time around
-
 
         if strictly_convex is not None:
             if strictly_convex:

@@ -27,8 +27,8 @@ from copy import copy
 from sage.modules.free_module_element import vector
 from sage.misc.misc_c import prod
 from sage.categories.fields import Fields
-from sage.arith.all import gcd
-from sage.rings.all import Zmod
+from sage.arith.misc import gcd
+from sage.rings.finite_rings.integer_mod_ring import IntegerModRing as Zmod
 
 from .cyclic_code import CyclicCode
 from .grs_code import GeneralizedReedSolomonCode
@@ -130,8 +130,8 @@ class BCHCode(CyclicCode):
         D = [(offset + jump_size * i) % length
              for i in range(designed_distance - 1)]
 
-        super(BCHCode, self).__init__(field=base_field, length=length,
-                                      D=D, primitive_root=primitive_root)
+        super().__init__(field=base_field, length=length,
+                         D=D, primitive_root=primitive_root)
         self._default_decoder_name = "UnderlyingGRS"
         self._jump_size = jump_size
         self._offset = offset
@@ -282,8 +282,7 @@ class BCHUnderlyingGRSDecoder(Decoder):
         self._grs_code = code.bch_to_grs()
         self._grs_decoder = self._grs_code.decoder(grs_decoder, **kwargs)
         self._decoder_type = copy(self._grs_decoder.decoder_type())
-        super(BCHUnderlyingGRSDecoder, self).__init__(
-            code, code.ambient_space(), "Vector")
+        super().__init__(code, code.ambient_space(), "Vector")
 
     def _repr_(self):
         r"""

@@ -231,7 +231,6 @@ class WeightLatticeRealizations(Category_over_base_ring):
                                        codomain = self
                                        ).register_as_coercion()
 
-
         def _test_weight_lattice_realization(self, **options):
             """
             Runs sanity checks on this weight lattice realization
@@ -263,9 +262,9 @@ class WeightLatticeRealizations(Category_over_base_ring):
             # For an affine root system, this will check the embedding of
             # the extended ones, and also of the non extended ones if this
             # realization is not extended
-            domains = [self.root_system.weight_space(base_ring, extended = extended)
+            domains = [self.root_system.weight_space(base_ring, extended=extended)
                        for base_ring in set([ZZ, self.base_ring()])
-                       for extended  in set([self.cartan_type().is_affine(), self.is_extended()])]
+                       for extended in set([self.cartan_type().is_affine(), self.is_extended()])]
             for domain in domains:
                 tester.assertIsNot(self._internal_coerce_map_from(domain), None)
                 for i in self.index_set():
@@ -694,7 +693,6 @@ class WeightLatticeRealizations(Category_over_base_ring):
                         tester.assertIn(root, rank_simple_roots)
                         permutation[i] = rank_simple_roots[root]
                     tester.assertEqual(set(permutation), set(self.index_set()))
-                    #print permutation
                     # It could be nicer to test equality of G and its relabelling
                     for i in self.index_set():
                         for j in self.index_set():
@@ -708,7 +706,6 @@ class WeightLatticeRealizations(Category_over_base_ring):
                 # automorphisms, which are in bijection with the special nodes
                 #from sage.groups.perm_gps.permgroup import PermutationGroup
                 #P = PermutationGroup([[i+1 for i in permutation] for permutation in permutations])
-                #print P, len(P)
                 #tester.assertEqual(P, G.automorphism_group())
                 pass
 

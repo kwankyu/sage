@@ -151,7 +151,9 @@ class ManifoldSubset(UniqueRepresentation, Parent):
 
     Element = ManifoldPoint
 
-    def __init__(self, manifold, name, latex_name=None, category=None):
+    _name: str
+
+    def __init__(self, manifold, name: str, latex_name=None, category=None):
         r"""
         Construct a manifold subset.
 
@@ -969,6 +971,7 @@ class ManifoldSubset(UniqueRepresentation, Parent):
             def vertex_family(subset):
                 return ManifoldSubsetFiniteFamily([subset])
         subset_to_vertex = {}
+
         def vertex(subset):
             try:
                 return subset_to_vertex[subset]
@@ -2064,7 +2067,7 @@ class ManifoldSubset(UniqueRepresentation, Parent):
 
         INPUT:
 
-        - ``resu`` -- an instance of ``:class:`TopologicalManifold` or
+        - ``resu`` -- an instance of :class:`TopologicalManifold` or
           a subclass.
 
         - ``coord_def`` -- (default: {}) definition of the subset in
@@ -2305,6 +2308,7 @@ class ManifoldSubset(UniqueRepresentation, Parent):
         subsets = set(subsets)
         if not subsets:
             raise TypeError('input set must be nonempty')
+
         def reduce():
             # Greedily replace inclusion chains by their minimal element
             # and pairs with declared intersections by their intersection
@@ -2529,6 +2533,7 @@ class ManifoldSubset(UniqueRepresentation, Parent):
 
         """
         subsets = set(subsets)
+
         def reduce():
             # Greedily replace inclusion chains by their maximal element
             # and pairs with declared unions by their union
@@ -2624,11 +2629,13 @@ class ManifoldSubset(UniqueRepresentation, Parent):
         - ``latex_name`` --  (default: ``None``) LaTeX symbol to denote the
           complement in the case the latter has to be created; the default
           is built upon the symbol `\setminus`
+        - ``is_open`` -- (default: ``False``) if ``True``, the created subset
+          is assumed to be open with respect to the manifold's topology
 
         OUTPUT:
 
-        - instance of :class:`ManifoldSubset` representing the
-          subset that is difference of ``superset`` minus ``self``
+        - instance of :class:`ManifoldSubset` representing the subset that
+          is ``superset`` minus ``self``
 
         EXAMPLES::
 
@@ -2644,6 +2651,15 @@ class ManifoldSubset(UniqueRepresentation, Parent):
             Traceback (most recent call last):
             ...
             TypeError: superset must be a superset of self
+
+        Demanding that the complement is open makes ``self`` a closed subset::
+
+            sage: A.is_closed()  # False a priori
+            False
+            sage: A.complement(is_open=True)
+            Open subset M_minus_A of the 2-dimensional topological manifold M
+            sage: A.is_closed()
+            True
 
         """
         if superset is None:
@@ -2667,11 +2683,13 @@ class ManifoldSubset(UniqueRepresentation, Parent):
         - ``latex_name`` --  (default: ``None``) LaTeX symbol to denote the
           difference in the case the latter has to be created; the default
           is built upon the symbol `\setminus`
+        - ``is_open`` -- (default: ``False``) if ``True``, the created subset
+          is assumed to be open with respect to the manifold's topology
 
         OUTPUT:
 
-        - instance of :class:`ManifoldSubset` representing the
-          subset that is difference of ``self`` minus ``other``
+        - instance of :class:`ManifoldSubset` representing the subset that is
+          ``self`` minus ``other``
 
         EXAMPLES::
 
@@ -2700,6 +2718,13 @@ class ManifoldSubset(UniqueRepresentation, Parent):
             True
             sage: M.difference(O, is_open=True)
             Open subset CO2 of the 2-dimensional topological manifold M
+
+        Since `O` is open and we have asked `M\setminus O` to be open, `O`
+        is a clopen set (if `O\neq M` and `O\neq\emptyset`, this implies that
+        `M` is not connected)::
+
+            sage: O.is_closed() and O.is_open()
+            True
 
         """
         # See if it has been created already

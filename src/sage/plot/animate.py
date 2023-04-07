@@ -233,8 +233,8 @@ class Animation(WithEqualityById, SageObject):
         EXAMPLES::
 
             sage: x = SR.var("x")
-            sage: a = animate([sin(x + float(k)) for k in srange(0,2*pi,0.3)],
-            ....:                xmin=0, xmax=2*pi, figsize=[2,1]) # indirect doctest
+            sage: a = animate([sin(x + float(k)) for k in srange(0,2*pi,0.3)],  # indirect doctest
+            ....:                xmin=0, xmax=2*pi, figsize=[2,1])
             sage: a           # optional -- ImageMagick   # long time
             Animation with 21 frames
         """
@@ -850,7 +850,6 @@ class Animation(WithEqualityById, SageObject):
         dm = get_display_manager()
         dm.display_immediately(self, **kwds)
 
-
     def ffmpeg(self, savefile=None, show_path=False, output_format=None,
                ffmpeg_options='', delay=None, iterations=0, pix_fmt='rgb24'):
         r"""
@@ -1206,7 +1205,7 @@ class Animation(WithEqualityById, SageObject):
         return KeyframeAnimationGroup(g3d_frames, **kwds)
 
 
-class APngAssembler(object):
+class APngAssembler():
     r"""
     Builds an APNG_ (Animated PNG) from a sequence of PNG files.
     This is used by the :meth:`sage.plot.animate.Animation.apng` method.

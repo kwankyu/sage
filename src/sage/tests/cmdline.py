@@ -165,7 +165,7 @@ def test_executable(args, input="", timeout=100.0, pydebug_ignore_warnings=False
     Test help::
 
         sage: (out, err, ret) = test_executable(["sage", "-h"])
-        sage: out.find("Optional arguments:") >= 0
+        sage: out.find("evaluate cmd as sage") >= 0
         True
         sage: err
         ''
@@ -173,7 +173,7 @@ def test_executable(args, input="", timeout=100.0, pydebug_ignore_warnings=False
         0
 
         sage: (out, err, ret) = test_executable(["sage", "--help"])
-        sage: out.find("Optional arguments:") >= 0
+        sage: out.find("evaluate cmd as sage") >= 0
         True
         sage: err
         ''
@@ -725,7 +725,7 @@ def test_executable(args, input="", timeout=100.0, pydebug_ignore_warnings=False
     except KeyError:
         pass
 
-    __with_pydebug = hasattr(sys, 'gettotalrefcount')   # This is a Python debug build (--with-pydebug) 
+    __with_pydebug = hasattr(sys, 'gettotalrefcount')   # This is a Python debug build (--with-pydebug)
     if __with_pydebug and pydebug_ignore_warnings:
         pexpect_env['PYTHONWARNINGS'] = ','.join([
             'ignore::DeprecationWarning',

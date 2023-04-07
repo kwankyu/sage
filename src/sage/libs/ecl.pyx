@@ -21,7 +21,6 @@ from posix.signal cimport sigaction, sigaction_t
 cimport cysignals.signals
 
 from sage.libs.gmp.types cimport mpz_t
-from sage.misc.misc import ECL_TMP
 from sage.cpython.string cimport str_to_bytes, char_to_str
 from sage.rings.integer cimport Integer
 from sage.rings.rational cimport Rational
@@ -273,11 +272,6 @@ def init_ecl():
     list_of_objects=cl_cons(ECL_NIL,cl_cons(ECL_NIL,ECL_NIL))
     cl_set(string_to_object(b"*SAGE-LIST-OF-OBJECTS*"), list_of_objects)
 
-    cl_eval(string_to_object(b"""
-        (setf (logical-pathname-translations "TMP")
-              '(("**;*.*" "%s/**/*.*")))
-        """ % str_to_bytes(str(ECL_TMP))))
-
     # We define our own error catching eval, apply and funcall/
     # Presently these routines are only converted to byte-code. If they
     # ever turn out to be a bottle neck, it should be easy to properly
@@ -435,16 +429,14 @@ cdef cl_object python_to_ecl(pyobj, bint read_strings) except NULL:
             return ECL_NIL
     elif pyobj is None:
         return ECL_NIL
-    elif isinstance(pyobj,long):
-        if pyobj >= MOST_NEGATIVE_FIXNUM and pyobj <= MOST_POSITIVE_FIXNUM:
+    elif isinstance(pyobj, int):
+        if MOST_NEGATIVE_FIXNUM <= pyobj <= MOST_POSITIVE_FIXNUM:
             return ecl_make_integer(pyobj)
         else:
             return python_to_ecl(Integer(pyobj), read_strings)
-    elif isinstance(pyobj,int):
-        return ecl_make_integer(pyobj)
-    elif isinstance(pyobj,float):
+    elif isinstance(pyobj, float):
         return ecl_make_doublefloat(pyobj)
-    elif isinstance(pyobj,unicode):
+    elif isinstance(pyobj, unicode):
         try:
             s = str_to_bytes(pyobj, 'ascii')
         except UnicodeEncodeError:
@@ -458,22 +450,22 @@ cdef cl_object python_to_ecl(pyobj, bint read_strings) except NULL:
             return ecl_safe_funcall(read_from_string_clobj, o)
         else:
             return o
-    elif isinstance(pyobj,bytes):
+    elif isinstance(pyobj, bytes):
         s=<bytes>pyobj
         if read_strings:
             return ecl_safe_read_string(s)
         else:
             return ecl_cstring_to_base_string_or_nil(s)
-    elif isinstance(pyobj,Integer):
+    elif isinstance(pyobj, Integer):
         if pyobj >= MOST_NEGATIVE_FIXNUM and pyobj <= MOST_POSITIVE_FIXNUM:
             return ecl_make_integer(pyobj)
         else:
             return ecl_bignum_from_mpz( (<Integer>pyobj).value )
-    elif isinstance(pyobj,Rational):
+    elif isinstance(pyobj, Rational):
         return ecl_make_ratio(
                 python_to_ecl( (<Rational>pyobj).numerator(),   read_strings ),
                 python_to_ecl( (<Rational>pyobj).denominator(), read_strings ))
-    elif isinstance(pyobj,EclObject):
+    elif isinstance(pyobj, EclObject):
         return (<EclObject>pyobj).obj
     elif isinstance(pyobj, list):
         L = ECL_NIL

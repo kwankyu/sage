@@ -61,7 +61,7 @@ Trying to multiply temperatures by another unit then converting raises a ValueEr
     sage: wrong.convert()
     Traceback (most recent call last):
     ...
-    ValueError: Cannot convert
+    ValueError: cannot convert
 
 TESTS:
 
@@ -93,7 +93,7 @@ import re
 from .ring import SR
 from .expression import Expression
 from sage.interfaces.tab_completion import ExtraTabCompletion
-from sage.docs.instancedoc import instancedoc
+from sage.misc.instancedoc import instancedoc
 
 ###############################################################################
 # Unit conversions dictionary.
@@ -886,7 +886,6 @@ unit_docs = {
 }
 
 
-
 ###############################################################################
 # Dictionary for converting from derived units to base SI units.
 ###############################################################################
@@ -1434,12 +1433,12 @@ def convert_temperature(expr, target):
         sage: t.convert(units.length.foot)
         Traceback (most recent call last):
         ...
-        ValueError: Cannot convert
+        ValueError: cannot convert
         sage: wrong = units.length.meter*units.temperature.fahrenheit
         sage: wrong.convert()
         Traceback (most recent call last):
         ...
-        ValueError: Cannot convert
+        ValueError: cannot convert
 
     We directly call the convert_temperature function::
 
@@ -1449,15 +1448,16 @@ def convert_temperature(expr, target):
         98.6000000000000
     """
     if len(expr.variables()) != 1:
-        raise ValueError("Cannot convert")
+        raise ValueError("cannot convert")
     elif target is None or unit_to_type[str(target)] == 'temperature':
         from sage.misc.sage_eval import sage_eval
         expr_temp = expr.variables()[0]
         coeff = expr/expr_temp
         if target is not None:
             target_temp = target.variables()[0]
-        a = sage_eval(unitdict['temperature'][str(expr_temp)], locals = {'x':coeff})
-        if  target is None or target_temp == units.temperature.kelvin:
+        a = sage_eval(unitdict['temperature'][str(expr_temp)],
+                      locals={'x': coeff})
+        if target is None or target_temp == units.temperature.kelvin:
             return a[0]*units.temperature.kelvin
         elif target_temp == units.temperature.celsius or target_temp == units.temperature.centigrade:
             return a[1]*target_temp
@@ -1466,4 +1466,4 @@ def convert_temperature(expr, target):
         elif target_temp == units.temperature.rankine:
             return a[3]*target_temp
     else:
-        raise ValueError("Cannot convert")
+        raise ValueError("cannot convert")

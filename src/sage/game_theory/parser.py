@@ -1,7 +1,6 @@
 """
 Parser For gambit And lrs Nash Equilibria
 """
-
 # ****************************************************************************
 #       Copyright (C) 2014 James Campbell james.campbell@tanti.org.uk
 #                     2015 Vincent Knight
@@ -12,6 +11,7 @@ Parser For gambit And lrs Nash Equilibria
 # (at your option) any later version.
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
+
 
 class Parser():
     r"""
@@ -39,7 +39,9 @@ class Parser():
             sage: game_name = tmp_filename()
             sage: with open(game_name, 'w') as game_file:
             ....:     _ = game_file.write(game_str)
-            sage: process = Popen(['lrsnash', game_name], stdout=PIPE, stderr=PIPE)  # optional - lrslib
+            sage: from sage.features.lrs import LrsNash
+            sage: process = Popen([LrsNash().absolute_filename(), game_name],        # optional - lrslib
+            ....:                 stdout=PIPE, stderr=PIPE)
             sage: lrs_output = [bytes_to_str(row) for row in process.stdout]         # optional - lrslib
             sage: Parser(lrs_output).format_lrs()                                    # optional - lrslib
             [[(1,), (1,)]]
@@ -65,7 +67,9 @@ class Parser():
             sage: game_name = tmp_filename()
             sage: with open(game_name, 'w') as game_file:
             ....:     _ = game_file.write(game_str)
-            sage: process = Popen(['lrsnash', game_name], stdout=PIPE, stderr=PIPE)  # optional - lrslib
+            sage: from sage.features.lrs import LrsNash
+            sage: process = Popen([LrsNash().absolute_filename(), game_name],        # optional - lrslib
+            ....:                 stdout=PIPE, stderr=PIPE)
             sage: lrs_output = [bytes_to_str(row) for row in process.stdout]         # optional - lrslib
 
         The above creates a game, writes the H representations to
@@ -105,7 +109,9 @@ class Parser():
             sage: game_name = tmp_filename()
             sage: with open(game_name, 'w') as game_file:
             ....:     _ = game_file.write(game_str)
-            sage: process = Popen(['lrsnash', game_name], stdout=PIPE, stderr=PIPE)  # optional - lrslib
+            sage: from sage.features.lrs import LrsNash
+            sage: process = Popen([LrsNash().absolute_filename(), game_name],        # optional - lrslib
+            ....:                 stdout=PIPE, stderr=PIPE)
             sage: lrs_output = [bytes_to_str(row) for row in process.stdout]         # optional - lrslib
             sage: print(lrs_output)                                                  # optional - lrslib
             [...,
@@ -144,14 +150,16 @@ class Parser():
             doctest:warning...
             DeprecationWarning: NormalFormGame._Hrepresentation is deprecated as it
             creates the legacy input format. Use NormalFormGame._lrs_nash_format instead
-            See https://trac.sagemath.org/27745 for details.
+            See https://github.com/sagemath/sage/issues/27745 for details.
             sage: g1_name, g2_name = tmp_filename(), tmp_filename()
             sage: g1_file, g2_file = open(g1_name, 'w'), open(g2_name, 'w')
             sage: _ = g1_file.write(game1_str)
             sage: g1_file.close()
             sage: _ = g2_file.write(game2_str)
             sage: g2_file.close()
-            sage: process = Popen(['lrsnash', g1_name, g2_name], stdout=PIPE, stderr=PIPE)  # not tested, optional - lrslib
+            sage: from sage.features.lrs import LrsNash
+            sage: process = Popen([LrsNash().absolute_filename(), g1_name, g2_name],        # optional - lrslib
+            ....:                 stdout=PIPE, stderr=PIPE)
             sage: lrs_output = [bytes_to_str(row) for row in process.stdout]                # not tested, optional - lrslib
             sage: nasheq = Parser(lrs_output).format_lrs(legacy_format=True)                # not tested, optional - lrslib
             sage: nasheq                                                                    # not tested, optional - lrslib
@@ -290,4 +298,3 @@ class Parser():
             nice_stuff.append(profile)
 
         return nice_stuff
-

@@ -1,5 +1,5 @@
 r"""
-Skew Univariate Polynomial Rings
+Univariate skew polynomial rings
 
 This module provides the
 :class:`~sage.rings.polynomial.skew_polynomial_ring.SkewPolynomialRing`.
@@ -124,7 +124,7 @@ def _minimal_vanishing_polynomial(R, eval_pts):
         sage: b = _minimal_vanishing_polynomial(S, eval_pts); b
         doctest:...: FutureWarning: This class/method/function is marked as experimental.
          It, its functionality or its interface might change without a formal deprecation.
-        See http://trac.sagemath.org/13215 for details.
+        See https://github.com/sagemath/sage/issues/13215 for details.
         x^3 + 4
     """
     l = len(eval_pts)
@@ -899,4 +899,3 @@ class SkewPolynomialRing_finite_field(SkewPolynomialRing_finite_order):
         if newmap or seed is not None or self._matrix_retraction is None:
             self._new_retraction_map()
         return (self._matrix_retraction*self.base_ring()(x)._vector_())[0]
-

@@ -120,13 +120,15 @@ AUTHORS:
 import os
 import re
 
+import sage.interfaces.abc
+
 from sage.interfaces.expect import (Expect, ExpectElement, ExpectFunction,
                                     FunctionElement)
 from sage.interfaces.interface import AsciiArtString
 from sage.misc.multireplace import multiple_replace
 from sage.misc.superseded import deprecated_function_alias
 from sage.interfaces.tab_completion import ExtraTabCompletion
-from sage.docs.instancedoc import instancedoc
+from sage.misc.instancedoc import instancedoc
 from sage.structure.global_options import GlobalOptions
 
 
@@ -216,14 +218,14 @@ class Macaulay2(ExtraTabCompletion, Expect):
             )
         command = "%s --no-debug --no-readline --silent -e '%s'" % (command, init_str)
         Expect.__init__(self,
-                        name = 'macaulay2',
-                        prompt = PROMPT,
-                        command = command,
-                        server = server,
-                        server_tmpdir = server_tmpdir,
-                        script_subdirectory = script_subdirectory,
-                        verbose_start = False,
-                        logfile = logfile,
+                        name='macaulay2',
+                        prompt=PROMPT,
+                        command=command,
+                        server=server,
+                        server_tmpdir=server_tmpdir,
+                        script_subdirectory=script_subdirectory,
+                        verbose_start=False,
+                        logfile=logfile,
                         eval_using_file_cutoff=500)
 
     # Macaulay2 provides no "clear" function. However, Macaulay2 does provide
@@ -237,7 +239,7 @@ class Macaulay2(ExtraTabCompletion, Expect):
 
         EXAMPLES::
 
-            sage: rlm2, t = macaulay2.__reduce__()
+            sage: rlm2, t = Macaulay2().__reduce__()
             sage: rlm2(*t)
             Macaulay2
         """
@@ -867,7 +869,7 @@ class Macaulay2(ExtraTabCompletion, Expect):
 
 
 @instancedoc
-class Macaulay2Element(ExtraTabCompletion, ExpectElement):
+class Macaulay2Element(ExtraTabCompletion, ExpectElement, sage.interfaces.abc.Macaulay2Element):
     """
     Instances of this class represent objects in Macaulay2.
 
@@ -1179,8 +1181,6 @@ class Macaulay2Element(ExtraTabCompletion, ExpectElement):
         P = self.parent()
         return P.eval('{0}===false or {0}==0'.format(self._name)) != 'true'
 
-    __nonzero__ = __bool__
-
     def sage_polystring(self):
         """
         If this Macaulay2 element is a polynomial, return a string
@@ -1210,7 +1210,7 @@ class Macaulay2Element(ExtraTabCompletion, ExpectElement):
             sage: X = R.Proj().name('X')                        # optional - macaulay2
             sage: X.structure_sheaf()                           # optional - macaulay2
             doctest:...: DeprecationWarning: The function `structure_sheaf` is deprecated. Use `self.sheaf()` instead.
-            See https://trac.sagemath.org/27848 for details.
+            See https://github.com/sagemath/sage/issues/27848 for details.
             OO
               X
             sage: X.sheaf()                                     # optional - macaulay2
@@ -1618,7 +1618,7 @@ class Macaulay2Element(ExtraTabCompletion, ExpectElement):
             elif cls_str == "String":
                 return str(repr_str)
             elif cls_str == "Module":
-                from sage.modules.all import FreeModule
+                from sage.modules.free_module import FreeModule
                 if self.isFreeModule()._sage_():
                     ring = self.ring()._sage_()
                     rank = self.rank()._sage_()
@@ -1632,7 +1632,7 @@ class Macaulay2Element(ExtraTabCompletion, ExpectElement):
                     graph_cls = DiGraph
                 adj_mat = self.adjacencyMatrix().sage()
                 g = graph_cls(adj_mat, format='adjacency_matrix')
-                g.relabel(self.vertices())
+                g.relabel(self.vertices(sort=True))
                 return g
             elif cls_str == "ChainComplex":
                 from sage.homology.chain_complex import ChainComplex
@@ -1834,14 +1834,24 @@ class Macaulay2FunctionElement(FunctionElement):
 
 def is_Macaulay2Element(x):
     """
+    Return True if ``x`` is a :class:`Macaulay2Element`
+
+    This function is deprecated; use :func:`isinstance`
+    (of :class:`sage.interfaces.abc.Macaulay2Element`) instead.
+
     EXAMPLES::
 
         sage: from sage.interfaces.macaulay2 import is_Macaulay2Element
         sage: is_Macaulay2Element(2)              # optional - macaulay2
+        doctest:...: DeprecationWarning: the function is_Macaulay2Element is deprecated; use isinstance(x, sage.interfaces.abc.MacaulayElement) instead
+        See https://github.com/sagemath/sage/issues/34823 for details.
         False
         sage: is_Macaulay2Element(macaulay2(2))   # optional - macaulay2
         True
     """
+    from sage.misc.superseded import deprecation
+    deprecation(34804, "the function is_Macaulay2Element is deprecated; use isinstance(x, sage.interfaces.abc.Macaulay2Element) instead")
+
     return isinstance(x, Macaulay2Element)
 
 # An instance
@@ -1866,7 +1876,6 @@ def macaulay2_console():
     os.system('M2')
 
 
-
 def reduce_load_macaulay2():
     """
     Used for reconstructing a copy of the Macaulay2 interpreter from a pickle.
@@ -1878,4 +1887,3 @@ def reduce_load_macaulay2():
         Macaulay2
     """
     return macaulay2
-

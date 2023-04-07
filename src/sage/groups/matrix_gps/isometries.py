@@ -1,21 +1,21 @@
 r"""
 Groups of isometries.
 
-Let `M = \ZZ^n` or `\QQ^n`, `b: M \times M \rightarrow \QQ$ a bilinear form and
-$f: M \rightarrow M$ a linear map. We say that $f$ is an isometry if for all
-elements $x,y$ of $M$ we have that $b(x,y)=b(f(x),f(y))$.
-A group of isometries is a subgroup of $GL(M)$ consisting of isometries.
+Let `M = \ZZ^n` or `\QQ^n`, `b: M \times M \rightarrow \QQ` a bilinear form and
+`f: M \rightarrow M` a linear map. We say that `f` is an isometry if for all
+elements `x,y` of `M` we have that `b(x,y)=b(f(x),f(y))`.
+A group of isometries is a subgroup of `GL(M)` consisting of isometries.
 
 EXAMPLES::
 
     sage: L = IntegralLattice("D4")
     sage: O = L.orthogonal_group()
     sage: O
-    Group of isometries with 5 generators (
-    [-1  0  0  0]  [0 0 0 1]  [-1 -1 -1 -1]  [ 1  1  0  0]  [ 1  0  0  0]
-    [ 0 -1  0  0]  [0 1 0 0]  [ 0  0  1  0]  [ 0  0  1  0]  [-1 -1 -1 -1]
-    [ 0  0 -1  0]  [0 0 1 0]  [ 0  1  0  1]  [ 0  1  0  1]  [ 0  0  1  0]
-    [ 0  0  0 -1], [1 0 0 0], [ 0 -1 -1  0], [ 0 -1 -1  0], [ 0  0  0  1]
+    Group of isometries with 3 generators (
+    [0 0 0 1]  [ 1  1  0  0]  [ 1  0  0  0]
+    [0 1 0 0]  [ 0  0  1  0]  [-1 -1 -1 -1]
+    [0 0 1 0]  [ 0  1  0  1]  [ 0  0  1  0]
+    [1 0 0 0], [ 0 -1 -1  0], [ 0  0  0  1]
     )
 
 Basic functionality is provided by GAP::

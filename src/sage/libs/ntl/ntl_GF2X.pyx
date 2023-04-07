@@ -87,7 +87,7 @@ def GF2XHexOutput(have_hex=None):
         GF2XHexOutput_c[0] = 0
 
 
-cdef class ntl_GF2X(object):
+cdef class ntl_GF2X():
     """
     Univariate Polynomials over GF(2) via NTL.
     """
@@ -160,7 +160,7 @@ cdef class ntl_GF2X(object):
             if x.characteristic() == 2:
                 x = list(x.modulus())
         elif isinstance(x, FiniteField_givaroElement):
-            x = "0x"+hex(x.integer_representation())[2:][::-1]
+            x = "0x" + hex(x.to_integer())[2:][::-1]
         elif isinstance(x, FiniteField_ntl_gf2eElement):
             x = x.polynomial().list()
         s = str(x).replace(","," ")
@@ -368,7 +368,7 @@ cdef class ntl_GF2X(object):
     def __lshift__(ntl_GF2X self, int i):
         """
         Return left shift of self by i bits ( == multiplication by
-        $X^i$).
+        `X^i`).
 
         INPUT:
             i -- offset/power of X
@@ -387,7 +387,7 @@ cdef class ntl_GF2X(object):
     def __rshift__(ntl_GF2X self, int offset):
         """
         Return right shift of self by i bits ( == floor division by
-        $X^i$).
+        `X^i`).
 
         INPUT:
             i -- offset/power of X

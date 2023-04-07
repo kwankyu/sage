@@ -36,6 +36,7 @@ AUTHORS:
 # This file implements common functionality among template elements
 include "padic_template_element.pxi"
 
+from collections.abc import Iterable
 from sage.structure.element cimport Element
 from sage.rings.padics.common_conversion cimport comb_prec, _process_args_and_kwds
 from sage.rings.integer_ring import ZZ
@@ -54,7 +55,7 @@ cdef class CAElement(pAdicTemplateElement):
 
         INPUT:
 
-        - ``x`` -- data defining a `p`-adic element: int, long,
+        - ``x`` -- data defining a `p`-adic element: int,
           Integer, Rational, other `p`-adic element...
 
         - ``val`` -- the valuation of the resulting element
@@ -467,8 +468,7 @@ cdef class CAElement(pAdicTemplateElement):
         cdef Integer right
         cdef CAElement pright, ans
         cdef bint exact_exp
-        if isinstance(_right, Integer) or isinstance(_right, (int, long)) \
-                                          or isinstance(_right, Rational):
+        if isinstance(_right, (Integer, int, Rational)):
             if _right < 0:
                 base = ~self
                 return base.__pow__(-_right, dummy)
@@ -489,7 +489,7 @@ cdef class CAElement(pAdicTemplateElement):
         elif ciszero(self.value, self.prime_pow):
             # We may assume from above that right > 0 if exact.
             # So we return a zero of precision right * self.ordp.
-            if isinstance(_right, (int, long)):
+            if isinstance(_right, int):
                 _right = Integer(_right)
             if isinstance(_right, Integer):
                 right = <Integer>_right
@@ -731,7 +731,7 @@ cdef class CAElement(pAdicTemplateElement):
                 return True
         return mpz_cmp_si((<Integer>absprec).value, val) <= 0
 
-    def __nonzero__(self):
+    def __bool__(self):
         """
         Whether this element should be considered true in a boolean context.
 
@@ -859,7 +859,8 @@ cdef class CAElement(pAdicTemplateElement):
 
             :meth:`sage.misc.cachefunc._cache_key`
         """
-        tuple_recursive = lambda l: tuple(tuple_recursive(x) for x in l) if hasattr(l, '__iter__') else l
+        def tuple_recursive(l):
+            return tuple(tuple_recursive(x) for x in l) if isinstance(l, Iterable) else l
         return (self.parent(), tuple_recursive(trim_zeros(list(self.expansion()))), self.precision_absolute())
 
     def _teichmuller_set_unsafe(self):
@@ -1670,7 +1671,8 @@ cdef class pAdicConvert_CA_frac_field(Morphism):
             a + O(3^20)
         """
         cdef CRElement x = _x
-        if x.ordp < 0: raise ValueError("negative valuation")
+        if x.ordp < 0:
+            raise ValueError("negative valuation")
         cdef CAElement ans = self._zero._new_c()
         cdef bint reduce = (x.prime_pow.e > 1)
         ans.absprec = x.relprec + x.ordp
@@ -1720,7 +1722,8 @@ cdef class pAdicConvert_CA_frac_field(Morphism):
         """
         cdef long aprec, rprec
         cdef CRElement x = _x
-        if x.ordp < 0: raise ValueError("negative valuation")
+        if x.ordp < 0:
+            raise ValueError("negative valuation")
         cdef CAElement ans = self._zero._new_c()
         cdef bint reduce = False
         _process_args_and_kwds(&aprec, &rprec, args, kwds, True, ans.prime_pow)

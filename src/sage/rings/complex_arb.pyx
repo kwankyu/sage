@@ -145,7 +145,7 @@ Classes and Methods
 import operator
 import sys
 import warnings
-from cysignals.signals cimport sig_on, sig_str, sig_off, sig_error
+from cysignals.signals cimport sig_on, sig_str, sig_off, sig_error, sig_block, sig_unblock
 
 import sage.categories.fields
 
@@ -284,27 +284,27 @@ cdef int acb_calc_func_callback(acb_ptr out, const acb_t inp, void * param,
     """
     cdef IntegrationContext ctx
     cdef ComplexBall x
-    sig_off()
+    sig_block()
     try:
         ctx = <IntegrationContext>param
         if ctx.exn_type is not None or order >= 2:
             acb_indeterminate(out)
             return 0
-        x = ComplexBall.__new__(ComplexBall)
-        assert prec == ctx.parent._prec
-        x._parent = ctx.parent
-        acb_set(x.value, inp)
         try:
+            x = ComplexBall.__new__(ComplexBall)
+            assert prec == ctx.parent._prec
+            x._parent = ctx.parent
+            acb_set(x.value, inp)
             y = ctx.f(x, (order == 1))
             if not isinstance(y, ComplexBall):
                 y = ctx.parent.coerce(y)
             acb_set(out, (<ComplexBall> y).value)
-        except Exception:
+        except BaseException:
             ctx.exn_type, ctx.exn_obj, ctx.exn_tb = sys.exc_info()
             acb_indeterminate(out)
         return 0
     finally:
-        sig_on()
+        sig_unblock()
 
 
 class ComplexBallField(UniqueRepresentation, sage.rings.abc.ComplexBallField):
@@ -350,7 +350,7 @@ class ComplexBallField(UniqueRepresentation, sage.rings.abc.ComplexBallField):
             sage: ComplexBallField(53) is ComplexBallField()
             True
         """
-        return super(ComplexBallField, cls).__classcall__(cls, precision)
+        return super().__classcall__(cls, precision)
 
     def __init__(self, long precision=53):
         r"""
@@ -567,7 +567,9 @@ class ComplexBallField(UniqueRepresentation, sage.rings.abc.ComplexBallField):
             emb = other.coerce_embedding()
             return emb is not None and self.has_coerce_map_from(emb.codomain())
 
-        from sage.rings.all import QQ, AA, QQbar, RLF, CLF
+        from sage.rings.qqbar import AA, QQbar
+        from sage.rings.real_lazy import RLF, CLF
+
         if other in [AA, QQbar, RLF, CLF]:
             return True
 
@@ -1173,6 +1175,14 @@ class ComplexBallField(UniqueRepresentation, sage.rings.abc.ComplexBallField):
 
             sage: ComplexBallField(100).integral(lambda x, _: sin(x), RBF(0), RBF(1))
             [0.4596976941318602825990633926 +/- ...e-29]
+
+            sage: from cysignals.alarm import alarm
+            sage: alarm(0.1r)
+            sage: C = ComplexBallField(1000000)
+            sage: C.integral(lambda x, _: x.cos() * x.sin(), 0, 1)
+            Traceback (most recent call last):
+            ...
+            AlarmInterrupt
         """
         cdef IntegrationContext ctx = IntegrationContext()
         cdef acb_calc_integrate_opt_t arb_opts
@@ -2267,7 +2277,7 @@ cdef class ComplexBall(RingElement):
         return (arb_is_nonzero(acb_realref(self.value))
                 or arb_is_nonzero(acb_imagref(self.value)))
 
-    def __nonzero__(self):
+    def __bool__(self):
         """
         Return ``True`` iff this complex ball is not the zero ball, i.e. if the
         midpoint and radius of its real and imaginary parts are not all zero.
@@ -2726,7 +2736,7 @@ cdef class ComplexBall(RingElement):
         cdef ComplexBall self = val
         cdef ComplexBall res = self._new()
         if is_small_python_int(shift):
-             acb_mul_2exp_si(res.value, self.value, PyInt_AS_LONG(shift))
+            acb_mul_2exp_si(res.value, self.value, PyInt_AS_LONG(shift))
         elif isinstance(shift, Integer):
             sig_on()
             fmpz_init(tmpz)
@@ -2982,7 +2992,7 @@ cdef class ComplexBall(RingElement):
         return res
 
     def rising_factorial(self, n):
-        """
+        r"""
         Return the ``n``-th rising factorial of this ball.
 
         The `n`-th rising factorial of `x` is equal to `x (x+1) \cdots (x+n-1)`.
@@ -3702,7 +3712,7 @@ cdef class ComplexBall(RingElement):
         return res
 
     def polylog(self, s):
-        """
+        r"""
         Return the polylogarithm `\operatorname{Li}_s(\mathrm{self})`.
 
         EXAMPLES::

@@ -7,7 +7,7 @@ Welcome to the Sage Reference Manual!
 Here you find documentation for all of `Sage <http://www.sagemath.org/>`_'s
 features, illustrated with lots of examples.  A thematic index follows.
 
-This documentation is licensed under the `Creative Commons Attribution-Share Alike 3.0 License`__:math:`.`
+This documentation is licensed under the `Creative Commons Attribution-Share Alike 3.0 License`__.
 
 __ http://creativecommons.org/licenses/by-sa/3.0/
 
@@ -92,18 +92,22 @@ Discrete Mathematics
 * :doc:`Symbolic Logic <logic/index>`
 * :doc:`SAT solvers <sat/index>`
 
-Geometry, Topology, and Homological Algebra
--------------------------------------------
+Geometry and Topology
+---------------------
 
 * :doc:`Euclidean Spaces and Vector Calculus <euclidean_spaces/index>`
 * :doc:`Combinatorial and Discrete Geometry <discrete_geometry/index>`
-* :doc:`Cell Complexes, Simplicial Complexes, and 
-  Simplicial Sets <topology/index>`
+* :doc:`Cell Complexes, Simplicial Complexes, and Simplicial Sets <topology/index>`
 * :doc:`Manifolds and Differential Geometry <manifolds/index>`
 * :doc:`Hyperbolic Geometry <hyperbolic_geometry/index>`
 * :doc:`Parametrized Surfaces <riemannian_geometry/index>`
 * :doc:`Knot Theory <knots/index>`
+
+Homological Algebra
+-------------------
+
 * :doc:`Chain Complexes and their Homology <homology/index>`
+* :doc:`Resolutions <resolutions/index>`
 
 Number Fields, Function Fields, and Valuations
 ----------------------------------------------
@@ -111,21 +115,19 @@ Number Fields, Function Fields, and Valuations
 * :doc:`Number Fields <number_fields/index>`
 * :doc:`Function Fields <function_fields/index>`
 * :doc:`Discrete Valuations <valuations/index>`
+* :doc:`Drinfeld Modules <drinfeld_modules/index>`
 
 Number Theory
 -------------
 
-* :doc:`Diophantine approximation <diophantine_approximation/index>`
+* :doc:`Diophantine Approximation <diophantine_approximation/index>`
 * :doc:`Quadratic Forms <quadratic_forms/index>`
 * :doc:`\\(L\\)-Functions <lfunctions/index>`
 * :doc:`Arithmetic Subgroups of \\({\\rm SL}_2(\\ZZ)\\) <arithgroup/index>`
 * :doc:`General Hecke Algebras and Hecke Modules <hecke/index>`
-* :doc:`Modular Symbols <modsym/index>`
 * :doc:`Modular Forms <modfrm/index>`
-* :doc:`Quasimodular Forms <quasimodfrm/index>`
-* :doc:`Modular Forms for Hecke Triangle Groups <modfrm_hecketriangle/index>`
+* :doc:`Modular Symbols <modsym/index>`
 * :doc:`Modular Abelian Varieties <modabvar/index>`
-* :doc:`Miscellaneous Modular-Form-Related Modules <modmisc/index>`
 
 Algebraic and Arithmetic Geometry
 ---------------------------------
@@ -139,23 +141,28 @@ Miscellaneous
 * :doc:`Databases <databases/index>`
 * :doc:`Games <games/index>`
 
-Programming
-===========
+Infrastructure
+==============
 
-Facilities
-----------
+Programming Facilities
+----------------------
 
 * :doc:`Data Structures <data_structures/index>`
 * :doc:`Utilities <misc/index>`
 * :doc:`Test Framework <doctest/index>`
 * :doc:`Parallel Computing <parallel/index>`
+* :doc:`Python Technicalities <cpython/index>`
 
-Interfaces
-----------
+Subsystem Interfaces
+--------------------
 
 * :doc:`Interpreter Interfaces <interfaces/index>`
 * :doc:`C/C++ Library Interfaces <libs/index>`
-* :doc:`Python Technicalities <cpython/index>`
+
+Documentation System
+--------------------
+
+* :doc:`Documentation System <documentation/index>`
 
 General Information
 ===================
@@ -170,3 +177,10 @@ Indices and Tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+..
+  comment: the following math environment forces Sphinx to load MathJax
+  in the index.rst pages. Do not delete it!
+
+.. math::
+   :nowrap:

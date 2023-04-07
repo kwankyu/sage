@@ -48,7 +48,7 @@ only differ by a lattice automorphism::
     sage: square = LatticePolytope_PPL((-1,-1),(-1,1),(1,-1),(1,1))
     sage: fibers = [ f.vertices() for f in square.fibration_generator(1) ];  fibers
     [((1, 0), (-1, 0)), ((0, 1), (0, -1)), ((-1, -1), (1, 1)), ((-1, 1), (1, -1))]
-    sage: square.pointsets_mod_automorphism(fibers)
+    sage: square.pointsets_mod_automorphism(fibers)                                     # optional - sage.groups
     (frozenset({(-1, -1), (1, 1)}), frozenset({(-1, 0), (1, 0)}))
 
 AUTHORS:
@@ -177,7 +177,6 @@ def LatticePolytope_PPL(*args):
         dim = next(iter(gs)).space_dimension()
         polytope_class = _class_for_LatticePolytope(dim)
     return polytope_class(gs)
-
 
 
 ########################################################################
@@ -387,14 +386,14 @@ class LatticePolytope_PPL_class(C_Polyhedron):
             ....:      (-1,2,-1), (-1,2,-2), (-1,1,-2), (-1,-1,2), (-1,-3,2)]
             sage: P = LatticePolytope_PPL(*v)
             sage: pts1 = P.integral_points()                     # Sage's own code
-            sage: pts2 = LatticePolytope(v).points()          # PALP
+            sage: pts2 = LatticePolytope(v).points()                            # optional - palp
             sage: for p in pts1: p.set_immutable()
-            sage: set(pts1) == set(pts2)
+            sage: set(pts1) == set(pts2)                                        # optional - palp
             True
 
             sage: len(Polyhedron(v).integral_points())  # takes about 1 ms
             23
-            sage: len(LatticePolytope(v).points())  # takes about 13 ms
+            sage: len(LatticePolytope(v).points())  # takes about 13 ms         # optional - palp
             23
             sage: len(LatticePolytope_PPL(*v).integral_points())  # takes about 0.5 ms
             23
@@ -671,7 +670,8 @@ class LatticePolytope_PPL_class(C_Polyhedron):
         points = tuple(sorted(points))
         Aut = self.lattice_automorphism_group(points,
                                               point_labels=tuple(range(len(points))))
-        indexsets = set(frozenset(points.index(p) for p in ps)
+        point_to_index = {p: i for i, p in enumerate(points)}
+        indexsets = set(frozenset(point_to_index[p] for p in ps)
                         for ps in pointsets)
         orbits = []
         while indexsets:
@@ -854,8 +854,8 @@ class LatticePolytope_PPL_class(C_Polyhedron):
             sage: poly = LatticePolytope_PPL((-9,-6,-1,-1),(0,0,0,1),(0,0,1,0),(0,1,0,0),(1,0,0,0))
             sage: fiber = next(poly.fibration_generator(2))
             sage: poly.base_projection_matrix(fiber)
-            [0 0 1 0]
-            [0 0 0 1]
+            [ 0  0 -1  0]
+            [ 0  0  0 -1]
 
         Note that the basis choice in :meth:`base_projection` for the
         quotient is usually different::
@@ -865,7 +865,7 @@ class LatticePolytope_PPL_class(C_Polyhedron):
             sage: [ proj(p) for p in poly.integral_points() ]
             [(-1, -1), (0, 0), (0, 0), (0, 0), (0, 0), (0, 0), (0, 0), (0, 0), (0, 1), (1, 0)]
             sage: [ proj_matrix*p for p in poly.integral_points() ]
-            [(-1, -1), (0, 0), (0, 0), (0, 0), (0, 0), (0, 0), (0, 0), (0, 0), (0, 1), (1, 0)]
+            [(1, 1), (0, 0), (0, 0), (0, 0), (0, 0), (0, 0), (0, 0), (0, 0), (0, -1), (-1, 0)]
         """
         return matrix(ZZ, fiber.vertices()).right_kernel_matrix()
 
@@ -1260,4 +1260,3 @@ class LatticePolytope_PPL_class(C_Polyhedron):
             return points
         else:
             raise ValueError('output='+str(output)+' is not valid.')
-

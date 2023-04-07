@@ -1,5 +1,5 @@
 r"""
-Base Classes for 3D Graphics Objects and Plotting
+Base classes for 3D graphics objects and plotting
 
 The most important facts about these classes are
 that you can simply add graphics objects
@@ -9,7 +9,7 @@ choosing a viewer and setting
 various parameters for displaying the graphics.
 
 Most of the other methods of these classes are technical and
-for special usage. 
+for special usage.
 
 AUTHORS:
 
@@ -154,11 +154,15 @@ cdef class Graphics3d(SageObject):
         if viewer is None:
             viewer = SHOW_DEFAULTS['viewer']
         # fall back to 2d image if necessary
-        if viewer == 'canvas3d' and not can_view_canvas3d:   viewer = 'jmol'
-        if viewer == 'wavefront' and not can_view_wavefront: viewer = 'jmol'
-        if viewer == 'threejs' and not can_view_threejs:     viewer = 'jmol'
-        if viewer == 'jmol' and not can_view_jmol:           viewer = 'tachyon'
-        ### Second, return the corresponding graphics file
+        if viewer == 'canvas3d' and not can_view_canvas3d:
+            viewer = 'jmol'
+        if viewer == 'wavefront' and not can_view_wavefront:
+            viewer = 'jmol'
+        if viewer == 'threejs' and not can_view_threejs:
+            viewer = 'jmol'
+        if viewer == 'jmol' and not can_view_jmol:
+            viewer = 'tachyon'
+        # Second, return the corresponding graphics file
         if viewer == 'threejs':
             return self._rich_repr_threejs(**opts)
         elif viewer == 'jmol':
@@ -453,6 +457,7 @@ cdef class Graphics3d(SageObject):
         js_options['animate'] = options.get('animate', True)
         js_options['animationControls'] = options.get('animation_controls', True)
         js_options['aspectRatio'] = options.get('aspect_ratio', [1,1,1])
+        js_options['autoScaling'] = options.get('auto_scaling', [False, False, False])
         js_options['autoPlay'] = options.get('auto_play', True)
         js_options['axes'] = options.get('axes', False)
         js_options['axesLabels'] = options.get('axes_labels', ['x','y','z'])
@@ -735,7 +740,8 @@ cdef class Graphics3d(SageObject):
             ([-1.0, -1.0, 0.0], [1.0, 1.0, 1.0])
         """
         a_min, a_max = self.bounding_box()
-        a_min = list(a_min); a_max = list(a_max)
+        a_min = list(a_min)
+        a_max = list(a_max)
         for i in range(3):
             if a_min[i] == a_max[i]:
                 a_min[i] = a_min[i] - 1
@@ -993,7 +999,7 @@ cdef class Graphics3d(SageObject):
       "camera_position","updir",
       # "look_at", # omit look_at. viewdir is sufficient for most purposes
       "viewdir")
-      
+
     # The tachyon "aspectratio" parameter is outdated for normal users:
     # From the tachyon documentation:
     # "By using the aspect ratio parameter, one can produce images which look
@@ -1079,7 +1085,7 @@ cdef class Graphics3d(SageObject):
         updir = _flip_orientation(updir)
         camera_position = _flip_orientation(camera_position)
         light_position = _flip_orientation(light_position)
-       
+
         return """
 begin_scene
 resolution {resolution_x:d} {resolution_y:d}
@@ -1161,9 +1167,9 @@ end_scene""".format(
     def _tostring(s):
         r"""
         Converts vector information to a space-separated string.
-    
+
         EXAMPLES::
-    
+
             sage: sage.plot.plot3d.base.Graphics3d._tostring((1.0,1.2,-1.3))
             '1.00000000000000 1.20000000000000 -1.30000000000000'
         """
@@ -1251,7 +1257,6 @@ end_scene""".format(
             f.write('wireframe off; spacefill off\n')
             f.write('set labelOffset 0 0\n')
 
-
         # Set the scene background color
         f.write('background [%s,%s,%s]\n'%tuple([int(a*255) for a in background]))
         if spin:
@@ -1259,14 +1264,15 @@ end_scene""".format(
         else:
             f.write('spin OFF\n')
         if stereo:
-            if stereo is True: stereo = "redblue"
+            if stereo is True:
+                stereo = "redblue"
             f.write('stereo %s\n' % stereo)
         if orientation:
-            f.write('moveto 0 %s %s %s %s\n'%tuple(orientation))
+            f.write('moveto 0 %s %s %s %s\n' % tuple(orientation))
 
         f.write('centerAt absolute {0 0 0}\n')
         f.write('zoom {0}\n'.format(zoom * 100))
-        f.write('frank OFF\n') # jmol logo
+        f.write('frank OFF\n')  # jmol logo
 
         if perspective_depth:
             f.write('set perspectivedepth ON\n')
@@ -1484,8 +1490,10 @@ end_scene""".format(
         if aspect_ratio == "automatic" or aspect_ratio == [1.0]*3:
             return a_min, a_max
 
-        longest_side = 0; longest_length = a_max[0] - a_min[0]
-        shortest_side = 0; shortest_length = a_max[0] - a_min[0]
+        longest_side = 0
+        longest_length = a_max[0] - a_min[0]
+        shortest_side = 0
+        shortest_length = a_max[0] - a_min[0]
 
         for i in range(3):
             s = a_max[i] - a_min[i]
@@ -1527,7 +1535,8 @@ end_scene""".format(
 
     def _transform_to_bounding_box(self, xyz_min, xyz_max, a_min, a_max, frame, axes, thickness, labels):
 
-        a_min_orig = a_min; a_max_orig = a_max
+        a_min_orig = a_min
+        a_max_orig = a_max
 
         # Rescale in each direction
         scale = [float(xyz_max[i] - xyz_min[i]) / (a_max[i] - a_min[i]) for i in range(3)]
@@ -1673,7 +1682,7 @@ end_scene""".format(
            the viewpoint, with respect to the cube
            $[-1,1]\\times[-1,1]\\times[-1,1]$,
            into which the bounding box of the scene
-           is scaled and centered. 
+           is scaled and centered.
            The default viewing direction is towards the origin.
 
         -  ``viewdir`` (for tachyon) -- (default: None) three coordinates
@@ -1704,7 +1713,7 @@ end_scene""".format(
 
            * ``'lowest'``: worst quality rendering, preview (and fastest).
              Sets tachyon command line flag ``-lowestshade``.
-             
+
         -  ``extra_opts`` (for tachyon) -- string (default: empty string);
            extra options that will be appended to the tachyon command line.
 
@@ -3251,8 +3260,10 @@ def flatten_list(L):
     if type(L) is not list:
         return [L]
     flat = []
-    L_stack = []; L_pop = L_stack.pop
-    i_stack = []; i_pop = i_stack.pop
+    L_stack = []
+    L_pop = L_stack.pop
+    i_stack = []
+    i_pop = i_stack.pop
     cdef Py_ssize_t i = 0
     while i < PyList_GET_SIZE(L) or PyList_GET_SIZE(L_stack) > 0:
         while i < PyList_GET_SIZE(L):

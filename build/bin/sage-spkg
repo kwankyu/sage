@@ -451,20 +451,31 @@ echo "Setting up build directory for $PKG_NAME"
 cp -RLp "$PKG_SCRIPTS" "$PKG_NAME"
 cd "$PKG_NAME" || exit $?
 
-sage-uncompress-spkg -d src "$PKG_SRC"
-if [ $? -ne 0 ]; then
-    error_msg "Error: failed to extract $PKG_SRC"
-    exit 1
-fi
-
-echo "Finished extraction"
-
-cd src
-if ! sage-apply-patches; then
-    error_msg "Error applying patches"
-    exit 1
-fi
-cd ..
+case "$PKG_SRC" in
+    *.whl)
+        # (Platform-independent) wheel
+        # Do not extract, do not create a src directory,
+        # just copy to dist/ and create a simple install script.
+        mkdir -p dist
+        cp "$PKG_SRC" dist/
+        echo "sdh_store_and_pip_install_wheel ." > spkg-install.in
+        ;;
+    *)
+        # Source tarball
+        sage-uncompress-spkg -d src "$PKG_SRC"
+        if [ $? -ne 0 ]; then
+            error_msg "Error: failed to extract $PKG_SRC"
+            exit 1
+        fi
+        echo "Finished extraction"
+        cd src
+        if ! sage-apply-patches; then
+            error_msg "Error applying patches"
+            exit 1
+        fi
+        cd ..
+        ;;
+esac
 
 ##################################################################
 # The package has been extracted, prepare for installation
@@ -675,7 +686,7 @@ echo "Copying package files from temporary location $SAGE_DESTDIR to $SAGE_INST_
 if [ -d "$SAGE_DESTDIR" ]; then
     # Some `find` implementations will put superfluous slashes in the
     # output if we give them a directory name with a slash; so make sure
-    # any trailing slash is removed; https://trac.sagemath.org/ticket/26013
+    # any trailing slash is removed; https://github.com/sagemath/sage/issues/26013
     PREFIX="${SAGE_DESTDIR_LOCAL%/}"
 
     rm -f "$PREFIX"/lib/*.la

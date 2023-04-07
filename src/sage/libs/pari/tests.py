@@ -356,7 +356,7 @@ Constructors::
     [2, 4]~*x + [1, 3]~
 
     sage: pari(3).Qfb(7, 1)
-    Qfb(3, 7, 1, 0.E-19)
+    Qfb(3, 7, 1)
     sage: pari(3).Qfb(7, 2)
     Traceback (most recent call last):
     ...
@@ -512,7 +512,7 @@ Basic functions::
     sage: pari('sqrt(-2)').frac()
     Traceback (most recent call last):
     ...
-    PariError: incorrect type in gfloor (t_COMPLEX)
+    PariError: incorrect type in gfrac (t_COMPLEX)
 
     sage: pari('1+2*I').imag()
     2
@@ -784,7 +784,7 @@ Transcendental functions::
     sage: pari(1+i).cosh()
     0.833730025131149 + 0.988897705762865*I
     sage: pari('x+O(x^8)').cosh()
-    1 + 1/2*x^2 + 1/24*x^4 + 1/720*x^6 + O(x^8)
+    1 + 1/2*x^2 + 1/24*x^4 + 1/720*x^6 + ...O(...)
 
     sage: pari(5).cotan()
     -0.295812915532746
@@ -1767,7 +1767,7 @@ library::
     sage: eta1 = e.elleta(precision=150)[0]
     sage: eta1.sage()
     3.605463601432652085915820564207726774810268996598024745444380641429820491740 # 64-bit
-    3.60546360143265208591582056420772677481026899659802474544                    # 32-bit 
+    3.60546360143265208591582056420772677481026899659802474544                    # 32-bit
     sage: from cypari2 import Pari
     sage: pari = Pari()
 

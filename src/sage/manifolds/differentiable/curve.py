@@ -186,7 +186,7 @@ class DifferentiableCurve(DiffMap):
 
         sage: c = M.curve([sin(t), sin(2*t)/2], (t, 0, 2*pi))
         sage: latex(c)
-        \mbox{Curve in the 2-dimensional differentiable manifold M}
+        \text{Curve in the 2-dimensional differentiable manifold M}
         sage: c = M.curve([sin(t), sin(2*t)/2], (t, 0, 2*pi), name='c')
         sage: latex(c)
         c
@@ -965,10 +965,8 @@ class DifferentiableCurve(DiffMap):
 
         return self._graphics(plot_curve, ambient_coords,
                               thickness=thickness,
-                              aspect_ratio=aspect_ratio, color= color,
+                              aspect_ratio=aspect_ratio, color=color,
                               style=style, label_axes=label_axes)
-
-
 
     def _graphics(self, plot_curve, ambient_coords, thickness=1,
                   aspect_ratio='automatic', color='red', style='-',

@@ -202,6 +202,7 @@ class Rule(UniqueRepresentation):
     e.g., the case of Hecke insertion, in which a letter bumped
     into a row may change a different row).
     """
+
     def to_pairs(self, obj1=None, obj2=None, check=True):
         r"""
         Given a valid input for the RSK algorithm, such as
@@ -530,6 +531,7 @@ class RuleRSK(Rule):
         sage: RSK_inverse(p, q, insertion=RSK.rules.RSK)
         [[1, 2, 3, 3], [2, 1, 2, 2]]
     """
+
     def insertion(self, j, r):
         r"""
         Insert the letter ``j`` from the second row of the biword
@@ -613,9 +615,8 @@ class RuleRSK(Rule):
                 raise TypeError("p must be standard to have a valid permutation as output")
             from sage.combinat.permutation import Permutation
             return Permutation(reversed(lower_row))
-        else:
-            return super(RuleRSK, self)._backward_format_output(lower_row, upper_row, output,
-                                                                p_is_standard, q_is_standard)
+        return super()._backward_format_output(lower_row, upper_row, output,
+                                               p_is_standard, q_is_standard)
 
 
 class RuleEG(Rule):
@@ -701,6 +702,7 @@ class RuleEG(Rule):
         ....:     for wd in p.reduced_words())
         True
     """
+
     def insertion(self, j, r):
         r"""
         Insert the letter ``j`` from the second row of the biword
@@ -798,8 +800,8 @@ class RuleEG(Rule):
             from sage.combinat.permutation import Permutations
             return Permutations(n).from_reduced_word(list(lower_row))
         else:
-            return super(RuleEG, self)._backward_format_output(lower_row, upper_row, output,
-                                                               p_is_standard, q_is_standard)
+            return super()._backward_format_output(lower_row, upper_row, output,
+                                                   p_is_standard, q_is_standard)
 
 
 class RuleHecke(Rule):
@@ -867,6 +869,7 @@ class RuleHecke(Rule):
         sage: wp == w
         True
     """
+
     def forward_rule(self, obj1, obj2, check_standard=False):
         r"""
         Return a pair of tableaux obtained by applying Hecke
@@ -1307,6 +1310,7 @@ class RuleDualRSK(Rule):
         ...
         ValueError: p(=[[1, 2, 3]]) and q(=[[1, 2]]) must have the same shape
     """
+
     def to_pairs(self, obj1=None, obj2=None, check=True):
         r"""
         Given a valid input for the dual RSK algorithm, such as
@@ -1483,8 +1487,8 @@ class RuleDualRSK(Rule):
             from sage.combinat.permutation import Permutation
             return Permutation(reversed(lower_row))
         else:
-            return super(RuleDualRSK, self)._backward_format_output(lower_row, upper_row, output,
-                                                                    p_is_standard, q_is_standard)
+            return super()._backward_format_output(lower_row, upper_row, output,
+                                                   p_is_standard, q_is_standard)
 
     def _forward_format_output(self, p, q, check_standard):
         r"""
@@ -1687,6 +1691,7 @@ class RuleCoRSK(RuleRSK):
         ...
         ValueError: invalid strict cobiword
     """
+
     def to_pairs(self, obj1=None, obj2=None, check=True):
         r"""
         Given a valid input for the coRSK algorithm, such as
@@ -2009,6 +2014,7 @@ class RuleSuperRSK(RuleRSK):
         ...
         ValueError: p(=[[1, 2, 3]]) and q(=[[1, 2]]) must have the same shape
     """
+
     def to_pairs(self, obj1=None, obj2=None, check=True):
         r"""
         Given a valid input for the super RSK algorithm, such as
@@ -2645,6 +2651,7 @@ class RuleStar(Rule):
         ....:          insertion='Star', output='word') for w in words)])
         True
     """
+
     def forward_rule(self, obj1, obj2=None, check_braid=True):
         r"""
         Return a pair of tableaux obtained by applying forward insertion
@@ -2959,7 +2966,8 @@ class RuleStar(Rule):
                 df.append([])
             return DecreasingHeckeFactorization(df)
 
-class InsertionRules(object):
+
+class InsertionRules():
     r"""
     Catalog of rules for RSK-like insertion algorithms.
     """
@@ -2972,6 +2980,7 @@ class InsertionRules(object):
     Star = RuleStar
 
 #####################################################################
+
 
 def RSK(obj1=None, obj2=None, insertion=InsertionRules.RSK, check_standard=False, **options):
     r"""
@@ -3181,6 +3190,7 @@ def RSK(obj1=None, obj2=None, insertion=InsertionRules.RSK, check_standard=False
 robinson_schensted_knuth = RSK
 RSK.rules = InsertionRules
 
+
 def RSK_inverse(p, q, output='array', insertion=InsertionRules.RSK):
     r"""
     Return the generalized permutation corresponding to the pair of
@@ -3368,10 +3378,11 @@ def RSK_inverse(p, q, output='array', insertion=InsertionRules.RSK):
         raise TypeError("the insertion must be an instance of Rule")
 
     if p.shape() != q.shape():
-        raise ValueError("p(=%s) and q(=%s) must have the same shape" %(p, q))
+        raise ValueError(f"p(={p}) and q(={q}) must have the same shape")
 
     answer = rule.backward_rule(p, q, output)
     return answer
+
 
 robinson_schensted_knuth_inverse = RSK_inverse
 

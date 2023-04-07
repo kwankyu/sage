@@ -4,7 +4,8 @@ Examples of semigroups in cython
 
 from sage.structure.parent cimport Parent
 from sage.structure.element cimport Element
-from sage.categories.all import Category, Semigroups
+from sage.categories.category import Category
+from sage.categories.semigroups import Semigroups
 from sage.categories.examples.semigroups import LeftZeroSemigroup as LeftZeroSemigroupPython
 from cpython.object cimport PyObject_RichCompare
 
@@ -57,7 +58,7 @@ cdef class LeftZeroSemigroupElement(Element):
             sage: x = S(3)
             sage: TestSuite(x).run()
         """
-        Element.__init__(self, parent = parent)
+        Element.__init__(self, parent=parent)
         self._value = value
 
     def _repr_(self):
@@ -151,7 +152,7 @@ class LeftZeroSemigroup(LeftZeroSemigroupPython):
         sage: S.some_elements()
         [3, 42, 'a', 3.4, 'raton laveur']
 
-    with product rule is given by $a \times b = a$ for all $a,b$. ::
+    with product rule given by `a \times b = a` for all `a,b`. ::
 
         sage: S('hello') * S('world')
         'hello'
@@ -214,6 +215,6 @@ class LeftZeroSemigroup(LeftZeroSemigroupPython):
             Category of idempotent semigroups
             sage: TestSuite(S).run()
         """
-        Parent.__init__(self, category = IdempotentSemigroups())
+        Parent.__init__(self, category=IdempotentSemigroups())
 
     Element = LeftZeroSemigroupElement

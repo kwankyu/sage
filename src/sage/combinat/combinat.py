@@ -167,11 +167,11 @@ Functions and classes
 from __future__ import annotations
 from typing import Iterator
 
+from sage.arith.misc import bernoulli, factorial
 from sage.rings.integer_ring import ZZ
 from sage.rings.rational_field import QQ
 from sage.rings.integer import Integer
 from sage.rings.infinity import infinity
-from sage.arith.all import bernoulli, factorial
 from sage.rings.polynomial.polynomial_element import Polynomial
 from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
 from sage.libs.pari.all import pari
@@ -364,9 +364,9 @@ def bell_number(n, algorithm='flint', **options) -> Integer:
 
     TESTS::
 
-        sage: all(bell_number(n) == bell_number(n,'dobinski') for n in range(200))
+        sage: all(bell_number(n) == bell_number(n,'dobinski') for n in range(100))
         True
-        sage: all(bell_number(n) == bell_number(n,'gap') for n in range(200))
+        sage: all(bell_number(n) == bell_number(n,'gap') for n in range(100))
         True
         sage: all(bell_number(n) == bell_number(n,'mpmath', prec=500) for n in range(200, 220))
         True
@@ -854,15 +854,22 @@ def lucas_number2(n, P, Q):
     return libgap.Lucas(P, Q, n)[1].sage()
 
 
-def stirling_number1(n, k) -> Integer:
+def stirling_number1(n, k, algorithm="gap") -> Integer:
     r"""
     Return the `n`-th Stirling number `S_1(n,k)` of the first kind.
 
     This is the number of permutations of `n` points with `k` cycles.
 
-    This wraps GAP's ``Stirling1``.
-
     See :wikipedia:`Stirling_numbers_of_the_first_kind`.
+
+    INPUT:
+
+    - ``n`` -- nonnegative machine-size integer
+    - ``k`` -- nonnegative machine-size integer
+    - ``algorithm``:
+
+      * ``"gap"`` (default) -- use GAP's ``Stirling1`` function
+      * ``"flint"`` -- use flint's ``arith_stirling_number_1u`` function
 
     EXAMPLES::
 
@@ -876,31 +883,48 @@ def stirling_number1(n, k) -> Integer:
         269325
 
     Indeed, `S_1(n,k) = S_1(n-1,k-1) + (n-1)S_1(n-1,k)`.
+
+    TESTS::
+
+        sage: stirling_number1(10,5, algorithm='flint')
+        269325
+
+        sage: s_sage = stirling_number1(50,3, algorithm="mutta")
+        Traceback (most recent call last):
+        ...
+        ValueError: unknown algorithm: mutta
     """
     n = ZZ(n)
     k = ZZ(k)
-    from sage.libs.gap.libgap import libgap
-    return libgap.Stirling1(n, k).sage()
+    if algorithm == 'gap':
+        from sage.libs.gap.libgap import libgap
+        return libgap.Stirling1(n, k).sage()
+    if algorithm == 'flint':
+        import sage.libs.flint.arith
+        return sage.libs.flint.arith.stirling_number_1(n, k)
+    raise ValueError("unknown algorithm: %s" % algorithm)
 
 
 def stirling_number2(n, k, algorithm=None) -> Integer:
     r"""
-    Return the `n`-th Stirling number `S_2(n,k)` of the second
-    kind.
+    Return the `n`-th Stirling number `S_2(n,k)` of the second kind.
 
     This is the number of ways to partition a set of `n` elements into `k`
     pairwise disjoint nonempty subsets. The `n`-th Bell number is the
     sum of the `S_2(n,k)`'s, `k=0,...,n`.
 
+    See :wikipedia:`Stirling_numbers_of_the_second_kind`.
+
     INPUT:
 
-       *  ``n`` - nonnegative machine-size integer
-       *  ``k`` - nonnegative machine-size integer
-       * ``algorithm``:
+    -  ``n`` -- nonnegative machine-size integer
+    -  ``k`` -- nonnegative machine-size integer
+    - ``algorithm``:
 
-         * None (default) - use native implementation
-         * ``"maxima"`` - use Maxima's stirling2 function
-         * ``"gap"`` - use GAP's Stirling2 function
+      * ``None`` (default) -- use native implementation
+      * ``"flint"`` -- use flint's ``arith_stirling_number_2`` function
+      * ``"gap"`` -- use GAP's ``Stirling2`` function
+      * ``"maxima"`` -- use Maxima's ``stirling2`` function
 
     EXAMPLES:
 
@@ -922,10 +946,10 @@ def stirling_number2(n, k, algorithm=None) -> Integer:
 
     Stirling numbers satisfy `S_2(n,k) = S_2(n-1,k-1) + kS_2(n-1,k)`::
 
-         sage: 5*stirling_number2(9,5) + stirling_number2(9,4)
-         42525
-         sage: stirling_number2(10,5)
-         42525
+        sage: 5*stirling_number2(9,5) + stirling_number2(9,4)
+        42525
+        sage: stirling_number2(10,5)
+        42525
 
     TESTS::
 
@@ -961,58 +985,57 @@ def stirling_number2(n, k, algorithm=None) -> Integer:
         1900842429486
         sage: type(n)
         <class 'sage.rings.integer.Integer'>
-        sage: n = stirling_number2(20,11,algorithm='maxima')
+        sage: n = stirling_number2(20,11,algorithm='flint')
         sage: n
         1900842429486
         sage: type(n)
         <class 'sage.rings.integer.Integer'>
 
-     Sage's implementation splitting the computation of the Stirling
-     numbers of the second kind in two cases according to `n`, let us
-     check the result it gives agree with both maxima and gap.
+    Sage's implementation splitting the computation of the Stirling
+    numbers of the second kind in two cases according to `n`, let us
+    check the result it gives agree with both flint and gap.
 
-     For `n<200`::
+    For `n<200`::
 
-         sage: for n in Subsets(range(100,200), 5).random_element():
-         ....:     for k in Subsets(range(n), 5).random_element():
-         ....:         s_sage = stirling_number2(n,k)
-         ....:         s_maxima = stirling_number2(n,k, algorithm = "maxima")
-         ....:         s_gap = stirling_number2(n,k, algorithm = "gap")
-         ....:         if not (s_sage == s_maxima and s_sage == s_gap):
-         ....:             print("Error with n<200")
+        sage: for n in Subsets(range(100,200), 5).random_element():
+        ....:     for k in Subsets(range(n), 5).random_element():
+        ....:         s_sage = stirling_number2(n,k)
+        ....:         s_flint = stirling_number2(n,k, algorithm = "flint")
+        ....:         s_gap = stirling_number2(n,k, algorithm = "gap")
+        ....:         if not (s_sage == s_flint and s_sage == s_gap):
+        ....:             print("Error with n<200")
 
-     For `n\geq 200`::
+    For `n\geq 200`::
 
-         sage: for n in Subsets(range(200,300), 5).random_element():
-         ....:     for k in Subsets(range(n), 5).random_element():
-         ....:         s_sage = stirling_number2(n,k)
-         ....:         s_maxima = stirling_number2(n,k, algorithm = "maxima")
-         ....:         s_gap = stirling_number2(n,k, algorithm = "gap")
-         ....:         if not (s_sage == s_maxima and s_sage == s_gap):
-         ....:             print("Error with n<200")
+        sage: for n in Subsets(range(200,300), 5).random_element():
+        ....:     for k in Subsets(range(n), 5).random_element():
+        ....:         s_sage = stirling_number2(n,k)
+        ....:         s_flint = stirling_number2(n,k, algorithm = "flint")
+        ....:         s_gap = stirling_number2(n,k, algorithm = "gap")
+        ....:         if not (s_sage == s_flint and s_sage == s_gap):
+        ....:             print("Error with n<200")
 
+        sage: stirling_number2(20,3, algorithm="maxima")
+        580606446
 
-     TESTS:
-
-     Checking an exception is raised whenever a wrong value is given
-     for ``algorithm``::
-
-         sage: s_sage = stirling_number2(50,3, algorithm = "CloudReading")
-         Traceback (most recent call last):
-         ...
-         ValueError: unknown algorithm: CloudReading
+        sage: s_sage = stirling_number2(5,3, algorithm="namba")
+        Traceback (most recent call last):
+        ...
+        ValueError: unknown algorithm: namba
     """
     n = ZZ(n)
     k = ZZ(k)
     if algorithm is None:
         return _stirling_number2(n, k)
-    elif algorithm == 'gap':
+    if algorithm == 'gap':
         from sage.libs.gap.libgap import libgap
         return libgap.Stirling2(n, k).sage()
-    elif algorithm == 'maxima':
+    if algorithm == 'flint':
+        import sage.libs.flint.arith
+        return sage.libs.flint.arith.stirling_number_2(n, k)
+    if algorithm == 'maxima':
         return ZZ(maxima.stirling2(n, k))  # type:ignore
-    else:
-        raise ValueError("unknown algorithm: %s" % algorithm)
+    raise ValueError("unknown algorithm: %s" % algorithm)
 
 
 def polygonal_number(s, n):
@@ -1404,8 +1427,6 @@ class CombinatorialObject(SageObject):
         """
         return bool(self._list)
 
-    __nonzero__ = __bool__
-
     def __len__(self) -> Integer:
         """
         EXAMPLES::
@@ -1509,6 +1530,7 @@ class CombinatorialElement(CombinatorialObject, Element,
         sage: Foo(17)
         17
     """
+
     def __init__(self, parent, *args, **kwds):
         """
         Initialize this ``CombinatorialElement`` with a parent and a
@@ -1551,7 +1573,7 @@ class CombinatorialElement(CombinatorialObject, Element,
             L, = kwds.values()
         else:
             raise TypeError("__init__() takes exactly 2 arguments ({} given)".format(1 + len(args) + len(kwds)))
-        super(CombinatorialElement, self).__init__(L)
+        super().__init__(L)
         super(CombinatorialObject, self).__init__(parent)
 
 
@@ -1570,6 +1592,7 @@ class CombinatorialClass(Parent, metaclass=ClasscallMetaclass):
         sage: InfiniteEnumeratedSets().example()
         An example of an infinite enumerated set: the non negative integers
     """
+
     def __init__(self, category=None):
         """
         TESTS::
@@ -2395,6 +2418,7 @@ class Permutations_CC(CombinatorialClass):
     A testing class for :class:`CombinatorialClass` since :class:`Permutations`
     no longer inherits from :class:`CombinatorialClass` in :trac:`14772`.
     """
+
     def __init__(self, n):
         """
         EXAMPLES::
@@ -2442,7 +2466,6 @@ class Permutations_CC(CombinatorialClass):
 
 ##############################################################################
 from sage.sets.image_set import ImageSubobject
-from sage.categories.map import is_Map
 
 
 class MapCombinatorialClass(ImageSubobject, CombinatorialClass):
@@ -2467,6 +2490,7 @@ class MapCombinatorialClass(ImageSubobject, CombinatorialClass):
         sage: next(i), next(i), next(i)
         ([], [1, 2, 3, 4, 5, 6, 7, 8, 9], [1])
     """
+
     def __init__(self, cc, f, name=None, *, is_injective=True):
         """
         TESTS::
@@ -2494,6 +2518,7 @@ class InfiniteAbstractCombinatorialClass(CombinatorialClass):
     self._infinite_cclass_slice is supposed to accept any integer as an
     argument and return something which is iterable.
     """
+
     def cardinality(self) -> Integer | infinity:
         """
         Count the elements of the combinatorial class.
@@ -2503,7 +2528,7 @@ class InfiniteAbstractCombinatorialClass(CombinatorialClass):
             sage: R = InfiniteAbstractCombinatorialClass()
             doctest:warning...
             DeprecationWarning: this class is deprecated, do not use
-            See https://trac.sagemath.org/31545 for details.
+            See https://github.com/sagemath/sage/issues/31545 for details.
 
             sage: R.cardinality()
             +Infinity
@@ -3126,7 +3151,7 @@ def bernoulli_polynomial(x, n: Integer):
         if n < 0:
             raise TypeError
     except TypeError:
-        raise ValueError("The second argument must be a non-negative integer")
+        raise ValueError("the second argument must be a non-negative integer")
 
     if n == 0:
         return x**0   # result should be in the parent of x

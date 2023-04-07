@@ -574,7 +574,7 @@ class PseudoRiemannianSubmanifold(PseudoRiemannianManifold,
         Return the induced metric (first fundamental form) or define a new
         metric tensor on the submanifold.
 
-        A new (uninitialzed) metric is returned only if the argument ``name``
+        A new (uninitialized) metric is returned only if the argument ``name``
         is provided and differs from the metric name declared at the
         construction of the submanifold; otherwise, the first fundamental
         form is returned.
@@ -1173,7 +1173,7 @@ class PseudoRiemannianSubmanifold(PseudoRiemannianManifold,
                         g.restrict(chart.domain()).contract(pf[j]) *
                         self.scalar_field({chart: k.comp(chart.frame())[:][i, j]})
                         for i in range(self._dim) for j in range(self._dim))
-                    gam_rst._sym = [(0, 1)]
+                    gam_rst._sym = ((0, 1),)
                     self._ambient_second_fundamental_form.set_restriction(gam_rst)
 
                 charts = iter(self.top_charts())

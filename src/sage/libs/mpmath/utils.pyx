@@ -128,7 +128,7 @@ cpdef normalize(long sign, Integer man, exp, long bc, long prec, str rnd):
     res = PY_NEW(Integer)
     if shift > 0:
         if rnd == 'n':
-            if mpz_tstbit(man.value, shift-1) and (mpz_tstbit(man.value, shift)\
+            if mpz_tstbit(man.value, shift-1) and (mpz_tstbit(man.value, shift)
                 or (mpz_scan1(man.value, 0) < (shift-1))):
                 mpz_cdiv_q_2exp(res.value, man.value, shift)
             else:
@@ -334,7 +334,7 @@ def sage_to_mpmath(x, prec):
                 from sage.rings.complex_mpfr import ComplexField
                 x = ComplexField(prec)(x)
                 return x._mpmath_()
-    if isinstance(x, tuple) or isinstance(x, list):
+    if isinstance(x, (tuple, list)):
         return type(x)([sage_to_mpmath(v, prec) for v in x])
     if isinstance(x, dict):
         return dict([(k, sage_to_mpmath(v, prec)) for (k, v) in x.items()])

@@ -3,8 +3,8 @@
 # distutils: include_dirs = M4RI_INCDIR GDLIB_INCDIR LIBPNG_INCDIR
 # distutils: extra_compile_args = M4RI_CFLAGS
 
-"""
-Vectors with elements in GF(2)
+r"""
+Vectors with elements in `\GF{2}`
 
 AUTHOR:
 
@@ -135,7 +135,7 @@ cdef class Vector_mod2_dense(free_module_element.FreeModuleElement):
         """
         self._entries = NULL
         self._is_immutable = 0
-        if not parent is None:
+        if parent is not None:
             self._init(parent.degree(), parent)
 
     def __init__(self, parent, x, coerce=True, copy=True):
@@ -156,7 +156,7 @@ cdef class Vector_mod2_dense(free_module_element.FreeModuleElement):
 
         TESTS:
 
-        Check that ticket :trac:`8601` is fixed::
+        Check that issue :trac:`8601` is fixed::
 
             sage: VS = VectorSpace(GF(2), 3)
             sage: VS((-1,-2,-3))
@@ -200,7 +200,7 @@ cdef class Vector_mod2_dense(free_module_element.FreeModuleElement):
                 raise TypeError("x must be a list of the right length")
             for i in range(len(x)):
                 xi = x[i]
-                if isinstance(xi, (IntegerMod_int, int, long, Integer)):
+                if isinstance(xi, (IntegerMod_int, int, Integer)):
                     # the if/else statement is because in some compilers, (-1)%2 is -1
                     mzd_write_bit(self._entries, 0, i, 1 if xi%2 else 0)
                 elif isinstance(xi, Rational):
@@ -344,7 +344,7 @@ cdef class Vector_mod2_dense(free_module_element.FreeModuleElement):
         """
         cdef int i
         cdef int res = 0
-        cdef m4ri_word *row = mzd_row(self._entries, 0) 
+        cdef m4ri_word *row = mzd_row(self._entries, 0)
         for i from 0 <= i < self._entries.width:
             res += Integer(row[i]).popcount()
         return res
@@ -505,11 +505,10 @@ def unpickle_v0(parent, entries, degree, is_immutable):
     cdef int xi
 
     for i from 0 <= i < degree:
-        if isinstance(entries[i], IntegerMod_int) or isinstance(entries[i], int) or isinstance(entries[i], Integer):
+        if isinstance(entries[i], (IntegerMod_int, int, Integer)):
             xi = entries[i]
             mzd_write_bit(v._entries, 0, i, xi%2)
         else:
             mzd_write_bit(v._entries, 0, i, entries[i]%2)
     v._is_immutable = int(is_immutable)
     return v
-

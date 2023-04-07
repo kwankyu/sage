@@ -20,6 +20,7 @@ from sage.combinat.root_system.cartan_type import CartanType
 from sage.combinat.root_system.weyl_group import WeylGroup
 from sage.combinat.rsk import RSK
 
+
 class AffineFactorizationCrystal(UniqueRepresentation, Parent):
     r"""
     The crystal on affine factorizations with a cut-point, as introduced
@@ -117,7 +118,7 @@ class AffineFactorizationCrystal(UniqueRepresentation, Parent):
             w0 = W.from_reduced_word(w[0].from_kbounded_to_reduced_word(k))
             w1 = W.from_reduced_word(w[1].from_kbounded_to_reduced_word(k))
             w = w0*(w1.inverse())
-        return super(AffineFactorizationCrystal, cls).__classcall__(cls, w, n, x)
+        return super().__classcall__(cls, w, n, x)
 
     def __init__(self, w, n, x = None):
         r"""
@@ -212,6 +213,7 @@ class AffineFactorizationCrystal(UniqueRepresentation, Parent):
         """
         # Constructing the tableaux crystal
         from sage.combinat.crystals.tensor_product import CrystalOfTableaux
+
         def mg_to_shape(mg):
             l = list(mg.weight().to_vector())
             while l and l[-1] == 0:
@@ -358,6 +360,7 @@ class AffineFactorizationCrystal(UniqueRepresentation, Parent):
             """
             return self.parent()._tableaux_isomorphism(self)
 
+
 def affine_factorizations(w, l, weight=None):
     r"""
     Return all factorizations of ``w`` into ``l`` factors or of weight ``weight``.
@@ -447,6 +450,7 @@ def affine_factorizations(w, l, weight=None):
 #####################################################################
 ## Crystal isomorphisms
 
+
 class FactorizationToTableaux(CrystalMorphism):
     def _call_(self, x):
         """
@@ -506,4 +510,3 @@ class FactorizationToTableaux(CrystalMorphism):
 
     is_embedding = is_isomorphism
     is_surjective = is_isomorphism
-

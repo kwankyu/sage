@@ -291,7 +291,7 @@ from sage.misc.misc_c import prod
 from sage.env import DOT_SAGE, LIE_INFO_DIR
 from sage.misc.sage_eval import sage_eval
 from sage.interfaces.tab_completion import ExtraTabCompletion
-from sage.docs.instancedoc import instancedoc
+from sage.misc.instancedoc import instancedoc
 import os
 
 
@@ -474,7 +474,7 @@ class LiE(ExtraTabCompletion, Expect):
         """
         EXAMPLES::
 
-            sage: lie.__reduce__()
+            sage: LiE().__reduce__()
             (<function reduce_load_lie at 0x...>, ())
         """
         return reduce_load_lie, tuple([])
@@ -889,12 +889,17 @@ def is_LiEElement(x) -> bool:
     EXAMPLES::
 
         sage: from sage.interfaces.lie import is_LiEElement
+        sage: is_LiEElement(2)
+        doctest:...: DeprecationWarning: the function is_LiEElement is deprecated; use isinstance(x, sage.interfaces.abc.LiEElement) instead
+        See https://github.com/sagemath/sage/issues/34804 for details.
+        False
         sage: l = lie(2) # optional - lie
         sage: is_LiEElement(l) # optional - lie
         True
-        sage: is_LiEElement(2)
-        False
     """
+    from sage.misc.superseded import deprecation
+    deprecation(34804, "the function is_LiEElement is deprecated; use isinstance(x, sage.interfaces.abc.LiEElement) instead")
+
     return isinstance(x, LiEElement)
 
 

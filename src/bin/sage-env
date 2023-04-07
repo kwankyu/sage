@@ -31,7 +31,7 @@
 # absolute path (a relative path remains relative), nor does it treat
 # "." or ".." specially.
 #
-# AUTHOR: Jeroen Demeyer (2011-08-23): Trac tickets #5852 and #11704
+# AUTHOR: Jeroen Demeyer (2011-08-23): Github issues #5852 and #11704
 #
 resolvelinks() {
     # $in is what still needs to be converted (normally has no starting slash)
@@ -115,9 +115,8 @@ fi
 
 # Don't execute the commands more than once for the same version of
 # sage-env... for the same combination of SAGE_LOCAL and SAGE_VENV.
-# "5" indicates the version of the format of the value of SAGE_ENV_VERSION.
-# The current format was introduced in #32745.
-SAGE_ENV_VERSION="5:$SAGE_LOCAL:$SAGE_VENV"
+# "6" indicates the version of the format of the value of SAGE_ENV_VERSION.
+SAGE_ENV_VERSION="6:$SAGE_LOCAL:$SAGE_VENV:$SAGE_SRC"
 if [ "$SAGE_ENV_SOURCED" = "$SAGE_ENV_VERSION" ]; then
     # Already sourced, nothing to do.
     return 0
@@ -200,7 +199,7 @@ fi
 
 
 if [ 1 = 2 ]; then
-    echo "The following enviroment variables can be set by the user"
+    echo "The following environment variables can be set by the user"
     echo "AR          The archiver (e.g. ar, /usr/ccs/bin/ar or /usr/bin/ar)"
     echo "AS          The assembler (e.g. as, /usr/ccs/bin/as or /usr/bin/as)"
     echo "CC          The C compiler (e.g cc, /opt/SUNWspro/bin/cc or /usr/bin/gcc)"
@@ -217,10 +216,10 @@ if [ 1 = 2 ]; then
     echo "SHAREDFLAGS Flag(s) necessary for building a shared library (e.g. -fPIC or -xcode=pic32)"
     echo "We attempt to set this to sensible values, but check below to"
     echo "ensure they are OK. If you wish to override any then please use:"
-    echo "setenv NAME_OF_ENVIROMENT_VARIABLE value_of_enviroment_variable"
+    echo "setenv NAME_OF_ENVIRONMENT_VARIABLE value_of_environment_variable"
     echo "(if you use tcsh, csh or a similar shell) or"
-    echo "NAME_OF_ENVIROMENT_VARIABLE value_of_enviroment_variable"
-    echo "export NAME_OF_ENVIROMENT_VARIABLE"
+    echo "NAME_OF_ENVIRONMENT_VARIABLE value_of_environment_variable"
+    echo "export NAME_OF_ENVIRONMENT_VARIABLE"
     echo "if you use sh, bash or a similar shell"
 fi
 
@@ -279,7 +278,7 @@ if [ "$UNAME" = "Darwin" ]; then
     export MACOSX_VERSION=`uname -r | awk -F. '{print $1}'`
     # Work around problems on recent OS X crashing with an error message
     # "... may have been in progress in another thread when fork() was called"
-    # when objective-C functions are called after fork(). See Trac #25921.
+    # when objective-C functions are called after fork(). See Issue #25921.
     # Most likely, these errors are false positives, so we disable them:
     export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 fi
@@ -306,11 +305,11 @@ if [ -n "$SAGE_LOCAL" ]; then
 fi
 
 if [ -z "$SAGE_REPO_ANONYMOUS" ]; then
-    SAGE_REPO_ANONYMOUS="https://github.com/sagemath/sagetrac-mirror.git"
+    SAGE_REPO_ANONYMOUS="https://github.com/sagemath/sage.git"
     export SAGE_REPO_ANONYMOUS
 fi
 if [ -z "$SAGE_REPO_AUTHENTICATED" ]; then
-        SAGE_REPO_AUTHENTICATED="ssh://git@trac.sagemath.org:2222/sage.git"
+        SAGE_REPO_AUTHENTICATED="https://github.com/sagemath/sage.git"
         export SAGE_REPO_AUTHENTICATED
 fi
 
@@ -356,12 +355,12 @@ if [ "$PYTHON_EGG_CACHE" = "" ]; then
 fi
 
 # Set PYTHONUSERBASE to avoid picking up non-Sage versions of
-# Matplotlib, numpy, etc. See http://trac.sagemath.org/ticket/19612.
+# Matplotlib, numpy, etc. See https://github.com/sagemath/sage/issues/19612.
 #
 # For more history (it used to be PYTHONNOUSERSITE=yes which killed
 # the ability to do "sage -pip install PACKAGE --user"), see
-# http://trac.sagemath.org/ticket/14243 and
-# http://trac.sagemath.org/ticket/18955.
+# https://github.com/sagemath/sage/issues/14243 and
+# https://github.com/sagemath/sage/issues/18955.
 
 if [ "$PYTHONUSERBASE" = "" ]; then
     PYTHONUSERBASE="$DOT_SAGE/local"
@@ -450,7 +449,7 @@ if [ -n "$SAGE_LOCAL" ]; then
     PERL5LIB="$SAGE_LOCAL/lib/perl5:$PERL5LIB" && export PERL5LIB
 fi
 
-# Allow SAGE_BROWSER to override BROWSER (Trac #22449)
+# Allow SAGE_BROWSER to override BROWSER (Issue #22449)
 if [ -n "$SAGE_BROWSER" ]; then
     export BROWSER="$SAGE_BROWSER"
 fi
@@ -559,7 +558,7 @@ case "$SAGE_NUM_THREADS,$SAGE_NUM_THREADS_PARALLEL" in
         # sage-num-threads.py would just recompute them
         ;;
     *)
-        # See Trac Ticket #12016
+        # See Issue Ticket #12016
         # First, figure out the right values for SAGE_NUM_THREADS (default
         # number of threads) and SAGE_NUM_THREADS_PARALLEL (default number of
         # threads when parallel execution is asked explicitly).
@@ -593,8 +592,6 @@ if [ "${MAKEFLAGS-__unset__}" != "__unset__" ]; then
 fi
 export MAKE
 
-export PIP_FORMAT="columns"
-
 # Set the cysignals crash logs directory
 if [ -z "$CYSIGNALS_CRASH_LOGS" ]; then
     export CYSIGNALS_CRASH_LOGS="$DOT_SAGE/crash_logs"
@@ -618,7 +615,7 @@ fi
 
 if [ -n "$SAGE_LOCAL" ]; then
     # If we move the Sage tree then ncurses cannot find terminfo, hence, we
-    # tell it where to find it. See Trac Ticket #15091
+    # tell it where to find it. See Issue Ticket #15091
     export TERMINFO="$SAGE_LOCAL/share/terminfo"
 
     # If nodejs is installed, activate the nodeenv containing it.

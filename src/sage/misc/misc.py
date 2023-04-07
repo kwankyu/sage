@@ -81,7 +81,7 @@ def sage_makedirs(dirname, mode=0o777):
         sage: sage_makedirs(DOT_SAGE) # no output
         doctest:warning...
         DeprecationWarning: sage_makedirs is deprecated; use os.makedirs(..., exist_ok=True) instead
-        See https://trac.sagemath.org/32987 for details.
+        See https://github.com/sagemath/sage/issues/32987 for details.
 
     The following fails because we are trying to create a directory in
     place of an ordinary file::
@@ -175,7 +175,7 @@ def try_read(obj, splitlines=False):
 
     Custom readable::
 
-        sage: class MyFile(object):
+        sage: class MyFile():
         ....:     def read(self): return 'Hello world!'
         sage: try_read(MyFile())
         'Hello world!'
@@ -221,8 +221,15 @@ def SAGE_TMP():
 
         sage: from sage.misc.misc import SAGE_TMP
         sage: SAGE_TMP
+        doctest:warning...
+        DeprecationWarning: SAGE_TMP is deprecated; please use python's
+        "tempfile" module instead.
+        See https://github.com/sagemath/sage/issues/33213 for details.
         l'.../temp/...'
+
     """
+    from sage.misc.superseded import deprecation
+    deprecation(33213, "SAGE_TMP is deprecated; please use python's \"tempfile\" module instead.")
     d = os.path.join(DOT_SAGE, 'temp', HOSTNAME, str(os.getpid()))
     os.makedirs(d, exist_ok=True)
     return d
@@ -238,37 +245,41 @@ def ECL_TMP():
 
         sage: from sage.misc.misc import ECL_TMP
         sage: ECL_TMP
-        l'.../temp/.../ecl'
+        doctest:warning...
+        DeprecationWarning: ECL_TMP is deprecated and is no longer used
+        by the ECL interface in sage
+        See https://github.com/sagemath/sage/issues/33213 for details.
+        ...
+
     """
-    d = os.path.join(str(SAGE_TMP), 'ecl')
-    os.makedirs(d, exist_ok=True)
-    return d
+    from sage.misc.superseded import deprecation
+    deprecation(33213, "ECL_TMP is deprecated and is no longer used by the ECL interface in sage")
+    import atexit
+    import tempfile
+    d = tempfile.TemporaryDirectory()
+    result = os.path.join(d.name, 'ecl')
+    atexit.register(lambda: d.cleanup())
+    return result
 
 
 @lazy_string
 def SPYX_TMP():
-    """
+    r"""
     EXAMPLES::
 
         sage: from sage.misc.misc import SPYX_TMP
         sage: SPYX_TMP
-        l'.../temp/.../spyx'
-    """
-    return os.path.join(str(SAGE_TMP), 'spyx')
+        doctest:warning...
+        DeprecationWarning: SPYX_TMP is deprecated;
+        use sage.misc.temporary_file.spyx_tmp instead
+        See https://github.com/sagemath/sage/issues/33213 for details.
+        ...
 
-
-@lazy_string
-def SAGE_TMP_INTERFACE():
     """
-    EXAMPLES::
-
-        sage: from sage.misc.misc import SAGE_TMP_INTERFACE
-        sage: SAGE_TMP_INTERFACE
-        l'.../temp/.../interface'
-    """
-    d = os.path.join(str(SAGE_TMP), 'interface')
-    os.makedirs(d, exist_ok=True)
-    return d
+    from sage.misc.temporary_file import spyx_tmp
+    from sage.misc.superseded import deprecation
+    deprecation(33213, "SPYX_TMP is deprecated; use sage.misc.temporary_file.spyx_tmp instead")
+    return spyx_tmp()
 
 
 SAGE_DB = os.path.join(DOT_SAGE, 'db')
@@ -527,7 +538,7 @@ def union(x, y=None):
 
         sage: answer = union([1,2,3,4], [5,6]); answer
         doctest:...: DeprecationWarning: sage.misc.misc.union is deprecated...
-        See https://trac.sagemath.org/32096 for details.
+        See https://github.com/sagemath/sage/issues/32096 for details.
         [1, 2, 3, 4, 5, 6]
         sage: union([1,2,3,4,5,6], [5,6]) == answer
         True
@@ -537,7 +548,7 @@ def union(x, y=None):
         True
     """
     from sage.misc.superseded import deprecation
-    deprecation(32096, "sage.misc.misc.union is deprecated, use 'list(set(x).union(y)' or a more suitable replacement")
+    deprecation(32096, "sage.misc.misc.union is deprecated, use 'list(set(x).union(y))' or a more suitable replacement")
     if y is None:
         return list(set(x))
     return list(set(x).union(y))
@@ -552,7 +563,7 @@ def uniq(x):
 
         sage: uniq([1, 1, 8, -5, 3, -5, -13, 13, -13])
         doctest:...: DeprecationWarning: the output of uniq(X) being sorted is deprecated; use sorted(set(X)) instead if you want sorted output
-        See https://trac.sagemath.org/27014 for details.
+        See https://github.com/sagemath/sage/issues/27014 for details.
         [-13, -5, 1, 3, 8, 13]
     """
     # After deprecation period, rename _stable_uniq -> uniq
@@ -564,7 +575,7 @@ def uniq(x):
 def _stable_uniq(L):
     """
     Iterate over the elements of ``L``, yielding every element at most
-    once: keep only the first occurance of any item.
+    once: keep only the first occurrence of any item.
 
     The items must be hashable.
 
@@ -1402,7 +1413,7 @@ def inject_variable(name, value, warn=True):
         sage: a
         272
 
-    That's because warn seem to not reissue twice the same warning:
+    That's because warn seem to not reissue twice the same warning::
 
         sage: from warnings import warn
         sage: warn("blah")

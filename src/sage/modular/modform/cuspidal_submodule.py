@@ -1,5 +1,5 @@
 """
-The Cuspidal Subspace
+The cuspidal subspace
 
 EXAMPLES::
 
@@ -37,10 +37,13 @@ EXAMPLES::
 #
 #                  http://www.gnu.org/licenses/
 #########################################################################
-from sage.rings.all     import QQ, Integer
-from sage.misc.all      import cached_method
+
+from sage.matrix.constructor import Matrix
+from sage.matrix.special import identity_matrix
+from sage.misc.cachefunc import cached_method
 from sage.misc.verbose  import verbose
-from sage.matrix.all    import Matrix, identity_matrix
+from sage.rings.integer import Integer
+from sage.rings.rational_field import QQ
 
 from .submodule import ModularFormsSubmodule
 from . import vm_basis
@@ -171,15 +174,16 @@ class CuspidalSubmodule(ModularFormsSubmodule):
         A = self.ambient_module()
         return A.modular_symbols(sign).cuspidal_submodule()
 
-
     def change_ring(self, R):
         r"""
-        Change the base ring of self to R, when this makes sense. This differs
-        from :meth:`~sage.modular.modform.space.ModularFormsSpace.base_extend`
-        in that there may not be a canonical map from self to the new space, as
-        in the first example below. If this space has a character then this may
-        fail when the character cannot be defined over R, as in the second
-        example.
+        Change the base ring of ``self`` to ``R``, when this makes sense.
+
+        This differs from
+        :meth:`~sage.modular.modform.space.ModularFormsSpace.base_extend`
+        in that there may not be a canonical map from ``self`` to the new
+        space, as in the first example below. If this space has a
+        character then this may fail when the character cannot be
+        defined over ``R``, as in the second example.
 
         EXAMPLES::
 
@@ -233,7 +237,7 @@ class CuspidalSubmodule_modsym_qexp(CuspidalSubmodule):
             prec = Integer(prec)
         if self.dimension() == 0:
             return []
-        M = self.modular_symbols(sign = 1)
+        M = self.modular_symbols(sign=1)
         return M.q_expansion_basis(prec)
 
     def _compute_hecke_matrix_prime(self, p):
@@ -242,7 +246,7 @@ class CuspidalSubmodule_modsym_qexp(CuspidalSubmodule):
 
         EXAMPLES::
 
-            sage: C=CuspForms(38, 2)
+            sage: C = CuspForms(38, 2)
             sage: C._compute_hecke_matrix_prime(7)
             [-1  0  0  0]
             [ 0 -1  0  0]

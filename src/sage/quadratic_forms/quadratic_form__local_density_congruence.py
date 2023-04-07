@@ -10,7 +10,7 @@ from copy import deepcopy
 
 from sage.sets.set import Set
 from sage.rings.rational_field import QQ
-from sage.arith.all import valuation
+from sage.arith.misc import valuation
 from sage.misc.verbose import verbose
 
 from sage.quadratic_forms.count_local_2 import count_modp__by_gauss_sum
@@ -385,7 +385,7 @@ def local_good_density_congruence(self, p, m, Zvec=None, NZvec=None):
     # There was here a commented-out check that Q is in local normal form
     # (it often may not be since the reduction procedure
     # often mixes up the order of the valuations...)
-    # This commented-out code was removed in ticket #32960
+    # This commented-out code was removed in issue #32960
 
     # Decide which routine to use to compute the Good-type density
     if p > 2:
@@ -598,7 +598,7 @@ def local_badI_density_congruence(self, p, m, Zvec=None, NZvec=None):
     if not S0:
         print(" Using Q = " + str(self))
         print(" and p = " + str(p))
-        raise RuntimeError("Oops! The form is not primitive!")
+        raise RuntimeError("the form is not primitive")
 
     #  DIAGNOSTIC
     verbose(" m = " + str(m) + "   p = " + str(p))
@@ -744,11 +744,11 @@ def local_badII_density_congruence(self, p, m, Zvec=None, NZvec=None):
     if (NZvec is not None) and (len(Set(S2plus).intersection(Set(NZvec))) == 0):
         return 0
 
-    #  Check that the form is primitive...                     WHY IS THIS NECESSARY?
+    #  Check that the form is primitive...      WHY IS THIS NECESSARY?
     if not S0:
         print(" Using Q = " + str(self))
         print(" and p = " + str(p))
-        raise RuntimeError("Oops! The form is not primitive!")
+        raise RuntimeError("the form is not primitive")
 
     #  DIAGNOSTIC
     verbose("\n Entering BII routine ")
@@ -837,9 +837,9 @@ def local_bad_density_congruence(self, p, m, Zvec=None, NZvec=None):
     """
     return self.local_badI_density_congruence(p, m, Zvec, NZvec) + self.local_badII_density_congruence(p, m, Zvec, NZvec)
 
-#########################################################
-#  local_density and local_density_congruence routines ##
-#########################################################
+########################################################
+#  local_density and local_density_congruence routines #
+########################################################
 
 
 def local_density_congruence(self, p, m, Zvec=None, NZvec=None):
@@ -982,7 +982,6 @@ def local_primitive_density_congruence(self, p, m, Zvec=None, NZvec=None):
         8/27
         sage: Q.local_primitive_density_congruence(3, 243, None, None)
         8/27
-
     """
     return self.local_good_density_congruence(p, m, Zvec, NZvec) \
         + self.local_bad_density_congruence(p, m, Zvec, NZvec)

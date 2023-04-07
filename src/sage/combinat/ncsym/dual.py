@@ -36,6 +36,7 @@ class SymmetricFunctionsNonCommutingVariablesDual(UniqueRepresentation, Parent):
 
     See Section 2.3 of [BZ05]_ for a study.
     """
+
     def __init__(self, R):
         """
         Initialize ``self``.
@@ -71,7 +72,7 @@ class SymmetricFunctionsNonCommutingVariablesDual(UniqueRepresentation, Parent):
             sage: SymmetricFunctionsNonCommutingVariables(ZZ).dual()
             Dual symmetric functions in non-commuting variables over the Integer Ring
         """
-        return "Dual symmetric functions in non-commuting variables over the %s"%self.base_ring()
+        return "Dual symmetric functions in non-commuting variables over the %s" % self.base_ring()
 
     def a_realization(self):
         r"""
@@ -123,6 +124,7 @@ class SymmetricFunctionsNonCommutingVariablesDual(UniqueRepresentation, Parent):
             sage: h(elt)
             3*h[2, 1]
         """
+
         def __init__(self, NCSymD):
             """
             EXAMPLES::
@@ -229,6 +231,7 @@ class SymmetricFunctionsNonCommutingVariablesDual(UniqueRepresentation, Parent):
             P = SetPartitions()
             n = A.size()
             k = B.size()
+
             def unions(s):
                 a = sorted(s)
                 b = sorted(Set(range(1, n+k+1)).difference(s))
@@ -424,6 +427,7 @@ class SymmetricFunctionsNonCommutingVariablesDual(UniqueRepresentation, Parent):
             r"""
             An element in the `\mathbf{w}` basis.
             """
+
             def expand(self, n, letter='x'):
                 r"""
                 Expand ``self`` written in the `\mathbf{w}` basis in `n^2`

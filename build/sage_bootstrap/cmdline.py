@@ -4,6 +4,11 @@ View for the Commandline UI
 
 This module handles the main "sage-package" commandline utility, which
 is also exposed as "sage --package".
+
+AUTHORS:
+
+    - Volker Braun (2016): initial version
+    - Thierry Monteil (2022): clean option to remove outdated source tarballs
 """
 
 # ****************************************************************************
@@ -68,20 +73,20 @@ EXAMPLE:
     arb
     autotools
     [...]
-    zn_poly
+    zlib
 
     $ sage --package list :standard: | sort
     arb
     backports_ssl_match_hostname
     [...]
-    zn_poly
+    zlib
 """
 
 
 epilog_name = \
 """
 Find the package name given a tarball filename
-    
+
 EXAMPLE:
 
     $ sage --package name pari-2.8-1564-gdeac36e.tar.gz
@@ -92,7 +97,7 @@ EXAMPLE:
 epilog_tarball = \
 """
 Find the tarball filename given a package name
-    
+
 EXAMPLE:
 
     $ sage --package tarball pari
@@ -109,12 +114,12 @@ EXAMPLE:
     $ sage --package apropos python
     Did you mean: cython, ipython, python2, python3, patch?
 """
-        
+
 
 epilog_update = \
 """
-Update a package. This modifies the Sage sources. 
-    
+Update a package. This modifies the Sage sources.
+
 EXAMPLE:
 
     $ sage --package update pari 2015 --url=http://localhost/pari/tarball.tgz
@@ -123,8 +128,8 @@ EXAMPLE:
 
 epilog_update_latest = \
 """
-Update a package to the latest version. This modifies the Sage sources. 
-    
+Update a package to the latest version. This modifies the Sage sources.
+
 EXAMPLE:
 
     $ sage --package update-latest ipython
@@ -134,7 +139,7 @@ EXAMPLE:
 epilog_download = \
 """
 Download the tarball for a package and print the filename to stdout
-    
+
 EXAMPLE:
 
     $ sage --package download pari
@@ -146,7 +151,7 @@ EXAMPLE:
 epilog_upload = \
 """
 Upload the tarball to the Sage mirror network (requires ssh key authentication)
-    
+
 EXAMPLE:
 
     $ sage --package upload pari
@@ -157,7 +162,7 @@ EXAMPLE:
 epilog_fix_checksum = \
 """
 Fix the checksum of a package
-    
+
 EXAMPLE:
 
     $ sage --package fix-checksum pari
@@ -167,11 +172,21 @@ EXAMPLE:
 epilog_create = \
 """
 Create new package, or overwrite existing package
-    
+
 EXAMPLE:
 
     $ sage --package create foo --version=3.14 --tarball=Foo-VERSION.tar.bz2 --type=standard
     Creating new package "foo"
+"""
+
+epilog_clean = \
+"""
+Remove outdated source tarballs from the upstream/ directory
+
+EXAMPLE:
+
+    $ sage --package clean
+    42 files were removed from the .../upstream directory
 """
 
 
@@ -206,11 +221,11 @@ def make_parser():
     parser_list.add_argument(
         '--has-file', action='append', default=[], metavar='FILENAME', dest='has_files',
         help=('only include packages that have this file in their metadata directory '
-              '(examples: SPKG.rst, spkg-configure.m4, distros/debian.txt)'))
+              '(examples: SPKG.rst, spkg-configure.m4, distros/debian.txt, spkg-install|spkg-install.in)'))
     parser_list.add_argument(
         '--no-file', action='append', default=[], metavar='FILENAME', dest='no_files',
         help=('only include packages that do not have this file in their metadata directory '
-              '(examples: huge, patches)'))
+              '(examples: huge, patches, huge|has_nonfree_dependencies)'))
     parser_list.add_argument(
         '--exclude', action='append', default=[], metavar='PACKAGE_NAME',
         help='exclude package from list')
@@ -225,13 +240,13 @@ def make_parser():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         help='Find the tarball filename given a package name')
     parser_tarball.add_argument('package_name', type=str, help='Package name')
-    
+
     parser_apropos = subparsers.add_parser(
         'apropos', epilog=epilog_apropos,
         formatter_class=argparse.RawDescriptionHelpFormatter,
         help='Find up to 5 package names that are close to the given name')
     parser_apropos.add_argument(
-        'incorrect_name', type=str, 
+        'incorrect_name', type=str,
         help='Fuzzy name to search for')
 
     parser_update = subparsers.add_parser(
@@ -277,7 +292,7 @@ def make_parser():
         help='Upload tarball to Sage mirrors')
     parser_upload.add_argument(
         'package_name', type=str, help='Package name or :type:')
-    
+
     parser_fix_checksum = subparsers.add_parser(
         'fix-checksum', epilog=epilog_fix_checksum,
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -297,7 +312,7 @@ def make_parser():
         'package_name', default=None, type=str,
         help='Package name.')
     parser_create.add_argument(
-        '--source', type=str, default='normal', help='Package source (one of normal, script, pip)')
+        '--source', type=str, default='normal', help='Package source (one of normal, wheel, script, pip)')
     parser_create.add_argument(
         '--version', type=str, default=None, help='Package version')
     parser_create.add_argument(
@@ -316,8 +331,12 @@ def make_parser():
         '--pypi', action="store_true",
         help='Create a package for a Python package available on PyPI')
 
-    return parser
+    parser_clean = subparsers.add_parser(
+        'clean', epilog=epilog_clean,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        help='Remove outdated source tarballs from the upstream/ directory')
 
+    return parser
 
 
 def run():
@@ -357,9 +376,11 @@ def run():
         app.upload_cls(args.package_name)
     elif args.subcommand == 'fix-checksum':
         app.fix_checksum_cls(*args.package_class)
+    elif args.subcommand == 'clean':
+        app.clean()
     else:
         raise RuntimeError('unknown subcommand: {0}'.format(args))
 
-        
+
 if __name__ == '__main__':
     run()

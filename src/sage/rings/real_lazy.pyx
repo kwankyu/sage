@@ -975,7 +975,7 @@ cdef class LazyWrapper(LazyFieldElement):
         """
         return <double>self._value
 
-    def __nonzero__(self):
+    def __bool__(self):
         """
         Check to see if ``self`` is not zero.
 
@@ -1748,4 +1748,3 @@ cdef class LazyWrapperMorphism(Morphism):
         else:
             e._value = x
         return e
-

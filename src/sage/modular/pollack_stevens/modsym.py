@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-Element class for Pollack-Stevens' Modular Symbols
+Element class for Pollack-Stevens' modular symbols
 
 This is the class of elements in the spaces of Pollack-Steven's modular symbols as described in [PS2011]_.
 
@@ -36,23 +36,26 @@ EXAMPLES::
 #  the License, or (at your option) any later version.
 #                  https://www.gnu.org/licenses/
 # *****************************************************************************
+
 import operator
+
+from sage.arith.misc import next_prime, gcd, kronecker
+from sage.categories.action import Action
+from sage.misc.cachefunc import cached_method
+from sage.misc.verbose import verbose
+from sage.rings.integer_ring import ZZ
+from sage.rings.padics.factory import Qp
+from sage.rings.padics.padic_generic import pAdicGeneric
+from sage.rings.padics.precision_error import PrecisionError
+from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
+from sage.rings.rational_field import QQ
 from sage.structure.element import ModuleElement
 from sage.structure.richcmp import op_EQ, op_NE
-from sage.rings.integer_ring import ZZ
-from sage.rings.rational_field import QQ
-from sage.misc.cachefunc import cached_method
-from sage.rings.padics.factory import Qp
-from sage.rings.polynomial.all import PolynomialRing
-from sage.rings.padics.padic_generic import pAdicGeneric
-from sage.arith.all import next_prime, gcd, kronecker
-from sage.misc.verbose import verbose
-from sage.rings.padics.precision_error import PrecisionError
 
-from sage.categories.action import Action
 from .manin_map import ManinMap
 from .sigma0 import Sigma0
 from .fund_domain import M2Z
+
 
 minusproj = [1, 0, 0, -1]
 
@@ -90,18 +93,18 @@ def _iterate_Up(Phi, p, M, ap, q, aq, check):
     if ap.valuation(p) > 0:
         raise ValueError("Lifting non-ordinary eigensymbols not implemented (issue #20)")
 
-    ## Act by Hecke to ensure values are in D and not D^dag after solving difference equation
+    # Act by Hecke to ensure values are in D and not D^dag after solving difference equation
     verbose("Applying Hecke", level = 2)
 
     apinv = ~ap
     Phi = apinv * Phi.hecke(p)
 
-    ## Killing eisenstein part
+    # Killing eisenstein part
     verbose("Killing eisenstein part with q = %s" % q, level = 2)
     k = Phi.parent().weight()
     Phi = ((q ** (k + 1) + 1) * Phi - Phi.hecke(q))
 
-    ## Iterating U_p
+    # Iterating U_p
     verbose("Iterating U_p", level = 2)
     Psi = apinv * Phi.hecke(p)
 
@@ -811,20 +814,20 @@ class PSModularSymbolElement(ModuleElement):
         """
         f = self._map
         MR = self._map._manin
-        ## Test two torsion relations
+        # Test two torsion relations
         for g in MR.reps_with_two_torsion():
             gamg = MR.two_torsion_matrix(g)
             if not (f[g] * gamg + f[g]).is_zero():
                 raise ValueError("Two torsion relation failed with", g)
 
-        ## Test three torsion relations
+        # Test three torsion relations
         for g in MR.reps_with_three_torsion():
             gamg = MR.three_torsion_matrix(g)
             if not (f[g] * (gamg ** 2) + f[g] * gamg + f[g]).is_zero():
                 raise ValueError("Three torsion relation failed with", g)
 
-        ## Test that the symbol adds to 0 around the boundary of the
-        ## fundamental domain
+        # Test that the symbol adds to 0 around the boundary of the
+        # fundamental domain
         t = self.parent().coefficient_module().zero()
         for g in MR.gens()[1:]:
             if not(g in MR.reps_with_two_torsion()
@@ -1283,7 +1286,7 @@ class PSModularSymbolElement_symk(PSModularSymbolElement):
         OUTPUT:
 
         - An overconvergent modular symbol whose specialization
-        equals self up to some Eisenstein error.
+          equals self up to some Eisenstein error.
 
         EXAMPLES::
 
@@ -1318,8 +1321,8 @@ class PSModularSymbolElement_symk(PSModularSymbolElement):
                     D[g] = self._map[g].lift(p, M, new_base_ring)
 
             t = self.parent().coefficient_module().lift(p, M, new_base_ring).zero()
-            ## This loops adds up around the boundary of fundamental
-            ## domain except the two vertical lines
+            # This loops adds up around the boundary of fundamental
+            # domain except the two vertical lines
             for g in manin.gens()[1:]:
                 twotor = g in manin.reps_with_two_torsion()
                 threetor = g in manin.reps_with_three_torsion()
@@ -1327,11 +1330,11 @@ class PSModularSymbolElement_symk(PSModularSymbolElement):
                     t = t - D[g]
                 else:
                     t += D[g] * manin.gammas[g] - D[g]
-            ## t now should be sum Phi(D_i) | (gamma_i - 1) - sum
-            ## Phi(D'_i) - sum Phi(D''_i)
+            # t now should be sum Phi(D_i) | (gamma_i - 1) - sum
+            # Phi(D'_i) - sum Phi(D''_i)
 
-            ## (Here I'm using the opposite sign convention of [PS2011]
-            ## regarding D'_i and D''_i)
+            # (Here I'm using the opposite sign convention of [PS2011]
+            # regarding D'_i and D''_i)
 
             D[manin.gen(0)] = -t.solve_difference_equation()  # Check this!
         else:
@@ -1436,7 +1439,6 @@ class PSModularSymbolElement_symk(PSModularSymbolElement):
             newM += -s
         return newM, eisenloss, q, aq
 
-
     def p_stabilize_and_lift(self, p, M, alpha=None, ap=None,
                              new_base_ring=None,
                              ordinary=True, algorithm='greenberg', eigensymbol=False,
@@ -1528,7 +1530,7 @@ class PSModularSymbolElement_dist(PSModularSymbolElement):
 
     def precision_relative(self):
         r"""
-        Return the number of moments of each value of self
+        Return the number of moments of each value of ``self``.
 
         EXAMPLES::
 
@@ -1538,14 +1540,14 @@ class PSModularSymbolElement_dist(PSModularSymbolElement):
             sage: f.precision_relative()
             1
         """
-        return min([len(a._moments) for a in self._map])
-
+        return min(len(a._moments) for a in self._map)
 
     def specialize(self, new_base_ring=None):
         r"""
-        Return the underlying classical symbol of weight `k` - i.e.,
-        applies the canonical map `D_k \to Sym^k` to all values of
-        self.
+        Return the underlying classical symbol of weight `k`.
+
+        Namely, this applies the canonical map `D_k \to Sym^k` to all
+        values of ``self``.
 
         EXAMPLES::
 

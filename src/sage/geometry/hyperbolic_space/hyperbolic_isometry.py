@@ -218,7 +218,7 @@ class HyperbolicIsometry(Morphism):
         if self.domain().is_isometry_group_projective():
             # Special care must be taken for projective groups
             m = matrix(self._matrix.nrows(),
-                       [abs(x) for x in  self._matrix.list()])
+                       [abs(x) for x in self._matrix.list()])
             m.set_immutable()
         else:
             m = self._matrix
@@ -324,7 +324,7 @@ class HyperbolicIsometry(Morphism):
         """
         return self._matrix
 
-    def inverse(self):
+    def __invert__(self):
         r"""
         Return the inverse of the isometry ``self``.
 
@@ -332,13 +332,11 @@ class HyperbolicIsometry(Morphism):
 
             sage: UHP = HyperbolicPlane().UHP()
             sage: A = UHP.get_isometry(matrix(2,[4,1,3,2]))
-            sage: B = A.inverse()
+            sage: B = A.inverse()   # indirect doctest
             sage: A*B == UHP.get_isometry(identity_matrix(2))
             True
         """
-        return self.__class__(self.domain(), self.matrix().inverse())
-
-    __invert__ = inverse
+        return self.__class__(self.domain(), self.matrix().__invert__())
 
     def is_identity(self):
         """
@@ -939,12 +937,11 @@ class HyperbolicIsometryPD(HyperbolicIsometry):
             Isometry in PD
             [   5/8  3/8*I]
             [-3/8*I    5/8]
-
         """
         if isinstance(other, HyperbolicIsometry):
-            M = self._cached_isometry*other._cached_isometry
+            M = self._cached_isometry * other._cached_isometry
             return M.to_model('PD')
-        return super(HyperbolicIsometryPD, self).__mul__(other)
+        return super().__mul__(other)
 
     def __pow__(self, n): #PD
         r"""
@@ -1092,4 +1089,3 @@ def moebius_transform(A, z):
         return (a * z + b) / (c * z + d)
     raise TypeError("A must be an invertible 2x2 matrix over the"
                     " complex numbers or a symbolic ring")
-

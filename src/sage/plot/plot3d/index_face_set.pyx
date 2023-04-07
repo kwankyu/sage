@@ -1,5 +1,5 @@
 """
-Indexed Face Sets
+Indexed face sets
 
 Graphics3D object that consists of a list of polygons, also used for
 triangulations of other objects.
@@ -284,7 +284,7 @@ def cut_edge_by_bisection(pointa, pointb, condition, eps=1.0e-6, N=100):
 
     point_c_middle(&midp, b, a, half)
 
-    return  midp.x, midp.y, midp.z
+    return midp.x, midp.y, midp.z
 
 
 cdef class IndexFaceSet(PrimitiveObject):
@@ -1793,7 +1793,7 @@ cdef class EdgeIter:
     def __init__(self, face_set):
         self.set = face_set
         if not self.set.enclosed:
-            raise TypeError("Must be closed to use the simple iterator.")
+            raise TypeError("must be closed to use the simple iterator")
         self.i = 0
         self.j = 0
         self.seen = {}
@@ -1824,7 +1824,7 @@ cdef class EdgeIter:
                     if point_c_cmp(P, Q) > 0:
                         P, Q = Q, P
                     edge = ((P.x, P.y, P.z), (Q.x, Q.y, Q.z))
-                    if not edge in self.seen:
+                    if edge not in self.seen:
                         self.seen[edge] = edge
                         return edge
         raise StopIteration

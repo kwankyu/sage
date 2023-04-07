@@ -56,7 +56,6 @@ class GraphicPrimitive(WithEqualityById, SageObject):
         """
         self._options = options
 
-
     def _allowed_options(self):
         """
         Return the allowed options for a graphics primitive.
@@ -216,7 +215,6 @@ class GraphicPrimitive(WithEqualityById, SageObject):
         return "Graphics primitive"
 
 
-
 class GraphicPrimitive_xydata(GraphicPrimitive):
     def get_minmax_data(self):
         """
@@ -246,8 +244,6 @@ class GraphicPrimitive_xydata(GraphicPrimitive):
             100.0
             sage: d['xmax']
             120.0
-
         """
         from sage.plot.plot import minmax_data
         return minmax_data(self.xdata, self.ydata, dict=True)
-

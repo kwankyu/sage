@@ -61,7 +61,7 @@ AUTHORS:
 cimport cython
 
 from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
-from sage.rings.function_field.all import FunctionField
+from sage.rings.function_field.constructor import FunctionField
 
 from sage.modules.free_module_element import vector
 from sage.matrix.constructor import matrix
@@ -1330,7 +1330,7 @@ cdef inline int pos_mod(int a, int b):
     return m
 
 
-cdef class Decoder_K(object):
+cdef class Decoder_K():
     """
     Common base class for the implementation of decoding algorithm K
     for AG codes.
@@ -1519,6 +1519,7 @@ cdef class Decoder_K(object):
 
         if verbose:
             width = 7 * (K.degree() + 2)
+
             # auxiliary function for verbose printing
             def vprint_g(g, s):
                 if verbose > 1:
@@ -2313,7 +2314,7 @@ cdef class DifferentialAGCodeDecoder_K(Decoder_K):
         self.info = info
 
 
-cdef class Decoder_K_extension(object):
+cdef class Decoder_K_extension():
     """
     Common base class for decoding algorithm K for AG codes via constant field extension.
 
@@ -2635,4 +2636,3 @@ cdef class DifferentialAGCodeDecoder_K_extension(Decoder_K_extension):
             sage: TestSuite(circuit).run(skip='_test_pickling')               # long time
         """
         super().__init__(pls, G, Q, DifferentialAGCodeDecoder_K, verbose=verbose)
-

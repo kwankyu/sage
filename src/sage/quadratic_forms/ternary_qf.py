@@ -1,5 +1,5 @@
 """
-Ternary Quadratic Form with integer coefficients
+Ternary quadratic form with integer coefficients
 
 AUTHOR:
 
@@ -26,19 +26,25 @@ The form `a*x^2 + b*y^2 + c*z^2 + r*yz + s*xz + t*xy` is stored as a tuple (a, b
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 
-from sage.structure.sage_object import SageObject
-from sage.rings.integer_ring import ZZ
-from sage.arith.all import gcd, kronecker_symbol
-from sage.quadratic_forms.quadratic_form import QuadraticForm
+from sage.arith.misc import gcd, kronecker as kronecker_symbol
 from sage.matrix.constructor import matrix, identity_matrix
-from sage.structure.element import is_Vector, is_Matrix
-from sage.quadratic_forms.ternary import _reduced_ternary_form_eisenstein_with_matrix
-from sage.quadratic_forms.ternary import _reduced_ternary_form_eisenstein_without_matrix, _find_zeros_mod_p_odd, _find_zeros_mod_p_2, _find_p_neighbor_from_vec, _basic_lemma
-from sage.quadratic_forms.ternary import _find_all_ternary_qf_by_level_disc, _find_a_ternary_qf_by_level_disc
 from sage.misc.prandom import randint
+from sage.quadratic_forms.quadratic_form import QuadraticForm
+from sage.quadratic_forms.ternary import (_basic_lemma,
+                                          _find_a_ternary_qf_by_level_disc,
+                                          _find_all_ternary_qf_by_level_disc,
+                                          _find_p_neighbor_from_vec,
+                                          _find_zeros_mod_p_2,
+                                          _find_zeros_mod_p_odd,
+                                          _reduced_ternary_form_eisenstein_with_matrix,
+                                          _reduced_ternary_form_eisenstein_without_matrix)
+
 from sage.rings.finite_rings.integer_mod import mod
-from sage.rings.ring import is_Ring
+from sage.rings.integer_ring import ZZ
 from sage.rings.polynomial.polynomial_ring import polygens
+from sage.rings.ring import is_Ring
+from sage.structure.element import is_Vector, is_Matrix
+from sage.structure.sage_object import SageObject
 
 
 class TernaryQF(SageObject):
@@ -207,7 +213,7 @@ class TernaryQF(SageObject):
         if is_Matrix(v):
             # Check that v has 3 rows
             if v.nrows() != 3:
-                raise TypeError("Oops! The matrix must have 3 rows.")
+                raise TypeError("the matrix must have 3 rows")
             # Check if v has 3 cols
             if v.ncols() == 3:
                 M = v.transpose() * self.matrix() * v
@@ -217,12 +223,12 @@ class TernaryQF(SageObject):
         elif (is_Vector(v) or isinstance(v, (list, tuple))):
             # Check that v has length 3
             if not (len(v) == 3):
-                raise TypeError("Oops! Your vector needs to have length 3")
+                raise TypeError("your vector needs to have length 3")
             v0, v1, v2 = v
             a, b, c, r, s, t = self.coefficients()
             return a*v0**2 + b*v1**2 + c*v2**2 + r*v1*v2 + s*v0*v2 + t*v0*v1
         else:
-            raise TypeError("Oops! Presently we can only evaluate a quadratic form on a list, tuple, vector or matrix")
+            raise TypeError("presently we can only evaluate a quadratic form on a list, tuple, vector or matrix")
 
     def quadratic_form(self):
         """
@@ -510,8 +516,7 @@ class TernaryQF(SageObject):
                 return QuadraticForm(R, 3, [k*self._a, k*self._t, k*self._s, k*self._b, k*self._r, k*self._c])
 
             else:
-
-                raise TypeError("Oops! " + k.__repr__() + " doesn't belongs to a Ring")
+                raise TypeError(f"{k} does not belong to a Ring")
 
     def reciprocal(self):
         """
@@ -806,7 +811,7 @@ class TernaryQF(SageObject):
              sage: Q = TernaryQF([1, 1, 11, 0, -1, 0])
              sage: Q.disc()
              43
-             sage: Q.pseudorandom_primitive_zero_mod_p(3)  ## RANDOM
+             sage: Q.pseudorandom_primitive_zero_mod_p(3)  # random
              (1, 2, 1)
              sage: Q((1, 2, 1))
              15
@@ -1734,7 +1739,7 @@ class TernaryQF(SageObject):
             True
         """
         if not self.is_definite():
-            raise ValueError("Oops, only implemented for definite forms.")
+            raise ValueError("only implemented for definite forms")
 
         if self._automorphisms is not None:
             return self._automorphisms
@@ -1956,7 +1961,7 @@ class TernaryQF(SageObject):
             24
         """
         if not self.is_definite():
-            raise ValueError("Oops, only implemented for definite forms.")
+            raise ValueError("only implemented for definite forms")
 
         if self._number_of_automorphisms is not None:
             return self._number_of_automorphisms
