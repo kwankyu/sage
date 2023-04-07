@@ -78,7 +78,7 @@ class SuperCrystals(Category_singleton):
                     sage: Q = crystals.Letters(['Q',3])
                     sage: G = Q.digraph(); G
                     Multi-digraph on 3 vertices
-                    sage: G.edges()
+                    sage: G.edges(sort=True)
                     [(1, 2, -1), (1, 2, 1), (2, 3, -2), (2, 3, 2)]
 
                 The edges of the crystal graph are by default colored using
@@ -257,7 +257,7 @@ class SuperCrystals(Category_singleton):
                     B[(1, 0, 0, 0, 0)] + B[(0, 1, 0, 0, 0)] + B[(0, 0, 1, 0, 0)]
                      + B[(0, 0, 0, 1, 0)] + B[(0, 0, 0, 0, 1)]
                 """
-                from sage.rings.all import ZZ
+                from sage.rings.integer_ring import ZZ
                 A = self.weight_lattice_realization().algebra(ZZ)
                 return A.sum(A(x.weight()) for x in self)
 
@@ -399,4 +399,3 @@ class SuperCrystals(Category_singleton):
                 [Category of super crystals]
             """
             return [self.base_category()]
-

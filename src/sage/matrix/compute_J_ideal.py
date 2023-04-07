@@ -116,7 +116,6 @@ Classes and Methods
 # (at your option) any later version.
 # https://www.gnu.org/licenses/
 # *****************************************************************************
-from __future__ import print_function, absolute_import
 
 from sage.matrix.constructor import matrix
 from sage.structure.sage_object import SageObject
@@ -191,7 +190,6 @@ def lifting(p, t, A, G):
     """
     from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
 
-
     DX = A.parent().base()
     (X,) = DX.variable_names()
     D = DX.base_ring()
@@ -203,7 +201,6 @@ def lifting(p, t, A, G):
 
     if not (A*G % p**(t-1)).is_zero():
         raise ValueError("A*G not zero mod %s^%s" % (p, t-1))
-
 
     R = A*G/p**(t-1)
     R.change_ring(DX)
@@ -352,7 +349,6 @@ class ComputeMinimalPolynomials(SageObject):
         self._DX = X.parent()
         self._cache = {}
 
-
     def find_monic_replacements(self, p, t, pt_generators, prev_nu):
         r"""
         Replace possibly non-monic generators of `N_{(p^t)}(B)` by monic
@@ -433,7 +429,6 @@ class ComputeMinimalPolynomials(SageObject):
 
         return replacements
 
-
     def current_nu(self, p, t, pt_generators, prev_nu):
         r"""
         Compute `(p^t)`-minimal polynomial of `B`.
@@ -481,8 +476,7 @@ class ComputeMinimalPolynomials(SageObject):
         """
         import heapq
 
-        from sage.misc.misc import verbose
-
+        from sage.misc.verbose import verbose
 
         if not all((g(self._B) % p**t).is_zero()
                    for g in pt_generators):
@@ -519,7 +513,6 @@ class ComputeMinimalPolynomials(SageObject):
             verbose([g] + [h for (deg_h, h) in heap])
 
         return g
-
 
     def mccoy_column(self, p, t, nu):
         r"""
@@ -577,7 +570,6 @@ class ComputeMinimalPolynomials(SageObject):
                                  "McCoy column incorrect"
 
         return column
-
 
     def p_minimal_polynomials(self, p, s_max=None):
         r"""
@@ -751,7 +743,7 @@ class ComputeMinimalPolynomials(SageObject):
 
         [HR2016]_, Algorithm 5.
         """
-        from sage.misc.misc import verbose
+        from sage.misc.verbose import verbose
         from sage.rings.infinity import Infinity
 
         deg_mu = self.mu_B.degree()
@@ -768,7 +760,6 @@ class ComputeMinimalPolynomials(SageObject):
             nu = self._DX(1)
             d = self._A.ncols()
             G = matrix(self._DX, d, 0)
-
 
         while t < s_max:
             deg_prev_nu = nu.degree()
@@ -812,7 +803,6 @@ class ComputeMinimalPolynomials(SageObject):
             return result
 
         return p_min_polys
-
 
     def null_ideal(self, b=0):
         r"""
@@ -878,7 +868,6 @@ class ComputeMinimalPolynomials(SageObject):
 
         return self._DX.ideal(generators)
 
-
     def prime_candidates(self):
         r"""
         Determine those primes `p` where `\mu_B` might not be a
@@ -910,7 +899,6 @@ class ComputeMinimalPolynomials(SageObject):
         F, T = self._B.frobenius(2)
 
         return [p for (p, t) in factor(T.det())]
-
 
     def integer_valued_polynomials_generators(self):
         r"""

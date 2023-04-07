@@ -1,4 +1,5 @@
-"""
+# -*- coding: utf-8 -*-
+r"""
 Sparse integer matrices
 
 AUTHORS:
@@ -14,7 +15,7 @@ TESTS::
     []
 """
 
-#*****************************************************************************
+# ****************************************************************************
 #       Copyright (C) 2007 William Stein <wstein@gmail.com>
 #       Copyright (C) 2018 Vincent Delecroix <20100.delecroix@gmail.com>
 #
@@ -22,13 +23,11 @@ TESTS::
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 2 of the License, or
 # (at your option) any later version.
-#                  http://www.gnu.org/licenses/
-#*****************************************************************************
+#                  https://www.gnu.org/licenses/
+# ****************************************************************************
 
 from cysignals.memory cimport check_calloc, sig_free
 from cysignals.signals cimport sig_on, sig_off
-
-from collections import Iterator, Sequence
 
 from cpython.int cimport PyInt_FromSize_t
 
@@ -119,6 +118,20 @@ cdef class Matrix_integer_sparse(Matrix_sparse):
         mpz_vector_get_entry(x.value, &self._matrix[i], j)
         return x
 
+    cdef bint get_is_zero_unsafe(self, Py_ssize_t i, Py_ssize_t j) except -1:
+        """
+        Return 1 if the entry ``(i, j)`` is zero, otherwise 0.
+
+        EXAMPLES::
+
+            sage: M = matrix(ZZ, [[0,1,0],[0,0,0]], sparse=True)
+            sage: M.zero_pattern_matrix()  # indirect doctest
+            [1 0 1]
+            [1 1 1]
+        """
+        return mpz_vector_is_entry_zero_unsafe(&self._matrix[i], j)
+
+
     ########################################################################
     # LEVEL 2 functionality
     #   * def _pickle
@@ -206,7 +219,7 @@ cdef class Matrix_integer_sparse(Matrix_sparse):
         be dangerous if you change entries of the returned dict.
         """
         d = self.fetch('dict')
-        if not d is None:
+        if d is not None:
             return d
 
         cdef Py_ssize_t i, j, k
@@ -218,6 +231,63 @@ cdef class Matrix_integer_sparse(Matrix_sparse):
                 d[(int(i),int(self._matrix[i].positions[j]))] = x
         self.cache('dict', d)
         return d
+
+    cdef sage.structure.element.Matrix _matrix_times_matrix_(self, sage.structure.element.Matrix _right):
+        """
+        Return the product of the sparse integer matrices
+        ``self`` and ``_right``.
+
+       EXAMPLES::
+
+            sage: a = matrix(ZZ, 2, [1,2,3,4], sparse=True)
+            sage: b = matrix(ZZ, 2, 3, [1..6], sparse=True)
+            sage: a * b
+            [ 9 12 15]
+            [19 26 33]
+        """
+        cdef Matrix_integer_sparse right, ans
+        right = _right
+
+        cdef mpz_vector* v
+
+        # Build a table that gives the nonzero positions in each column of right
+        cdef list nonzero_positions_in_columns = [set() for _ in range(right._ncols)]
+        cdef Py_ssize_t i, j, k
+        for i in range(right._nrows):
+            v = &(right._matrix[i])
+            for j in range(v.num_nonzero):
+                (<set> nonzero_positions_in_columns[v.positions[j]]).add(i)
+        # pre-computes the list of nonzero columns of right
+        cdef list right_indices
+        right_indices = [j for j in range(right._ncols)
+                         if nonzero_positions_in_columns[j]]
+
+        ans = self.new_matrix(self._nrows, right._ncols)
+
+        # Now do the multiplication, getting each row completely before filling it in.
+        cdef set c
+        cdef mpz_t x, y, s
+        mpz_init(x)
+        mpz_init(y)
+        mpz_init(s)
+        for i in range(self._nrows):
+            v = &(self._matrix[i])
+            if not v.num_nonzero:
+                continue
+            for j in right_indices:
+                mpz_set_si(s, 0)
+                c = <set> nonzero_positions_in_columns[j]
+                for k in range(v.num_nonzero):
+                    if v.positions[k] in c:
+                        mpz_vector_get_entry(y, &right._matrix[v.positions[k]], j)
+                        mpz_mul(x, v.entries[k], y)
+                        mpz_add(s, s, x)
+                mpz_vector_set_entry(&ans._matrix[i], j, s)
+
+        mpz_clear(x)
+        mpz_clear(y)
+        mpz_clear(s)
+        return ans
 
     ########################################################################
     # LEVEL 3 functionality (Optional)
@@ -241,10 +311,9 @@ cdef class Matrix_integer_sparse(Matrix_sparse):
             [0 1 0 0 0 0 1 0]
             sage: M._nonzero_positions_by_row()
             [(0, 3), (1, 1), (1, 6)]
-
         """
         x = self.fetch('nonzero_positions')
-        if not x is None:
+        if x is not None:
             if copy:
                 return list(x)
             return x
@@ -273,10 +342,9 @@ cdef class Matrix_integer_sparse(Matrix_sparse):
             [0 1 0 0 0 0 1 0]
             sage: M._nonzero_positions_by_column()
             [(1, 1), (0, 3), (1, 6)]
-
         """
         x = self.fetch('nonzero_positions_by_column')
-        if not x is None:
+        if x is not None:
             if copy:
                 return list(x)
             return x
@@ -541,13 +609,13 @@ cdef class Matrix_integer_sparse(Matrix_sparse):
             [0 3 0]
             [0 0 0]
             sage: U
-            [ 0  1  0]
+            [ 0  2 -1]
             [ 0 -1  1]
-            [-1  2 -1]
+            [ 1 -2  1]
             sage: V
-            [-1  4  1]
-            [ 1 -3 -2]
             [ 0  0  1]
+            [-1  2 -2]
+            [ 1 -1  1]
             sage: U*A*V
             [1 0 0]
             [0 3 0]
@@ -562,12 +630,12 @@ cdef class Matrix_integer_sparse(Matrix_sparse):
             [0 2]
             [0 0]
             sage: U
-            [ 0  1  0]
+            [ 0  2 -1]
             [ 0 -1  1]
-            [-1  2 -1]
+            [ 1 -2  1]
             sage: V
-            [-1  3]
-            [ 1 -2]
+            [-1  1]
+            [ 1  0]
             sage: U * A * V
             [1 0]
             [0 2]
@@ -1062,7 +1130,7 @@ cdef class Matrix_integer_sparse(Matrix_sparse):
             ....:         x, d = m._solve_vector_linbox(b, algorithm=algo)
             ....:         assert m * x == d * b
         """
-        Vin = self._column_ambient_module().dense_module()
+        Vin = self.column_ambient_module(base_ring=None, sparse=False)
         v = Vin(v)
 
         if self._nrows == 0 or self._ncols == 0:
@@ -1095,7 +1163,7 @@ cdef class Matrix_integer_sparse(Matrix_sparse):
             linbox.solve(res[0], D, A[0], b[0], linbox.Method.Blackbox())
         sig_off()
 
-        Vout = self._row_ambient_module().dense_module()
+        Vout = self.row_ambient_module(base_ring=None, sparse=False)
         res_sage = new_sage_vector_integer_dense(Vout, res[0])
         cdef Integer d = PY_NEW(Integer)
         mpz_set(d.value, D.get_mpz_const())

@@ -1,5 +1,5 @@
 r"""
-Generic structures for linear codes of any metirc
+Generic structures for linear codes of any metric
 
 Class supporting methods available for linear codes over any metric (Hamming,
 rank).
@@ -13,10 +13,10 @@ from sage.categories.modules import Modules
 from sage.modules.free_module import VectorSpace
 from sage.coding.encoder import Encoder
 from sage.misc.cachefunc import cached_method
-from sage.matrix.matrix_space import MatrixSpace
 from sage.rings.integer import Integer
 from sage.structure.parent import Parent
 from sage.rings.integer_ring import ZZ
+
 
 class AbstractLinearCodeNoMetric(AbstractCode, Module):
     r"""
@@ -33,7 +33,7 @@ class AbstractLinearCodeNoMetric(AbstractCode, Module):
     - inherit from AbstractLinearCodeNoMetric
 
     - call AbstractCode ``__init__`` method in the subclass constructor.
-      Example: ``super(SubclassName, self).__init__(length, "EncoderName",
+      Example: ``super().__init__(length, "EncoderName",
       "DecoderName", "metric")``.
 
     - add the following two lines on the class level::
@@ -157,24 +157,40 @@ class AbstractLinearCodeNoMetric(AbstractCode, Module):
         - ``default_decoder_name`` -- the name of the default decoder of ``self``
 
         - ``metric`` -- (default: ``Hamming``) the metric of ``self``
+
+        EXAMPLES:
+
+            sage: from sage.coding.linear_code_no_metric import AbstractLinearCodeNoMetric
+            sage: from sage.coding.linear_code import LinearCodeSyndromeDecoder
+            sage: class MyLinearCode(AbstractLinearCodeNoMetric):
+            ....:   def __init__(self, field, length, dimension, generator_matrix):
+            ....:       self._registered_decoders['Syndrome'] = LinearCodeSyndromeDecoder
+            ....:       AbstractLinearCodeNoMetric.__init__(self, field, length, "Systematic", "Syndrome")
+            ....:       self._dimension = dimension
+            ....:       self._generator_matrix = generator_matrix
+            ....:   def generator_matrix(self):
+            ....:       return self._generator_matrix
+            ....:   def _repr_(self):
+            ....:       return "[%d, %d] dummy code over GF(%s)" % (self.length(), self.dimension(), self.base_field().cardinality())
+            sage: C = MyLinearCode(GF(2), 1, 1, matrix(GF(2), [1]))
         """
 
         self._registered_encoders['Systematic'] = LinearCodeSystematicEncoder
 
         if not base_field.is_field():
             raise ValueError("'base_field' must be a field (and {} is not one)".format(base_field))
-        if not default_encoder_name in self._registered_encoders:
+        if default_encoder_name not in self._registered_encoders:
             raise ValueError("You must set a valid encoder as default encoder for this code, by filling in the dictionary of registered encoders")
-        if not default_decoder_name in self._registered_decoders:
+        if default_decoder_name not in self._registered_decoders:
             raise ValueError("You must set a valid decoder as default decoder for this code, by filling in the dictionary of registered decoders")
 
-        #if not self.dimension() <= length:
-        #    raise ValueError("The dimension of the code can be at most its length, {}".format(length))
+        # if not self.dimension() <= length:
+        #     raise ValueError("The dimension of the code can be at most its length, {}".format(length))
 
-        super(AbstractLinearCodeNoMetric, self).__init__(length, default_encoder_name, default_decoder_name, metric)
+        super().__init__(length, default_encoder_name, default_decoder_name, metric)
         cat = Modules(base_field).FiniteDimensional().WithBasis().Finite()
         facade_for = VectorSpace(base_field, self._length)
-        self.Element = type(facade_for.an_element()) #for when we made this a non-facade parent
+        self.Element = type(facade_for.an_element())  # for when we made this a non-facade parent
         Parent.__init__(self, base=base_field, facade=facade_for, category=cat)
 
     def base_field(self):
@@ -192,7 +208,7 @@ class AbstractLinearCodeNoMetric(AbstractCode, Module):
 
     def ambient_space(self):
         r"""
-        Returns the ambient vector space of ``self``.
+        Return the ambient vector space of ``self``.
 
         EXAMPLES::
 
@@ -204,7 +220,7 @@ class AbstractLinearCodeNoMetric(AbstractCode, Module):
 
     def generator_matrix(self, encoder_name=None, **kwargs):
         r"""
-        Returns a generator matrix of ``self``.
+        Return a generator matrix of ``self``.
 
         INPUT:
 
@@ -226,10 +242,65 @@ class AbstractLinearCodeNoMetric(AbstractCode, Module):
         E = self.encoder(encoder_name, **kwargs)
         return E.generator_matrix()
 
+    def __eq__(self, other):
+        r"""
+        Tests equality between two linear codes.
+
+        EXAMPLES::
+
+            sage: G = Matrix(GF(2), [[1,1,1,0,0,0,0],[1,0,0,1,1,0,0],[0,1,0,1,0,1,0],[1,1,0,1,0,0,1]])
+            sage: C1 = LinearCode(G)
+            sage: C1 == 5
+            False
+            sage: C2 = LinearCode(G)
+            sage: C1 == C2
+            True
+            sage: G = Matrix(GF(2), [[1,1,1,0,0,0,0],[1,0,0,1,1,0,0],[0,1,0,1,0,1,0],[1,1,0,1,0,1,1]])
+            sage: C2 = LinearCode(G)
+            sage: C1 == C2
+            False
+            sage: G = Matrix(GF(3), [[1,2,1,0,0,0,0]])
+            sage: C3 = LinearCode(G)
+            sage: C1 == C3
+            False
+        """
+        # Fail without computing the generator matrix if possible:
+        if not (isinstance(other, AbstractLinearCodeNoMetric)
+                and self.length() == other.length()
+                and self.dimension() == other.dimension()
+                and self.base_ring() == other.base_ring()):
+            return False
+        # Check that basis elements of `other` are all in `self.`
+        # Since we're over a field and since the dimensions match, the codes
+        # must be equal.
+        # This implementation may avoid linear algebra altogether, if `self`
+        # implements an efficient way to obtain a parity check matrix, and in
+        # the worst case does only one system solving.
+        return all(c in self for c in other.gens())
+
+    def __ne__(self, other):
+        r"""
+        Tests inequality of ``self`` and ``other``.
+
+        This is a generic implementation, which returns the inverse of ``__eq__`` for self.
+
+        EXAMPLES::
+
+            sage: G = Matrix(GF(2), [[1,1,1,0,0,0,0],[1,0,0,1,1,0,0],[0,1,0,1,0,1,0],[1,1,0,1,0,0,1]])
+            sage: C1 = LinearCode(G)
+            sage: C2 = LinearCode(G)
+            sage: C1 != C2
+            False
+            sage: G = Matrix(GF(2), [[1,1,1,0,0,0,0],[1,0,0,1,1,0,0],[0,1,0,1,0,1,0],[1,1,0,1,0,1,1]])
+            sage: C2 = LinearCode(G)
+            sage: C1 != C2
+            True
+        """
+        return not self == other
 
     def dimension(self):
         r"""
-        Returns the dimension of this code.
+        Return the dimension of this code.
 
         EXAMPLES::
 
@@ -248,11 +319,11 @@ class AbstractLinearCodeNoMetric(AbstractCode, Module):
             ....:     _registered_encoders = {}
             ....:     _registered_decoders = {}
             ....:     def __init__(self):
-            ....:         super(MonkeyCode, self).__init__(GF(5), 10, "Monkey", "Syndrome")
+            ....:         super().__init__(GF(5), 10, "Monkey", "Syndrome")
             ....:
             sage: class MonkeyEncoder(Encoder):
             ....:     def __init__(self, code):
-            ....:         super(MonkeyEncoder, self).__init__(C)
+            ....:         super().__init__(C)
             ....:     @cached_method
             ....:     def generator_matrix(self):
             ....:         G = identity_matrix(GF(5), 5).augment(matrix(GF(5), 5, 7))
@@ -302,7 +373,7 @@ class AbstractLinearCodeNoMetric(AbstractCode, Module):
     @cached_method
     def gens(self):
         r"""
-        Returns the generators of this code as a list of vectors.
+        Return the generators of this code as a list of vectors.
 
         EXAMPLES::
 
@@ -314,7 +385,7 @@ class AbstractLinearCodeNoMetric(AbstractCode, Module):
 
     def basis(self):
         r"""
-        Returns a basis of ``self``.
+        Return a basis of ``self``.
 
         OUTPUT:
 
@@ -340,7 +411,7 @@ class AbstractLinearCodeNoMetric(AbstractCode, Module):
     @cached_method
     def parity_check_matrix(self):
         r"""
-        Returns the parity check matrix of ``self``.
+        Return the parity check matrix of ``self``.
 
         The parity check matrix of a linear code `C` corresponds to the
         generator matrix of the dual code of `C`.
@@ -379,7 +450,7 @@ class AbstractLinearCodeNoMetric(AbstractCode, Module):
 
     def syndrome(self, r):
         r"""
-        Returns the syndrome of ``r``.
+        Return the syndrome of ``r``.
 
         The syndrome of ``r`` is the result of `H \times r` where `H` is
         the parity check matrix of ``self``. If ``r`` belongs to ``self``,
@@ -423,7 +494,7 @@ class AbstractLinearCodeNoMetric(AbstractCode, Module):
 
     def __contains__(self, v):
         r"""
-        Returns True if `v` can be coerced into ``self``. Otherwise, returns False.
+        Return True if `v` can be coerced into ``self``. Otherwise, returns False.
 
         EXAMPLES::
 
@@ -435,7 +506,7 @@ class AbstractLinearCodeNoMetric(AbstractCode, Module):
             sage: vector((1, 0, 0, 0, 0, 1/2, 1)) in C # indirect doctest
             False
         """
-        if not v in self.ambient_space() or len(v) != self.length():
+        if v not in self.ambient_space() or len(v) != self.length():
             return False
         return self.syndrome(v) == 0
 
@@ -464,7 +535,7 @@ class AbstractLinearCodeNoMetric(AbstractCode, Module):
             [1 2 0 1]
             [0 0 1 2]
 
-        Specific systematic positions can also be requested:
+        Specific systematic positions can also be requested::
 
             sage: C.systematic_generator_matrix(systematic_positions=[3,2])
             [1 2 0 1]
@@ -475,7 +546,7 @@ class AbstractLinearCodeNoMetric(AbstractCode, Module):
 
     def standard_form(self, return_permutation=True):
         r"""
-        Returns a linear code which is permutation-equivalent to ``self`` and
+        Return a linear code which is permutation-equivalent to ``self`` and
         admits a generator matrix in standard form.
 
         A generator matrix is in standard form if it is of the form `[I \vert
@@ -529,7 +600,7 @@ class AbstractLinearCodeNoMetric(AbstractCode, Module):
 
     def redundancy_matrix(self):
         r"""
-        Returns the non-identity columns of a systematic generator matrix for
+        Return the non-identity columns of a systematic generator matrix for
         ``self``.
 
         A systematic generator matrix is a generator matrix such that a subset
@@ -656,7 +727,7 @@ class AbstractLinearCodeNoMetric(AbstractCode, Module):
 
     def __getitem__(self, i):
         r"""
-        Returns the `i`-th codeword of this code.
+        Return the `i`-th codeword of this code.
 
         The implementation of this depends on the implementation of the
         :meth:`.__iter__` method.
@@ -679,10 +750,12 @@ class AbstractLinearCodeNoMetric(AbstractCode, Module):
            ``[(i*a^0 +(p-1)*a^1 +...+ (p-1)*a^(m-1))*G[0] for i in range(p)]``
         4. Then, we move to G[1]:
            ``[i*a^0 * G[0] + a^0*G[1] for i in range(p)]``,
-         and so on.
-         Hence the `i`-th element can be obtained by the p-adic expansion
-         of `i` as ``[i_0, i_1, ...,i_{m-1}, i_m, i_{m+1}, ..., i_{km-1}].``
-         The element that is generated is:
+
+        and so on.
+        Hence the `i`-th element can be obtained by the p-adic expansion
+        of `i` as ``[i_0, i_1, ...,i_{m-1}, i_m, i_{m+1}, ..., i_{km-1}].``
+
+        The element that is generated is:
 
         .. MATH::
 
@@ -759,7 +832,7 @@ class AbstractLinearCodeNoMetric(AbstractCode, Module):
 
     def __hash__(self):
         r"""
-        Returns the hash value of ``self``.
+        Return the hash value of ``self``.
 
         EXAMPLES::
 
@@ -786,7 +859,7 @@ class AbstractLinearCodeNoMetric(AbstractCode, Module):
 
     def is_subcode(self, other):
         """
-        Returns ``True`` if ``self`` is a subcode of ``other``.
+        Return ``True`` if ``self`` is a subcode of ``other``.
 
         EXAMPLES::
 
@@ -822,7 +895,7 @@ class AbstractLinearCodeNoMetric(AbstractCode, Module):
 
     def is_permutation_automorphism(self,g):
         r"""
-        Returns `1` if `g` is an element of `S_n` (`n` = length of self) and
+        Return `1` if `g` is an element of `S_n` (`n` = length of self) and
         if `g` is an automorphism of self.
 
         EXAMPLES::
@@ -853,7 +926,7 @@ class AbstractLinearCodeNoMetric(AbstractCode, Module):
 
     def permuted_code(self, p):
         r"""
-        Returns the permuted code, which is equivalent to ``self`` via the
+        Return the permuted code, which is equivalent to ``self`` via the
         column permutation ``p``.
 
         EXAMPLES::
@@ -869,14 +942,14 @@ class AbstractLinearCodeNoMetric(AbstractCode, Module):
             True
         """
         if not hasattr(self, "_generic_constructor"):
-          raise NotImplementedException("Generic constructor not set for the class of codes")
+            raise NotImplementedError("Generic constructor not set for the class of codes")
         G = copy(self.generator_matrix())
         G.permute_columns(p)
         return self._generic_constructor(G)
 
     def dual_code(self):
         r"""
-        Returns the dual code `C^{\perp}` of the code `C`,
+        Return the dual code `C^{\perp}` of the code `C`,
 
         .. MATH::
 
@@ -892,12 +965,12 @@ class AbstractLinearCodeNoMetric(AbstractCode, Module):
             [21, 3] linear code over GF(4)
         """
         if not hasattr(self, "_generic_constructor"):
-          raise NotImplementedException("Generic constructor not set for the class of codes")
+            raise NotImplementedError("Generic constructor not set for the class of codes")
         return self._generic_constructor(self.parity_check_matrix())
 
-    def is_self_dual(self):
+    def is_self_dual(self) -> bool:
         """
-        Returns ``True`` if the code is self-dual (in the usual Hamming inner
+        Return ``True`` if the code is self-dual (in the usual Hamming inner
         product) and ``False`` otherwise.
 
         EXAMPLES::
@@ -913,7 +986,7 @@ class AbstractLinearCodeNoMetric(AbstractCode, Module):
 
     def is_self_orthogonal(self):
         """
-        Returns ``True`` if this code is self-orthogonal and ``False``
+        Return ``True`` if this code is self-orthogonal and ``False``
         otherwise.
 
         A code is self-orthogonal if it is a subcode of its dual.
@@ -935,7 +1008,7 @@ class AbstractLinearCodeNoMetric(AbstractCode, Module):
     @cached_method
     def zero(self):
         r"""
-        Returns the zero vector of ``self``.
+        Return the zero vector of ``self``.
 
         EXAMPLES::
 
@@ -1060,7 +1133,7 @@ class LinearCodeSystematicEncoder(Encoder):
             sage: E
             Systematic encoder for [7, 4] linear code over GF(2)
         """
-        super(LinearCodeSystematicEncoder, self).__init__(code)
+        super().__init__(code)
         self._systematic_positions = tuple(systematic_positions) if systematic_positions else None
         if systematic_positions:
             # Test that systematic_positions consists of integers in the right
@@ -1071,7 +1144,6 @@ class LinearCodeSystematicEncoder(Encoder):
                 raise ValueError("systematic positions must be a tuple of distinct integers in the range 0 to n-1 where n is the length of the code")
             # Test that the systematic positions are an information set
             self.generator_matrix()
-
 
     def __eq__(self, other):
         r"""
@@ -1127,7 +1199,7 @@ class LinearCodeSystematicEncoder(Encoder):
     @cached_method
     def generator_matrix(self):
         r"""
-        Returns a generator matrix in systematic form of the associated code of ``self``.
+        Return a generator matrix in systematic form of the associated code of ``self``.
 
         Systematic form here means that a subsets of the columns of the matrix
         forms the identity matrix.
@@ -1206,7 +1278,7 @@ class LinearCodeSystematicEncoder(Encoder):
 
     def systematic_permutation(self):
         r"""
-        Returns a permutation which would take the systematic positions into [0,..,k-1]
+        Return a permutation which would take the systematic positions into [0,..,k-1]
 
         EXAMPLES::
 
@@ -1222,13 +1294,13 @@ class LinearCodeSystematicEncoder(Encoder):
         n = self.code().length()
         systematic_positions = self.systematic_positions()
         k = len(systematic_positions)
-        lp = [ None ]*n
-        for (i,j) in zip(range(k), systematic_positions):
+        lp = [None] * n
+        for (i, j) in zip(range(k), systematic_positions):
             lp[i] = j
         j = k
         set_sys_pos = set(systematic_positions)
         for i in range(n):
-            if not i in set_sys_pos:
+            if i not in set_sys_pos:
                 lp[j] = i
                 j += 1
         from sage.combinat.permutation import Permutation
@@ -1236,7 +1308,7 @@ class LinearCodeSystematicEncoder(Encoder):
 
     def systematic_positions(self):
         r"""
-        Returns a tuple containing the indices of the columns which form an
+        Return a tuple containing the indices of the columns which form an
         identity matrix when the generator matrix is in systematic form.
 
         EXAMPLES::

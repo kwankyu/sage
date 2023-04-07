@@ -31,7 +31,6 @@ EXAMPLES::
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 
-from __future__ import print_function, absolute_import
 
 from sage.categories.rings import Rings
 from sage.rings.infinity import infinity
@@ -45,6 +44,8 @@ from .ring import CommutativeRing
 
 from sage.structure.unique_representation import UniqueRepresentation
 from sage.misc.cachefunc import cached_method
+
+from sage.rings.integer_ring import ZZ
 
 
 def is_LaurentSeriesRing(x):
@@ -457,10 +458,16 @@ class LaurentSeriesRing(UniqueRepresentation, CommutativeRing):
             1/5*q^-11 + 4/5*q^-9 + 64/25*q^-7 + 192/25*q^-5 + 2816/125*q^-3 + 8192/125*q^-1 + O(1)
             sage: L(pari('O(x^-10)'))
             O(q^-10)
+
+        Check that :trac:`30073` is fixed::
+
+            sage: P.<x> = LaurentSeriesRing(QQ)
+            sage: P({-3: 1})
+            x^-3
         """
         from sage.rings.fraction_field_element import is_FractionFieldElement
-        from sage.rings.polynomial.polynomial_element import is_Polynomial
-        from sage.rings.polynomial.multi_polynomial_element import is_MPolynomial
+        from sage.rings.polynomial.polynomial_element import Polynomial
+        from sage.rings.polynomial.multi_polynomial import MPolynomial
         from sage.structure.element import parent
         from sage.libs.pari.all import pari_gen
 
@@ -493,10 +500,40 @@ class LaurentSeriesRing(UniqueRepresentation, CommutativeRing):
                 return (self(self.polynomial_ring()(x)) << n).add_bigoh(prec)
         elif (is_FractionFieldElement(x)
               and (x.base_ring() is self.base_ring() or x.base_ring() == self.base_ring())
-              and (is_Polynomial(x.numerator()) or is_MPolynomial(x.numerator()))):
+              and isinstance(x.numerator(), (Polynomial, MPolynomial))):
             x = self(x.numerator()) / self(x.denominator())
             return (x << n).add_bigoh(prec)
         return self.element_class(self, x, n).add_bigoh(prec)
+
+    def random_element(self, algorithm='default'):
+        r"""
+        Return a random element of this Laurent series ring.
+
+        The optional ``algorithm`` parameter decides how elements are generated.
+        Algorithms currently implemented:
+
+        - ``'default'``: Choose an integer ``shift`` using the standard
+          distribution on the integers.  Then choose a list of coefficients
+          using the ``random_element`` function of the base ring, and construct
+          a new element based on those coefficients, so that the i-th
+          coefficient corresponds to the (i+shift)-th power of the uniformizer.
+          The amount of coefficients is determined by the ``default_prec``
+          of the ring. Note that this method only creates non-exact elements.
+
+        EXAMPLES::
+
+            sage: S.<s> = LaurentSeriesRing(GF(3))
+            sage: S.random_element()  # random
+            s^-8 + s^-7 + s^-6 + s^-5 + s^-1 + s + s^3 + s^4
+            + s^5 + 2*s^6 + s^7 + s^11 + O(s^12)
+        """
+        if algorithm == 'default':
+            shift = ZZ.random_element()
+            return self([self.base_ring().random_element()
+                         for k in range(self.default_prec())],
+                        shift).O(shift + self.default_prec())
+        else:
+            raise ValueError("algorithm cannot be %s" % algorithm)
 
     def construction(self):
         r"""
@@ -586,9 +623,10 @@ class LaurentSeriesRing(UniqueRepresentation, CommutativeRing):
         A = self.base_ring()
         from sage.rings.polynomial.polynomial_ring import is_PolynomialRing
         from sage.rings.power_series_ring import is_PowerSeriesRing
-        from sage.rings.polynomial.laurent_polynomial_ring import is_LaurentPolynomialRing
+        from sage.rings.polynomial.laurent_polynomial_ring_base import LaurentPolynomialRing_generic
+
         if ((is_LaurentSeriesRing(P) or
-             is_LaurentPolynomialRing(P) or
+             isinstance(P, LaurentPolynomialRing_generic) or
              is_PowerSeriesRing(P) or
              is_PolynomialRing(P))
             and P.variable_name() == self.variable_name()

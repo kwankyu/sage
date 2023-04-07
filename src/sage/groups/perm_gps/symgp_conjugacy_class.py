@@ -5,8 +5,6 @@ AUTHORS:
 
 - Vincent Delecroix, Travis Scrimshaw (2014-11-23)
 """
-from __future__ import print_function
-from six.moves import range
 
 from sage.groups.conjugacy_classes import ConjugacyClass, ConjugacyClassGAP
 from sage.groups.perm_gps.permgroup_element import PermutationGroupElement
@@ -17,7 +15,7 @@ from sage.sets.set import Set
 import itertools
 
 
-class SymmetricGroupConjugacyClassMixin(object):
+class SymmetricGroupConjugacyClassMixin():
     r"""
     Mixin class which contains methods for conjugacy classes of
     the symmetric group.
@@ -50,7 +48,7 @@ class SymmetricGroupConjugacyClassMixin(object):
             Conjugacy class of cycle type [4] in
              Symmetric group of order 4! as a permutation group
         """
-        return "Conjugacy class of cycle type %s in %s"%(self._part, self._parent)
+        return "Conjugacy class of cycle type %s in %s" % (self._part, self._parent)
 
     def __eq__(self, other):
         r"""
@@ -169,8 +167,9 @@ class SymmetricGroupConjugacyClass(SymmetricGroupConjugacyClassMixin, ConjugacyC
         """
         if not self._set:
             self._set = Set(self._parent.element_class(x, self._parent, check=False)
-                            for x in conjugacy_class_iterator(self._part, self._domain) )
+                            for x in conjugacy_class_iterator(self._part, self._domain))
         return self._set
+
 
 class PermutationsConjugacyClass(SymmetricGroupConjugacyClassMixin, ConjugacyClass):
     """
@@ -199,7 +198,7 @@ class PermutationsConjugacyClass(SymmetricGroupConjugacyClassMixin, ConjugacyCla
             part = elt.cycle_type()
         else:
             elt = P.element_in_conjugacy_classes(part)
-        SymmetricGroupConjugacyClassMixin.__init__(self, range(1, P.n+1), part)
+        SymmetricGroupConjugacyClassMixin.__init__(self, range(1, P.n + 1), part)
         ConjugacyClass.__init__(self, P, elt)
 
     def __iter__(self):
@@ -243,11 +242,12 @@ class PermutationsConjugacyClass(SymmetricGroupConjugacyClassMixin, ConjugacyCla
         """
         if not self._set:
             self._set = Set(from_cycles(self._parent.n, x, self._parent)
-                            for x in conjugacy_class_iterator(self._part, self._domain) )
+                            for x in conjugacy_class_iterator(self._part, self._domain))
         return self._set
 
+
 #####################################################################
-## Helper functions
+# Helper functions
 
 def default_representative(part, G):
     r"""
@@ -286,7 +286,7 @@ def default_representative(part, G):
     total = 0
     cycles = []
     for p in part:
-        cycles.append(tuple(D[total:total+p]))
+        cycles.append(tuple(D[total:total + p]))
         total += p
     return G.element_class(cycles, G, check=False)
 
@@ -295,7 +295,7 @@ def conjugacy_class_iterator(part, S=None):
     r"""
     Return an iterator over the conjugacy class associated to
     the partition ``part``.
-    
+
     The elements are given as a list of tuples, each tuple being a cycle.
 
     INPUT:
@@ -340,10 +340,6 @@ def conjugacy_class_iterator(part, S=None):
     It is also possible to specify any underlying set::
 
         sage: it = conjugacy_class_iterator([2,2,2], 'abcdef')
-        sage: next(it) # py2
-        [('a', 'b'), ('c', 'd'), ('e', 'f')]
-        sage: next(it) # py2
-        [('a', 'f'), ('c', 'b'), ('e', 'd')]
         sage: sorted(flatten(next(it)))
         ['a', 'b', 'c', 'd', 'e', 'f']
         sage: all(len(x) == 2 for x in next(it))
@@ -353,11 +349,11 @@ def conjugacy_class_iterator(part, S=None):
     if part not in _Partitions:
         raise ValueError("invalid partition")
     if S is None:
-        S = range(1, n+1)
+        S = range(1, n + 1)
     else:
         S = list(S)
         if n != len(S):
-            raise ValueError("the sum of the partition %s does not match the size of %s"%(part,S))
+            raise ValueError("the sum of the partition %s does not match the size of %s" % (part, S))
 
     m = len(part)
     for s in SetPartitions(S, part):
@@ -367,4 +363,3 @@ def conjugacy_class_iterator(part, S=None):
         iterator = tuple(itertools.permutations(r) for r in rests)
         for r in itertools.product(*iterator):
             yield [(firsts[i],) + r[i] for i in range(m)]
-

@@ -119,7 +119,7 @@ created, which, by default, bares the same name (here `e`)::
 Let us check that the coframe `(e^i)` is indeed the dual of the vector
 frame `(e_i)`::
 
-    sage: e_dual[1](e[1]) # the linear form e^1 applied to the local section e_1
+    sage: e_dual[1](e[1]) # linear form e^1 applied to local section e_1
     Scalar field e^1(e_1) on the Open subset U of the 3-dimensional topological
      manifold M
     sage: e_dual[1](e[1]).expr() # the explicit expression of e^1(e_1)
@@ -162,19 +162,20 @@ Let us check the components of `f` with respect to the frame `e`::
 
 """
 
-#******************************************************************************
+# *****************************************************************************
 #       Copyright (C) 2013-2018 Eric Gourgoulhon <eric.gourgoulhon@obspm.fr>
 #       Copyright (C) 2019 Michael Jung <micjung@uni-potsdam.de>
 #
 #  Distributed under the terms of the GNU General Public License (GPL)
 #  as published by the Free Software Foundation; either version 2 of
 #  the License, or (at your option) any later version.
-#                  http://www.gnu.org/licenses/
-#******************************************************************************
+#                  https://www.gnu.org/licenses/
+# *****************************************************************************
 
 from sage.tensor.modules.free_module_basis import (FreeModuleBasis,
                                                    FreeModuleCoBasis)
 from sage.tensor.modules.finite_rank_free_module import FiniteRankFreeModule
+
 
 class LocalCoFrame(FreeModuleCoBasis):
     r"""
@@ -331,7 +332,7 @@ class LocalCoFrame(FreeModuleCoBasis):
             Dual basis (e^1,e^2) on the Fiber of E at Point p on the
             2-dimensional topological manifold M
             sage: type(e_dual_p)
-            <class 'sage.tensor.modules.free_module_basis.FreeModuleCoBasis'>
+            <class 'sage.tensor.modules.free_module_basis.FreeModuleCoBasis_with_category'>
             sage: e_dual_p[1]
             Linear form e^1 on the Fiber of E at Point p on the 2-dimensional
              topological manifold M
@@ -398,10 +399,10 @@ class LocalCoFrame(FreeModuleCoBasis):
             \left(E|_{M}, \left(e^{\xi},e^{\zeta}\right)\right)
 
         """
-        super(LocalCoFrame, self).set_name(symbol, latex_symbol=latex_symbol,
-                                      indices=indices,
-                                      latex_indices=latex_indices,
-                                      index_position=index_position)
+        super().set_name(symbol, latex_symbol=latex_symbol,
+                         indices=indices,
+                         latex_indices=latex_indices,
+                         index_position=index_position)
         if include_domain:
             # Redefinition of the name and the LaTeX name to include the domain
             self._name = "({}|_{}, {})".format(self._vbundle._name,
@@ -422,7 +423,7 @@ class LocalFrame(FreeModuleBasis):
     of the base space `M`, such that `e(p)` is a basis of the fiber `E_p` for
     any `p \in U`.
 
-    For each instanciation of a local frame, a local coframe is automatically
+    For each instantiation of a local frame, a local coframe is automatically
     created, as an instance of the class :class:`LocalCoFrame`. It is returned
     by the method :meth:`coframe`.
 
@@ -597,12 +598,12 @@ class LocalFrame(FreeModuleBasis):
             symbol_dual = tuple(symbol_dual)
         if isinstance(latex_symbol_dual, list):
             latex_symbol_dual = tuple(latex_symbol_dual)
-        return super(LocalFrame, cls).__classcall__(cls, section_module,
-                                        symbol, latex_symbol=latex_symbol,
-                                        indices=indices,
-                                        latex_indices=latex_indices,
-                                        symbol_dual=symbol_dual,
-                                        latex_symbol_dual=latex_symbol_dual)
+        return super().__classcall__(cls, section_module,
+                                     symbol, latex_symbol=latex_symbol,
+                                     indices=indices,
+                                     latex_indices=latex_indices,
+                                     symbol_dual=symbol_dual,
+                                     latex_symbol_dual=latex_symbol_dual)
 
     def __init__(self, section_module, symbol, latex_symbol=None, indices=None,
                  latex_indices=None, symbol_dual=None, latex_symbol_dual=None):
@@ -646,7 +647,7 @@ class LocalFrame(FreeModuleBasis):
                     smodule.set_default_frame(self)
                 # Initialization of the zero element of the section module:
                 if not isinstance(smodule, FiniteRankFreeModule):
-                    smodule(0).add_comp(self)
+                    smodule(0)._add_comp_unsafe(self)
                     # (since new components are initialized to zero)
         ###
         # Add this frame to the list of frames of the overlying vector bundle:
@@ -1045,7 +1046,7 @@ class LocalFrame(FreeModuleBasis):
             Basis (e_0,e_1) on the Fiber of E at Point p on the 2-dimensional
              topological manifold M
             sage: type(ep)
-            <class 'sage.tensor.modules.free_module_basis.FreeModuleBasis'>
+            <class 'sage.tensor.modules.free_module_basis.FreeModuleBasis_with_category'>
             sage: ep[0]
             Vector e_0 in the fiber of E at Point p on the 2-dimensional
              topological manifold M
@@ -1088,12 +1089,12 @@ class LocalFrame(FreeModuleBasis):
             Automorphism of the Fiber of E at Point p on the 2-dimensional
              topological manifold M
             sage: Ep.change_of_basis(ep, fp).display()
-            5 e_0*e^0 + 2 e_1*e^1
+            5 e_0⊗e^0 + 2 e_1⊗e^1
             sage: Ep.change_of_basis(fp, ep)
             Automorphism of the Fiber of E at Point p on the 2-dimensional
              topological manifold M
             sage: Ep.change_of_basis(fp, ep).display()
-            1/5 e_0*e^0 + 1/2 e_1*e^1
+            1/5 e_0⊗e^0 + 1/2 e_1⊗e^1
 
         The dual bases::
 
@@ -1136,7 +1137,8 @@ class LocalFrame(FreeModuleBasis):
         vbf_frame_bases[self] = basis
         # Update of the change of bases in the fiber:
         for frame_pair, automorph in self._vbundle._frame_changes.items():
-            frame1 = frame_pair[0]; frame2 = frame_pair[1]
+            frame1 = frame_pair[0]
+            frame2 = frame_pair[1]
             if frame1 is self:
                 fr2 = None
                 for frame in vbf_frame_bases:
@@ -1238,10 +1240,10 @@ class LocalFrame(FreeModuleBasis):
             \left(E|_{M}, \left(E_{\alpha},E_{\beta}\right)\right)
 
         """
-        super(LocalFrame, self).set_name(symbol, latex_symbol=latex_symbol,
-                                          indices=indices,
-                                          latex_indices=latex_indices,
-                                          index_position=index_position)
+        super().set_name(symbol, latex_symbol=latex_symbol,
+                         indices=indices,
+                         latex_indices=latex_indices,
+                         index_position=index_position)
         if include_domain:
             # Redefinition of the name and the LaTeX name to include the domain
             self._name = "({}|_{}, {})".format(self._vbundle._name,

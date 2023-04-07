@@ -1,3 +1,10 @@
+# distutils: libraries = NTL_LIBRARIES gmp m
+# distutils: extra_compile_args = NTL_CFLAGS
+# distutils: include_dirs = NTL_INCDIR
+# distutils: library_dirs = NTL_LIBDIR
+# distutils: extra_link_args = NTL_LIBEXTRA
+# distutils: language = c++
+
 # ****************************************************************************
 #       Copyright (C) 2005 William Stein <wstein@gmail.com>
 #
@@ -56,7 +63,7 @@ cdef make_ZZ_pX(ZZ_pX_c* x, ntl_ZZ_pContext_class ctx):
 #
 ##############################################################################
 
-cdef class ntl_ZZ_pX(object):
+cdef class ntl_ZZ_pX():
     r"""
     The class \class{ZZ_pX} implements polynomial arithmetic modulo `p`.
 
@@ -200,11 +207,13 @@ cdef class ntl_ZZ_pX(object):
 
     def __setitem__(self, long i, a):
         r"""
-        sage: c = ntl.ZZ_pContext(23)
-        sage: x = ntl.ZZ_pX([2, 3, 4], c)
-        sage: x[1] = 5
-        sage: x
-        [2 5 4]
+        EXAMPLES::
+
+            sage: c = ntl.ZZ_pContext(23)
+            sage: x = ntl.ZZ_pX([2, 3, 4], c)
+            sage: x[1] = 5
+            sage: x
+            [2 5 4]
         """
         if i < 0:
             raise IndexError("index (i=%s) must be >= 0" % i)
@@ -269,7 +278,7 @@ cdef class ntl_ZZ_pX(object):
         """
         self.c.restore_c()
         cdef ZZ_p_c r
-        cdef long l
+        cdef long l = 0
         sig_on()
         r = ZZ_pX_coeff( self.x, i)
         ZZ_conv_to_long(l, ZZ_p_rep(r))
@@ -305,7 +314,7 @@ cdef class ntl_ZZ_pX(object):
             sage: x.list()
             [1, 3, 5]
             sage: type(x.list()[0])
-            <type 'sage.libs.ntl.ntl_ZZ_p.ntl_ZZ_p'>
+            <class 'sage.libs.ntl.ntl_ZZ_p.ntl_ZZ_p'>
         """
         # could be sped up.
         self.c.restore_c()
@@ -321,7 +330,7 @@ cdef class ntl_ZZ_pX(object):
             [0 2 4 6 8 5]
         """
         if self.c is not other.c:
-            raise ValueError("You can not perform arithmetic with elements of different moduli.")
+            raise ValueError("You cannot perform arithmetic with elements of different moduli.")
         cdef ntl_ZZ_pX r = self._new()
         sig_on()
         #self.c.restore_c() # restored in _new()
@@ -338,7 +347,7 @@ cdef class ntl_ZZ_pX(object):
             [0 0 0 0 0 15]
         """
         if self.c is not other.c:
-            raise ValueError("You can not perform arithmetic with elements of different moduli.")
+            raise ValueError("You cannot perform arithmetic with elements of different moduli.")
         cdef ntl_ZZ_pX r = self._new()
         sig_on()
         #self.c.restore_c() # restored in _new()
@@ -363,7 +372,7 @@ cdef class ntl_ZZ_pX(object):
             [0 0 1 4 10 0 10 14 11]
         """
         if self.c is not other.c:
-            raise ValueError("You can not perform arithmetic with elements of different moduli.")
+            raise ValueError("You cannot perform arithmetic with elements of different moduli.")
         cdef ntl_ZZ_pX r = self._new()
         sig_on()
         # self.c.restore_c() # restored in _new()
@@ -393,7 +402,7 @@ cdef class ntl_ZZ_pX(object):
             ArithmeticError: self (=[0 1 2 3 4 5 6 7 8 9]) is not divisible by other (=[16 0 1])
         """
         if self.c is not other.c:
-            raise ValueError("You can not perform arithmetic with elements of different moduli.")
+            raise ValueError("You cannot perform arithmetic with elements of different moduli.")
         cdef int divisible
         cdef ntl_ZZ_pX r = self._new()
         sig_on()
@@ -403,9 +412,6 @@ cdef class ntl_ZZ_pX(object):
         if not divisible:
             raise ArithmeticError("self (=%s) is not divisible by other (=%s)" % (self, other))
         return r
-
-    def __div__(self, other):
-        return self / other
 
     def __mod__(ntl_ZZ_pX self, ntl_ZZ_pX other):
         """
@@ -434,7 +440,7 @@ cdef class ntl_ZZ_pX(object):
             NTLError: ZZ_p: division by non-invertible element
         """
         if self.c is not other.c:
-            raise ValueError("You can not perform arithmetic with elements of different moduli.")
+            raise ValueError("You cannot perform arithmetic with elements of different moduli.")
         cdef ntl_ZZ_pX r = self._new()
         sig_on()
         #self.c.restore_c() # restored in _new()
@@ -458,7 +464,7 @@ cdef class ntl_ZZ_pX(object):
             True
         """
         if self.c is not other.c:
-            raise ValueError("You can not perform arithmetic with elements of different moduli.")
+            raise ValueError("You cannot perform arithmetic with elements of different moduli.")
         cdef ntl_ZZ_pX r = self._new()
         cdef ntl_ZZ_pX q = self._new()
         sig_on()
@@ -592,7 +598,7 @@ cdef class ntl_ZZ_pX(object):
         """
         self.c.restore_c()
         if ZZ_pX_IsZero(self.x):
-             return False
+            return False
         return bool(ZZ_p_IsOne(ZZ_pX_LeadCoeff(self.x)))
 
     def __neg__(self):
@@ -1148,7 +1154,7 @@ cdef class ntl_ZZ_pX(object):
         ZZ_pX_Modulus_build(mod, modulus.x)
         cdef ntl_ZZ_pX mod_prime
         cdef ntl_ZZ_pContext_class ctx
-        cdef long mini, minval
+        cdef long mini = 0, minval = 0
         if Integer(modulus[0].lift()).valuation(p) == 1:
             eisenstein = True
             for c in modulus.list()[1:-1]:
@@ -1199,7 +1205,7 @@ cdef class ntl_ZZ_pX(object):
     def trace_mod(self, ntl_ZZ_pX modulus):
         """
         Return the trace of this polynomial modulus the modulus.
-        The modulus must be monic, and of positive degree degree bigger
+        The modulus must be monic, and of positive degree bigger
         than the degree of self.
 
         EXAMPLES::
@@ -1411,7 +1417,7 @@ cdef class ntl_ZZ_pX(object):
         #ZZ_pX_preallocate_space(&self.x, n)
         sig_off()
 
-cdef class ntl_ZZ_pX_Modulus(object):
+cdef class ntl_ZZ_pX_Modulus():
     """
     Thin holder for ZZ_pX_Moduli.
     """

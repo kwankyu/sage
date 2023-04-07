@@ -41,6 +41,7 @@ class ClassicalCrystals(Category_singleton):
         running ._test_an_element() . . . pass
         running ._test_cardinality() . . . pass
         running ._test_category() . . . pass
+        running ._test_construction() . . . pass
         running ._test_elements() . . .
           Running the test suite of self.an_element()
           running ._test_category() . . . pass
@@ -106,10 +107,9 @@ class ClassicalCrystals(Category_singleton):
         """
         return None
 
-
     class ParentMethods:
 
-        def demazure_character(self, w, f = None):
+        def demazure_character(self, w, f=None):
             r"""
             Return the Demazure character associated to ``w``.
 
@@ -265,6 +265,7 @@ class ClassicalCrystals(Category_singleton):
                 running ._test_an_element() . . . pass
                 running ._test_cardinality() . . . pass
                 running ._test_category() . . . pass
+                running ._test_construction() . . . pass
                 running ._test_elements() . . .
                   Running the test suite of self.an_element()
                   running ._test_category() . . . pass
@@ -293,6 +294,7 @@ class ClassicalCrystals(Category_singleton):
                 running ._test_an_element() . . . pass
                 running ._test_cardinality() . . . pass
                 running ._test_category() . . . pass
+                running ._test_construction() . . . pass
                 running ._test_elements() . . .
                   Running the test suite of self.an_element()
                   running ._test_category() . . . pass
@@ -346,6 +348,7 @@ class ClassicalCrystals(Category_singleton):
                 running ._test_an_element() . . . pass
                 running ._test_cardinality() . . . pass
                 running ._test_category() . . . pass
+                running ._test_construction() . . . pass
                 running ._test_elements() . . .
                   Running the test suite of self.an_element()
                   running ._test_category() . . . pass
@@ -474,4 +477,3 @@ class ClassicalCrystals(Category_singleton):
                 [Category of classical crystals]
             """
             return [self.base_category()]
-

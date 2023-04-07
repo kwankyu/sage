@@ -86,9 +86,17 @@ We create element of a permutation group of large degree::
     sage: G = SymmetricGroup(30)
     sage: s = G(srange(30,0,-1)); s
     (1,30)(2,29)(3,28)(4,27)(5,26)(6,25)(7,24)(8,23)(9,22)(10,21)(11,20)(12,19)(13,18)(14,17)(15,16)
+
+TESTS:
+
+Check that :trac:`13569` is fixed::
+
+    sage: [g*h for g in SymmetricGroup(3) for h in AlternatingGroup(3)]
+    [(), (1,2,3), (1,3,2), (1,3,2), (), (1,2,3), (1,2,3), (1,3,2), (), (2,3),
+    (1,2), (1,3), (1,3), (2,3), (1,2), (1,2), (1,3), (2,3)]
 """
 
-#*****************************************************************************
+# ****************************************************************************
 #       Copyright (C) 2006 William Stein <wstein@gmail.com>
 #       Copyright (C) 2006 David Joyner
 #       Copyright (C) 2019 Vincent Delecroix <20100.delecroix@gmail.com>
@@ -97,8 +105,8 @@ We create element of a permutation group of large degree::
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 2 of the License, or
 # (at your option) any later version.
-#                  http://www.gnu.org/licenses/
-#*****************************************************************************
+#                  https://www.gnu.org/licenses/
+# ****************************************************************************
 
 import copy
 import random
@@ -113,17 +121,19 @@ from cpython.list cimport *
 from cypari2.gen cimport Gen
 
 from sage.ext.stdsage cimport HAS_DICTIONARY
-from sage.rings.all      import ZZ, Integer
-from sage.rings.polynomial.polynomial_element import is_Polynomial
-from sage.rings.polynomial.multi_polynomial import is_MPolynomial
+from sage.rings.integer_ring import ZZ
+from sage.rings.integer import Integer
+from sage.rings.polynomial.multi_polynomial import MPolynomial
+from sage.rings.polynomial.polynomial_element import Polynomial
 from sage.structure.element import is_Matrix
-from sage.matrix.all     import MatrixSpace
+from sage.matrix.matrix_space import MatrixSpace
 from sage.sets.finite_enumerated_set import FiniteEnumeratedSet
 import sage.structure.coerce as coerce
 from sage.structure.richcmp cimport richcmp_not_equal, rich_to_bool
 from sage.structure.coerce cimport coercion_model
-from sage.interfaces.gap import GapElement as PExpectGapElement
-from sage.interfaces.gp import GpElement
+from sage.interfaces.abc import GpElement
+
+import sage.interfaces.abc
 
 from sage.libs.gap.libgap import libgap
 from sage.libs.gap.gap_includes cimport (UInt, UInt2, UInt4, T_PERM2, T_PERM4,
@@ -478,7 +488,7 @@ cdef class PermutationGroupElement(MultiplicativeGroupElement):
                 self._set_list_images(g.sage(), convert)
             else:
                 raise ValueError("invalid data to initialize a permutation")
-        elif isinstance(g, PExpectGapElement):
+        elif isinstance(g, sage.interfaces.abc.GapElement):
             if g.IsPerm():
                 self._set_list_images(g.ListPerm(), False)
             else:
@@ -934,7 +944,7 @@ cdef class PermutationGroupElement(MultiplicativeGroupElement):
 
     def _latex_(self):
         r"""
-        Returns a latex representation of this permutation.
+        Return a latex representation of this permutation.
 
         EXAMPLES::
 
@@ -944,10 +954,11 @@ cdef class PermutationGroupElement(MultiplicativeGroupElement):
 
             sage: S = SymmetricGroup(['a', 'b'])
             sage: latex(S.gens())
-            \left[(\text{\texttt{a}},\text{\texttt{b}})\right]
+            \left((\text{\texttt{a}},\text{\texttt{b}})\right)
         """
         from sage.misc.latex import latex
-        return "".join(["(" + ",".join([latex(x) for x in cycle])+")" for cycle in self.cycle_tuples()])
+        return "".join(("(" + ",".join(latex(x) for x in cycle) + ")")
+                       for cycle in self.cycle_tuples())
 
     def __getitem__(self, i):
         """
@@ -956,15 +967,13 @@ cdef class PermutationGroupElement(MultiplicativeGroupElement):
 
         INPUT:
 
-
         -  ``i`` - integer
-
 
         OUTPUT: a permutation group element
 
         EXAMPLES::
 
-            sage: G = PermutationGroup([[(1,2,3),(4,5)]],5)
+            sage: G = PermutationGroup([[(1,2,3),(4,5)]])
             sage: g = G.gen(0)
             sage: g[0]
             (1,2,3)
@@ -1045,11 +1054,11 @@ cdef class PermutationGroupElement(MultiplicativeGroupElement):
             sage: g(x)
             Traceback (most recent call last):
             ...
-            ValueError: Must be in the domain or a list, tuple or string.
+            ValueError: must be in the domain or a list, tuple or string
             sage: g(3/2)
             Traceback (most recent call last):
             ...
-            ValueError: Must be in the domain or a list, tuple or string.
+            ValueError: must be in the domain or a list, tuple or string
         """
         to_gap = self._parent._domain_to_gap
         from_gap = self._parent._domain_from_gap
@@ -1062,12 +1071,11 @@ cdef class PermutationGroupElement(MultiplicativeGroupElement):
             # current behavior where if you pass in an integer which
             # is not in the domain of the permutation group, then that
             # integer itself will be returned.
-            if isinstance(i, (long, int, Integer)):
+            if isinstance(i, (int, Integer)):
                 return i
 
-
-            if not isinstance(i,(list,tuple,str)):
-                raise ValueError("Must be in the domain or a list, tuple or string.")
+            if not isinstance(i, (list, tuple, str)):
+                raise ValueError("must be in the domain or a list, tuple or string")
 
             permuted = [i[self.perm[j]] for j from 0 <= j < self.n]
             if isinstance(i, tuple):
@@ -1176,23 +1184,24 @@ cdef class PermutationGroupElement(MultiplicativeGroupElement):
         return result
 
     cpdef _act_on_(self, x, bint self_on_left):
-        """
-        Return the right action of self on left.
+        r"""
+        Return the result of the action of ``self`` on ``x``.
 
-        For example, if f=left is a polynomial, then this function returns
-        f(sigma\*x), which is image of f under the right action of sigma on
+        For example, if ``x=f(z)`` is a polynomial, then this function returns
+        f(sigma\*z), which is the image of f under the right action of sigma on
         the indeterminates. This is a right action since the image of
-        f(sigma\*x) under tau is f(sigma\*tau\*x).
+        f(sigma\*z) under tau is f(sigma\*tau\*z).
 
-        Additionally, if ``left`` is a matrix, then sigma acts on the matrix
-        by permuting the rows.
+        Additionally, if ``x`` is a matrix, then sigma acts on the matrix
+        by permuting the columns when acting from the right and by permuting
+        the rows when acting from the left.
 
         INPUT:
 
+        - ``x`` -- element of space on which permutations act
 
-        -  ``left`` - element of space on which permutations
-           act from the right
-
+        - ``self_on_left`` -- if ``True``, this permutation acts on ``x`` from
+          the left, otherwise from the right
 
         EXAMPLES::
 
@@ -1210,22 +1219,27 @@ cdef class PermutationGroupElement(MultiplicativeGroupElement):
             2*x^2 - y^2 + z^2 + u^2
 
             sage: M = matrix(ZZ,[[1,0,0,0,0],[0,2,0,0,0],[0,0,3,0,0],[0,0,0,4,0],[0,0,0,0,5]])
-            sage: M*sigma
+            sage: sigma * M
             [0 2 0 0 0]
             [0 0 3 0 0]
             [1 0 0 0 0]
             [0 0 0 0 5]
             [0 0 0 4 0]
-
+            sage: (M * sigma) * tau == M * (sigma * tau)
+            True
+            sage: (M * sigma) * tau == (M * sigma.matrix()) * tau.matrix()
+            True
+            sage: (tau * sigma) * M == tau * (sigma * M)
+            True
         """
         if not self_on_left:
             left = x
-            if is_Polynomial(left):
+            if isinstance(left, Polynomial):
                 if self != 1:
                     raise ValueError("%s does not act on %s" % (self,
                                                                 left.parent()))
                 return left
-            elif is_MPolynomial(left):
+            elif isinstance(left, MPolynomial):
                 R = left.parent()
                 vars = R.gens()
                 try:
@@ -1235,7 +1249,11 @@ cdef class PermutationGroupElement(MultiplicativeGroupElement):
                                                                left.parent()))
                 return left(tuple(sigma_x))
             elif is_Matrix(left):
-                return left.with_permuted_rows(self)
+                return left.with_permuted_columns(~self)
+        else:
+            if is_Matrix(x):
+                return x.with_permuted_rows(self)
+
 
     def __mul__(left, right):
         r"""
@@ -1548,10 +1566,10 @@ cdef class PermutationGroupElement(MultiplicativeGroupElement):
             sage: prod(primes(150))
             1492182350939279320058875736615841068547583863326864530410
             sage: L = [tuple(range(sum(primes(p))+1, sum(primes(p))+1+p)) for p in primes(150)]
-            sage: t=PermutationGroupElement(L).multiplicative_order(); t
+            sage: t = PermutationGroupElement(L).multiplicative_order(); t
             1492182350939279320058875736615841068547583863326864530410
             sage: type(t)
-            <type 'sage.rings.integer.Integer'>
+            <class 'sage.rings.integer.Integer'>
         """
         order = None
         cdef long long order_c = 1
@@ -1610,7 +1628,7 @@ cdef class PermutationGroupElement(MultiplicativeGroupElement):
         return ~self
 
     def sign(self):
-        """
+        r"""
         Returns the sign of self, which is `(-1)^{s}`, where
         `s` is the number of swaps.
 
@@ -1795,9 +1813,10 @@ cdef class PermutationGroupElement(MultiplicativeGroupElement):
             '(1,3)(2)'
         """
         cycles = self.cycle_tuples(singletons)
-        if len(cycles) == 0:
+        if not cycles:
             return '()'
-        return ''.join([repr(c) for c in cycles]).replace(', ',',').replace(',)',')')
+        text = ''.join(repr(c) for c in cycles)
+        return text.replace(', ', ',').replace(',)', ')')
 
     def cycle_type(self, singletons=True, as_list=False):
         r"""
@@ -1839,20 +1858,20 @@ cdef class PermutationGroupElement(MultiplicativeGroupElement):
             [2, 1, 1]
         """
         cycle_type = [len(c) for c in self.cycle_tuples(singletons)]
-        cycle_type.sort(reverse = True)
+        cycle_type.sort(reverse=True)
         if as_list:
             return cycle_type
         else:
             from sage.combinat.partition import _Partitions
             return _Partitions(cycle_type)
 
-    def has_descent(self, i, side = "right", positive = False):
-        """
+    def has_descent(self, i, side="right", positive=False):
+        r"""
         INPUT:
 
-         - ``i``: an element of the index set
-         - ``side``: "left" or "right" (default: "right")
-         - ``positive``: a boolean (default: False)
+        - ``i`` -- an element of the index set
+        - ``side`` -- "left" or "right" (default: "right")
+        - ``positive`` -- a boolean (default: False)
 
         Returns whether ``self`` has a left (resp. right) descent at
         position ``i``. If ``positive`` is True, then test for a non

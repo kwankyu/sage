@@ -6,6 +6,17 @@
 Distributed Development
 =======================
 
+.. WARNING::
+
+    **Sage development is scheduled to move to GitHub in February 2023.** The exact
+    date will be announced in `<https://groups.google.com/g/sage-devel>`_. After
+    the transition, some parts of this guide (especially those related with `the
+    Sage Trac server <https://trac.sagemath.org>`_) will become obsolete and be
+    updated according to the new workflow on GitHub. See our `transition guide from Trac to
+    GitHub
+    <https://github.com/sagemath/trac-to-github/blob/master/docs/Migration-Trac-to-Github.md>`_
+    for the preliminary version of the workflow.
+
 Git is a tool to exchange commits (organized into branches) with other
 developers. As a distributed revision control system, it does not have
 the notion of a central server. The Sage trac server is just one of
@@ -174,7 +185,7 @@ particular, your choices are
 * Have every coauthor create their own fork and send you (the lead
   author) pull requests to your GitHub fork.
 
-* Use the GitHub web page editing & commiting feature, that way you
+* Use the GitHub web page editing & committing feature, that way you
   can make changes without ever using your local machine.
 
 

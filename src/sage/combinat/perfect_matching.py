@@ -4,7 +4,7 @@ Perfect matchings
 
 A perfect matching of a set `S` is a partition into 2-element sets. If `S` is
 the set `\{1,...,n\}`, it is equivalent to fixpoint-free involutions. These
-simple combinatorial objects appear in different domains such as combinatoric
+simple combinatorial objects appear in different domains such as combinatorics
 of orthogonal polynomials and of the hyperoctaedral groups (see [MV]_, [McD]_
 and also [CM]_):
 
@@ -36,7 +36,7 @@ List the perfect matchings of a given ground set::
 REFERENCES:
 
 .. [MV] combinatorics of orthogonal polynomials (A. de Medicis et
-   X.Viennot, Moments des q-polynomes de Laguerre et la bijection de
+   X.Viennot, Moments des q-polynômes de Laguerre et la bijection de
    Foata-Zeilberger, Adv. Appl. Math., 15 (1994), 262-304)
 
 .. [McD] combinatorics of hyperoctahedral group, double coset algebra and
@@ -44,8 +44,8 @@ REFERENCES:
    polynomials, Oxford University Press, second edition, 1995, chapter
    VII).
 
-.. [CM] Benoit Collins, Sho Matsumoto, On some properties of
-   orthogonal Weingarten functions, :arxiv:`0903.5143`.
+.. [CM] Benoit Collins, Sho Matsumoto, *On some properties of
+   orthogonal Weingarten functions*, :arxiv:`0903.5143`.
 """
 # ****************************************************************************
 #       Copyright (C) 2010 Valentin Feray <feray@labri.fr>
@@ -53,8 +53,6 @@ REFERENCES:
 #  Distributed under the terms of the GNU General Public License (GPL)
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
-from __future__ import division, print_function
-from six.moves import range
 
 from sage.misc.cachefunc import cached_method
 from sage.rings.integer import Integer
@@ -477,11 +475,11 @@ class PerfectMatching(SetPartition):
 
         EXAMPLES::
 
-            sage: PerfectMatching([[1,3], [4,2]]).to_graph().edges(labels=False)
+            sage: PerfectMatching([[1,3], [4,2]]).to_graph().edges(sort=True, labels=False)
             [(1, 3), (2, 4)]
-            sage: PerfectMatching([[1,4], [3,2]]).to_graph().edges(labels=False)
+            sage: PerfectMatching([[1,4], [3,2]]).to_graph().edges(sort=True, labels=False)
             [(1, 4), (2, 3)]
-            sage: PerfectMatching([]).to_graph().edges(labels=False)
+            sage: PerfectMatching([]).to_graph().edges(sort=True, labels=False)
             []
         """
         from sage.graphs.graph import Graph
@@ -554,7 +552,7 @@ class PerfectMatchings(SetPartitions_set):
 
     Test that ``x = M.an_element()`` is actually a perfect matching::
 
-        sage: set([]).union(*x) == M.base_set()
+        sage: set().union(*x) == M.base_set()
         True
         sage: sum([len(a) for a in x]) == M.base_set().cardinality()
         True
@@ -605,7 +603,7 @@ class PerfectMatchings(SetPartitions_set):
             except AttributeError:
                 pass
             s = frozenset(s)
-        return super(PerfectMatchings, cls).__classcall__(cls, s)
+        return super().__classcall__(cls, s)
 
     def _repr_(self):
         """

@@ -9,7 +9,6 @@ from sage.groups.matrix_gps.group_element import MatrixGroupElement_gap
 from sage.groups.matrix_gps.linear import GL, LinearMatrixGroup_generic
 
 
-
 class LegacyMatrixGroup(FinitelyGeneratedMatrixGroup_gap):
 
     def __setstate__(self, state):
@@ -34,7 +33,7 @@ class LegacyMatrixGroup(FinitelyGeneratedMatrixGroup_gap):
         matrix_gens = state['_gensG']
         ring = state['_MatrixGroup_gap__R']
         degree = state['_MatrixGroup_gap__n']
-        from sage.libs.all import libgap
+        from sage.libs.gap.libgap import libgap
         libgap_group = libgap.Group(libgap(matrix_gens))
         self.__init__(degree, ring, libgap_group)
 

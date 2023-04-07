@@ -16,8 +16,6 @@ Factory for Character-Based Art
 #
 #                  https://www.gnu.org/licenses/
 # ******************************************************************************
-from six import iteritems, string_types, text_type, binary_type
-from six.moves import range
 
 from sage.structure.sage_object import SageObject
 
@@ -62,7 +60,7 @@ class CharacterArtFactory(SageObject):
             <class 'sage.typeset.character_art_factory.CharacterArtFactory'>
         """
         self.art_type = art_type
-        assert isinstance(string_type('a'), string_types)
+        assert isinstance(string_type('a'), str)
         self.string_type = string_type
         assert magic_method_name in ['_ascii_art_', '_unicode_art_']
         self.magic_method_name = magic_method_name
@@ -86,7 +84,9 @@ class CharacterArtFactory(SageObject):
 
         EXAMPLES::
 
-            sage: ascii_art(integral(exp(x+x^2)/(x+1), x))
+            sage: result = ascii_art(integral(exp(x+x^2)/(x+1), x))
+            ...
+            sage: result
                 /
                |
                |   2
@@ -201,12 +201,10 @@ class CharacterArtFactory(SageObject):
         TESTS::
 
             sage: from sage.typeset.ascii_art import _ascii_art_factory as factory
-            sage: factory.build_from_string(u'a\nbb\nccc')  # same with unicode
-            a
+            sage: factory.build_from_string('à\nbb\nccc')  # same with unicode
+            à
             bb
             ccc
-
-        ::
 
             sage: a = factory.build_from_string('a\nbb\nccc', baseline=2)
             sage: a + ascii_art('<-')
@@ -214,13 +212,13 @@ class CharacterArtFactory(SageObject):
             bb
             ccc
         """
-        if self.string_type is text_type and not isinstance(obj, text_type):
-            if isinstance(obj, binary_type):
+        if self.string_type is str and not isinstance(obj, str):
+            if isinstance(obj, bytes):
                 obj = obj.decode('utf-8')
             else:
-                obj = text_type(obj)
-        if self.string_type is binary_type and not isinstance(obj, binary_type):
-            obj = text_type(obj).encode('utf-8')
+                obj = str(obj)
+        if self.string_type is bytes and not isinstance(obj, bytes):
+            obj = str(obj).encode('utf-8')
         return self.art_type(obj.splitlines(), baseline=baseline)
 
     def build_container(self, content, left_border, right_border, baseline=0):
@@ -329,14 +327,15 @@ class CharacterArtFactory(SageObject):
 
         Check that :trac:`29447` is fixed::
 
-            sage: ascii_art({'a': '', '': ''})  # py3
+            sage: ascii_art({'a': '', '': ''})
             { a:, : }
         """
         comma = self.art_type([self.string_type(', ')],
                               baseline=0,
                               breakpoints=[1])
         colon = self.art_type([self.string_type(':')], baseline=0)
-        def concat_no_breakpoint(k,v):
+
+        def concat_no_breakpoint(k, v):
             k = self.build(k)
             v = self.build(v)
             elt = k + colon + v
@@ -346,11 +345,11 @@ class CharacterArtFactory(SageObject):
                 elt._breakpoints.remove(k._l + 1)
             return elt
         repr_elems = self.concatenate(
-                (concat_no_breakpoint(k, v) for k, v in iteritems(d)),
-                comma, nested=True)
+            (concat_no_breakpoint(k, v) for k, v in d.items()),
+            comma, nested=True)
         return self.build_container(
-                repr_elems, self.left_curly_brace, self.right_curly_brace,
-                baseline)
+            repr_elems, self.left_curly_brace, self.right_curly_brace,
+            baseline)
 
     def build_list(self, l, baseline=0):
         r"""

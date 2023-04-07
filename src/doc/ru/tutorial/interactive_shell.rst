@@ -16,8 +16,8 @@ Sage вы увидите вывод, похожий на следующий:
 ::
 
     ┌────────────────────────────────────────────────────────────────────┐
-    │ SageMath version 9.0, Release Date: 2020-01-01                     │
-    │ Using Python 3.7.3. Type "help()" for help.                        │
+    │ SageMath version 9.7, Release Date: 2022-01-10                     │
+    │ Using Python 3.10.4. Type "help()" for help.                       │
     └────────────────────────────────────────────────────────────────────┘
 
     sage:
@@ -29,7 +29,7 @@ Sage вы увидите вывод, похожий на следующий:
 ::
 
     sage: quit
-    Exiting SAGE (CPU time 0m0.00s, Wall time 0m0.89s)
+    Exiting Sage (CPU time 0m0.00s, Wall time 0m0.89s)
 
 Wall time — это прошедшее время. Это значение верно, потому как в "CPU time"
 не входит время, использованное субпроцессами вроде GAP или Singular.
@@ -166,8 +166,8 @@ Notebook), то вы можете ввести ``%hist``, чтобы вывес�
 
     was@form:~$ sage
     ┌────────────────────────────────────────────────────────────────────┐
-    │ SageMath version 9.0, Release Date: 2020-01-01                     │
-    │ Using Python 3.7.3. Type "help()" for help.                        │
+    │ SageMath version 9.7, Release Date: 2022-01-10                     │
+    │ Using Python 3.10.4. Type "help()" for help.                       │
     └────────────────────────────────────────────────────────────────────┘
 
     sage: logstart setup
@@ -182,11 +182,11 @@ Notebook), то вы можете ввести ``%hist``, чтобы вывес�
     sage: x,y = QQ['x,y'].gens()
     sage: G = E.gens()
     sage:
-    Exiting SAGE (CPU time 0m0.61s, Wall time 0m50.39s).
+    Exiting Sage (CPU time 0m0.61s, Wall time 0m50.39s).
     was@form:~$ sage
     ┌────────────────────────────────────────────────────────────────────┐
-    │ SageMath version 9.0, Release Date: 2020-01-01                     │
-    │ Using Python 3.7.3. Type "help()" for help.                        │
+    │ SageMath version 9.7, Release Date: 2022-01-10                     │
+    │ Using Python 3.10.4. Type "help()" for help.                       │
     └────────────────────────────────────────────────────────────────────┘
 
     sage: load("setup")
@@ -292,7 +292,7 @@ GMP ведет себя лучше, но только немного (как и 
 
     sage: cputime?
     ...
-        Return the time in CPU second since SAGE started, or with optional
+        Return the time in CPU second since Sage started, or with optional
         argument t, return the time since time t.
         INPUT:
             t -- (optional) float, time in CPU seconds
@@ -358,7 +358,7 @@ Wall time. Однако, если существует существенная 
 Когда что-то идет не так, обычно можно увидеть исключение Python (Python
 "exception"). Python даже попытается предположить, что вызвало ошибку. Часто
 вы можете видеть имя исключения, например, ``NameError`` или ``ValueError``
-(см. Python Reference Manual [Py]_ для полного списка исключений). Например,
+(см. Python Library Reference [PyLR]_ для полного списка исключений). Например,
 
 .. skip
 
@@ -369,7 +369,7 @@ Wall time. Однако, если существует существенная 
        File "<console>", line 1
          ZZ(3)_2
                ^
-    SyntaxError: invalid syntax
+    SyntaxError: invalid ...
 
     sage: EllipticCurve([0,infinity])
     ------------------------------------------------------------
@@ -392,7 +392,7 @@ Wall time. Однако, если существует существенная 
     Automatic pdb calling has been turned ON
     sage: EllipticCurve([1,infinity])
     ---------------------------------------------------------------------------
-    <type 'exceptions.TypeError'>             Traceback (most recent call last)
+    <class 'exceptions.TypeError'>             Traceback (most recent call last)
     ...
 
     ipdb>
@@ -498,7 +498,7 @@ Sage обладает встроенной справочной системой
     sage: V = QQ^3
     sage: V.coordinates?
     Type:           instancemethod
-    Base Class:     <type 'instancemethod'>
+    Base Class:     <class 'instancemethod'>
     String Form:    <bound method FreeModule_ambient_field.coordinates of Vector
     space of dimension 3 over Rational Field>
     Namespace:      Interactive
@@ -840,83 +840,3 @@ Sage обладает очень гибкими возможностями со�
     sage: a
     389
 
-
-
-.. _section-notebook:
-
-Интерфейсы Notebook
-=============================
-
-SageMath переходит на
-`Jupyter notebook <http://jupyter-notebook.readthedocs.io/en/latest/notebook.html>`_ -
-где документы имеют другую структуру. Наиболее существенное
-отличие для пользователей в том, что индивидуальные рабочие листы
-сохраняются Jupyter на локальной файловой системе как обычные файлы,
-в то время как Sage notebook делает это как описано ниже.
-
-Интерфейс Notebook (устаревший, работает только с Python 2)
-==============================================================
-
-Sage notebook запускается путем выбора опции SageNB после запуска Sage из
-терминала с указанием опции ``-n``.  Sage notebook и откроется в дефолтном
-браузере. Файлы состояния сервера хранятся в
-``$HOME/.sage/sage\_notebook.sagenb``.
-
-Когда вы запускаете Notebook, вначале он создает следующие файлы в директории
-``$HOME/.sage/sage_notebook.sagenb``:
-
-::
-
-    conf.pickle
-    openid.pickle
-    twistedconf.tac
-    sagenb.pid
-    users.pickle
-    home/admin/
-    home/guest/
-    home/pub/
-
-После создания этих файлов, Notebook запускает веб-сервер.
-
-Notebook — это коллекция учетных записей пользователей (аккаунтов), каждый
-из которых может иметь любое количество рабочих листов. Когда вы создаете
-новый рабочий лист, информация, которая описывает его, сохраняется в директории
-``home/username/number``. В каждой такой директории находится простой
-текстовый файл ``worksheet.html``; если что-то случится с вашими рабочими листами,
-или с Sage, или что-нибудь еще пойдет не так, то текcтовый файл, который легко
-читается, поможет восстановить ваш лист полностью.
-
-В Sage введите ``notebook?`` для получения подробной информации о том, как
-запустить сервер Notebook.
-
-Следующая диаграмма иллюстрирует архитектуру Sage Notebook:
-
-::
-
-    ----------------------
-    |                    |
-    |                    |
-    |   firefox/safari   |
-    |                    |
-    |     javascript     |
-    |      program       |
-    |                    |
-    |                    |
-    ----------------------
-          |      ^
-          | AJAX |
-          V      |
-    ----------------------
-    |                    |
-    |       sage         |                SAGE process 1
-    |       web          | ------------>  SAGE process 2    (Python processes)
-    |      server        |   pexpect      SAGE process 3
-    |                    |                    .
-    |                    |                    .
-    ----------------------                    .
-
-Для получения справки о команде Sage, ``cmd``, в notebook введите, ``cmd?`` и
-нажмите ``<tab>`` (не ``<shift-enter>``).
-
-Для получения справки о горячих клавишах интерфейса notebook нажмите ссылку
-``Help``.

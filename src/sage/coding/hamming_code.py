@@ -18,7 +18,6 @@ REFERENCES:
 # (at your option) any later version.
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
-from __future__ import absolute_import
 
 from .linear_code import AbstractLinearCode
 from sage.matrix.matrix_space import MatrixSpace
@@ -71,7 +70,7 @@ class HammingCode(AbstractLinearCode):
 
         q = base_field.order()
         length = Integer((q ** order - 1) / (q - 1))
-        super(HammingCode, self).__init__(base_field, length, "Systematic", "Syndrome")
+        super().__init__(base_field, length, "Systematic", "Syndrome")
         self._dimension = length - order
 
     def __eq__(self, other):

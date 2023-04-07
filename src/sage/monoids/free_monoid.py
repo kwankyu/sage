@@ -23,8 +23,6 @@ the optional ``names`` argument to the
 # (at your option) any later version.
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
-from __future__ import absolute_import
-from six import integer_types
 
 from sage.rings.integer import Integer
 from sage.structure.category_object import normalize_names
@@ -35,7 +33,7 @@ from .monoid import Monoid_class
 from sage.combinat.words.finite_word import FiniteWord_class
 
 from sage.structure.unique_representation import UniqueRepresentation
-from sage.rings.all import ZZ
+from sage.rings.integer_ring import ZZ
 
 
 def is_FreeMonoid(x):
@@ -168,7 +166,7 @@ class FreeMonoid(Monoid_class, UniqueRepresentation):
         if names is None:
             raise ValueError("names must be specified")
         names = normalize_names(index_set, names)
-        return super(FreeMonoid, cls).__classcall__(cls, index_set, names)
+        return super().__classcall__(cls, index_set, names)
 
     Element = FreeMonoidElement
 
@@ -190,7 +188,7 @@ class FreeMonoid(Monoid_class, UniqueRepresentation):
             sage: F.<x,y> = FreeMonoid()
             sage: TestSuite(F).run()
         """
-        if not isinstance(n, integer_types + (Integer,)):
+        if not isinstance(n, (int, Integer)):
             raise TypeError("n (=%s) must be an integer" % n)
         if n < 0:
             raise ValueError("n (=%s) must be nonnegative" % n)
@@ -245,7 +243,7 @@ class FreeMonoid(Monoid_class, UniqueRepresentation):
             return x
         if isinstance(x, FreeMonoidElement) and x.parent() == self:
             return self.element_class(self, x._element_list, check)
-        if isinstance(x, integer_types + (Integer,)) and x == 1:
+        if isinstance(x, (int, Integer)) and x == 1:
             return self.element_class(self, x, check)
         if isinstance(x, FiniteWord_class):
             d = self.gens_dict()

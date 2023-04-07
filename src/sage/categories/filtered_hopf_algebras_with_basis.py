@@ -14,8 +14,6 @@ from sage.categories.filtered_modules import FilteredModulesCategory
 from sage.categories.with_realizations import WithRealizationsCategory
 from sage.misc.cachefunc import cached_method
 
-import six
-
 
 class FilteredHopfAlgebrasWithBasis(FilteredModulesCategory):
     """
@@ -66,7 +64,6 @@ class FilteredHopfAlgebrasWithBasis(FilteredModulesCategory):
             from sage.categories.hopf_algebras import HopfAlgebras
             R = self.base_category().base_ring()
             return [HopfAlgebras(R).Filtered()]
-
 
     class Connected(CategoryWithAxiom_over_base_ring):
         class ParentMethods:
@@ -132,9 +129,8 @@ class FilteredHopfAlgebrasWithBasis(FilteredModulesCategory):
                 """
                 return self.linear_combination(
                     (self.antipode_on_basis(mon), coeff)
-                    for mon, coeff in six.iteritems(elem.monomial_coefficients(copy=False))
+                    for mon, coeff in elem.monomial_coefficients(copy=False).items()
                 )
 
         class ElementMethods:
             pass
-

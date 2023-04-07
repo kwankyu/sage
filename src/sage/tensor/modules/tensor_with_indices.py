@@ -23,6 +23,12 @@ from sage.groups.perm_gps.permgroup import PermutationGroup
 import re
 from itertools import combinations
 
+# Regular expression for the allowed characters in index notation.
+# This includes Unicode word constituents but excludes digits and underscores.
+# Compare with https://docs.python.org/3/reference/lexical_analysis.html#identifiers
+# The dot is special syntax for unnamed index positions.
+_alph_or_dot_pattern = r"([.]|[^\d\W_])"
+
 class TensorWithIndices(SageObject):
     r"""
     Index notation for tensors.
@@ -214,6 +220,11 @@ class TensorWithIndices(SageObject):
         sage: all(c[i,j,k,l] == c[k,l,i,j] for i,j,k,l in product(range(3),repeat=4))
         True
 
+    Non-digit unicode identifier characters are allowed::
+
+        sage: a['^μξ']
+        a^μξ
+
     Conventions are checked and non acceptable indices raise ``ValueError``,
     for instance::
 
@@ -233,7 +244,7 @@ class TensorWithIndices(SageObject):
         Traceback (most recent call last):
         ...
         ValueError: index conventions not satisfied
-        sage: a["^éa"]  # accentuated index name
+        sage: a["^\u2663\u2665"]  # non-word-constituent
         Traceback (most recent call last):
         ...
         ValueError: index conventions not satisfied
@@ -286,7 +297,19 @@ class TensorWithIndices(SageObject):
             Traceback (most recent call last):
             ...
             ValueError: index conventions not satisfied
-            sage: TensorWithIndices._parse_indices("^éa")  # accentuated index name
+            sage: TensorWithIndices._parse_indices("^17")  # digits are not allowed as names
+            Traceback (most recent call last):
+            ...
+            ValueError: index conventions not satisfied
+            sage: TensorWithIndices._parse_indices("^;")  # non-word-constituents are not allowed as names
+            Traceback (most recent call last):
+            ...
+            ValueError: index conventions not satisfied
+            sage: TensorWithIndices._parse_indices("^\u00ae")  # non-word-constituents are not allowed as names
+            Traceback (most recent call last):
+            ...
+            ValueError: index conventions not satisfied
+            sage: TensorWithIndices._parse_indices("^\u25e2")  # non-word-constituents are not allowed as names
             Traceback (most recent call last):
             ...
             ValueError: index conventions not satisfied
@@ -314,7 +337,7 @@ class TensorWithIndices(SageObject):
         indices = indices.replace('{','').replace('}','')
 
         # Check index notation conventions and parse indices
-        allowed_pattern = r"(\([a-zA-Z.]{2,}\)|\[[a-zA-Z.]{2,}\]|[a-zA-Z.]+)*"
+        allowed_pattern = r"(\(" + _alph_or_dot_pattern + r"{2,}\)|\[" + _alph_or_dot_pattern + r"{2,}\]|" + _alph_or_dot_pattern + r"+)*"
         con_then_cov = r"^(\^|)" + allowed_pattern + r"(\_" + allowed_pattern + r"|)$"
         cov_then_con = r"^\_" + allowed_pattern + r"(\^" + allowed_pattern + r"|)$"
         if (re.match(con_then_cov,indices) is None
@@ -362,7 +385,6 @@ class TensorWithIndices(SageObject):
                                  "with the tensor type")
         return con,cov
 
-
     def __init__(self, tensor, indices):
         r"""
         TESTS::
@@ -393,14 +415,13 @@ class TensorWithIndices(SageObject):
                               # symmetries or contractions are indicated in the
                               # indices)
 
-        # Check wether the usual convention for indices, symmetries and
+        # Check whether the usual convention for indices, symmetries and
         # contractions are respected. This includes restrictions on the
         # indices symbols used, non nested (anti)symmetries,
         # (co/contra)variant  identification of repeated indices, as well
         # as checking the number of covariant and contravariant indices.
         # Latex notations '{' and '}' are totally ignored.
         # "^{ijkl}_{ib(cd)}"
-        # For now authorized symbol list only includes a-z and A-Z
 
         con,cov = self._parse_indices(
             indices,
@@ -408,7 +429,7 @@ class TensorWithIndices(SageObject):
         )
 
         # Apply (anti)symmetrizations on contravariant indices
-        first_sym_regex = r"(\(|\[)[a-zA-Z.]*[)\]]"
+        first_sym_regex = r"(\(|\[)" + _alph_or_dot_pattern + r"*[)\]]"
         while re.search(first_sym_regex,con):
             first_sym = re.search(first_sym_regex,con)
             sym1 = first_sym.span()[0]
@@ -591,7 +612,7 @@ class TensorWithIndices(SageObject):
             sage: ai = TensorWithIndices(a, '^ij')
             sage: bi = TensorWithIndices(b, '_k')
             sage: s = ai.__mul__(bi) ; s  # no repeated indices ==> tensor product
-            Type-(2,1) tensor a*b on the 3-dimensional vector space M over the
+            Type-(2,1) tensor a⊗b on the 3-dimensional vector space M over the
              Rational Field
             sage: s == a*b
             True
@@ -606,7 +627,6 @@ class TensorWithIndices(SageObject):
             True
             sage: s[:]
             [3, -6, 9]
-
         """
         if not isinstance(other, TensorWithIndices):
             raise TypeError("the second item of * must be a tensor with " +
@@ -614,12 +634,12 @@ class TensorWithIndices(SageObject):
         contraction_pairs = []
         for ind in self._con:
             if ind != '.':
-                if  ind in other._cov:
+                if ind in other._cov:
                     pos1 = self._con.index(ind)
                     pos2 = other._tensor._tensor_type[0] + other._cov.index(ind)
                     contraction_pairs.append((pos1, pos2))
                 if ind in other._con:
-                    raise IndexError("the index {} appears twice ".format(ind)
+                    raise IndexError(f"the index {ind} appears twice "
                                      + "in a contravariant position")
         for ind in self._cov:
             if ind != '.':
@@ -628,7 +648,7 @@ class TensorWithIndices(SageObject):
                     pos2 = other._con.index(ind)
                     contraction_pairs.append((pos1, pos2))
                 if ind in other._cov:
-                    raise IndexError("the index {} appears twice ".format(ind)
+                    raise IndexError(f"the index {ind} appears twice "
                                      + "in a covariant position")
         if not contraction_pairs:
             # No contraction is performed: the tensor product is returned
@@ -664,7 +684,7 @@ class TensorWithIndices(SageObject):
         r"""
         Addition between tensors with indices.
 
-        The underlying tensor of the ouput is the sum of the underlying tensor
+        The underlying tensor of the output is the sum of the underlying tensor
         of ``self`` with the underlying tensor of ``other`` whose entries have
         be permuted to respect Einstein summation usual conventions. The
         indices names of the output are those of self.
@@ -719,12 +739,11 @@ class TensorWithIndices(SageObject):
         result._tensor = result._tensor + other.permute_indices(permutation)._tensor
         return result
 
-
     def __sub__(self, other):
         r"""
-        Substraction between tensors with indices.
+        Subtraction between tensors with indices.
 
-        The underlying tensor of the ouput is  the underlying tensor of
+        The underlying tensor of the output is the underlying tensor of
         ``self`` minus the underlying tensor of ``other`` whose entries have
         be permuted to respect Einstein summation usual conventions. The
         indices names of the output are those of self.
@@ -883,7 +902,7 @@ class TensorWithIndices(SageObject):
         - ``permutation`` -- permutation that has to be applied to the indices
           the input should be a ``list`` containing the second line of the permutation
           in Cauchy notation.
-        
+
         OUTPUT:
 
         - an instance of ``TensorWithIndices`` whose indices names and place
@@ -950,12 +969,12 @@ class TensorWithIndices(SageObject):
 
         if decomposition_as_string != "<identity ...>":
             decomposition_as_string = [
-                # Two cases wether the term appear with an exponent or not
+                # Two cases whether the term appear with an exponent or not
                 ("^" in term)*term.split("^") + ("^" not in term)*(term.split("^")+['1'])
                 for term in decomposition_as_string.replace("x","").split("*")
             ]
-            decomposition = [(swap_params[int(x)-1], int(y)) for x,y in decomposition_as_string]
-            decomposition.reverse() # /!\ The symetric group acts on the right by default /!\.
+            decomposition = [(swap_params[int(x)-1], int(y)) for x, y in decomposition_as_string]
+            decomposition.reverse()  # /!\ The symmetric group acts on the right by default /!\.
         else:
             decomposition = []
         # Choice of a basis

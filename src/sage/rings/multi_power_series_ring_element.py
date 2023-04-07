@@ -154,7 +154,6 @@ AUTHORS:
 #  Distributed under the terms of the GNU General Public License (GPL)
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
-from six import iteritems, integer_types
 
 from sage.structure.richcmp import richcmp
 
@@ -463,7 +462,7 @@ class MPowerSeries(PowerSeries):
             sage: cc = K.hom([-i])
             sage: R.<s,t> = PowerSeriesRing(K)
             sage: f = s^2 + i*s*t + (3+4*i)*s^3 + R.O(4); f
-            s^2 + (i)*s*t + (4*i + 3)*s^3 + O(s, t)^4
+            s^2 + i*s*t + (4*i + 3)*s^3 + O(s, t)^4
             sage: f(t, s, base_map=cc)
             (-i)*s*t + t^2 + (-4*i + 3)*t^3 + O(s, t)^4
         """
@@ -476,7 +475,7 @@ class MPowerSeries(PowerSeries):
         valn_list = []
         for i in range(len(x)):
             try:
-                 xi = self.parent(x[i])
+                xi = self.parent(x[i])
             except (AttributeError, TypeError):
                 # Input does not coerce to parent ring of self
                 # attempt formal substitution
@@ -484,7 +483,7 @@ class MPowerSeries(PowerSeries):
             if xi.valuation() == 0 and self.prec() is not infinity:
                 raise TypeError("Substitution defined only for elements of positive valuation, unless self has infinite precision.")
             elif xi.valuation() > 0:
-                sub_dict[self.parent()._poly_ring().gens()[i]] = xi.add_bigoh(xi.valuation()*self.prec())
+                sub_dict[self.parent()._poly_ring().gens()[i]] = xi.add_bigoh(xi.valuation() * self.prec())
                 valn_list.append(xi.valuation())
             else:
                 sub_dict[self.parent()._poly_ring().gens()[i]] = xi
@@ -554,7 +553,7 @@ class MPowerSeries(PowerSeries):
         base_map = kwds.get('base_map')
         if base_map is None:
             base_map = lambda t: t
-        for m, c in iteritems(self.dict()):
+        for m, c in self.dict().items():
             y += base_map(c)*prod([x[i]**m[i] for i in range(n) if m[i] != 0])
         if self.prec() == infinity:
             return y
@@ -1086,7 +1085,7 @@ class MPowerSeries(PowerSeries):
             sage: g.polynomial() == f.polynomial() % 2
             True
         """
-        if isinstance(other, integer_types + (Integer,)):
+        if isinstance(other, (int, Integer)):
             return self.change_ring(Zmod(other))
         raise NotImplementedError("Mod on multivariate power series ring elements not defined except modulo an integer.")
 
@@ -1285,7 +1284,7 @@ class MPowerSeries(PowerSeries):
             -x^3*y^12*z^21 - 1/4*y^3*z^36 + 1/2*x^21*y^15*z^6 + 2/3*y^18*z^24 + O(x, y, z)^45
         """
         cd = self.coefficients()
-        Vs = sum(v * k**n for k, v in iteritems(cd))
+        Vs = sum(v * k**n for k, v in cd.items())
         return Vs.add_bigoh(self.prec()*n)
 
     def prec(self):
@@ -1505,7 +1504,12 @@ class MPowerSeries(PowerSeries):
             False
             sage: f.base_extend(QQ).is_unit()
             True
+            sage: (O(a,b)^0).is_unit()
+            False
         """
+        # Return False for 0 + O(a, b)^0, which is the only element with precision_absolute == 0.
+        if self.precision_absolute() == 0:
+            return False
         return self._bg_value[0].is_unit()
 
     ###
@@ -1664,8 +1668,10 @@ class MPowerSeries(PowerSeries):
         """
         Formal integral for multivariate power series.
 
-        INPUT: ``xx`` - a generator of the power series ring (the
-        one with respect to which to integrate)
+        INPUT:
+
+        - ``xx`` -- a generator of the power series ring (the
+          one with respect to which to integrate)
 
         EXAMPLES::
 
@@ -1711,7 +1717,7 @@ class MPowerSeries(PowerSeries):
         xxe = xx.exponents()[0]
         pos = [i for i, c in enumerate(xxe) if c != 0][0]  # get the position of the variable
         res = {mon.eadd(xxe): R(co / (mon[pos]+1))
-               for mon, co in iteritems(self.dict())}
+               for mon, co in self.dict().items()}
         return P( res ).add_bigoh(self.prec()+1)
 
     def ogf(self):
@@ -1947,7 +1953,8 @@ class MPowerSeries(PowerSeries):
         c = self.constant_coefficient()
         exp_c = exp(c)
         x = self._bg_value - c
-        if x.is_zero(): return exp_c
+        if x.is_zero():
+            return exp_c
         val = x.valuation()
         assert(val >= 1)
 
@@ -2040,7 +2047,8 @@ class MPowerSeries(PowerSeries):
             raise ValueError('Can only take formal power series for non-zero constant term.')
         log_c = log(c)
         x = 1 - self._bg_value/c
-        if x.is_zero(): return log_c
+        if x.is_zero():
+            return log_c
         val = x.valuation()
         assert(val >= 1)
 
@@ -2074,7 +2082,7 @@ class MPowerSeries(PowerSeries):
         raise NotImplementedError("laurent_series not defined for multivariate power series.")
 
 
-class MO(object):
+class MO():
     """
     Object representing a zero element with given precision.
 

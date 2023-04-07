@@ -11,7 +11,6 @@ SageMath version and banner info
 #  the License, or (at your option) any later version.
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
-from __future__ import print_function
 import sys
 
 from sage.env import (SAGE_VERSION, SAGE_VERSION_BANNER, SAGE_BANNER)
@@ -68,13 +67,21 @@ def banner_text(full=True):
     a(u"│ %-66s │\n" % 'Using Python {}.{}.{}. Type "help()" for help.'.format(*python_version))
     a(u'└' + bars + u'┘')
     pre = version_dict()['prerelease']
-    if pre:
+    try:
+        import sage.all
+        have_sage_all = True
+    except ImportError:
+        have_sage_all = False
+    if pre or not have_sage_all:
         red_in = '\033[31m'
         red_out = '\033[0m'
         bars2 = bars.replace(u'─', u'━')
         a('\n')
         a(red_in + u'┏' + bars2 + u'┓' + '\n')
-        a(u"┃ %-66s ┃\n" % 'Warning: this is a prerelease version, and it may be unstable.')
+        if pre:
+            a(u"┃ %-66s ┃\n" % 'Warning: this is a prerelease version, and it may be unstable.')
+        if not have_sage_all:
+            a(u"┃ %-66s ┃\n" % 'Warning: sage.all is not available; this is a limited REPL.')
         a(u'┗' + bars2 + u'┛' + red_out)
     return u''.join(s)
 
@@ -231,7 +238,7 @@ def require_version(major, minor=0, tiny=0, prerelease=False,
         return True
     else:
         if print_message:
-            print("This code requires at least version {} of SageMath to run correctly.".
-                   format(major + 0.1 * minor + 0.01 * tiny))
+            txt = "This code requires at least version {} of SageMath to run correctly."
+            print(txt.format(major + 0.1 * minor + 0.01 * tiny))
             print("You are running version {}.".format(SAGE_VERSION))
         return False

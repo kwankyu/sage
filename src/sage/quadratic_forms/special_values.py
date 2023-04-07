@@ -1,25 +1,26 @@
 r"""
-Routines for computing special values of L-functions
+Routines for computing special values of `L`-functions
 
 - :func:`gamma__exact` -- Exact values of the `\Gamma` function at integers and half-integers
 - :func:`zeta__exact` -- Exact values of the Riemann `\zeta` function at critical values
 - :func:`quadratic_L_function__exact` -- Exact values of the Dirichlet L-functions of quadratic characters at critical values
 - :func:`quadratic_L_function__numerical` -- Numerical values of the Dirichlet L-functions of quadratic characters in the domain of convergence
 """
-# python3
-from __future__ import division, print_function
 
+import sage.rings.abc
+
+from sage.arith.misc import (bernoulli,
+                             factorial,
+                             fundamental_discriminant,
+                             kronecker as kronecker_symbol)
 from sage.combinat.combinat import bernoulli_polynomial
 from sage.misc.functional import denominator
-from sage.rings.all import RealField
-from sage.arith.all import kronecker_symbol, bernoulli, factorial, fundamental_discriminant
 from sage.rings.infinity import infinity
 from sage.rings.integer_ring import ZZ
 from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
 from sage.rings.rational_field import QQ
-from sage.rings.real_mpfr import is_RealField
-from sage.symbolic.constants import pi
-from sage.symbolic.all import I
+from sage.symbolic.constants import pi, I
+
 
 # ---------------- The Gamma Function  ------------------
 
@@ -64,21 +65,21 @@ def gamma__exact(n):
         ...
         TypeError: you must give an integer or half-integer argument
     """
-    from sage.all import sqrt
+    from sage.misc.functional import sqrt
     n = QQ(n)
 
     if denominator(n) == 1:
         if n <= 0:
             return infinity
-        if n > 0:
-            return factorial(n-1)
+        return factorial(n - 1)
     elif denominator(n) == 2:
+        # now n = 1/2 + an integer
         ans = QQ.one()
         while n != QQ((1, 2)):
             if n < 0:
                 ans /= n
                 n += 1
-            elif n > 0:
+            else:
                 n += -1
                 ans *= n
 
@@ -162,7 +163,7 @@ def QuadraticBernoulliNumber(k, d):
 
     Let us create a list of some odd negative fundamental discriminants::
 
-        sage: test_set = [d for d in range(-163, -3, 4) if is_fundamental_discriminant(d)]
+        sage: test_set = [d for d in srange(-163, -3, 4) if d.is_fundamental_discriminant()]
 
     In general, we have `B_{1, \chi_d} = -2 h/w` for odd negative fundamental
     discriminants::
@@ -217,7 +218,8 @@ def quadratic_L_function__exact(n, d):
     - [IR1990]_
     - [Was1997]_
     """
-    from sage.all import SR, sqrt
+    from sage.symbolic.ring import SR
+    from sage.misc.functional import sqrt
     if n <= 0:
         return QuadraticBernoulliNumber(1-n,d)/(n-1)
     elif n >= 1:
@@ -245,6 +247,7 @@ def quadratic_L_function__exact(n, d):
                 raise TypeError("n must be a critical value (i.e. even > 0 or odd < 0)")
             if delta == 1:
                 raise TypeError("n must be a critical value (i.e. odd > 0 or even <= 0)")
+
 
 def quadratic_L_function__numerical(n, d, num_terms=1000):
     """
@@ -277,12 +280,13 @@ def quadratic_L_function__numerical(n, d, num_terms=1000):
 
         sage: for d in range(-20,0):  # long time (2s on sage.math 2014)
         ....:     if abs(RR(quadratic_L_function__numerical(1, d, 10000) - quadratic_L_function__exact(1, d))) > 0.001:
-        ....:         print("Oops! We have a problem at d = {}: exact = {}, numerical = {}".format(d, RR(quadratic_L_function__exact(1, d)), RR(quadratic_L_function__numerical(1, d))))
+        ....:         print("We have a problem at d = {}: exact = {}, numerical = {}".format(d, RR(quadratic_L_function__exact(1, d)), RR(quadratic_L_function__numerical(1, d))))
     """
     # Set the correct precision if it is given (for n).
-    if is_RealField(n.parent()):
+    if isinstance(n.parent(), sage.rings.abc.RealField):
         R = n.parent()
     else:
+        from sage.rings.real_mpfr import RealField
         R = RealField()
 
     if n < 0:

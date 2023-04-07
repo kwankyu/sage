@@ -1,7 +1,6 @@
 """
-Implicit Plots
+Implicit plots
 """
-from __future__ import absolute_import
 from .implicit_surface import ImplicitSurface
 
 
@@ -184,12 +183,6 @@ def implicit_plot3d(f, xrange, yrange, zrange, **kwds):
         G = implicit_plot3d(x**4 + y**2 + z**2, (x,-2,2),
                            (y,-2,2),(z,-2,2), contour=4, color=(t,cm), plot_points=40)
         sphinx_plot(G)
-
-    .. WARNING::
-
-        This kind of coloring using a colormap can be visualized using
-        Jmol, Tachyon (option ``viewer='tachyon'``) and Canvas3D
-        (option ``viewer='canvas3d'`` in the notebook).
 
     MANY MORE EXAMPLES:
 

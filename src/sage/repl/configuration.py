@@ -24,7 +24,6 @@ the IPython simple prompt is being used::
 #                  http://www.gnu.org/licenses/
 #*****************************************************************************
 
-from __future__ import absolute_import
 
 import sys
 import copy
@@ -37,7 +36,7 @@ from sage.repl.prompts import SagePrompts
 SAGE_EXTENSION = 'sage'
 
 
-class SageIpythonConfiguration(object):
+class SageIpythonConfiguration():
 
     def _doctest_mode(self):
         """
@@ -82,7 +81,10 @@ class SageIpythonConfiguration(object):
             sage: sage_ipython_config.simple_prompt()
             True
         """
-        return 'LightBG' if self._allow_ansi() else 'NoColor'
+        if not self._allow_ansi():
+            return 'NoColor'
+        from sage.repl.interpreter import SageTerminalInteractiveShell
+        return SageTerminalInteractiveShell.colors.default()
 
     def simple_prompt(self):
         """
@@ -130,7 +132,7 @@ class SageIpythonConfiguration(object):
         # Use the same config for both InteractiveShell, and its subclass
         # TerminalInteractiveShell (note: in fact some configs like term_title
         # only apply to the latter, but we can still use the same config for
-        # both for simplicity's sake; see Trac #28289)
+        # both for simplicity's sake; see Issue #28289)
         InteractiveShell=Config(
             prompts_class=SagePrompts,
             ast_node_interactivity='all',
@@ -151,6 +153,10 @@ class SageIpythonConfiguration(object):
             InteractiveShell=InteractiveShell,
             TerminalInteractiveShell=InteractiveShell,
             InteractiveShellApp=Config(extensions=[SAGE_EXTENSION]),
+            # TODO: jedi is disabled by default because it causes too many troubles
+            # disabling issue: https://github.com/sagemath/sage/issues/31648
+            # reenabling issue: https://github.com/sagemath/sage/issues/31649
+            IPCompleter=Config(use_jedi=False),
         )
         if self._doctest_mode():
             # Using the file-backed history causes problems in parallel tests

@@ -87,14 +87,12 @@ dynamical systems:
 #
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
-from six import add_metaclass
 from sage.categories.sets_cat import Sets
 from sage.structure.sage_object import SageObject
 from sage.misc.classcall_metaclass import ClasscallMetaclass, typecall
 
 
-@add_metaclass(ClasscallMetaclass)
-class DiscreteDynamicalSystem(SageObject):
+class DiscreteDynamicalSystem(SageObject, metaclass=ClasscallMetaclass):
     r"""
     A discrete dynamical system.
 
@@ -461,6 +459,7 @@ class DiscreteDynamicalSystem(SageObject):
         if n not in NN:
             raise ValueError("the n-th power of evolution is only defined for nonnegative integers n")
         ev = self.evolution()
+
         def evn(x):
             y = x
             for _ in range(n):
@@ -822,6 +821,7 @@ class InvertibleDiscreteDynamicalSystem(DiscreteDynamicalSystem):
         else:
             ev = self.inverse_evolution()
             n = -n
+
         def evn(x):
             y = x
             for _ in range(n):
@@ -1251,4 +1251,3 @@ class InvertibleFiniteDynamicalSystem(InvertibleDiscreteDynamicalSystem, FiniteD
             [2, 2, 2]
         """
         return [len(orb) for orb in self.orbits()]
-

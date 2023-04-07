@@ -24,20 +24,23 @@ from sage.plot.colors import Color
 from sage.repl.image import Image
 from copy import copy
 from cysignals.signals cimport sig_check
-from sage.rings.complex_field import ComplexField
+from sage.rings.complex_mpfr import ComplexField
 from sage.functions.log import exp, log
 from sage.symbolic.constants import pi
 from sage.symbolic.relation import solve
 from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
-from sage.rings.all import CC
+from sage.rings.cc import CC
 from sage.rings.real_double import RDF
 from sage.rings.complex_double import CDF
 from sage.ext.fast_callable import fast_callable
 from sage.calculus.all import symbolic_expression
+from sage.symbolic.ring import SR
 from sage.calculus.var import var
 from sage.rings.fraction_field import is_FractionField
 from sage.categories.function_fields import FunctionFields
+from cypari2.handle_error import PariError
 from math import sqrt
+
 
 def _color_to_RGB(color):
     """
@@ -743,7 +746,7 @@ cpdef polynomial_mandelbrot(f, parameter=None, double x_center=0,
     # Split function into real and imaginary parts
     R = PolynomialRing(CC, [variable,parameter])
     if len(R.gens()) > 2:
-        raise NotImplementedError("Base ring must have only 2 variables")
+        raise NotImplementedError("base ring must have only 2 variables")
     z, c = R.gens()
     f = R(str(f))
     S = PolynomialRing(f.base_ring(), 'x,y,J,cr,ci')
@@ -762,7 +765,7 @@ cpdef polynomial_mandelbrot(f, parameter=None, double x_center=0,
         df = f.derivative(z).univariate_polynomial()
         critical_pts = df.roots(multiplicities=False)
         constant_c = True
-    except:
+    except PariError:
         constant_c = False
 
     # If c is in the constant term of the polynomial, then the critical points
@@ -843,9 +846,9 @@ cpdef polynomial_mandelbrot(f, parameter=None, double x_center=0,
     # critical points for each c.
     else:
         # Solve for critical points symbollically.
-        w = var('w')
-        df = f.derivative(z).polynomial(z).subs({z:w})
-        critical_pts = solve(symbolic_expression(df)==0, w)
+        with SR.temp_var() as w:
+            df = f.derivative(z).polynomial(z).subs({z:w})
+            critical_pts = solve(symbolic_expression(df)==0, w)
         c_pts = []
         for pt in critical_pts:
             c_pts.append(fast_callable(pt.rhs(), vars=[c], domain=CDF))
@@ -941,7 +944,7 @@ cpdef general_julia(f, double x_center=0, double y_center=0, image_width=4,
     sage: from sage.dynamics.complex_dynamics.mandel_julia_helper import general_julia
     sage: from sage.plot.colors import Color
     sage: R.<z> = CC[]
-    sage: f = z^5 - 1 
+    sage: f = z^5 - 1
     sage: general_julia(f)
     500x500px 24-bit RGB image
     """

@@ -7,7 +7,6 @@ AUTHORS:
 
 - David Roe
 """
-from __future__ import absolute_import
 
 # ****************************************************************************
 #       Copyright (C) 2008 David Roe <roed.math@gmail.com>
@@ -57,7 +56,7 @@ class UnramifiedExtensionGeneric(pAdicExtensionGeneric):
 
     def _extension_type(self):
         """
-        Return the type (``Unramified``, ``Eisenstein``) of this 
+        Return the type (``Unramified``, ``Eisenstein``) of this
         extension as a string, if any.
 
         Used for printing.
