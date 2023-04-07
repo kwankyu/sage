@@ -190,7 +190,7 @@ AUTHORS:
 import os
 
 from .expect import Expect, ExpectElement
-from sage.docs.instancedoc import instancedoc
+from sage.misc.instancedoc import instancedoc
 
 
 class Scilab(Expect):
@@ -220,15 +220,15 @@ class Scilab(Expect):
             sage: del sci_obj
         """
         Expect.__init__(self,
-                        name = 'scilab',
-                        prompt = '-->',
-                        command = "scilab -nw",
-                        server = server,
-                        server_tmpdir = server_tmpdir,
-                        script_subdirectory = script_subdirectory,
-                        restart_on_ctrlc = False,
-                        verbose_start = False,
-                        logfile = logfile,
+                        name='scilab',
+                        prompt='-->',
+                        command="scilab -nw",
+                        server=server,
+                        server_tmpdir=server_tmpdir,
+                        script_subdirectory=script_subdirectory,
+                        restart_on_ctrlc=False,
+                        verbose_start=False,
+                        logfile=logfile,
                         eval_using_file_cutoff=100)
         self._seed = seed
 
@@ -486,7 +486,7 @@ class ScilabElement(ExpectElement):
             [1.00000000000000 2.00000000000000]
             [3.00000000000000 4.50000000000000]
         """
-        from sage.matrix.all import MatrixSpace
+        from sage.matrix.matrix_space import MatrixSpace
         s = str(self).strip()
         v = s.split('\n ')
         nrows = len(v)
@@ -561,4 +561,3 @@ def scilab_version():
         'scilab-...'
     """
     return str(scilab('getversion()')).strip()
-

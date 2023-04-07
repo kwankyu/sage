@@ -50,6 +50,7 @@ class Derangement(CombinatorialElement):
         sage: elt = D([4,3,2,1])
         sage: TestSuite(elt).run()
     """
+
     def to_permutation(self):
         """
         Return the permutation corresponding to ``self``.
@@ -65,10 +66,10 @@ class Derangement(CombinatorialElement):
             sage: D[0].to_permutation()
             Traceback (most recent call last):
             ...
-            ValueError: Can only convert to a permutation for derangements of [1, 2, ..., n]
+            ValueError: can only convert to a permutation for derangements of [1, 2, ..., n]
         """
         if self.parent()._set != tuple(range(1, len(self) + 1)):
-            raise ValueError("Can only convert to a permutation for derangements of [1, 2, ..., n]")
+            raise ValueError("can only convert to a permutation for derangements of [1, 2, ..., n]")
         return Permutation(list(self))
 
 
@@ -146,8 +147,8 @@ class Derangements(UniqueRepresentation, Parent):
             True
         """
         if x in ZZ:
-            x = list(range(1, x + 1))
-        return super(Derangements, cls).__classcall__(cls, tuple(x))
+            x = tuple(range(1, x + 1))
+        return super().__classcall__(cls, tuple(x))
 
     def __init__(self, x):
         """
@@ -198,7 +199,7 @@ class Derangements(UniqueRepresentation, Parent):
         if isinstance(der, Derangement):
             if der.parent() is self:
                 return der
-            raise ValueError("Cannot convert %s to an element of %s" % (der, self))
+            raise ValueError("cannot convert %s to an element of %s" % (der, self))
         return self.element_class(self, der)
 
     Element = Derangement

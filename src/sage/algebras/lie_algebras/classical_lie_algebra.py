@@ -295,7 +295,7 @@ class ClassicalMatrixLieAlgebra(MatrixLieAlgebraFromAssociative):
             gens = self._f
         cur = gens[i]
         for j in reversed(w):
-            for k in range(-r.scalar(coroots[j])):
+            for _ in range(-r.scalar(coroots[j])):
                 cur = self.bracket(gens[j], cur)
             r = r.reflection(coroots[j], True)
         return cur
@@ -629,9 +629,34 @@ class so(ClassicalMatrixLieAlgebra):
     r"""
     The matrix Lie algebra `\mathfrak{so}_n`.
 
-    The Lie algebra `\mathfrak{so}_n`, which consists of all real
-    anti-symmetric `n \times n` matrices. This is the Lie algebra of
-    type `B_{(n-1)/2}` or `D_{n/2}` if `n` is odd or even respectively.
+    The Lie algebra `\mathfrak{so}_n`, which is isomorphic to the
+    Lie algebra of all anti-symmetric `n \times n` matrices.
+    The implementation here uses a different bilinear form and follows
+    the description in Chapter 8 of [HK2002]_. More precisely, this
+    is the set of matrices:
+
+    .. MATH::
+
+        \begin{pmatrix}
+        A & B \\
+        C & D
+        \end{pmatrix}
+
+    such that `A^t = -D`, `B^t = -B`, `C^t = -C` for `n` even and
+
+    .. MATH::
+
+        \begin{pmatrix}
+        A & B & a \\
+        C & D & b \\
+        c & d & 0
+        \end{pmatrix}
+
+    such that `A^t = -D`, `B^t = -B`, `C^t = -C`, `a^t = -d`,
+    and `b^t = -c` for `n` odd.
+
+    This is the Lie algebra of type `B_{(n-1)/2}` or `D_{n/2}` if `n`
+    is odd or even respectively.
     """
     def __init__(self, R, n):
         """
@@ -647,25 +672,26 @@ class so(ClassicalMatrixLieAlgebra):
         MS = MatrixSpace(R, n)
         one = R.one()
         self._n = n
-        if n % 2 == 0: # Even
-            m = n / 2 - 1 # -1 for indexing
+        if n % 2 == 0:  # Even
+            m = n // 2 - 1  # -1 for indexing
             n -= 1
-            e = [MS({(m-1,n):one, (m,n-1):-one})]
-            f = [MS({(n,m-1):one, (n-1,m):-one})]
-            h = [MS({(m-1,m-1):one, (m,m):one, (n-1,n-1):-one, (n,n):-one})]
+            e = [MS({(m-1, n): one, (m, n-1): -one})]
+            f = [MS({(n, m-1): one, (n-1, m): -one})]
+            h = [MS({(m-1, m-1): one, (m, m): one, (n-1, n-1): -one, (n, n): -one})]
             m += 1
             ct = CartanType(['D', m])
-        else: # Odd
-            m = (n-1) / 2 - 1 # -1 for indexing
+        else:  # Odd
+            m = (n-1) // 2 - 1  # -1 for indexing
             n -= 1
-            e = [MS({(m,n):2, (n,n-1):-2})]
-            f = [MS({(n,m):one, (n-1,n):-one})]
-            h = [MS({(m,m):2, (n-1,n-1):-2})]
+            e = [MS({(m, n): 2, (n, n-1): -2})]
+            f = [MS({(n, m): one, (n-1, n): -one})]
+            h = [MS({(m, m): 2, (n-1, n-1): -2})]
             m += 1
             ct = CartanType(['B', m])
-        e = [MS({(i,i+1):one, (m+i+1,m+i):-one}) for i in range(m-1)] + e
-        f = [MS({(i+1,i):one, (m+i,m+i+1):-one}) for i in range(m-1)] + f
-        h = [MS({(i,i):one, (i+1,i+1):-one, (m+i,m+i):-one, (m+i+1,m+i+1):one}) for i in range(m-1)] + h
+        e = [MS({(i, i+1): one, (m+i+1, m+i): -one}) for i in range(m-1)] + e
+        f = [MS({(i+1, i): one, (m+i, m+i+1): -one}) for i in range(m-1)] + f
+        h = [MS({(i, i): one, (i+1, i+1): -one, (m+i, m+i): -one, (m+i+1, m+i+1): one})
+             for i in range(m-1)] + h
         ClassicalMatrixLieAlgebra.__init__(self, R, ct, e, f, h)
 
     def _repr_(self):
@@ -735,10 +761,10 @@ class so(ClassicalMatrixLieAlgebra):
         i = self.index_set().index(i)
         if i == len(self.index_set()) - 1:
             if self._n % 2 == 0:
-                return h[i-1,i-1] + h[i,i]
+                return h[i-1, i-1] + h[i, i]
             # otherwise we are odd
-            return h[i,i]
-        return h[i,i] - h[i+1,i+1]
+            return h[i, i]
+        return h[i, i] - h[i+1, i+1]
 
 class sp(ClassicalMatrixLieAlgebra):
     r"""
@@ -1332,7 +1358,7 @@ class MatrixCompactRealForm(FinitelyGeneratedLieAlgebra):
             from sage.typeset.unicode_art import unicode_art
             return unicode_art(self._combined_matrix())
 
-        def __bool__(self):
+        def __bool__(self) -> bool:
             r"""
             Return if ``self`` is nonzero.
 
@@ -1345,8 +1371,6 @@ class MatrixCompactRealForm(FinitelyGeneratedLieAlgebra):
                 False
             """
             return bool(self._real) or bool(self._imag)
-
-        __nonzero__ = __bool__
 
         def __hash__(self):
             r"""
@@ -1568,8 +1592,7 @@ class LieAlgebraChevalleyBasis(LieAlgebraWithStructureCoefficients):
             cartan_type = cartan_type.cartan_type()
         else:
             cartan_type = CartanType(cartan_type)
-        return super(LieAlgebraChevalleyBasis, cls).__classcall__(
-            cls, R, cartan_type)
+        return super().__classcall__(cls, R, cartan_type)
 
     def __init__(self, R, cartan_type):
         r"""
@@ -1724,9 +1747,9 @@ class LieAlgebraChevalleyBasis(LieAlgebraWithStructureCoefficients):
         # Setup the GAP objects
         from sage.libs.gap.libgap import libgap
         L = libgap.SimpleLieAlgebra(ct.letter, ct.n, libgap(self.base_ring()))
-        pos_B, neg_B, h_B = libgap.ChevalleyBasis(L)
+        pos_B, neg_B, _ = libgap.ChevalleyBasis(L)
         gap_p_roots = libgap.PositiveRoots(libgap.RootSystem(L)).sage()
-        #E, F, H = libgap.CanonicalGenerators(L)
+        # E, F, H = libgap.CanonicalGenerators(L)
 
         # Setup the conversion between the Sage roots and GAP roots.
         #   The GAP roots are given in terms of the weight lattice.
@@ -2055,4 +2078,3 @@ class LieAlgebraChevalleyBasis(LieAlgebraWithStructureCoefficients):
         if pos:
             return B[theta]
         return B[-theta]
-

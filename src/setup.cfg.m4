@@ -19,17 +19,18 @@ classifiers =
     Operating System :: POSIX
     Operating System :: MacOS :: MacOS X
     Programming Language :: Python :: 3 :: Only
-    Programming Language :: Python :: 3.7
     Programming Language :: Python :: 3.8
     Programming Language :: Python :: 3.9
+    Programming Language :: Python :: 3.10
+    Programming Language :: Python :: 3.11
     Programming Language :: Python :: Implementation :: CPython
     Topic :: Scientific/Engineering :: Mathematics
 
 [options]
-python_requires = >=3.7, <3.10
+python_requires = >=3.8, <3.12
 install_requires =
-    sage_conf
     esyscmd(`sage-get-system-packages install-requires \
+        sage_conf \
         six \
         | sed "2,\$s/^/    /;"')dnl'
 dnl From build/pkgs/sagelib/dependencies
@@ -38,12 +39,18 @@ dnl From build/pkgs/sagelib/dependencies
         cysignals      \
         cython         \
         gmpy2          \
+        importlib_metadata \
+        importlib_resources \
         jinja2         \
         jupyter_core   \
+        lrcalc_python  \
+        memory_allocator \
         numpy          \
         pkgconfig      \
         pplpy          \
-        memory_allocator \
+        primecountpy   \
+        requests       \
+        typing_extensions \
         | sed "2,\$s/^/    /;"')dnl'
 dnl From Makefile.in: SAGERUNTIME
     esyscmd(`sage-get-system-packages install-requires \
@@ -65,10 +72,13 @@ dnl From Makefile.in: DOC_DEPENDENCIES
         | sed "2,\$s/^/    /;"')dnl'
 dnl Other Python packages that are standard spkg, used in doctests
     esyscmd(`sage-get-system-packages install-requires \
-        rpy2           \
         fpylll         \
         | sed "2,\$s/^/    /;"')dnl'
 dnl pycryptosat  # Sage distribution installs it as part of cryptominisat. According to its README on https://pypi.org/project/pycryptosat/: "The pycryptosat python package compiles while compiling CryptoMiniSat. It cannot be compiled on its own, it must be compiled at the same time as CryptoMiniSat."
+dnl Packages with important upper version bounds
+    esyscmd(`sage-get-system-packages install-requires \
+        ptyprocess     \
+        | sed "2,\$s/^/    /;"')dnl'
 
 scripts =
     # The sage script
@@ -93,22 +103,18 @@ scripts =
     bin/sage-cleaner
     # Only makes sense in sage-the-distribution. TODO: Move to another installation script.
     bin/sage-list-packages
-    bin/sage-location
     # Uncategorized scripts in alphabetical order
     bin/math-readline
     bin/sage-env
     # sage-env-config -- installed by sage_conf
     # sage-env-config.in -- not to be installed
-    bin/sage-gdb-commands
     bin/sage-grep
     bin/sage-grepdoc
     bin/sage-inline-fortran
     bin/sage-ipynb2rst
     bin/sage-ipython
-    bin/sage-native-execute
     bin/sage-notebook
     bin/sage-num-threads.py
-    bin/sage-open
     bin/sage-preparse
     bin/sage-python
     bin/sage-rebase.bat
@@ -118,7 +124,6 @@ scripts =
     bin/sage-run
     bin/sage-run-cython
     bin/sage-startuptime.py
-    bin/sage-update-src
     bin/sage-update-version
 
 [options.package_data]
@@ -132,6 +137,9 @@ sage.interfaces =
 sage.doctest =
     tests/*
 
+sage.repl.rich_output =
+    example*
+
 sage =
     ext_data/*
     ext_data/kenzo/*
@@ -140,8 +148,6 @@ sage =
     ext_data/images/*
     ext_data/doctest/*
     ext_data/doctest/invalid/*
-    ext_data/doctest/rich_output/*
-    ext_data/doctest/rich_output/example_wavefront/*
     ext_data/gap/*
     ext_data/gap/joyner/*
     ext_data/mwrank/*
@@ -157,3 +163,8 @@ sage =
     ext_data/magma/sage/*
     ext_data/valgrind/*
     ext_data/threejs/*
+
+[options.extras_require]
+R = esyscmd(`sage-get-system-packages install-requires \
+        rpy2           \
+        | sed "2,\$s/^/    /;"')dnl'

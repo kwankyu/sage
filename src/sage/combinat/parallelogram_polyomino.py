@@ -42,10 +42,11 @@ from sage.combinat.combinatorial_map import combinatorial_map
 from sage.functions.trig import cos, sin
 from sage.misc.functional import sqrt
 
-from sage.plot.graphics import Graphics
-from sage.plot.line import line
-from sage.plot.text import text
-from sage.plot.point import point
+from sage.misc.lazy_import import lazy_import
+lazy_import("sage.plot.graphics", "Graphics")
+lazy_import("sage.plot.line", "line")
+lazy_import("sage.plot.text", "text")
+lazy_import("sage.plot.point", "point")
 
 import pprint
 
@@ -103,6 +104,7 @@ class LocalOptions:
     sage.structure.global_options.py. We should split global_option in two
     classes LocalOptions and GlobalOptions.
     """
+
     def __init__(self, name='', **options):
         r"""
         Construct a new LocalOptions.
@@ -383,7 +385,7 @@ class LocalOptions:
         """
         return self._available_options.__iter__()
 
-    def keys(self) -> list:
+    def keys(self) -> list[str]:
         r"""
         Return the list of the options in ``self``.
 
@@ -424,10 +426,9 @@ class LocalOptions:
         specifications for the options and then to add the options to the
         class.
 
-        The _dispatch method will then call:
-
-            obj.``<option name> + '_' + <current value of option>``(
-                *get_values, **set_values)
+        The ``_dispatch`` method will then call the method named
+        ``<option name> + '_' + <current value of option>`` of ``obj``
+        with arguments ``*get_values, **set_values``.
 
         Note that the argument ``self`` is necessary here because the
         dispatcher is a method of the options class and not of ``self``.
@@ -454,6 +455,7 @@ class LocalOptions:
             dispatch_to = dispatch_to[:-1]
         f = getattr(obj, dispatch_to + "_" + str(self._options[option]))
         return f(*get_values, **set_values)
+
 
 default_tikz_options = dict(
     scale=1, line_size=1, point_size=3.5, color_line='black',
@@ -595,6 +597,7 @@ class _drawing_tool:
         (1.000000, -1.000000);'
 
     """
+
     def __init__(self, options, XY=lambda v: v):
         r"""
         Construct a drawing tools to produce some TIKZ drawing.
@@ -1021,44 +1024,44 @@ class ParallelogramPolyomino(ClonableList,
             sage: pp = ParallelogramPolyomino([[0, 1], [1, 0]])
             sage: pp = ParallelogramPolyomino([[1], [1]])
 
-            sage: pp = ParallelogramPolyomino(
+            sage: pp = ParallelogramPolyomino(                # indirect doctest
             ....:     [[1, 0], [0, 1]]
-            ....: ) # indirect doctest
+            ....: )
             Traceback (most recent call last):
             ...
             ValueError: the lower and upper paths are crossing
 
-            sage: pp = ParallelogramPolyomino([[1], [0, 1]]) # indirect doctest
+            sage: pp = ParallelogramPolyomino([[1], [0, 1]])  # indirect doctest
             Traceback (most recent call last):
             ...
             ValueError: the lower and upper paths have different sizes (2 != 1)
 
-            sage: pp = ParallelogramPolyomino([[1], [0]]) # indirect doctest
+            sage: pp = ParallelogramPolyomino([[1], [0]])     # indirect doctest
             Traceback (most recent call last):
             ...
             ValueError: the two paths have distinct ends
 
-            sage: pp = ParallelogramPolyomino([[0], [1]]) # indirect doctest
+            sage: pp = ParallelogramPolyomino([[0], [1]])     # indirect doctest
             Traceback (most recent call last):
             ...
             ValueError: the two paths have distinct ends
 
-            sage: pp = ParallelogramPolyomino([[0], [0]]) # indirect doctest
+            sage: pp = ParallelogramPolyomino([[0], [0]])     # indirect doctest
             Traceback (most recent call last):
             ...
             ValueError: the lower or the upper path can...t be equal to [0]
 
-            sage: pp = ParallelogramPolyomino([[], [0]])  # indirect doctest
+            sage: pp = ParallelogramPolyomino([[], [0]])      # indirect doctest
             Traceback (most recent call last):
             ...
             ValueError: the lower or the upper path can...t be equal to []
 
-            sage: pp = ParallelogramPolyomino([[0], []])  # indirect doctest
+            sage: pp = ParallelogramPolyomino([[0], []])      # indirect doctest
             Traceback (most recent call last):
             ...
             ValueError: the lower or the upper path can...t be equal to []
 
-            sage: pp = ParallelogramPolyomino([[], []])  # indirect doctest
+            sage: pp = ParallelogramPolyomino([[], []])       # indirect doctest
             Traceback (most recent call last):
             ...
             ValueError: the lower or the upper path can...t be equal to []
@@ -1170,7 +1173,7 @@ class ParallelogramPolyomino(ClonableList,
         if check:
             if not isinstance(value, (list, tuple)):
                 raise ValueError(
-                    "Value %s must be a list or a tuple." % value)
+                    "value %s must be a list or a tuple" % value)
             self.check()
         self._options = None
 
@@ -1327,7 +1330,7 @@ class ParallelogramPolyomino(ClonableList,
             return self._to_dyck_delest_viennot()
         if bijection == 'Delest-Viennot-beta':
             return self._to_dyck_delest_viennot_peaks_valleys()
-        raise ValueError("The given bijection is not valid.")
+        raise ValueError("the given bijection is not valid")
 
     @staticmethod
     def _from_dyck_word_delest_viennot(dyck):
@@ -1454,9 +1457,9 @@ class ParallelogramPolyomino(ClonableList,
             return ParallelogramPolyomino._from_dyck_word_delest_viennot(dyck)
         if bijection == 'Delest-Viennot-beta':
             return ParallelogramPolyomino._from_dyck_word_delest_viennot_peaks_valleys(dyck)
-        raise ValueError("The given bijection is not valid.")
+        raise ValueError("the given bijection is not valid")
 
-    def _to_binary_tree_Aval_Boussicault(self, position=[0, 0]):
+    def _to_binary_tree_Aval_Boussicault(self, position=None):
         r"""
         Convert to a binary tree using the Aval-Boussicault algorithm.
 
@@ -1492,6 +1495,8 @@ class ParallelogramPolyomino(ClonableList,
             .
         """
         from sage.combinat.binary_tree import BinaryTree
+        if position is None:
+            position = [0, 0]
         if self.size() == 1:
             return BinaryTree()
         result = [BinaryTree(), BinaryTree()]
@@ -1634,6 +1639,7 @@ class ParallelogramPolyomino(ClonableList,
             the binary tree and the virtual root.
 
             The edges are defined as follow:
+
             - if v1 is a left (resp. right) son of v2 and v2 is a right
               (resp. left) son of v3, then, in the ordered tree, v2 is the
               father of v1;
@@ -1656,6 +1662,7 @@ class ParallelogramPolyomino(ClonableList,
                       5
                        \
                         6
+
             becomes
 
             ::
@@ -2304,6 +2311,7 @@ class ParallelogramPolyomino(ClonableList,
             sage: row
             [0, 1, 1]
         """
+
         def __init__(self, polyomino, row):
             r"""
             The constructor of the class
@@ -2788,7 +2796,7 @@ class ParallelogramPolyomino(ClonableList,
             res += drawing_tool.draw_line([w1, h], [w2, h])
         return res
 
-    def _to_tikz_bounce(self, directions=[0, 1]):
+    def _to_tikz_bounce(self, directions=None):
         r"""
         Return the tikz code to display one or both bounces of ``self``.
 
@@ -2853,6 +2861,8 @@ class ParallelogramPolyomino(ClonableList,
               \draw[color=red, line width=2] (4.000000, 1.000000) --
             (4.000000, 0.000000);
         """
+        if directions is None:
+            directions = [0, 1]
         res = ""
         tikz_options = self.get_tikz_options()
         grid_height = self.height() + 1
@@ -3049,7 +3059,7 @@ class ParallelogramPolyomino(ClonableList,
                 return [h, w]
         return None
 
-    def get_node_position_from_box(self, box_position, direction, nb_crossed_nodes=[0]):
+    def get_node_position_from_box(self, box_position, direction, nb_crossed_nodes=None):
         r"""
         This function starts from a cell inside a parallelogram polyomino and
         a direction.
@@ -3125,6 +3135,8 @@ class ParallelogramPolyomino(ClonableList,
             sage: l
             [0]
         """
+        if nb_crossed_nodes is None:
+            nb_crossed_nodes = [0]
         pos = list(box_position)
         if self[pos[0]][pos[1]] == 0:
             return None
@@ -3140,6 +3152,7 @@ class ParallelogramPolyomino(ClonableList,
         Return True if the box contains a node in the context of the
         Aval-Boussicault bijection between parallelogram polyomino and binary
         tree.
+
         A box is a node if there is no cell on the top of the box in the
         same column or on the left of the box.in the same row.
 
@@ -3729,7 +3742,7 @@ class ParallelogramPolyomino(ClonableList,
 
         return G
 
-    def _plot_bounce(self, directions=[0,1]):
+    def _plot_bounce(self, directions=None):
         r"""
         Return a plot of the bounce paths of ``self``.
 
@@ -3753,6 +3766,8 @@ class ParallelogramPolyomino(ClonableList,
             Graphics object consisting of 9 graphics primitives
 
         """
+        if directions is None:
+            directions = [0, 1]
         G = Graphics()
         if 0 in directions:
             a,b = (1,0)
@@ -3986,6 +4001,7 @@ class ParallelogramPolyominoesFactory(SetFactory):
         sage: PPS.cardinality()
         +Infinity
     """
+
     def __call__(self, size=None, policy=None):
         r"""
         Return a family of parallelogram polyominoes enumerated with the
@@ -4029,8 +4045,8 @@ class ParallelogramPolyominoesFactory(SetFactory):
             return ParallelogramPolyominoes_size(size, policy)
         if size is None:
             return ParallelogramPolyominoes_all(policy)
-        raise ValueError("Invalid argument for Parallelogram Polyominoes "
-                         "Factory.")
+        raise ValueError("invalid argument for Parallelogram Polyominoes "
+                         "Factory")
 
     @lazy_attribute
     def _default_policy(self):
@@ -4086,6 +4102,7 @@ class ParallelogramPolyominoes_size(
          [[0, 1, 0, 1], [1, 1, 0, 0]],
          [[0, 1, 1, 1], [1, 1, 1, 0]]]
     """
+
     def __init__(self, size, policy):
         r"""
         Construct a set of Parallelogram Polyominoes of a given size.
@@ -4132,9 +4149,9 @@ class ParallelogramPolyominoes_size(
         EXAMPLES::
 
             sage: PPS = ParallelogramPolyominoes(3)
-            sage: ParallelogramPolyomino(
+            sage: ParallelogramPolyomino(                     # indirect doctest
             ....:     [[0, 1, 1], [1, 1, 0]]
-            ....: ) in PPS # indirect doctest
+            ....: ) in PPS
             True
         """
         if el.size() != self.size():
@@ -4146,7 +4163,7 @@ class ParallelogramPolyominoes_size(
         Return the number of parallelogram polyominoes.
 
         The number of parallelogram polyominoes of size n is given by
-        the Catalan number $c_{n-1}$.
+        the Catalan number `c_{n-1}`.
 
         EXAMPLES::
 
@@ -4254,6 +4271,7 @@ class ParallelogramPolyominoes_all(
         sage: PPS
         Parallelogram polyominoes
     """
+
     def __init__(self, policy):
         r"""
         Construct the set of all parallelogram polyominoes.
@@ -4304,9 +4322,9 @@ class ParallelogramPolyominoes_all(
         EXAMPLES::
 
             sage: PPS = ParallelogramPolyominoes()
-            sage: ParallelogramPolyomino(
+            sage: ParallelogramPolyomino(                     # indirect doctest
             ....:     [[0, 1, 1], [1, 1, 0]]
-            ....: ) in PPS # indirect doctest
+            ....: ) in PPS
             True
         """
         pass

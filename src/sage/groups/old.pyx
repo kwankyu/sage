@@ -31,7 +31,7 @@ cdef class Group(sage.structure.parent.Parent):
     """
     Generic group class
     """
-    def __init__(self, category = None):
+    def __init__(self, category=None):
         """
 
         TESTS::
@@ -160,7 +160,7 @@ cdef class Group(sage.structure.parent.Parent):
         return self.order() != infinity
 
     def is_multiplicative(self):
-        """
+        r"""
         Returns True if the group operation is given by \* (rather than
         +).
 

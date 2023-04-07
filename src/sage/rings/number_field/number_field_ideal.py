@@ -42,7 +42,8 @@ import sage.misc.latex as latex
 
 import sage.rings.rational_field as rational_field
 import sage.rings.integer_ring as integer_ring
-from sage.arith.all import kronecker_symbol, gcd
+from sage.arith.misc import kronecker as kronecker_symbol
+from sage.arith.misc import GCD as gcd
 import sage.misc.misc as misc
 from sage.rings.finite_rings.finite_field_constructor import FiniteField
 
@@ -995,16 +996,38 @@ class NumberFieldIdeal(Ideal_generic):
             False
             sage: K.ideal(17).is_prime()  # ramified
             False
+
+        TESTS:
+
+        Check that we do not factor the norm of the ideal, this used
+        to take half an hour, see :trac:`33360`::
+
+            sage: K.<a,b,c> = NumberField([x^2-2,x^2-3,x^2-5])
+            sage: t = (((-2611940*c + 1925290/7653)*b - 1537130/7653*c
+            ....:       + 10130950)*a + (1343014/7653*c - 8349770)*b
+            ....:       + 6477058*c - 2801449990/4002519)
+            sage: t.is_prime()
+            False
         """
         try:
             return self._pari_prime is not None
         except AttributeError:
-            F = self.factor()  # factorization with caching
-            if len(F) != 1 or F[0][1] != 1:
-                self._pari_prime = None
-            else:
-                self._pari_prime = F[0][0]._pari_prime
-            return self._pari_prime is not None
+            pass
+
+        K = self.number_field().pari_nf()
+        I = self.pari_hnf()
+
+        candidate = K.idealismaximal(I) or None
+
+        # PARI uses probabilistic primality testing inside idealismaximal().
+        if get_flag(None, 'arithmetic'):
+            # proof required, check using isprime()
+            if candidate and not candidate[0].isprime():
+                candidate = None
+
+        self._pari_prime = candidate
+
+        return self._pari_prime is not None
 
     def pari_prime(self):
         r"""
@@ -1031,7 +1054,7 @@ class NumberFieldIdeal(Ideal_generic):
             ValueError: Fractional ideal (2) is not a prime ideal
         """
         if not self.is_prime():
-           raise ValueError("%s is not a prime ideal" % self)
+            raise ValueError("%s is not a prime ideal" % self)
         return self._pari_prime
 
     def _cache_bnfisprincipal(self, proof=None, gens=False):
@@ -2073,7 +2096,7 @@ class NumberFieldFractionalIdeal(MultiplicativeGroupElement, NumberFieldIdeal, I
 
         Rbasis = R.basis()
         n = len(Rbasis)
-        from sage.matrix.all import MatrixSpace
+        from sage.matrix.matrix_space import MatrixSpace
         M = MatrixSpace(ZZ,n)([R.coordinates(y) for y in self.basis()])
 
         D = M.hermite_form()
@@ -2142,7 +2165,7 @@ class NumberFieldFractionalIdeal(MultiplicativeGroupElement, NumberFieldIdeal, I
         R = self.number_field().maximal_order()
         Rbasis = R.basis()
         n = len(Rbasis)
-        from sage.matrix.all import MatrixSpace
+        from sage.matrix.matrix_space import MatrixSpace
         M = MatrixSpace(ZZ, n)([R.coordinates(_) for _ in self.basis()])
 
         D = M.hermite_form()
@@ -2283,7 +2306,8 @@ class NumberFieldFractionalIdeal(MultiplicativeGroupElement, NumberFieldIdeal, I
         g = G.gens_values()
         n = G.ngens()
 
-        from sage.matrix.all import Matrix, diagonal_matrix
+        from sage.matrix.constructor import Matrix
+        from sage.matrix.special import diagonal_matrix
 
         M = diagonal_matrix(ZZ, invs)
         if subgp_gens:
@@ -2711,7 +2735,11 @@ class NumberFieldFractionalIdeal(MultiplicativeGroupElement, NumberFieldIdeal, I
         G = self.idealstar(2)
         invs = G.invariants()
 
-        from sage.matrix.all import matrix, identity_matrix, zero_matrix, diagonal_matrix, block_matrix
+        from sage.matrix.constructor import Matrix as matrix
+        from sage.matrix.special import identity_matrix
+        from sage.matrix.special import zero_matrix
+        from sage.matrix.special import diagonal_matrix
+        from sage.matrix.special import block_matrix
 
         # We use Hermite normal form twice: once to express the standard
         # generators in terms of the new ones (independently of x) and once to
@@ -2731,7 +2759,7 @@ class NumberFieldFractionalIdeal(MultiplicativeGroupElement, NumberFieldIdeal, I
         ans = N.hermite_form()[0, 1:].list()
 
         if check:
-            from sage.rings.all import Zmod
+            from sage.rings.finite_rings.integer_mod_ring import Zmod
             Z_norm = Zmod(self.norm().numerator())  # norm is an integer ?
             t = 1
             for gi, ai in zip(gens, ans):
@@ -2890,72 +2918,72 @@ class NumberFieldFractionalIdeal(MultiplicativeGroupElement, NumberFieldIdeal, I
             a = a*p**(-n)
         return a
 
-    def is_S_unit(self,S):
-       r"""
-       Return True if this fractional ideal is a unit with respect to the list of primes ``S``.
+    def is_S_unit(self, S):
+        r"""
+        Return True if this fractional ideal is a unit with respect to the list of primes ``S``.
 
-       INPUT:
+        INPUT:
 
-       - `S` - a list of prime ideals (not checked if they are
-         indeed prime).
+        - `S` - a list of prime ideals (not checked if they are
+          indeed prime).
 
-       .. note::
+        .. note::
 
-          This function assumes that `S` is a list of prime ideals,
-          but does not check this.  This function will fail if `S` is
-          not a list of prime ideals.
+           This function assumes that `S` is a list of prime ideals,
+           but does not check this.  This function will fail if `S` is
+           not a list of prime ideals.
 
-       OUTPUT:
+        OUTPUT:
 
-       True, if the ideal is an `S`-unit: that is, if the valuations of
-       the ideal at all primes not in `S` are zero. False, otherwise.
+        True, if the ideal is an `S`-unit: that is, if the valuations of
+        the ideal at all primes not in `S` are zero. False, otherwise.
 
-       EXAMPLES::
+        EXAMPLES::
 
-           sage: K.<a> = NumberField(x^2+23)
-           sage: I = K.ideal(2)
-           sage: P = I.factor()[0][0]
-           sage: I.is_S_unit([P])
-           False
-       """
-       return self.prime_to_S_part(S).is_trivial()
+            sage: K.<a> = NumberField(x^2+23)
+            sage: I = K.ideal(2)
+            sage: P = I.factor()[0][0]
+            sage: I.is_S_unit([P])
+            False
+        """
+        return self.prime_to_S_part(S).is_trivial()
 
-    def is_S_integral(self,S):
-       r"""
-       Return True if this fractional ideal is integral with respect to the list of primes ``S``.
+    def is_S_integral(self, S):
+        r"""
+        Return True if this fractional ideal is integral with respect to the list of primes ``S``.
 
-       INPUT:
+        INPUT:
 
-       - `S` - a list of prime ideals (not checked if they are indeed
-         prime).
+        - `S` - a list of prime ideals (not checked if they are indeed
+          prime).
 
-       .. note::
+        .. note::
 
-          This function assumes that `S` is a list of prime ideals,
-          but does not check this.  This function will fail if `S` is
-          not a list of prime ideals.
+           This function assumes that `S` is a list of prime ideals,
+           but does not check this.  This function will fail if `S` is
+           not a list of prime ideals.
 
-       OUTPUT:
+        OUTPUT:
 
-       True, if the ideal is `S`-integral: that is, if the valuations
-       of the ideal at all primes not in `S` are non-negative. False,
-       otherwise.
+        True, if the ideal is `S`-integral: that is, if the valuations
+        of the ideal at all primes not in `S` are non-negative. False,
+        otherwise.
 
-       EXAMPLES::
+        EXAMPLES::
 
-           sage: K.<a> = NumberField(x^2+23)
-           sage: I = K.ideal(1/2)
-           sage: P = K.ideal(2,1/2*a - 1/2)
-           sage: I.is_S_integral([P])
-           False
+            sage: K.<a> = NumberField(x^2+23)
+            sage: I = K.ideal(1/2)
+            sage: P = K.ideal(2,1/2*a - 1/2)
+            sage: I.is_S_integral([P])
+            False
 
-           sage: J = K.ideal(1/5)
-           sage: J.is_S_integral([K.ideal(5)])
-           True
-       """
-       if self.is_integral():
-           return True
-       return self.prime_to_S_part(S).is_integral()
+            sage: J = K.ideal(1/5)
+            sage: J.is_S_integral([K.ideal(5)])
+            True
+        """
+        if self.is_integral():
+            return True
+        return self.prime_to_S_part(S).is_integral()
 
     def prime_to_idealM_part(self, M):
         r"""
@@ -3009,13 +3037,15 @@ class NumberFieldFractionalIdeal(MultiplicativeGroupElement, NumberFieldIdeal, I
         computing the quotient of the ring of integers by a prime ideal.
 
         INPUT:
-            p -- a prime number contained in self.
+
+        - ``p`` -- a prime number contained in ``self``
 
         OUTPUT:
-            V -- a vector space of characteristic p
-            quo -- a partially defined quotient homomorphism from the
-                   ambient number field to V
-            lift -- a section of quo.
+
+        - ``V`` -- a vector space of characteristic ``p``
+        - ``quo`` -- a partially defined quotient homomorphism from the
+          ambient number field to ``V``
+        - ``lift`` -- a section of ``quo``.
 
         EXAMPLES::
 
@@ -3250,7 +3280,7 @@ class QuotientMap:
         return self.__Q( list(w) )
 
     def __repr__(self):
-        """
+        r"""
         Return a string representation of this QuotientMap.
 
         EXAMPLES::
@@ -3315,7 +3345,7 @@ class LiftMap:
         return self.__OK(sum(z[i] * self.__Kgen ** i for i in range(len(z))))
 
     def __repr__(self):
-        """
+        r"""
         Return a string representation of this QuotientMap.
 
         EXAMPLES::
@@ -3353,7 +3383,7 @@ def quotient_char_p(I, p):
         []
 
         sage: I = K.factor(13)[0][0]; I
-        Fractional ideal (-3*i - 2)
+        Fractional ideal (-2*i + 3)
         sage: I.residue_class_degree()
         1
         sage: quotient_char_p(I, 13)[0]

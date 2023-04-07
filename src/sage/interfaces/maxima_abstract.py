@@ -59,14 +59,13 @@ COMMANDS_CACHE = '%s/maxima_commandlist_cache.sobj' % DOT_SAGE
 
 from sage.cpython.string import bytes_to_str
 
-from sage.misc.misc import ECL_TMP
 from sage.misc.multireplace import multiple_replace
 from sage.structure.richcmp import richcmp, rich_to_bool
 
 from .interface import (Interface, InterfaceElement, InterfaceFunctionElement,
                         InterfaceFunction, AsciiArtString)
 from sage.interfaces.tab_completion import ExtraTabCompletion
-from sage.docs.instancedoc import instancedoc
+from sage.misc.instancedoc import instancedoc
 
 # The Maxima "apropos" command, e.g., apropos(det) gives a list
 # of all identifiers that begin in a certain way.  This could
@@ -166,7 +165,6 @@ class MaximaAbstract(ExtraTabCompletion, Interface):
         """
         cmd = '{} --very-quiet --batch-string="{}({});" '.format(MAXIMA, command, s)
         env = os.environ.copy()
-        env['TMPDIR'] = str(ECL_TMP)
 
         if redirect:
             res = bytes_to_str(subprocess.check_output(cmd, shell=True,
@@ -748,12 +746,12 @@ class MaximaAbstract(ExtraTabCompletion, Interface):
         """
         tmin = trange[0]
         tmax = trange[1]
-        cmd = "plot2d([parametric, %s, %s, [%s, %s, %s], [nticks, %s]]"%( \
-                   r[0], r[1], var, tmin, tmax, nticks)
+        cmd = "plot2d([parametric, %s, %s, [%s, %s, %s], [nticks, %s]]" % (
+            r[0], r[1], var, tmin, tmax, nticks)
         if options is None:
             cmd += ")"
         else:
-            cmd += ", %s)"%options
+            cmd += ", %s)" % options
         self(cmd)
 
     def plot3d(self, *args):
@@ -949,17 +947,17 @@ class MaximaAbstract(ExtraTabCompletion, Interface):
         """
         eqs = "["
         for i in range(len(eqns)):
-            if i<len(eqns)-1:
-                eqs = eqs + eqns[i]+","
-            if  i==len(eqns)-1:
-                eqs = eqs + eqns[i]+"]"
+            if i < len(eqns) - 1:
+                eqs = eqs + eqns[i] + ","
+            if i == len(eqns) - 1:
+                eqs = eqs + eqns[i] + "]"
         vrs = "["
         for i in range(len(vars)):
-            if i<len(vars)-1:
-                vrs = vrs + vars[i]+","
-            if  i==len(vars)-1:
-                vrs = vrs + vars[i]+"]"
-        return self('linsolve(%s, %s)'%(eqs, vrs))
+            if i < len(vars) - 1:
+                vrs = vrs + vars[i] + ","
+            if i == len(vars) - 1:
+                vrs = vrs + vars[i] + "]"
+        return self('linsolve(%s, %s)' % (eqs, vrs))
 
     def unit_quadratic_integer(self, n):
         r"""
@@ -1022,8 +1020,8 @@ class MaximaAbstract(ExtraTabCompletion, Interface):
 
         EXAMPLES::
 
-            sage: zeta_ptsx = [ (pari(1/2 + i*I/10).zeta().real()).precision(1) for i in range (70,150)]
-            sage: zeta_ptsy = [ (pari(1/2 + i*I/10).zeta().imag()).precision(1) for i in range (70,150)]
+            sage: zeta_ptsx = [ (pari(1/2 + i*I/10).zeta().real()).precision(1) for i in range(70,150)]
+            sage: zeta_ptsy = [ (pari(1/2 + i*I/10).zeta().imag()).precision(1) for i in range(70,150)]
             sage: maxima.plot_list(zeta_ptsx, zeta_ptsy)         # not tested
             sage: opts='[gnuplot_preamble, "set nokey"], [gnuplot_term, ps], [gnuplot_out_file, "zeta.eps"]'
             sage: maxima.plot_list(zeta_ptsx, zeta_ptsy, opts)      # not tested
@@ -1034,7 +1032,6 @@ class MaximaAbstract(ExtraTabCompletion, Interface):
         else:
             cmd += ', %s)'%options
         self(cmd)
-
 
     def plot_multilist(self, pts_list, options=None):
         r"""
@@ -1059,15 +1056,15 @@ class MaximaAbstract(ExtraTabCompletion, Interface):
 
         EXAMPLES::
 
-            sage: xx = [ i/10.0 for i in range (-10,10)]
-            sage: yy = [ i/10.0 for i in range (-10,10)]
-            sage: x0 = [ 0 for i in range (-10,10)]
-            sage: y0 = [ 0 for i in range (-10,10)]
-            sage: zeta_ptsx1 = [ (pari(1/2+i*I/10).zeta().real()).precision(1) for i in range (10)]
-            sage: zeta_ptsy1 = [ (pari(1/2+i*I/10).zeta().imag()).precision(1) for i in range (10)]
+            sage: xx = [ i/10.0 for i in range(-10,10)]
+            sage: yy = [ i/10.0 for i in range(-10,10)]
+            sage: x0 = [ 0 for i in range(-10,10)]
+            sage: y0 = [ 0 for i in range(-10,10)]
+            sage: zeta_ptsx1 = [ (pari(1/2+i*I/10).zeta().real()).precision(1) for i in range(10)]
+            sage: zeta_ptsy1 = [ (pari(1/2+i*I/10).zeta().imag()).precision(1) for i in range(10)]
             sage: maxima.plot_multilist([[zeta_ptsx1,zeta_ptsy1],[xx,y0],[x0,yy]])       # not tested
-            sage: zeta_ptsx1 = [ (pari(1/2+i*I/10).zeta().real()).precision(1) for i in range (10,150)]
-            sage: zeta_ptsy1 = [ (pari(1/2+i*I/10).zeta().imag()).precision(1) for i in range (10,150)]
+            sage: zeta_ptsx1 = [ (pari(1/2+i*I/10).zeta().real()).precision(1) for i in range(10,150)]
+            sage: zeta_ptsy1 = [ (pari(1/2+i*I/10).zeta().imag()).precision(1) for i in range(10,150)]
             sage: maxima.plot_multilist([[zeta_ptsx1,zeta_ptsy1],[xx,y0],[x0,yy]])      # not tested
             sage: opts='[gnuplot_preamble, "set nokey"]'
             sage: maxima.plot_multilist([[zeta_ptsx1,zeta_ptsy1],[xx,y0],[x0,yy]],opts)    # not tested
@@ -1149,8 +1146,6 @@ class MaximaAbstractElement(ExtraTabCompletion, InterfaceElement):
                 != P._true_symbol())
         # but be careful, since for relations things like is(equal(a,b)) are
         # what Maxima needs
-
-    __nonzero__ = __bool__
 
     def _richcmp_(self, other, op):
         """
@@ -1525,7 +1520,7 @@ class MaximaAbstractElement(ExtraTabCompletion, InterfaceElement):
         EXAMPLES::
 
             sage: maxima('exp(-sqrt(x))').nintegral('x',0,1)
-            (0.5284822353142306, 4.1633141378838...e-11, 231, 0)
+            (0.5284822353142306, 4.163...e-11, 231, 0)
 
         Note that GP also does numerical integration, and can do so to very
         high precision very quickly::
@@ -1850,7 +1845,7 @@ class MaximaAbstractElement(ExtraTabCompletion, InterfaceElement):
             [  3 3/2   1 3/4]
             [  4   2 4/3   1]
         """
-        from sage.matrix.all import MatrixSpace
+        from sage.matrix.matrix_space import MatrixSpace
         self._check_valid()
         P = self.parent()
         nrows = int(P.eval('length(%s)'%self.name()))

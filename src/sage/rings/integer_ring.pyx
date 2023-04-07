@@ -58,6 +58,7 @@ import sage.libs.pari.all
 import sage.rings.ideal
 from sage.categories.basic import EuclideanDomains
 from sage.categories.infinite_enumerated_sets import InfiniteEnumeratedSets
+from sage.rings.number_field.number_field_element_base import NumberFieldElement_base
 from sage.structure.coerce cimport is_numpy_type
 from sage.structure.element cimport parent
 from sage.structure.parent_gens import ParentWithGens
@@ -390,7 +391,7 @@ cdef class IntegerRing_class(PrincipalIdealDomain):
         return "\\Bold{Z}"
 
     def __getitem__(self, x):
-        """
+        r"""
         Return the ring `\ZZ[...]` obtained by adjoining to the integers one
         or several elements.
 
@@ -414,8 +415,7 @@ cdef class IntegerRing_class(PrincipalIdealDomain):
         if x in self:
             return self
 
-        from sage.rings.number_field.number_field_element import NumberFieldElement
-        if isinstance(x, NumberFieldElement):
+        if isinstance(x, NumberFieldElement_base):
             K, from_K = parent(x).subfield(x)
             return K.order(K.gen())
 
@@ -579,14 +579,6 @@ cdef class IntegerRing_class(PrincipalIdealDomain):
             4
             sage: f(-7r)
             -7
-
-        Note that the input *MUST* be an ``int``::
-
-            sage: a = 10000000000000000000000rL
-            sage: f(a)  # py2
-            Traceback (most recent call last):
-            ...
-            TypeError: must be a Python int object
         """
         if S is long:
             return sage.rings.integer.long_to_Z()
@@ -875,7 +867,7 @@ cdef class IntegerRing_class(PrincipalIdealDomain):
         """
         if key == 'element_is_atomic':
             return True
-        return super(IntegerRing_class, self)._repr_option(key)
+        return super()._repr_option(key)
 
     def is_field(self, proof = True):
         """
@@ -1190,7 +1182,7 @@ cdef class IntegerRing_class(PrincipalIdealDomain):
         return sage.rings.infinity.infinity
 
     def zeta(self, n=2):
-        """
+        r"""
         Return a primitive ``n``-th root of unity in the integers, or raise an
         error if none exists.
 
@@ -1200,7 +1192,7 @@ cdef class IntegerRing_class(PrincipalIdealDomain):
 
         OUTPUT:
 
-        - an ``n``-th root of unity in `\ZZ`.
+        an ``n``-th root of unity in `\ZZ`
 
         EXAMPLES::
 
@@ -1514,7 +1506,7 @@ cdef class IntegerRing_class(PrincipalIdealDomain):
 
         EXAMPLES::
 
-            sage: polymake(ZZ)    # optional - polymake # indirect doctest
+            sage: polymake(ZZ)    # optional - jupymake # indirect doctest
             Integer
 
         """

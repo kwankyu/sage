@@ -47,29 +47,29 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
     r"""
     Dense matrix over a univariate polynomial ring over a field.
 
-    For a field $\Bold{K}$, we consider matrices over the univariate
-    polynomial ring $\Bold{K}[x]$.
+    For a field `\Bold{K}`, we consider matrices over the univariate
+    polynomial ring `\Bold{K}[x]`.
 
-    They are often used to represent bases of some $\Bold{K}[x]$-modules. In
+    They are often used to represent bases of some `\Bold{K}[x]`-modules. In
     this context, there are two possible representations which are both
     commonly used in the literature.
 
     - Working column-wise: each column of the matrix is a vector in the basis;
-      then, a $\\Bold{K}[x]$-submodule of $\\Bold{K}[x]^{m}$ of rank $n$ is
-      represented by an $m \\times n$ matrix, whose columns span the module
-      (via $\\Bold{K}[x]$-linear combinations). This matrix has full rank,
-      and $n \\leq m$.
+      then, a `\Bold{K}[x]`-submodule of `\Bold{K}[x]^{m}` of rank `n` is
+      represented by an `m \times n` matrix, whose columns span the module
+      (via `\Bold{K}[x]`-linear combinations). This matrix has full rank,
+      and `n \leq m`.
 
     - Working row-wise: each row of the matrix is a vector in the basis; then,
-      a $\\Bold{K}[x]$-submodule of $\\Bold{K}[x]^{n}$ of rank $m$ is
-      represented by an $m \\times n$ matrix, whose rows span the module (via
-      $\\Bold{K}[x]$-linear combinations). This matrix has full rank, and $m
-      \\leq n$.
+      a `\Bold{K}[x]`-submodule of `\Bold{K}[x]^{n}` of rank `m` is
+      represented by an `m \times n` matrix, whose rows span the module (via
+      `\Bold{K}[x]`-linear combinations). This matrix has full rank, and `m
+      \leq n`.
 
     For the rest of this class description, we assume that one is working
     row-wise. For a given such module, all its bases are equivalent under
     left-multiplication by a unimodular matrix, that is, a square matrix which
-    has determinant in $\Bold{K}\setminus\{0\}$.
+    has determinant in `\Bold{K}\setminus\{0\}`.
 
     There are bases which are called reduced or minimal: their rows have the
     minimal degree possible among all bases of this module; here the degree of
@@ -82,17 +82,17 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
 
     These notions can be extended via a more general degree measure, involving
     a tuple of integers which is called shift and acts as column degree shifts
-    in the definition of row degree. Precisely, for given $s_1,\ldots,s_n \in
-    \ZZ$ and a row vector $[p_1 \; \cdots \; p_n] \in \Bold{K}[x]^{1 \times
-    n}$, its shifted row degree is the maximum of $\deg(p_j) + s_j$ for $1 \leq
-    j \leq n$ (see :meth:`row_degrees`). Then, reduced bases and Popov bases
+    in the definition of row degree. Precisely, for given `s_1,\ldots,s_n \in
+    \ZZ` and a row vector `[p_1 \; \cdots \; p_n] \in \Bold{K}[x]^{1 \times
+    n}`, its shifted row degree is the maximum of `\deg(p_j) + s_j` for `1 \leq
+    j \leq n` (see :meth:`row_degrees`). Then, reduced bases and Popov bases
     are defined similarly, with respect to this notion of degree.
 
     Another important canonical basis is the Hermite basis, which is an upper
     triangular matrix satisfying a normalization condition similar to that for
-    the Popov basis. In fact, if $d$ is the largest degree appearing in the
+    the Popov basis. In fact, if `d` is the largest degree appearing in the
     Hermite basis, then the Hermite basis coincide with the shifted Popov basis
-    with the shifts $((n-1)d,\ldots,2d,d,0)$.
+    with the shifts `((n-1)d,\ldots,2d,d,0)`.
     """
 
     def _check_shift_dimension(self, shifts, row_wise=True):
@@ -100,9 +100,9 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
         Raises an exception if the ``shifts`` argument does not have the right
         length.
 
-        For an $m \times n$ polynomial matrix, if working row-wise then
-        ``shifts`` should have $n$ entries; if working column-wise, it should
-        have $m$ entries.
+        For an `m \times n` polynomial matrix, if working row-wise then
+        ``shifts`` should have `n` entries; if working column-wise, it should
+        have `m` entries.
 
         INPUT:
 
@@ -123,9 +123,9 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
             ...
             ValueError: shifts length should be the row dimension
         """
-        if shifts != None and (not row_wise) and len(shifts) != self.nrows():
+        if shifts is not None and (not row_wise) and len(shifts) != self.nrows():
             raise ValueError('shifts length should be the row dimension')
-        if shifts != None and (row_wise and len(shifts) != self.ncols()):
+        if shifts is not None and (row_wise and len(shifts) != self.ncols()):
             raise ValueError('shifts length should be the column dimension')
 
     def degree(self):
@@ -168,17 +168,17 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
         r"""
         Return the matrix of the (shifted) degrees in this matrix.
 
-        For a given polynomial matrix $M = (M_{i,j})_{i,j}$, its degree matrix
-        is the matrix $(\deg(M_{i,j}))_{i,j}$ formed by the degrees of its
-        entries. Here, the degree of the zero polynomial is $-1$.
+        For a given polynomial matrix `M = (M_{i,j})_{i,j}`, its degree matrix
+        is the matrix `(\deg(M_{i,j}))_{i,j}` formed by the degrees of its
+        entries. Here, the degree of the zero polynomial is `-1`.
 
-        For given shifts $s_1,\ldots,s_m \in \ZZ$, the shifted degree
-        matrix of $M$ is either $(\deg(M_{i,j})+s_j)_{i,j}$ if working
-        row-wise, or $(\deg(M_{i,j})+s_i)_{i,j}$ if working column-wise. In the
-        former case, $m$ has to be the number of columns of $M$; in the latter
-        case, the number of its rows. Here, if $M_{i,j}=0$ then the
+        For given shifts `s_1,\ldots,s_m \in \ZZ`, the shifted degree
+        matrix of `M` is either `(\deg(M_{i,j})+s_j)_{i,j}` if working
+        row-wise, or `(\deg(M_{i,j})+s_i)_{i,j}` if working column-wise. In the
+        former case, `m` has to be the number of columns of `M`; in the latter
+        case, the number of its rows. Here, if `M_{i,j}=0` then the
         corresponding entry in the shifted degree matrix is
-        $\min(s_1,\ldots,s_m)-1$. For more on shifts and working row-wise
+        `\min(s_1,\ldots,s_m)-1`. For more on shifts and working row-wise
         versus column-wise, see the class documentation.
 
         INPUT:
@@ -224,7 +224,7 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
             return self.apply_map(lambda x: x.degree())
         from sage.matrix.constructor import matrix
         zero_degree = min(shifts) - 1
-        if row_wise: 
+        if row_wise:
             return matrix( ZZ, [[ self[i,j].degree() + shifts[j]
                 if self[i,j] != 0 else zero_degree
                 for j in range(self.ncols()) ] for i in range(self.nrows())] )
@@ -295,12 +295,12 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
 
         - if `d` is an integer, this selects the coefficient of `d` for all
           entries;
-        - if `d` is a list $(d_1,\ldots,d_m)$ and ``row_wise`` is ``True``,
-          this selects the coefficient of degree $d_i$ for all entries of the
-          $i$th row for each $i$;
-        - if `d` is a list $(d_1,\ldots,d_n)$ and ``row_wise`` is ``False``,
-          this selects the coefficient of degree $d_i$ for all entries of the
-          $j$th column for each $j$.
+        - if `d` is a list `(d_1,\ldots,d_m)` and ``row_wise`` is ``True``,
+          this selects the coefficient of degree `d_i` for all entries of the
+          `i`th row for each `i`;
+        - if `d` is a list `(d_1,\ldots,d_n)` and ``row_wise`` is ``False``,
+          this selects the coefficient of degree `d_i` for all entries of the
+          `j`th column for each `j`.
 
         INPUT:
 
@@ -370,11 +370,11 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
 
         # raise an error if d does not have the right length
         if row_wise and len(d) != m:
-            raise ValueError("length of input degree list should be the " \
-                                      + "row dimension of the input matrix")
+            raise ValueError("length of input degree list should be the "
+                             "row dimension of the input matrix")
         elif (not row_wise) and len(d) != n:
-            raise ValueError("length of input degree list should be the " \
-                                      + "column dimension of the input matrix")
+            raise ValueError("length of input degree list should be the "
+                             "column dimension of the input matrix")
 
         from sage.matrix.constructor import matrix
         return matrix(self.base_ring().base_ring(), m, n,
@@ -388,12 +388,12 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
 
         - if `d` is an integer, the truncation is at precision `d` for all
           entries;
-        - if `d` is a list $(d_1,\ldots,d_m)$ and ``row_wise`` is ``True``, all
-          entries of the $i$th row are truncated at precision $d_i$ for each
-          $i$;
-        - if `d` is a list $(d_1,\ldots,d_n)$ and ``row_wise`` is ``False``,
-          all entries of the $j$th column are truncated at precision $d_j$ for
-          each $j$.
+        - if `d` is a list `(d_1,\ldots,d_m)` and ``row_wise`` is ``True``, all
+          entries of the `i`th row are truncated at precision `d_i` for each
+          `i`;
+        - if `d` is a list `(d_1,\ldots,d_n)` and ``row_wise`` is ``False``,
+          all entries of the `j`th column are truncated at precision `d_j` for
+          each `j`.
 
         Here the convention for univariate polynomials is to take zero
         for the truncation for a negative `d`.
@@ -464,11 +464,11 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
 
         # raise an error if d does not have the right length
         if row_wise and len(d) != m:
-            raise ValueError("length of input precision list should be the " \
-                                      + "row dimension of the input matrix")
+            raise ValueError("length of input precision list should be the "
+                             "row dimension of the input matrix")
         elif (not row_wise) and len(d) != n:
-            raise ValueError("length of input precision list should be the " \
-                                      + "column dimension of the input matrix")
+            raise ValueError("length of input precision list should be the "
+                             "column dimension of the input matrix")
 
         return matrix(self.base_ring(), m, n, [[self[i,j].truncate(d[i])
             if row_wise else self[i,j].truncate(d[j])
@@ -480,10 +480,10 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
         all its entries as specified by `d`.
 
         - if `d` is an integer, the shift is by `d` for all entries;
-        - if `d` is a list $(d_1,\ldots,d_m)$ and ``row_wise`` is ``True``, all
-          entries of the $i$th row are shifted by $d_i$ for each $i$;
-        - if `d` is a list $(d_1,\ldots,d_n)$ and ``row_wise`` is ``False``,
-          all entries of the $j$th column are shifted by $d_j$ for each $j$.
+        - if `d` is a list `(d_1,\ldots,d_m)` and ``row_wise`` is ``True``, all
+          entries of the `i`th row are shifted by `d_i` for each `i`;
+        - if `d` is a list `(d_1,\ldots,d_n)` and ``row_wise`` is ``False``,
+          all entries of the `j`th column are shifted by `d_j` for each `j`.
 
         Shifting by `d` means multiplying by the variable to the power `d`; if
         `d` is negative then terms of negative degree after shifting are
@@ -556,11 +556,11 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
 
         # raise an error if d does not have the right length
         if row_wise and len(d) != m:
-            raise ValueError("length of input shift list should be the " \
-                                      + "row dimension of the input matrix")
+            raise ValueError("length of input shift list should be the "
+                             "row dimension of the input matrix")
         elif (not row_wise) and len(d) != n:
-            raise ValueError("length of input shift list should be the " \
-                                      + "column dimension of the input matrix")
+            raise ValueError("length of input shift list should be the "
+                             "column dimension of the input matrix")
 
         return matrix(self.base_ring(), m, n, [[self[i,j].shift(d[i])
             if row_wise else self[i,j].shift(d[j])
@@ -586,12 +586,12 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
           it;
         - if ``degree`` is not provided, then all entries are reversed with
           respect to the degree of the whole matrix;
-        - if ``degree`` is a list $(d_1,\ldots,d_m)$ and ``row_wise`` is
-          ``True``, all entries of the $i$th row are reversed with respect to
-          $d_i$ for each $i$;
-        - if ``degree`` is a list $(d_1,\ldots,d_n)$ and ``row_wise`` is
-          ``False``, all entries of the $j$th column are reversed with respect
-          to $d_j$ for each $j$.
+        - if ``degree`` is a list `(d_1,\ldots,d_m)` and ``row_wise`` is
+          ``True``, all entries of the `i`th row are reversed with respect to
+          `d_i` for each `i`;
+        - if ``degree`` is a list `(d_1,\ldots,d_n)` and ``row_wise`` is
+          ``False``, all entries of the `j`th column are reversed with respect
+          to `d_j` for each `j`.
 
         INPUT:
 
@@ -693,7 +693,7 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
                 for j in range(n)] for i in range(m)])
 
         # if degree is None, make it the matrix degree
-        if degree==None:
+        if degree is None:
             degree = self.degree()
         # if degree is an integer, make it a uniform list
         if not isinstance(degree,list):
@@ -701,11 +701,11 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
 
         # raise an error if degree does not have the right length
         if row_wise and len(degree) != m:
-            raise ValueError("length of input degree list should be the " \
-                                      + "row dimension of the input matrix")
+            raise ValueError("length of input degree list should be the "
+                             "row dimension of the input matrix")
         elif (not row_wise) and len(degree) != n:
-            raise ValueError("length of input degree list should be the " \
-                                      + "column dimension of the input matrix")
+            raise ValueError("length of input degree list should be the "
+                             "column dimension of the input matrix")
 
         return matrix(self.base_ring(), m, n, [[self[i,j].reverse(degree[i])
             if row_wise else self[i,j].reverse(degree[j])
@@ -733,7 +733,7 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
 
         INPUT: a positive integer `d` .
 
-        OUTPUT: the unique polynomial matrix $B$ of degree less than `d` such
+        OUTPUT: the unique polynomial matrix `B` of degree less than `d` such
         that `AB` and `BA` are the identity matrix modulo `x^d`, where `A` is
         ``self``.
 
@@ -781,15 +781,15 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
             2021), it would be highly beneficial to use conversions and rely on
             polynomials with matrix coefficients when the matrix size is
             "large" and the degree "small", see
-            [https://trac.sagemath.org/ticket/31472#comment:5].
+            :trac:`31472#comment:5`.
         """
         if d <= 0:
             raise ValueError("the precision must be positive")
         try:
             inv_trunc = self.constant_matrix().inverse()
         except ZeroDivisionError:
-            raise ZeroDivisionError("the constant matrix term self(0)" \
-                                                    " must be invertible")
+            raise ZeroDivisionError("the constant matrix term self(0)"
+                                    " must be invertible")
         except ArithmeticError:
             raise ArithmeticError("the input matrix must be square")
 
@@ -1069,15 +1069,15 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
         r"""
         Return the (shifted) row degrees of this matrix.
 
-        For a given polynomial matrix $M = (M_{i,j})_{i,j}$ with $m$ rows and
-        $n$ columns, its row degrees is the tuple $(d_1,\ldots,d_m)$ where $d_i
-        = \max_j(\deg(M_{i,j}))$ for $1\leq i \leq m$. Thus, $d_i=-1$ if
-        the $i$-th row of $M$ is zero, and $d_i \geq 0$ otherwise.
+        For a given polynomial matrix `M = (M_{i,j})_{i,j}` with `m` rows and
+        `n` columns, its row degrees is the tuple `(d_1,\ldots,d_m)` where `d_i
+        = \max_j(\deg(M_{i,j}))` for `1\leq i \leq m`. Thus, `d_i=-1` if
+        the `i`-th row of `M` is zero, and `d_i \geq 0` otherwise.
 
-        For given shifts $s_1,\ldots,s_n \in \ZZ$, the shifted row degrees of
-        $M$ is $(d_1,\ldots,d_m)$ where $d_i = \max_j(\deg(M_{i,j})+s_j)$.
-        Here, if the $i$-th row of $M$ is zero then $d_i
-        =\min(s_1,\ldots,s_n)-1$; otherwise, $d_i$ is larger than this value.
+        For given shifts `s_1,\ldots,s_n \in \ZZ`, the shifted row degrees of
+        `M` is `(d_1,\ldots,d_m)` where `d_i = \max_j(\deg(M_{i,j})+s_j)`.
+        Here, if the `i`-th row of `M` is zero then `d_i
+        =\min(s_1,\ldots,s_n)-1`; otherwise, `d_i` is larger than this value.
 
         INPUT:
 
@@ -1114,9 +1114,9 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
             sage: M.row_degrees(shifts=[-2,1,2])
             [2, 1, -3]
 
-        The row degrees of an empty matrix ($0\times n$ or $m\times 0$) is
+        The row degrees of an empty matrix (`0\times n` or `m\times 0`) is
         not defined::
-            
+
             sage: M = Matrix( pR, 0, 3 )
             sage: M.row_degrees()
             Traceback (most recent call last):
@@ -1144,15 +1144,15 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
         r"""
         Return the (shifted) column degrees of this matrix.
 
-        For a given polynomial matrix $M = (M_{i,j})_{i,j}$ with $m$ rows and
-        $n$ columns, its column degrees is the tuple $(d_1,\ldots,d_n)$ where
-        $d_j = \max_i(\deg(M_{i,j}))$ for $1\leq j \leq n$. Thus, $d_j=-1$ if
-        the $j$-th column of $M$ is zero, and $d_j \geq 0$ otherwise.
+        For a given polynomial matrix `M = (M_{i,j})_{i,j}` with `m` rows and
+        `n` columns, its column degrees is the tuple `(d_1,\ldots,d_n)` where
+        `d_j = \max_i(\deg(M_{i,j}))` for `1\leq j \leq n`. Thus, `d_j=-1` if
+        the `j`-th column of `M` is zero, and `d_j \geq 0` otherwise.
 
-        For given shifts $s_1,\ldots,s_m \in \ZZ$, the shifted column degrees of
-        $M$ is $(d_1,\ldots,d_n)$ where $d_j = \max_i(\deg(M_{i,j})+s_i)$.
-        Here, if the $j$-th column of $M$ is zero then $d_j =
-        \min(s_1,\ldots,s_m)-1$; otherwise $d_j$ is larger than this value.
+        For given shifts `s_1,\ldots,s_m \in \ZZ`, the shifted column degrees of
+        `M` is `(d_1,\ldots,d_n)` where `d_j = \max_i(\deg(M_{i,j})+s_i)`.
+        Here, if the `j`-th column of `M` is zero then `d_j =
+        \min(s_1,\ldots,s_m)-1`; otherwise `d_j` is larger than this value.
 
         INPUT:
 
@@ -1177,7 +1177,7 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
             sage: M.column_degrees(shifts=[-2,1])
             [4, -3, -2]
 
-        The column degrees of an empty matrix ($0\times n$ or $m\times 0$) is
+        The column degrees of an empty matrix (`0\times n` or `m\times 0`) is
         not defined::
 
             sage: M = Matrix( pR, 0, 3 )
@@ -1211,22 +1211,22 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
         r"""
         Return the (shifted) leading matrix of this matrix.
 
-        Let $M$ be a univariate polynomial matrix in $\Bold{K}[x]^{m \times
-        n}$. Working row-wise and without shifts, its leading matrix is the
-        matrix in $\Bold{K}^{m \times n}$ formed by the leading coefficients of
-        the entries of $M$ which reach the degree of the corresponding row.
-  
-        More precisely, if working row-wise, let $s_1,\ldots,s_n \in \ZZ$
-        be a shift, and let $(d_1,\ldots,d_m)$ denote the shifted row degrees of
-        $M$. Then, the shifted leading matrix of $M$ is the matrix in
-        $\Bold{K}^{m \times n}$ whose entry $i,j$ is the coefficient of degree
-        $d_i-s_j$ of the entry $i,j$ of $M$.
+        Let `M` be a univariate polynomial matrix in `\Bold{K}[x]^{m \times
+        n}`. Working row-wise and without shifts, its leading matrix is the
+        matrix in `\Bold{K}^{m \times n}` formed by the leading coefficients of
+        the entries of `M` which reach the degree of the corresponding row.
 
-        If working column-wise, let $s_1,\ldots,s_m \in \ZZ$ be a shift,
-        and let $(d_1,\ldots,d_n)$ denote the shifted column degrees of $M$.
-        Then, the shifted leading matrix of $M$ is the matrix in $\Bold{K}^{m
-        \times n}$ whose entry $i,j$ is the coefficient of degree $d_j-s_i$ of
-        the entry $i,j$ of $M$.
+        More precisely, if working row-wise, let `s_1,\ldots,s_n \in \ZZ`
+        be a shift, and let `(d_1,\ldots,d_m)` denote the shifted row degrees of
+        `M`. Then, the shifted leading matrix of `M` is the matrix in
+        `\Bold{K}^{m \times n}` whose entry `i,j` is the coefficient of degree
+        `d_i-s_j` of the entry `i,j` of `M`.
+
+        If working column-wise, let `s_1,\ldots,s_m \in \ZZ` be a shift,
+        and let `(d_1,\ldots,d_n)` denote the shifted column degrees of `M`.
+        Then, the shifted leading matrix of `M` is the matrix in `\Bold{K}^{m
+        \times n}` whose entry `i,j` is the coefficient of degree `d_j-s_i` of
+        the entry `i,j` of `M`.
 
         INPUT:
 
@@ -1239,7 +1239,7 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
         OUTPUT: a matrix over the base field.
 
         REFERENCES:
-        
+
         [Wol1974]_ (Section 2.5, without shifts) and [VBB1992]_ (Section 3).
 
         EXAMPLES::
@@ -1296,12 +1296,12 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
 
     def _is_empty_popov(self, row_wise=True, include_zero_vectors=True):
         r"""
-        Assuming that this matrix is empty, that is, of dimensions $0\times n$
-        or $m\times 0$, return a boolean indicating if it is in shifted Popov
+        Assuming that this matrix is empty, that is, of dimensions `0\times n`
+        or `m\times 0`, return a boolean indicating if it is in shifted Popov
         form. If zero vectors are allowed in shifted reduced forms, this always
         returns true. Otherwise, by convention and if working row-wise, for
-        $n\geq 0$ the $0\times n$ matrix is in shifted Popov form for all
-        shifts, and for $m>0$ the $m \times 0$ matrix is not in shifted Popov
+        `n\geq 0` the `0\times n` matrix is in shifted Popov form for all
+        shifts, and for `m>0` the `m \times 0` matrix is not in shifted Popov
         form for any shift. The convention is similar if working column-wise.
 
         The behaviour of this method for non-empty matrices is not defined.
@@ -1335,7 +1335,7 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
             False
 
         .. SEEALSO::
-        
+
             :meth:`is_popov` .
         """
         if include_zero_vectors:
@@ -1355,18 +1355,18 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
         Return a boolean indicating whether this matrix is in (shifted) reduced
         form.
 
-        An $m \times n$ univariate polynomial matrix $M$ is said to be in
-        shifted row reduced form if it has $k$ nonzero rows with $k \leq n$ and
-        its shifted leading matrix has rank $k$. Equivalently, when considering
-        all the matrices obtained by left-multiplying $M$ by a unimodular
-        matrix, then the shifted row degrees of $M$ -- once sorted in
+        An `m \times n` univariate polynomial matrix `M` is said to be in
+        shifted row reduced form if it has `k` nonzero rows with `k \leq n` and
+        its shifted leading matrix has rank `k`. Equivalently, when considering
+        all the matrices obtained by left-multiplying `M` by a unimodular
+        matrix, then the shifted row degrees of `M` -- once sorted in
         nondecreasing order -- is lexicographically minimal.
 
-        Similarly, $M$ is said to be in shifted column reduced form if it has
-        $k$ nonzero columns with $k \leq m$ and its shifted leading matrix has
-        rank $k$.
+        Similarly, `M` is said to be in shifted column reduced form if it has
+        `k` nonzero columns with `k \leq m` and its shifted leading matrix has
+        rank `k`.
 
-        Sometimes, one forbids $M$ to have zero rows (resp. columns) in the
+        Sometimes, one forbids `M` to have zero rows (resp. columns) in the
         above definitions; an optional parameter allows one to adopt this more
         restrictive setting.
 
@@ -1385,7 +1385,7 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
         OUTPUT: a boolean value.
 
         REFERENCES:
-        
+
         [Wol1974]_ (Section 2.5, without shifts) and [VBB1992]_ (Section 3).
 
         EXAMPLES::
@@ -1435,15 +1435,15 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
         Return the (shifted) leading positions (also known as the pivot
         indices), and optionally the (shifted) pivot degrees of this matrix.
 
-        If working row-wise, for a given shift $s_1,\ldots,s_n \in
-        \ZZ$, taken as $(0,\ldots,0)$ by default, and a row vector of
-        univariate polynomials $[p_1,\ldots,p_n]$, the leading position of
-        this vector is the index $j$ of the rightmost nonzero entry $p_j$ such
-        that $\deg(p_j) + s_j$ is equal to the shifted row degree of the vector.
-        Then the pivot degree of the vector is the degree $\deg(p_j)$.
-        
-        For the zero row, both the leading positions and degree are $-1$.  For
-        a $m \times n$ polynomial matrix, the leading positions and pivot
+        If working row-wise, for a given shift `s_1,\ldots,s_n \in
+        \ZZ`, taken as `(0,\ldots,0)` by default, and a row vector of
+        univariate polynomials `[p_1,\ldots,p_n]`, the leading position of
+        this vector is the index `j` of the rightmost nonzero entry `p_j` such
+        that `\deg(p_j) + s_j` is equal to the shifted row degree of the vector.
+        Then the pivot degree of the vector is the degree `\deg(p_j)`.
+
+        For the zero row, both the leading positions and degree are `-1`.  For
+        a `m \times n` polynomial matrix, the leading positions and pivot
         degrees are the two lists containing the leading positions and the
         pivot degrees of its rows.
 
@@ -1465,7 +1465,7 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
         of integers otherwise.
 
         REFERENCES:
-        
+
         [Kai1980]_ (Section 6.7.2, without shifts).
 
         EXAMPLES::
@@ -1498,8 +1498,8 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
             sage: M.leading_positions(shifts=[2,0], row_wise=False,return_degree=True)
             ([1, -1, 0], [3, -1, 0])
 
-        The leading positions and pivot degrees of an empty matrix ($0\times n$
-        or $m\times 0$) is not defined::
+        The leading positions and pivot degrees of an empty matrix (`0\times n`
+        or `m\times 0`) is not defined::
 
             sage: M = Matrix( pR, 0, 3 )
             sage: M.leading_positions()
@@ -1541,7 +1541,7 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
                 self[i,pivot_index[i]].degree())
                 for i in range(self.nrows()) ]
             return (pivot_index,pivot_degree) if return_degree else pivot_index
-                    
+
         # now in the column-wise case
         column_degrees = self.column_degrees(shifts)
         if shifts is None:
@@ -1595,7 +1595,7 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
         OUTPUT: a boolean.
 
         REFERENCES:
-        
+
         [Kai1980]_ (Section 6.7.2, square case without shifts), [MS2003]_
         (without shifts), [BLV1999]_ .
 
@@ -1646,7 +1646,7 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
             sage: M = Matrix([
             ....:   [      6*x+4,       0,             5*x+1, 0],
             ....:   [          2, 5*x + 1,       6*x^2+3*x+1, 0],
-            ....:   [2*x^2+5*x+5,       1, 2*x^3+4*x^2+6*x+4, 0] 
+            ....:   [2*x^2+5*x+5,       1, 2*x^3+4*x^2+6*x+4, 0]
             ....:   ])
             sage: M.is_weak_popov(shifts=[2,1,0], row_wise=False, ordered=True)
             True
@@ -1724,7 +1724,7 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
         OUTPUT: a boolean.
 
         REFERENCES:
-        
+
         For the square case, without shifts: [Pop1972]_ and [Kai1980]_ (Section
         6.7.2). For the general case: [BLV2006]_ .
 
@@ -1834,9 +1834,9 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
         the matrix, and in each nonzero row the pivot (leftmost nonzero entry)
         is strictly to the right of the pivot of the row just above this row.
 
-        Note that, for any integer $d$ strictly greater than all degrees
+        Note that, for any integer `d` strictly greater than all degrees
         appearing in the Hermite form, then the Hermite form coincides with the
-        shifted Popov form with the shifts $((n-1)d,\ldots,2d,d,0)$, where $n$
+        shifted Popov form with the shifts `((n-1)d,\ldots,2d,d,0)`, where `n`
         is the column dimension.
 
         If working column-wise, a polynomial matrix is said to be in Hermite
@@ -1908,7 +1908,7 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
             False
 
         .. SEEALSO::
-        
+
             :meth:`hermite_form` .
         """
         # shift for lower echelon
@@ -1932,8 +1932,8 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
         Return a (shifted) (ordered) weak Popov form of this matrix.
 
         See :meth:`is_weak_popov` for a definition of weak Popov forms. If the
-        input matrix is $A$, a weak Popov form of $A$ is any matrix $P$ in weak
-        Popov form and such that $UA = P$ for some unimodular matrix $U$. The
+        input matrix is `A`, a weak Popov form of `A` is any matrix `P` in weak
+        Popov form and such that `UA = P` for some unimodular matrix `U`. The
         latter matrix is called the transformation, and the first optional
         argument allows one to specify whether to return this transformation.
 
@@ -2060,7 +2060,7 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
         m = self.nrows()
         # make shift nonnegative, required by main call _weak_popov_form
         self._check_shift_dimension(shifts,row_wise=True)
-        if shifts==None:
+        if shifts is None:
             nonnegative_shifts = None
         else:
             min_shifts = min(shifts)
@@ -2230,9 +2230,9 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
         Return the (shifted) Popov form of this matrix.
 
         See :meth:`is_popov` for a definition of Popov forms. If the input
-        matrix is $A$, the (shifted) Popov form of $A$ is the unique matrix $P$
-        in (shifted) Popov form and such that $UA = P$ for some unimodular
-        matrix $U$. The latter matrix is called the transformation, and the
+        matrix is `A`, the (shifted) Popov form of `A` is the unique matrix `P`
+        in (shifted) Popov form and such that `UA = P` for some unimodular
+        matrix `U`. The latter matrix is called the transformation, and the
         first optional argument allows one to specify whether to return this
         transformation. We refer to the description of :meth:`weak_popov_form`
         for an explanation of the option ``include_zero_vectors`` .
@@ -2353,7 +2353,7 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
 
         # compute leading positions and shifted row degrees
         lpos,rdeg = P.leading_positions(shifts,True,True)
-        if shifts != None:
+        if shifts is not None:
             rdeg = [rdeg[i] + shifts[lpos[i]] for i in range(m)]
 
         # 1/ transform P into ascending order (as defined in
@@ -2424,9 +2424,9 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
         Return a row reduced form of this matrix (resp. a column reduced form
         if the optional parameter ``row_wise`` is set to ``False``).
 
-        An $m \times n$ univariate polynomial matrix $M$ is said to be in
-        (shifted) row reduced form if it has $k$ nonzero rows with $k \leq n$
-        and its (shifted) leading matrix has rank $k$. See :meth:`is_reduced`
+        An `m \times n` univariate polynomial matrix `M` is said to be in
+        (shifted) row reduced form if it has `k` nonzero rows with `k \leq n`
+        and its (shifted) leading matrix has rank `k`. See :meth:`is_reduced`
         for more information.
 
         Currently, the implementation of this method is a direct call to
@@ -2548,8 +2548,8 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
         Return the Hermite form of this matrix.
 
         See :meth:`is_hermite` for a definition of Hermite forms. If the input
-        is a matrix $A$, then its Hermite form is the unique matrix $H$ in Hermite
-        form such that $UA = H$ for some unimodular matrix $U$.
+        is a matrix `A`, then its Hermite form is the unique matrix `H` in Hermite
+        form such that `UA = H` for some unimodular matrix `U`.
 
         INPUT:
 
@@ -2564,7 +2564,7 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
         - the Hermite normal form `H` of this matrix `A` .
 
         - (optional) transformation matrix `U` such that `UA = H` .
- 
+
         EXAMPLES::
 
             sage: M.<x> = GF(7)[]
@@ -2594,7 +2594,7 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
             True
 
         .. SEEALSO::
-        
+
             :meth:`is_hermite` ,
             :meth:`popov_form` .
         """
@@ -2680,8 +2680,8 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
             :meth:`reduce` .
         """
         if self.nrows() != B.nrows():
-            raise ValueError("row dimension of self should be the" \
-                                + " row dimension of the input matrix")
+            raise ValueError("row dimension of self should be the"
+                             " row dimension of the input matrix")
         (Q,R) = self.T.right_quo_rem(B.T)
         return (Q.T,R.T)
 
@@ -2839,8 +2839,8 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
             :meth:`reduce` .
         """
         if self.ncols() != B.ncols():
-            raise ValueError("column dimension of self should be the" \
-                                + " column dimension of the input matrix")
+            raise ValueError("column dimension of self should be the"
+                             " column dimension of the input matrix")
         if B.is_square() and \
            B.is_reduced(row_wise=False,include_zero_vectors=False):
             # case of B column reduced (without zero columns):
@@ -2859,10 +2859,9 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
             (Q,R) = self.reduce(B,shifts=s,return_quotient=True)
             cdeg = R.column_degrees()
             if all([cdeg[i] + s[i] < 0 for i in range(B.ncols())]):
-                return (Q,R)
-            else:
-                raise ValueError("division of these matrices does not admit" \
-                        + " a remainder with the required degree property")
+                return (Q, R)
+            raise ValueError("division of these matrices does not admit a "
+                             "remainder with the required degree property")
 
     def _right_quo_rem_reduced(self, B):
         r"""
@@ -2924,7 +2923,7 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
             return (self.parent().zero().__copy__(), self)
         # Step 1: reverse input matrices
         # Brev = B(1/x) diag(x^(cdeg[i]))
-        # Arev = A(1/x) diag(x^(d+cdeg[i]-1)) 
+        # Arev = A(1/x) diag(x^(d+cdeg[i]-1))
         Brev = B.reverse(degree=cdeg, row_wise=False)
         Arev = self.reverse(degree=[d+c-1 for c in cdeg], row_wise=False)
         # Step 2: compute quotient
@@ -2954,7 +2953,7 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
         and such a quotient and remainder is returned by the method. Or this
         matrix equation has no solution and this method fails: this raises
         ``ValueError``; however this is not a proof that there is no valid
-        division with remainder (see the last example below). 
+        division with remainder (see the last example below).
 
         EXAMPLES::
 
@@ -3194,11 +3193,11 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
             :meth:`right_quo_rem` .
         """
         if row_wise and self.ncols() != B.ncols():
-            raise ValueError("column dimension of self should be the" \
-                                + " column dimension of the input matrix")
+            raise ValueError("column dimension of self should be the"
+                             " column dimension of the input matrix")
         if not row_wise and (self.nrows() != B.nrows()):
-            raise ValueError("row dimension of self should be the" \
-                                + " row dimension of the input matrix")
+            raise ValueError("row dimension of self should be the"
+                             " row dimension of the input matrix")
         # note: is_popov calls B._check_shift_dimension(shifts,row_wise)
         # --> no need to check here again
         if B.is_popov(shifts,row_wise,False,False):
@@ -3246,12 +3245,12 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
         Return ``True`` if and only if this matrix is an approximant basis in
         ``shifts``-ordered weak Popov form for the polynomial matrix ``pmat``
         at order ``order``.
-        
+
         If ``normal_form`` is ``True``, then the polynomial matrix must
         furthermore be in ``shifts``-Popov form. An error is raised if the
         input dimensions are not sound. If a single integer is provided for
         ``order``, then it is interpreted as a list of repeated integers with
-        this value. (See :meth:`minimal_approximant_basis` for definitions and 
+        this value. (See :meth:`minimal_approximant_basis` for definitions and
         more details.)
 
         INPUT:
@@ -3328,14 +3327,14 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
             sage: appbas.is_minimal_approximant_basis(pmat, [8,8], shifts)
             Traceback (most recent call last):
             ...
-            ValueError: order length should be the column dimension 
+            ValueError: order length should be the column dimension
                         of the input matrix
 
             sage: appbas.is_minimal_approximant_basis(pmat, \
                     order, shifts, row_wise=False)
             Traceback (most recent call last):
             ...
-            ValueError: shifts length should be the column dimension 
+            ValueError: shifts length should be the column dimension
                         of the input matrix
 
             sage: Matrix(pR, [x^8]).is_minimal_approximant_basis(pmat, 8)
@@ -3355,30 +3354,30 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
         if shifts is None:
             shifts = [0] * m if row_wise else [0] * n
         elif row_wise and len(shifts) != m:
-            raise ValueError('shifts length should be the row dimension of' \
-                                                      + ' the input matrix')
+            raise ValueError('shifts length should be the row dimension of'
+                             ' the input matrix')
         elif (not row_wise) and len(shifts) != n:
-            raise ValueError('shifts length should be the column dimension' \
-                                                   + ' of the input matrix')
+            raise ValueError('shifts length should be the column dimension'
+                             ' of the input matrix')
 
         # set default order / check order dimension
         if not isinstance(order,list):
             order = [order]*n if row_wise else [order]*m
 
         if row_wise and len(order) != n:
-            raise ValueError("order length should be the column dimension" \
-                                                  + " of the input matrix")
+            raise ValueError("order length should be the column dimension"
+                             " of the input matrix")
         elif (not row_wise) and len(order) != m:
-            raise ValueError("order length should be the row dimension of" \
-                                                     + " the input matrix")
+            raise ValueError("order length should be the row dimension of"
+                             " the input matrix")
 
         # raise an error if self does not have the right dimension
         if row_wise and self.ncols() != m:
-            raise ValueError("column dimension should be the row dimension" \
-                                                    + " of the input matrix")
+            raise ValueError("column dimension should be the row dimension"
+                             " of the input matrix")
         elif (not row_wise) and self.nrows() != n:
-            raise ValueError("row dimension should be the column dimension" \
-                                                    + " of the input matrix")
+            raise ValueError("row dimension should be the column dimension"
+                             " of the input matrix")
 
         # check square
         if not self.is_square():
@@ -3599,11 +3598,11 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
                 # (since weak Popov, pivot degree is rdeg-shifts entrywise)
                 degree_shifts = [shifts[i] - rdeg[i] for i in range(n)]
                 # compute approximant basis with that list as shifts
-                P,rdeg = self.transpose()._approximant_basis_iterative( \
-                                                order, degree_shifts)
+                P, rdeg = self.transpose()._approximant_basis_iterative(
+                    order, degree_shifts)
                 P = P.transpose()
                 # right-multiply by inverse of leading matrix
-                lmat = P.leading_matrix(shifts=degree_shifts,row_wise=False)
+                lmat = P.leading_matrix(shifts=degree_shifts, row_wise=False)
                 P = P * lmat.inverse()
             else:
                 P = P.transpose()
@@ -3613,7 +3612,7 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
     def _approximant_basis_iterative(self, order, shifts):
         r"""
         Return a ``shifts``-ordered weak Popov approximant basis for this
-        polynomial matrix at order ``order`` 
+        polynomial matrix at order ``order``
         (see :meth:`minimal_approximant_basis` for definitions).
 
         The output basis is considered row-wise, that is, its rows are
@@ -3824,19 +3823,19 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
         if shifts is None:
             shifts = [0] * m if row_wise else [0] * n
         elif row_wise and len(shifts) != m:
-            raise ValueError('shifts length should be the row dimension of' \
-                                                      + ' the input matrix')
+            raise ValueError('shifts length should be the row dimension of'
+                             ' the input matrix')
         elif (not row_wise) and len(shifts) != n:
-            raise ValueError('shifts length should be the column dimension' \
-                                                   + ' of the input matrix')
+            raise ValueError('shifts length should be the column dimension'
+                             ' of the input matrix')
 
         # raise an error if self does not have the right dimension
         if row_wise and self.ncols() != m:
-            raise ValueError("column dimension should be the row dimension" \
-                                                    + " of the input matrix")
+            raise ValueError("column dimension should be the row dimension"
+                             " of the input matrix")
         elif (not row_wise) and self.nrows() != n:
-            raise ValueError("row dimension should be the column dimension" \
-                                                    + " of the input matrix")
+            raise ValueError("row dimension should be the column dimension"
+                             " of the input matrix")
 
         # check full rank and shifts-(ordered weak) Popov form
         if normal_form and (not self.is_popov(shifts, row_wise, False, False)):
@@ -3975,7 +3974,7 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
             P = self.minimal_approximant_basis(orders,shifts,True,normal_form)
             row_indices = []
             for i in range(m):
-                if P[i,i].degree() + shifts[i] <= degree_bound:
+                if P[i, i].degree() + shifts[i] <= degree_bound:
                     row_indices.append(i)
             return P[row_indices,:]
 
@@ -4001,6 +4000,6 @@ cdef class Matrix_polynomial_dense(Matrix_generic_dense):
             P = self.minimal_approximant_basis(orders,shifts,False,normal_form)
             column_indices = []
             for j in range(n):
-                if P[j,j].degree() + shifts[j] <= degree_bound:
+                if P[j, j].degree() + shifts[j] <= degree_bound:
                     column_indices.append(j)
             return P[:,column_indices]

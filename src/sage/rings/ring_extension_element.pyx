@@ -122,6 +122,7 @@ cdef class RingExtensionElement(CommutativeAlgebraElement):
             method = getattr(self._backend, name)
         if not callable(method):
             raise AttributeError(AttributeErrorMessage(self, name))
+
         def wrapper(*args, **kwargs):
             output = method(*to_backend(args), **to_backend(kwargs))
             return from_backend(output, self._parent)
@@ -162,7 +163,7 @@ cdef class RingExtensionElement(CommutativeAlgebraElement):
                 attribute = getattr(self._backend, name)
                 if callable(attribute):
                     d.append(name)
-            except:
+            except AttributeError:
                 pass
         return sorted(set(d))
 
@@ -1457,14 +1458,23 @@ cdef class RingExtensionWithBasisElement(RingExtensionElement):
             sage: L(u).minpoly(F).degree() in [ 1, 3 ]
             True
         """
-        from sage.modules.free_module import FreeModule
         cdef RingExtensionWithBasis parent = self._parent
+
+        if base is None:
+            mod = parent.modulus()
+            S = mod.parent().quotient(mod)
+            try:
+                return S(list(self.vector())).minpoly()
+            except NotImplementedError:
+                pass  # fall back to generic code below
+
+        from sage.modules.free_module import FreeModule
         cdef MapRelativeRingToFreeModule j
 
         base = parent._check_base(base)
         if not (parent._is_finite_over(base) and parent._is_free_over(base)):
             raise ValueError("the extension is not finite free")
-        if not base in Fields():
+        if base not in Fields():
             raise NotImplementedError("minpoly is only implemented when the base is a field")
         K = backend_parent(base)
         degree = parent._degree_over(base)

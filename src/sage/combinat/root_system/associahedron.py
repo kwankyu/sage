@@ -11,14 +11,14 @@ AUTHORS:
 
 - Christian Stump
 """
-#*****************************************************************************
+# ***************************************************************************
 #       Copyright (C) 2011-2012 Christian Stump <christian.stump@gmail.com>
 #
 #  Distributed under the terms of the GNU General Public License (GPL)
 #  The full text of the GPL is available at:
 #
-#                  http://www.gnu.org/licenses/
-#*****************************************************************************
+#                  https://www.gnu.org/licenses/
+# ***************************************************************************
 from sage.geometry.polyhedron.backend_ppl import Polyhedron_QQ_ppl
 from sage.geometry.polyhedron.backend_normaliz import Polyhedron_QQ_normaliz
 from sage.geometry.polyhedron.backend_cdd import Polyhedron_QQ_cdd
@@ -128,7 +128,7 @@ def Associahedron(cartan_type, backend='ppl'):
     return parent(cartan_type)
 
 
-class Associahedron_class_base(object):
+class Associahedron_class_base():
     r"""
     The base class of the Python class of an associahedron
 
@@ -189,7 +189,7 @@ class Associahedron_class_base(object):
         if cartan_type or (parent is None and Vrep is None and Hrep is None):
             # Called from element constructor in ``Associahedron_base``.
             # Alternatively called from ``loads`` in ``loads(dumps(...))``.
-            return super(Associahedron_class_base, typ).__new__(typ, parent, Vrep, Hrep, **kwds)
+            return super().__new__(typ, parent, Vrep, Hrep, **kwds)
         else:
             # Not called from element constructor in ``Associahedron_base``.
             # Return a polyhedron with proper backend (not an associahedron).
@@ -214,7 +214,7 @@ class Associahedron_class_base(object):
         """
         if cartan_type:
             self._cartan_type = cartan_type
-            super(Associahedron_class_base, self).__init__(parent, Vrep, Hrep, **kwds)
+            super().__init__(parent, Vrep, Hrep, **kwds)
         else:
             raise ValueError("associahedron must be initialized with cartan type")
 
@@ -261,17 +261,22 @@ class Associahedron_class_base(object):
         return tuple(root_space.from_vector(vector(V))
                      for V in self.vertex_generator())
 
+
 class Associahedron_class_ppl(Associahedron_class_base, Polyhedron_QQ_ppl):
     pass
+
 
 class Associahedron_class_normaliz(Associahedron_class_base, Polyhedron_QQ_normaliz):
     pass
 
+
 class Associahedron_class_cdd(Associahedron_class_base, Polyhedron_QQ_cdd):
     pass
 
+
 class Associahedron_class_polymake(Associahedron_class_base, Polyhedron_polymake):
     pass
+
 
 class Associahedron_class_field(Associahedron_class_base, Polyhedron_field):
     pass
@@ -288,7 +293,7 @@ def Associahedra(base_ring, ambient_dim, backend='ppl'):
         <class 'sage.combinat.root_system.associahedron.Associahedra_ppl_with_category'>
         sage: Associahedra(QQ, 4, 'normaliz').parent() # optional - pynormaliz
         <class 'sage.combinat.root_system.associahedron.Associahedra_normaliz_with_category'>
-        sage: Associahedra(QQ, 4, 'polymake').parent() # optional - polymake
+        sage: Associahedra(QQ, 4, 'polymake').parent() # optional - jupymake
         <class 'sage.combinat.root_system.associahedron.Associahedra_polymake_with_category'>
         sage: Associahedra(QQ, 4, 'field').parent()
         <class 'sage.combinat.root_system.associahedron.Associahedra_field_with_category'>
@@ -315,7 +320,7 @@ def Associahedra(base_ring, ambient_dim, backend='ppl'):
         raise ValueError("unknown backend")
 
 
-class Associahedra_base(object):
+class Associahedra_base():
     """
     Base class of parent of Associahedra of specified dimension
 
@@ -338,6 +343,7 @@ class Associahedra_base(object):
         ...
         ValueError: V-representation data requires a list of length ambient_dim
     """
+
     def _element_constructor_(self, cartan_type, **kwds):
         """
         The element constructor.
@@ -375,7 +381,7 @@ class Associahedra_base(object):
             c = rhocheck.coefficient(orbit[0].leading_support())
             for beta in orbit:
                 inequalities.append([c] + [beta.coefficient(i) for i in I])
-        associahedron = super(Associahedra_base, self)._element_constructor_(None, [inequalities, []], cartan_type=cartan_type)
+        associahedron = super()._element_constructor_(None, [inequalities, []], cartan_type=cartan_type)
         return associahedron
 
     def _coerce_map_from_(self, X):
@@ -416,7 +422,7 @@ class Associahedra_base(object):
         """
         if not isinstance(X, Associahedra_base):
             return False
-        return super(Associahedra_base, self)._coerce_map_from_(X)
+        return super()._coerce_map_from_(X)
 
     def _pushout_(self, other):
         r"""
@@ -441,20 +447,25 @@ class Associahedra_base(object):
             return Polyhedra(QQ, self.ambient_dim(), self.backend())
 
         # Call the overwritten pushout in case it exists.
-        if hasattr(super(Associahedra_base, self), '_pushout_'):
-            return super(Associahedra_base, self)._pushout_(other)
+        if hasattr(super(), '_pushout_'):
+            return super()._pushout_(other)
+
 
 class Associahedra_ppl(Associahedra_base, Polyhedra_QQ_ppl):
     Element = Associahedron_class_ppl
 
+
 class Associahedra_normaliz(Associahedra_base, Polyhedra_QQ_normaliz):
     Element = Associahedron_class_normaliz
+
 
 class Associahedra_cdd(Associahedra_base, Polyhedra_QQ_cdd):
     Element = Associahedron_class_cdd
 
+
 class Associahedra_polymake(Associahedra_base, Polyhedra_polymake):
     Element = Associahedron_class_polymake
+
 
 class Associahedra_field(Associahedra_base, Polyhedra_field):
     Element = Associahedron_class_field

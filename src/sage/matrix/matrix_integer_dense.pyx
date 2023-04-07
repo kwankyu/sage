@@ -78,7 +78,7 @@ from sage.modules.vector_integer_dense cimport Vector_integer_dense
 from sage.misc.misc import cputime
 from sage.misc.verbose import verbose, get_verbose
 
-from sage.arith.all import previous_prime
+from sage.arith.misc import previous_prime
 from sage.arith.long cimport integer_check_long_py
 from sage.arith.power cimport generic_power
 from sage.structure.element cimport Element
@@ -364,7 +364,7 @@ cdef class Matrix_integer_dense(Matrix_dense):
         """
         fmpz_set_mpz(fmpz_mat_entry(self._matrix,i,j), value)
 
-    cdef void set_unsafe_si(self, Py_ssize_t i, Py_ssize_t j, long value):
+    cdef void set_unsafe_int(self, Py_ssize_t i, Py_ssize_t j, int value):
         """
         Set position i,j of this matrix to ``value``.
         """
@@ -378,7 +378,7 @@ cdef class Matrix_integer_dense(Matrix_dense):
 
     cdef get_unsafe(self, Py_ssize_t i, Py_ssize_t j):
         """
-        Return (i, j) entry of self as a new Integer.
+        Return the (i, j) entry of self as a new Integer.
 
         .. WARNING::
 
@@ -430,9 +430,20 @@ cdef class Matrix_integer_dense(Matrix_dense):
         """
         fmpz_get_mpz(value,fmpz_mat_entry(self._matrix, i, j))
 
+    cdef inline int get_unsafe_int(self, Py_ssize_t i, Py_ssize_t j):
+        """
+        Return the (i, j) entry of self as a new Integer.
+
+        .. WARNING::
+
+           This is very unsafe; it assumes i and j are in the right
+           range.
+        """
+        return fmpz_get_si(fmpz_mat_entry(self._matrix, i, j))
+
     cdef inline double get_unsafe_double(self, Py_ssize_t i, Py_ssize_t j):
         """
-        Return (j, i) entry of self as a new Integer.
+        Return the (i, j) entry of self as a new Integer.
 
         .. WARNING::
 
@@ -456,7 +467,7 @@ cdef class Matrix_integer_dense(Matrix_dense):
         """
         return fmpz_get_d(fmpz_mat_entry(self._matrix, i, j))
 
-    cdef bint get_is_zero_unsafe(self, Py_ssize_t i, Py_ssize_t j):
+    cdef bint get_is_zero_unsafe(self, Py_ssize_t i, Py_ssize_t j) except -1:
         """
         Return 1 if the entry (i, j) is zero, otherwise 0.
 
@@ -661,7 +672,7 @@ cdef class Matrix_integer_dense(Matrix_dense):
             A.subdivide(*self.subdivisions())
         return A
 
-    def __nonzero__(self):
+    def __bool__(self):
         r"""
         Tests whether self is not the zero matrix.
 
@@ -1067,7 +1078,7 @@ cdef class Matrix_integer_dense(Matrix_dense):
         cdef fmpz_t x
         cdef fmpz_t z
 
-        M = self._row_ambient_module()
+        M = self.row_ambient_module()
         w = <Vector_integer_dense> v
         ans = M.zero_vector()
 
@@ -1628,7 +1639,7 @@ cdef class Matrix_integer_dense(Matrix_dense):
         from .matrix_modn_dense_float import MAX_MODULUS as MAX_MODULUS_FLOAT
         from .matrix_modn_dense_double import MAX_MODULUS as MAX_MODULUS_DOUBLE
 
-        if isinstance(moduli, (int, long, Integer)):
+        if isinstance(moduli, (int, Integer)):
             return self._mod_int(moduli)
         elif isinstance(moduli, list):
             moduli = MultiModularBasis(moduli)
@@ -1995,11 +2006,12 @@ cdef class Matrix_integer_dense(Matrix_dense):
             Full MatrixSpace of 0 by 2 dense matrices over Integer Ring
             sage: H == U * m
             True
-            sage: m = random_matrix(ZZ, 100, 100, x=-1000, y=1000, density=.1)
+            sage: m = random_matrix(ZZ, 15, 15, x=-1000, y=1000, density=0.1)
             sage: m.parent()
-            Full MatrixSpace of 100 by 100 dense matrices over Integer Ring
-            sage: H, U = m.hermite_form(algorithm="flint", transformation=True)  # long time
-            sage: H == U*m                                                       # long time
+            Full MatrixSpace of 15 by 15 dense matrices over Integer Ring
+            sage: H, U = m.hermite_form(algorithm="flint",
+            ....:                       transformation=True)
+            sage: H == U*m
             True
         """
         key = 'hnf-%s-%s'%(include_zero_rows,transformation)
@@ -2257,7 +2269,7 @@ cdef class Matrix_integer_dense(Matrix_dense):
             [ 0  0  0]
         """
         p = self.fetch('pivots')
-        if not p is None:
+        if p is not None:
             return tuple(p)
 
         cdef Matrix_integer_dense E
@@ -2653,7 +2665,7 @@ cdef class Matrix_integer_dense(Matrix_dense):
 
         algorithm = kwds.pop('algorithm', None)
         if algorithm is None:
-          algorithm = 'default'
+            algorithm = 'default'
 
         if algorithm == 'default':
             # The heuristic here could be auto-tuned, stored for
@@ -2927,7 +2939,11 @@ cdef class Matrix_integer_dense(Matrix_dense):
             # 2. the user has specified the relevant parameters already
             if "strategies" not in kwds:
                 if proof is False:
-                    kwds["strategies"] = load_strategies_json(BKZ.DEFAULT_STRATEGY)
+                    import os
+                    kwds["strategies"] = load_strategies_json(
+                        os.path.normpath(os.path.join(
+                            BKZ.DEFAULT_STRATEGY_PATH,
+                            os.path.basename(BKZ.DEFAULT_STRATEGY))))
 
             if "auto_abort" not in kwds:
                 if proof is False:
@@ -3400,7 +3416,7 @@ cdef class Matrix_integer_dense(Matrix_dense):
         from .misc import matrix_integer_dense_rational_reconstruction
         return matrix_integer_dense_rational_reconstruction(self, N)
 
-    def randomize(self, density=1, x=None, y=None, distribution=None, \
+    def randomize(self, density=1, x=None, y=None, distribution=None,
                   nonzero=False):
         """
         Randomize ``density`` proportion of the entries of this matrix,
@@ -3471,8 +3487,8 @@ cdef class Matrix_integer_dense(Matrix_dense):
             if density == 1:
                 for i from 0 <= i < self._nrows:
                     for j from 0 <= j < self._ncols:
-                        the_integer_ring._randomize_mpz(tmp, x, y, \
-                                                    distribution)
+                        the_integer_ring._randomize_mpz(tmp, x, y,
+                                                        distribution)
                         self.set_unsafe_mpz(i,j,tmp)
             else:
                 nc = self._ncols
@@ -3480,7 +3496,7 @@ cdef class Matrix_integer_dense(Matrix_dense):
                 for i from 0 <= i < self._nrows:
                     for j from 0 <= j < num_per_row:
                         k = rstate.c_random()%nc
-                        the_integer_ring._randomize_mpz(tmp, \
+                        the_integer_ring._randomize_mpz(tmp,
                                                         x, y, distribution)
                         self.set_unsafe_mpz(i,k,tmp)
             sig_off()
@@ -3493,7 +3509,7 @@ cdef class Matrix_integer_dense(Matrix_dense):
                 for i from 0 <= i < self._nrows:
                     for j from 0 <= j < self._ncols:
                         while fmpz_sgn(fmpz_mat_entry(self._matrix,i,j)) == 0:
-                            the_integer_ring._randomize_mpz(tmp, \
+                            the_integer_ring._randomize_mpz(tmp,
                                 x, y, distribution)
                             self.set_unsafe_mpz(i,j,tmp)
             else:
@@ -3503,7 +3519,7 @@ cdef class Matrix_integer_dense(Matrix_dense):
                     for j from 0 <= j < num_per_row:
                         k = rstate.c_random() % nc
                         while fmpz_sgn(fmpz_mat_entry(self._matrix,i,k)) == 0:
-                            the_integer_ring._randomize_mpz(tmp,\
+                            the_integer_ring._randomize_mpz(tmp,
                                                             x, y, distribution)
                             self.set_unsafe_mpz(i,k,tmp)
 
@@ -3566,7 +3582,7 @@ cdef class Matrix_integer_dense(Matrix_dense):
                              "or 'linbox'")
 
         r = self.fetch('rank')
-        if not r is None:
+        if r is not None:
             return r
 
         if algorithm == 'flint' or (self._nrows <= 6 and self._ncols <= 6
@@ -4724,7 +4740,7 @@ cdef class Matrix_integer_dense(Matrix_dense):
             # Step 5: Apply p-adic solver
             C = B.matrix_from_columns(pivots)
             pivots_ = set(pivots)
-            non_pivots = [i for i in range(B.ncols()) if not i in pivots_]
+            non_pivots = [i for i in range(B.ncols()) if i not in pivots_]
             D = B.matrix_from_columns(non_pivots)
             t = verbose('calling %s solver'%solver, level=2, caller_name='p-adic echelon')
             if solver == 'iml':
@@ -5022,7 +5038,7 @@ cdef class Matrix_integer_dense(Matrix_dense):
         k = 0
         for i from 0 <= i < self._nrows:
             for j from 0 <= j < self._ncols:
-                res.set_unsafe_si(i,j,res_l[k])
+                res.set_unsafe_int(i,j,res_l[k])
                 k += 1
         sig_free(res_l)
 
@@ -5194,7 +5210,7 @@ cdef class Matrix_integer_dense(Matrix_dense):
             raise IndexError("row index out of range")
 
         cdef Py_ssize_t j
-        parent = self._row_ambient_module()
+        parent = self.row_ambient_module()
         cdef Vector_integer_dense v = parent.zero_vector()
         for j in range(self._ncols):
             fmpz_get_mpz(v._entries[j], fmpz_mat_entry(self._matrix, i, j))
@@ -5237,7 +5253,7 @@ cdef class Matrix_integer_dense(Matrix_dense):
             raise IndexError("column index out of range")
 
         cdef Py_ssize_t j
-        parent = self._column_ambient_module()
+        parent = self.column_ambient_module()
         cdef Vector_integer_dense v = parent.zero_vector()
         for j in range(self._nrows):
             fmpz_get_mpz(v._entries[j], fmpz_mat_entry(self._matrix, j, i))
@@ -5375,12 +5391,14 @@ cdef class Matrix_integer_dense(Matrix_dense):
         cdef Py_ssize_t i, j, p, qs, qa
         p, qs, qa = 0, 0, 0
         for i from 0 <= i < m:
-          for j from 0 <= j < ns:
-            fmpz_set(fmpz_mat_entry(Z._matrix,i,j),fmpz_mat_entry(self._matrix,i,j))
-          for j from 0 <= j < na:
-            fmpz_set(fmpz_mat_entry(Z._matrix,i,j + ns),fmpz_mat_entry(other._matrix,i,j))
+            for j from 0 <= j < ns:
+                fmpz_set(fmpz_mat_entry(Z._matrix,i,j),
+                         fmpz_mat_entry(self._matrix,i,j))
+            for j from 0 <= j < na:
+                fmpz_set(fmpz_mat_entry(Z._matrix,i,j + ns),
+                         fmpz_mat_entry(other._matrix,i,j))
         if subdivide:
-          Z._subdivide_on_augment(self, other)
+            Z._subdivide_on_augment(self, other)
         return Z
 
     def insert_row(self, Py_ssize_t index, row):

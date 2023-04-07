@@ -184,7 +184,7 @@ def coerce(P, x):
         <class 'sage.rings.rational.Rational'>
     """
     try:
-        return P._coerce_(x)
+        return P.coerce(x)
     except AttributeError:
         return P(x)
 
@@ -569,11 +569,20 @@ def symbolic_sum(expression, *args, **kwds):
           Mathematica, so even if the chosen backend can perform the summation the
           result might not be convertible into a Sage expression.
 
+    TESTS:
+
+    Check that :trac:`34007` is fixed::
+
+        sage: sum([1,2], start=1)
+        4
+        sage: sum([[1],[2]], start=[])
+        [1, 2]
+
     """
     if hasattr(expression, 'sum'):
         return expression.sum(*args, **kwds)
-    elif len(args) <= 1:
-        return sum(expression, *args)
+    elif max(len(args),len(kwds)) <= 1:
+        return sum(expression, *args, **kwds)
     else:
         from sage.symbolic.ring import SR
         return SR(expression).sum(*args, **kwds)
@@ -829,7 +838,7 @@ def is_commutative(x):
         sage: R = PolynomialRing(QQ, 'x')
         sage: is_commutative(R)
         doctest:...DeprecationWarning: use X.is_commutative() or X in Rings().Commutative()
-        See https://trac.sagemath.org/32347 for details.
+        See https://github.com/sagemath/sage/issues/32347 for details.
         True
     """
     deprecation(32347, "use X.is_commutative() or X in Rings().Commutative()")
@@ -863,7 +872,7 @@ def is_integrally_closed(x):
 
         sage: is_integrally_closed(QQ)
         doctest:...DeprecationWarning: use X.is_integrally_closed()
-        See https://trac.sagemath.org/32347 for details.
+        See https://github.com/sagemath/sage/issues/32347 for details.
         True
         sage: K.<a> = NumberField(x^2 + 189*x + 394)
         sage: R = K.order(2*a)
@@ -886,7 +895,7 @@ def is_field(x, proof=True):
         sage: F = FractionField(R)
         sage: is_field(F)
         doctest:...DeprecationWarning: use X.is_field() or X in Fields()
-        See https://trac.sagemath.org/32347 for details.
+        See https://github.com/sagemath/sage/issues/32347 for details.
         True
     """
     deprecation(32347, "use X.is_field() or X in Fields()")
@@ -1813,7 +1822,7 @@ def squarefree_part(x):
         return x.squarefree_part()
     except AttributeError:
         pass
-    from sage.arith.all import factor
+    from sage.arith.misc import factor
     from sage.structure.all import parent
     F = factor(x)
     n = parent(x)(1)
@@ -1926,7 +1935,7 @@ def sqrt(x, *args, **kwds):
         sage: sqrt(2).n(prec=100)
         1.4142135623730950488016887242
 
-    Or one can input a numerical type.
+    Or one can input a numerical type::
 
         sage: sqrt(2.)
         1.41421356237310

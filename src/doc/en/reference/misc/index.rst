@@ -156,7 +156,6 @@ Features
    sage/features/csdp
    sage/features/databases
    sage/features/dvipng
-   sage/features/fes
    sage/features/ffmpeg
    sage/features/four_ti_2
    sage/features/gap
@@ -230,6 +229,7 @@ LaTeX
    sagetex
    sage/misc/latex
    sage/misc/latex_macros
+   sage/misc/latex_standalone
 
 Saving and Loading Sage Objects
 -------------------------------
@@ -258,6 +258,7 @@ Interactive Sage Sessions
    sage/misc/viewer
    sage/misc/pager
    sage/misc/sagedoc
+   sage/misc/sagedoc_conf
    sage/misc/sphinxify
 
 Distribution
@@ -290,7 +291,7 @@ Testing
 
    sage/misc/sage_unittest
    sage/misc/random_testing
-   sage/misc/nested_class_test
+   sage/misc/test_nested_class
 
 Benchmarking and Profiling
 ~~~~~~~~~~~~~~~~~~~~~~~~~~

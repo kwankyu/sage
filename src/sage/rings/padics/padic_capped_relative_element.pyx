@@ -1,7 +1,7 @@
 """
-`p`-Adic Capped Relative Elements
+`p`-adic Capped Relative Elements
 
-Elements of `p`-Adic Rings with Capped Relative Precision
+Elements of `p`-adic Rings with Capped Relative Precision
 
 AUTHORS:
 
@@ -31,7 +31,7 @@ from sage.rings.padics.pow_computer cimport PowComputer_class
 
 cdef extern from "sage/rings/padics/transcendantal.c":
     cdef void padiclog(mpz_t ans, const mpz_t a, unsigned long p, unsigned long prec, const mpz_t modulo)
-    cdef void padicexp(mpz_t ans, const mpz_t a, unsigned long p, unsigned long prec, const mpz_t modulo)  
+    cdef void padicexp(mpz_t ans, const mpz_t a, unsigned long p, unsigned long prec, const mpz_t modulo)
     cdef void padicexp_Newton(mpz_t ans, const mpz_t a, unsigned long p, unsigned long prec, unsigned long precinit, const mpz_t modulo)
 
 
@@ -224,8 +224,8 @@ cdef class pAdicCappedRelativeElement(CRElement):
             O(5^5)
             sage: pari(R(0,5)).debug()
             [&=...] PADIC(lg=5):... (precp=0,valp=5):... ... ... ...
-                p : [&=...] INT(lg=3):... (+,lgefint=3):... ... 
-              p^l : [&=...] INT(lg=3):... (+,lgefint=3):... ... 
+                p : [&=...] INT(lg=3):... (+,lgefint=3):... ...
+              p^l : [&=...] INT(lg=3):... (+,lgefint=3):... ...
                 I : gen_0
         """
         if exactzero(self.ordp):
@@ -425,7 +425,7 @@ cdef class pAdicCappedRelativeElement(CRElement):
 
         if mpz_fits_slong_p(self.prime_pow.prime.value) == 0:
             raise NotImplementedError("the prime %s does not fit in a long" % self.prime_pow.prime)
-        p = self.prime_pow.prime      
+        p = self.prime_pow.prime
 
         ans = self._new_c()
         ans.ordp = 0
@@ -488,7 +488,7 @@ cdef class pAdicCappedRelativeElement(CRElement):
 
         if mpz_fits_slong_p(self.prime_pow.prime.value) == 0:
             raise NotImplementedError("the prime %s does not fit in a long" % self.prime_pow.prime)
-        p = self.prime_pow.prime      
+        p = self.prime_pow.prime
 
         ans = self._new_c()
         ans.ordp = 0
@@ -546,7 +546,7 @@ cdef class pAdicCappedRelativeElement(CRElement):
 
         if mpz_fits_slong_p(self.prime_pow.prime.value) == 0:
             raise NotImplementedError("the prime %s does not fit in a long" % self.prime_pow.prime)
-        p = self.prime_pow.prime      
+        p = self.prime_pow.prime
 
         ans = self._new_c()
         ans.ordp = 0
@@ -604,10 +604,9 @@ def base_p_list(Integer n, bint pos, PowComputer_class prime_pow):
         raise ValueError("n must be nonnegative")
     cdef expansion_mode mode = simple_mode if pos else smallest_mode
     # We need a p-adic element to feed to ExpansionIter before resetting its curvalue
-    from sage.rings.padics.all import Zp
+    from sage.rings.padics.factory import Zp
     p = prime_pow.prime
     dummy = Zp(p)(0)
     cdef ExpansionIter expansion = ExpansionIter(dummy, n.exact_log(p) + 2, mode)
     mpz_set(expansion.curvalue, n.value)
     return trim_zeros(list(expansion))
-

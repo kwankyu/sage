@@ -90,7 +90,9 @@ AUTHORS:
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 
-from sage.arith.all import binomial, gcd, divisors
+from sage.arith.misc import binomial
+from sage.arith.misc import GCD as gcd
+from sage.arith.misc import divisors
 from sage.rings.integer import Integer
 from sage.rings.integer_ring import IntegerRing
 from sage.rings.number_field.totallyreal_data import ZZx, lagrange_degree_3, int_has_small_square_divisor, hermite_constant
@@ -342,10 +344,11 @@ class tr_data_rel:
             self.beta[k+1] = [[self.b_lower] + numpy.roots([v(gnk[i]) for i in range(len(gnk))].reverse()).tolist().sort() + [self.b_upper] for v in self.Foo]
 
             # Now to really initialize gnk.
-            self.gnk[k+1] = [[0] + [binomial(j,k+1)*v(a[j]) for j in range (k+2,m+1)] for v in self.Foo]
+            self.gnk[k+1] = [[0] + [binomial(j,k+1)*v(a[j])
+                                    for j in range(k+2,m+1)] for v in self.Foo]
         else:
             # Bad input!
-            raise ValueError("a has length %s > m+1"%len(a))
+            raise ValueError("a has length %s > m+1" % len(a))
 
     def incr(self, f_out, verbose=False, haltk=0):
         r"""

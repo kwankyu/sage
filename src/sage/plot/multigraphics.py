@@ -1042,7 +1042,7 @@ class GraphicsArray(MultiGraphics):
     as a flattened list of graphics objects, not as an array. For instance,
     ``G[0, 1]`` throws an error::
 
-        sage: G[0, 1]  # py3 (error message is slightly different with Python 2)
+        sage: G[0, 1]
         Traceback (most recent call last):
         ...
         TypeError: list indices must be integers or slices, not tuple
@@ -1207,7 +1207,7 @@ class GraphicsArray(MultiGraphics):
             sage: fig = Figure()
             sage: ax1 = G._add_subplot(fig, 0)
             sage: type(ax1)
-            <class 'matplotlib.axes._subplots.AxesSubplot'>
+            <class 'matplotlib.axes...'>
             sage: ax2 = G._add_subplot(fig, 1)
             sage: fig.get_axes() == [ax1, ax2]
             True

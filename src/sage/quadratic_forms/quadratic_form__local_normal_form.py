@@ -21,7 +21,9 @@ import copy
 from sage.rings.infinity import Infinity
 from sage.rings.integer_ring import IntegerRing, ZZ
 from sage.rings.rational_field import QQ
-from sage.arith.all import GCD, valuation, is_prime
+from sage.arith.misc import GCD
+from sage.arith.misc import valuation
+from sage.arith.misc import is_prime
 
 
 def find_entry_with_minimal_scale_at_prime(self, p):
@@ -122,9 +124,9 @@ def local_normal_form(self, p):
     """
     # Sanity Checks
     if (self.base_ring() != IntegerRing()):
-        raise NotImplementedError("Oops!  This currently only works for quadratic forms defined over IntegerRing(). =(")
+        raise NotImplementedError("this currently only works for quadratic forms defined over ZZ")
     if not ((p>=2) and is_prime(p)):
-        raise TypeError("Oops!  p is not a positive prime number. =(")
+        raise TypeError("p is not a positive prime number")
 
     # Some useful local variables
     Q = self.parent()(self.base_ring(), self.dim(), self.coefficients())
@@ -146,7 +148,7 @@ def local_normal_form(self, p):
 
         # Error if we still haven't seen non-zero coefficients!
         if (min_val == Infinity):
-            raise RuntimeError("Oops!  The original matrix is degenerate. =(")
+            raise RuntimeError("the original matrix is degenerate")
 
         # Step 2: Arrange for the upper leftmost entry to have minimal valuation
         # ----------------------------------------------------------------------
@@ -178,12 +180,11 @@ def local_normal_form(self, p):
                 g = GCD(a, b)
 
                 # Sanity Check:  a/g is a p-unit
-                if valuation (g, p) != valuation(a, p):
-                    raise RuntimeError("Oops!  We have a problem with our rescaling not preserving p-integrality!")
+                if valuation(g, p) != valuation(a, p):
+                    raise RuntimeError("we have a problem with our rescaling not preserving p-integrality")
 
                 Q.multiply_variable(ZZ(a/g), j, in_place = True)   # Ensures that the new b entry is divisible by a
                 Q.add_symmetric(ZZ(-b/g), j, 0, in_place = True)  # Performs the cancellation
-
 
         elif (block_size == 2):
             a1 = 2 * Q[0,0]
@@ -225,7 +226,7 @@ def local_normal_form(self, p):
         for i in range(block_size):
             for j in range(block_size, n):
                 if Q[i,j] != 0:
-                    raise RuntimeError("Oops!  The cancellation didn't work properly at entry (" + str(i) + ", " + str(j) + ").")
+                    raise RuntimeError(f"the cancellation did not work properly at entry ({i},{j})")
         Q_Jordan = Q_Jordan + Q.extract_variables(range(block_size))
         Q = Q.extract_variables(range(block_size, n))
 
@@ -304,15 +305,12 @@ def jordan_blocks_by_scale_and_unimodular(self, p, safe_flag=True):
         if not hasattr(self, '__jordan_blocks_by_scale_and_unimodular_dict'):
             self.__jordan_blocks_by_scale_and_unimodular_dict = {}
 
-
     # Deal with zero dim'l forms
     if self.dim() == 0:
         return []
 
-
     # Find the Local Normal form of Q at p
     Q1 = self.local_normal_form(p)
-
 
     # Parse this into Jordan Blocks
     n = Q1.dim()
@@ -350,7 +348,6 @@ def jordan_blocks_by_scale_and_unimodular(self, p, safe_flag=True):
     # Add the last block
     tmp_Jordan_list += [(start_scale, Q1.extract_variables(range(start_ind, n)).scale_by_factor(ZZ(1) / QQ(p)**(start_scale)))]
 
-
     # Cache the result
     self.__jordan_blocks_by_scale_and_unimodular_dict[p] = tmp_Jordan_list
 
@@ -382,8 +379,7 @@ def jordan_blocks_in_unimodular_list_by_scale_power(self, p):
         sage: Q.jordan_blocks_in_unimodular_list_by_scale_power(2)
         Traceback (most recent call last):
         ...
-        TypeError: Oops!  The given quadratic form has a Jordan component with a negative scale exponent!
-        This routine requires an integer-matrix quadratic form for the output indexing to work properly!
+        TypeError: the given quadratic form has a Jordan component with a negative scale exponent
 
         sage: Q.scale_by_factor(2).jordan_blocks_in_unimodular_list_by_scale_power(2)
         [Quadratic form in 2 variables over Integer Ring with coefficients:
@@ -400,7 +396,7 @@ def jordan_blocks_in_unimodular_list_by_scale_power(self, p):
     """
     # Sanity Check
     if self.base_ring() != ZZ:
-        raise TypeError("Oops!  This method only makes sense for integer-valued quadratic forms (i.e. defined over ZZ).")
+        raise TypeError("this method only makes sense for integer-valued quadratic forms (i.e. defined over ZZ)")
 
     # Deal with zero dim'l forms
     if self.dim() == 0:
@@ -411,8 +407,7 @@ def jordan_blocks_in_unimodular_list_by_scale_power(self, p):
     scale_list = [P[0] for P in list_of_jordan_pairs]
     s_max = max(scale_list)
     if min(scale_list) < 0:
-        raise TypeError("Oops!  The given quadratic form has a Jordan component with a negative scale exponent!\n"
-        + "This routine requires an integer-matrix quadratic form for the output indexing to work properly!")
+        raise TypeError("the given quadratic form has a Jordan component with a negative scale exponent")
 
     # Make the new list of unimodular Jordan components
     zero_form = self.parent()(ZZ, 0)

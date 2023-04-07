@@ -50,7 +50,8 @@ from cysignals.signals cimport sig_on, sig_off
 from sage.ext.stdsage cimport PY_NEW
 from sage.cpython.python_debug cimport if_Py_TRACE_REFS_then_PyObject_INIT
 
-import math, operator
+import math
+import operator
 
 import sage.rings.integer
 import sage.rings.rational
@@ -84,7 +85,7 @@ def is_RealDoubleField(x):
         doctest:warning...
         DeprecationWarning: is_RealDoubleField is deprecated;
         use isinstance(..., sage.rings.abc.RealDoubleField) instead
-        See https://trac.sagemath.org/32610 for details.
+        See https://github.com/sagemath/sage/issues/32610 for details.
         True
         sage: is_RealDoubleField(RealField(53))
         False
@@ -236,7 +237,7 @@ cdef class RealDoubleField_class(sage.rings.abc.RealDoubleField):
         """
         if key == 'element_is_atomic':
             return True
-        return super(RealDoubleField_class, self)._repr_option(key)
+        return super()._repr_option(key)
 
     def __richcmp__(self, x, op):
         """
@@ -420,7 +421,7 @@ cdef class RealDoubleField_class(sage.rings.abc.RealDoubleField):
 
         EXAMPLES::
 
-            sage: polymake(RDF)    #optional - polymake # indirect doctest
+            sage: polymake(RDF)    #optional - jupymake # indirect doctest
             Float
         """
         return '"Float"'
@@ -946,7 +947,7 @@ cdef class RealDoubleElement(FieldElement):
             sage: ZZ(RDF(-2345.67))
             Traceback (most recent call last):
             ...
-            TypeError: Cannot convert non-integral float to integer
+            TypeError: cannot convert non-integral float to integer
         """
         return Integer(self._value)
 
@@ -1046,7 +1047,8 @@ cdef class RealDoubleElement(FieldElement):
                 v = -v
             return v
 
-        from sage.rings.all import ZZ, RR
+        from sage.rings.integer_ring import ZZ
+        from sage.rings.real_mpfr import RR
 
         cdef bint negative = self._value < 0
         if negative:
@@ -1286,7 +1288,7 @@ cdef class RealDoubleElement(FieldElement):
             sage: RDF('-0').sign_mantissa_exponent()
             (-1, 0, 0)
         """
-        from sage.rings.all import RR
+        from sage.rings.real_mpfr import RR
         return RR(self._value).sign_mantissa_exponent()
 
     def as_integer_ratio(self):

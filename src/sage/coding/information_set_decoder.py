@@ -40,7 +40,11 @@ AUTHORS:
 #                  http://www.gnu.org/licenses/
 #******************************************************************************
 
-from sage.all import ZZ, Integer, vector, SageObject, binomial
+from sage.rings.integer_ring import ZZ
+from sage.rings.integer import Integer
+from sage.modules.free_module_element import free_module_element as vector
+from sage.structure.sage_object import SageObject
+from sage.functions.other import binomial
 from .decoder import Decoder
 
 
@@ -100,7 +104,7 @@ class InformationSetAlgorithm(SageObject):
         sage: from sage.coding.decoder import DecodingError
         sage: class MinimalISD(InformationSetAlgorithm):
         ....:     def __init__(self, code, decoding_interval):
-        ....:         super(MinimalISD, self).__init__(code, decoding_interval, "MinimalISD")
+        ....:         super().__init__(code, decoding_interval, "MinimalISD")
         ....:     def calibrate(self):
         ....:         self._parameters = { } # calibrate parameters here
         ....:         self._time_estimate = 10.0  # calibrated time estimate
@@ -341,8 +345,6 @@ class InformationSetAlgorithm(SageObject):
         return "\\textnormal{{ISD Algorithm ({}) for }}{} \\textnormal{{decoding {} errors}}".format(self._algorithm_name, self.code()._latex_(), _format_decoding_interval(self.decoding_interval()))
 
 
-
-
 class LeeBrickellISDAlgorithm(InformationSetAlgorithm):
     r"""
     The Lee-Brickell algorithm for information-set decoding.
@@ -417,13 +419,12 @@ class LeeBrickellISDAlgorithm(InformationSetAlgorithm):
             if search_size > decoding_interval[1]:
                 raise ValueError("The search size parameter has to be at most"
                                  " the maximal number of allowed errors")
-            super(LeeBrickellISDAlgorithm, self).__init__(code, decoding_interval, "Lee-Brickell",
-                                                              parameters={ 'search_size': search_size })
+            super().__init__(code, decoding_interval, "Lee-Brickell",
+                             parameters={'search_size': search_size})
             self._parameters_specified = True
         else:
             self._parameters_specified = False
-            super(LeeBrickellISDAlgorithm, self).__init__(code, decoding_interval, "Lee-Brickell")
-
+            super().__init__(code, decoding_interval, "Lee-Brickell")
 
     def decode(self, r):
         r"""
@@ -476,16 +477,16 @@ class LeeBrickellISDAlgorithm(InformationSetAlgorithm):
                 # I was not an information set
                 continue
             Gt = Gi_inv * G
-            #step 2.
+            # step 2.
             y = r - vector([r[i] for i in I]) * Gt
             g = Gt.rows()
-            #step 3.
-            for pi in range(p+1):
+            # step 3.
+            for pi in range(p + 1):
                 for A in itertools.combinations(range(k), pi):
                     for m in itertools.product(Fstar, repeat=pi):
-                        e = y - sum(m[i]*g[A[i]] for i in range(pi))
+                        e = y - sum(m[i] * g[A[i]] for i in range(pi))
                         errs = e.hamming_weight()
-                        if  errs >= tau[0] and errs <= tau[1]:
+                        if tau[0] <= errs <= tau[1]:
                             return r - e
 
     def calibrate(self):
@@ -555,6 +556,7 @@ class LeeBrickellISDAlgorithm(InformationSetAlgorithm):
         F = C.base_ring()
         q = F.cardinality()
         Fstar = F.list()[1:]
+
         def time_information_set_steps():
             before = process_time()
             while True:
@@ -565,6 +567,7 @@ class LeeBrickellISDAlgorithm(InformationSetAlgorithm):
                 except ZeroDivisionError:
                     continue
                 return process_time() - before
+
         def time_search_loop(p):
             y = random_vector(F, n)
             g = random_matrix(F, p, n).rows()
@@ -622,8 +625,6 @@ class LeeBrickellISDAlgorithm(InformationSetAlgorithm):
                 search_size = p
         self._parameters = { 'search_size': search_size }
         self._time_estimate = estimates[search_size]
-
-
 
 
 class LinearCodeInformationSetDecoder(Decoder):
@@ -822,8 +823,7 @@ class LinearCodeInformationSetDecoder(Decoder):
 
         self._number_errors = number_errors
 
-        super(LinearCodeInformationSetDecoder, self).__init__(
-            code, code.ambient_space(), code._default_encoder_name)
+        super().__init__(code, code.ambient_space(), code._default_encoder_name)
 
         if algorithm is None:
             if kwargs:

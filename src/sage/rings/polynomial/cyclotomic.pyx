@@ -32,9 +32,10 @@ from cysignals.signals cimport sig_on, sig_off
 
 from sage.structure.element cimport parent
 
-from sage.arith.all import factor
+from sage.arith.misc import factor
 from sage.rings.integer_ring import ZZ
-from sage.misc.all import prod, subsets
+from sage.misc.misc_c import prod
+from sage.misc.misc import subsets
 from sage.rings.integer cimport Integer
 from sage.rings.rational cimport Rational
 from sage.libs.pari.all import pari

@@ -392,7 +392,7 @@ def gamma_list_to_cyclotomic(galist):
             sorted(d for d in resu for k in range(-resu[d])))
 
 
-class HypergeometricData(object):
+class HypergeometricData():
     _gauss_table = {}
 
     def __init__(self, cyclotomic=None, alpha_beta=None, gamma_list=None):
@@ -1094,7 +1094,7 @@ class HypergeometricData(object):
         d = gcd(g)
         return HypergeometricData(gamma_list=[x / d for x in g])
 
-### L-functions
+    # ----- L-functions -----
 
     def gauss_table(self, p, f, prec):
         """

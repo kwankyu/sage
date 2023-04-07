@@ -54,7 +54,8 @@ SAGE_SPKG_OPTIONS = @SAGE_SPKG_OPTIONS@
 
 # Where the Sage distribution installs documentation.
 # set to empty if --disable-doc is used
-SAGE_DOCS = $(SAGE_LOCAL)
+SAGE_DOCS = @SAGE_DOCS@
+SAGE_DOCS_DISABLED_MESSAGE = This Sage build is configured with "configure --disable-doc", so building the documentation will not work.
 
 # Where the Sage distribution installs Python packages.
 # This can be overridden by 'make SAGE_VENV=/some/venv'.
@@ -77,7 +78,7 @@ DUMMY_PACKAGES = @SAGE_DUMMY_PACKAGES@
 
 # Set to the path to Sage's GCC (if GCC is installed) to force rebuilds
 # of packages if GCC changed.
-# See m4/sage_spkg_collect.m4 and https://trac.sagemath.org/ticket/24703
+# See m4/sage_spkg_collect.m4 and https://github.com/sagemath/sage/issues/24703
 GCC_DEP = @SAGE_GCC_DEP@
 
 # Versions of all the packages, in the format
@@ -113,7 +114,7 @@ INSTALLED_PACKAGE_INSTS = \
 # All previously installed standard/optional/experimental packages that are to be uninstalled
 OPTIONAL_UNINSTALLED_PACKAGES = @SAGE_OPTIONAL_UNINSTALLED_PACKAGES@
 UNINSTALLED_PACKAGES = $(OPTIONAL_UNINSTALLED_PACKAGES)
-UNINSTALLED_PACKAGES_CLEANS = $(UNINSTALLED_PACKAGES:%=%-clean)
+UNINSTALLED_PACKAGES_UNINSTALLS = $(UNINSTALLED_PACKAGES:%=%-uninstall)
 
 # All packages which should be downloaded
 SDIST_PACKAGES = @SAGE_SDIST_PACKAGES@
@@ -127,7 +128,23 @@ PIP_PACKAGES = @SAGE_PIP_PACKAGES@
 # Packages that use the 'script' package build rules
 SCRIPT_PACKAGES = @SAGE_SCRIPT_PACKAGES@
 
+# Packages for which we build wheels for PyPI
+PYPI_WHEEL_PACKAGES =				\
+	sage_sws2rst				\
+	sage_setup				\
+	sagemath_environment			\
+	sagemath_objects			\
+	sagemath_repl				\
+	sagemath_categories
 
+# sage_docbuild is here, not in PYPI_WHEEL_PACKAGES, because it depends on sagelib
+WHEEL_PACKAGES = $(PYPI_WHEEL_PACKAGES)		\
+	sage_conf				\
+	sagelib					\
+	sage_docbuild
+
+# Packages for which build sdists for PyPI
+PYPI_SDIST_PACKAGES = $(WHEEL_PACKAGES)
 
 # Generate the actual inst_<pkgname> variables; for each package that is
 # actually built this generates a line like:
@@ -166,7 +183,7 @@ $(foreach tree,SAGE_LOCAL SAGE_VENV SAGE_DOCS, \
                $(foreach pkgname,$(INSTALLED_PACKAGES), \
                          $(if $(findstring $(tree),$(trees_$(pkgname))), \
                               $(inst_$(pkgname))))) \
-    $(eval $(tree)_CLEANED_PACKAGE_CLEANS = \
+    $(eval $(tree)_UNINSTALLED_PACKAGE_UNINSTALLS = \
                $(foreach pkgname,$(INSTALLED_PACKAGES), \
                          $(if $(findstring $(tree),$(trees_$(pkgname))), \
                               $(inst_$(pkgname))))))
@@ -182,18 +199,26 @@ else
 AM_V_at =
 endif
 
-# List of targets that can be run using `sage -i` or `sage -f`
-# These should generally have an associated -clean target for `sage -f` to
+# Trac #33125: Handle make options -n, -t, -q
+ifeq ($(strip $(foreach flag,n t q,$(findstring $(flag),$(filter-out --%,$(MAKEFLAGS))))),)
+PLUS = +
+else
+PLUS =
+endif
+
+# List of targets that can be run (in addition to names of packages) using `sage -i` or `sage -f`
+# These should generally have an associated -uninstall target for `sage -f` to
 # work correctly
 SAGE_I_TARGETS = sagelib doc
 
 # Tell make not to look for files with these names:
 .PHONY: all all-sage all-toolchain all-build all-sageruntime \
 	all-start build-start base toolchain toolchain-deps base-toolchain \
+	pypi-sdists pypi-wheels wheels \
 	sagelib \
 	doc doc-html doc-html-jsmath doc-html-mathjax doc-pdf \
-	doc-clean doc-src-clean doc-output-clean \
-	clean sagelib-clean build-clean python3_venv _clean-broken-gcc
+	doc-uninstall \
+	python3_venv _clean-broken-gcc
 
 PYTHON_FOR_VENV = @PYTHON_FOR_VENV@
 
@@ -219,7 +244,7 @@ endif
 # the doc build takes the most time and should be started as soon as
 # possible.
 all-start: toolchain-deps
-	+$(MAKE_REC) doc all-sage
+	+$(MAKE_REC) all-sage-docs all-sage
 
 # Build everything except the documentation
 all-build: toolchain-deps
@@ -234,25 +259,24 @@ base-toolchain: _clean-broken-gcc base
 
 # All targets except for the base packages and except the documentation
 all-sage: \
-		sagelib \
-		$(SAGE_LOCAL_INSTALLED_PACKAGE_INSTS) $(SAGE_LOCAL_UNINSTALLED_PACKAGES_CLEANS) \
-		$(SAGE_VENV_INSTALLED_PACKAGE_INSTS)  $(SAGE_VENV_UNINSTALLED_PACKAGES_CLEANS)
+		$(SAGE_LOCAL_INSTALLED_PACKAGE_INSTS) $(SAGE_LOCAL_UNINSTALLED_PACKAGES_UNINSTALLS) \
+		$(SAGE_VENV_INSTALLED_PACKAGE_INSTS)  $(SAGE_VENV_UNINSTALLED_PACKAGES_UNINSTALLS)
 
 # Same but filtered by installation trees:
 all-build-local: toolchain-deps
 	+$(MAKE_REC) all-sage-local
 
-all-sage-local: $(SAGE_LOCAL_INSTALLED_PACKAGE_INSTS) $(SAGE_LOCAL_UNINSTALLED_PACKAGES_CLEANS)
+all-sage-local: $(SAGE_LOCAL_INSTALLED_PACKAGE_INSTS) $(SAGE_LOCAL_UNINSTALLED_PACKAGES_UNINSTALLS)
 
 all-build-venv: toolchain-deps
 	+$(MAKE_REC) all-sage-venv
 
-all-sage-venv:  $(SAGE_VENV_INSTALLED_PACKAGE_INSTS)  $(SAGE_VENV_UNINSTALLED_PACKAGES_CLEANS)
+all-sage-venv:  $(SAGE_VENV_INSTALLED_PACKAGE_INSTS)  $(SAGE_VENV_UNINSTALLED_PACKAGES_UNINSTALLS)
 
 all-build-docs: toolchain-deps
 	+$(MAKE_REC) all-sage-docs
 
-all-sage-docs:  $(SAGE_DOCS_INSTALLED_PACKAGE_INSTS) $(SAGE_DOCS_UNINSTALLED_PACKAGES_CLEANS)
+all-sage-docs:  $(SAGE_DOCS_INSTALLED_PACKAGE_INSTS) $(SAGE_DOCS_UNINSTALLED_PACKAGES_UNINSTALLS)
 
 # Download all packages which should be inside an sdist tarball (the -B
 # option to make forces all targets to be built unconditionally)
@@ -325,7 +349,7 @@ base: $(inst_patch) $(inst_pkgconf)
 #
 # $ ./sage --docbuild -H
 
-doc: $(SAGE_DOCS_INSTALLED_PACKAGE_INSTS) $(SAGE_DOCS_UNINSTALLED_PACKAGES_CLEANS)
+doc: doc-html
 
 # All doc-building is delegated to the script packages
 # sagemath_doc_html, sagemath_doc_pdf
@@ -333,9 +357,10 @@ doc-html: sagemath_doc_html
 
 # 'doc-html-no-plot': build docs without building the graphics coming
 # from the '.. plot' directive, in case you want to save a few
-# megabytes of disk space. 'doc-clean' is a prerequisite because the
-# presence of graphics is cached in src/doc/output.
-doc-html-no-plot: doc-clean
+# megabytes of disk space. Run 'make doc-clean' first because the
+# presence of graphics is cached in the built documentation.
+doc-html-no-plot:
+	(cd $(SAGE_ROOT) && $(MAKE) doc-clean)
 	+$(MAKE_REC) SAGE_DOCBUILD_OPTS="$(SAGE_DOCBUILD_OPTS) --no-plot" doc-html
 
 # Using mathjax is actually the only options, but we keep
@@ -347,42 +372,8 @@ doc-html-jsmath: doc-html-mathjax
 
 doc-pdf: sagemath_doc_pdf
 
-doc-clean: doc-src-clean doc-output-clean
-
-doc-src-clean:
-	cd "$(SAGE_SRC)/doc" && $(MAKE) clean
-
-doc-output-clean:
+doc-uninstall:
 	rm -rf "$(SAGE_SHARE)/doc/sage"
-
-
-###############################################################################
-# Cleaning up
-###############################################################################
-
-clean:
-	@echo "Deleting package build directories..."
-	rm -rf "$(SAGE_LOCAL)/var/tmp/sage/build"
-
-# "c_lib", ".cython_version", "build" in $(SAGE_SRC) are from old sage versions
-# Cleaning .so files (and .c and .cpp files associated with .pyx files) is for editable installs.
-# Also cython_debug is for editable installs.
-sagelib-clean:
-	@echo "Deleting Sage library build artifacts..."
-	(cd "$(SAGE_SRC)" && \
-	 rm -rf c_lib .cython_version cython_debug; \
-	 rm -rf build; find . -name '*.pyc' -o -name "*.so" | xargs rm -f; \
-	 rm -f $$(find . -name "*.pyx" | sed 's/\(.*\)[.]pyx$$/\1.c \1.cpp/'); \
-	 rm -rf sage/ext/interpreters) \
-	&& (cd "$(SAGE_ROOT)/build/pkgs/sagelib/src/" && rm -rf build)
-
-sage_docbuild-clean:
-	(cd "$(SAGE_ROOT)/build/pkgs/sage_docbuild/src" && rm -rf build)
-
-sage_setup-clean:
-	(cd "$(SAGE_ROOT)/build/pkgs/sage_setup/src" && rm -rf build)
-
-build-clean: clean doc-clean sagelib-clean sage_docbuild-clean
 
 # Special target for cleaning up a broken GCC install detected by configure
 # This should check for the .clean-broken-gcc stamp, and if found clean
@@ -398,6 +389,72 @@ _clean-broken-gcc:
 	   echo "Cleaned up old broken GCC install"; \
 	fi
 
+# Implicit rules for uninstalling packages that no longer exist in the source tree.
+%-SAGE_LOCAL-uninstall:
+	@package=$@; \
+	package=$${package%%-*}; \
+	if [ -d '$(SAGE_LOCAL)' ]; then \
+	    sage-spkg-uninstall $$package; \
+	fi
+
+%-SAGE_VENV-uninstall:
+	@package=$@; \
+	package=$${package%%-*}; \
+	if [ -d '$(SAGE_VENV)' ]; then \
+	    sage-spkg-uninstall $$package $(SAGE_VENV); \
+	fi
+
+%-uninstall:
+	@package=$@; \
+	package=$${package%%-*}; \
+	$(MAKE) $$package-SAGE_LOCAL-uninstall $$package-SAGE_VENV-uninstall
+
+%-installcheck:
+	@stampfile=$@; \
+	stampfile=$${stampfile%-installcheck}; \
+	if [ -s $$stampfile ]; then \
+	    echo >&2 "# Checking $$stampfile"; \
+            tree=$${stampfile%%/$(SPKG_INST_RELDIR)/*}; \
+	    package_with_version=$${stampfile##*/}; \
+	    package=$${package_with_version%%-*}; \
+	    if ! $(SAGE_VENV)/bin/python3 $(SAGE_ROOT)/build/bin/sage-spkg-installcheck --verbose $$package $$tree; then \
+		case "$$tree" in \
+		    "$(SAGE_LOCAL)") echo "    make $$package-SAGE_LOCAL-uninstall;";; \
+		    "$(SAGE_VENV)")  echo "    make $$package-SAGE_VENV-uninstall;";; \
+		    *)               echo "    ./sage --buildsh -c \"sage-spkg-uninstall $$package $$tree\";";; \
+		esac; \
+	    fi; \
+	fi;
+
+list-broken-packages: auditwheel_or_delocate
+	@fix_broken_packages=$$($(MAKE) -s $(patsubst %,%-installcheck,$(wildcard $(SAGE_LOCAL)/$(SPKG_INST_RELDIR)/* $(SAGE_VENV)/$(SPKG_INST_RELDIR)/*))); \
+	if [ -n "$$fix_broken_packages" ]; then \
+	    echo >&2 ; \
+	    echo >&2 "Uninstall broken packages by typing:"; \
+	    echo >&2 ; \
+	    echo >&2 "$$fix_broken_packages"; \
+	fi
+
+pypi-sdists: $(PYPI_SDIST_PACKAGES:%=%-sdist)
+	@echo "Built sdists are in upstream/"
+
+# Ensuring wheels are present, even for packages that may have been installed
+# as editable. Until we have better uninstallation of script packages, we
+# just remove the timestamps, which will lead to rebuilds of the packages.
+pypi-wheels:
+	for a in $(PYPI_WHEEL_PACKAGES); do \
+	    rm -f $(SAGE_VENV)/var/lib/sage/installed/$$a-*; \
+	done
+	$(MAKE_REC) SAGE_EDITABLE=no SAGE_WHEELS=yes $(PYPI_WHEEL_PACKAGES)
+	@echo "Built wheels are in venv/var/lib/sage/wheels/"
+
+wheels:
+	for a in $(WHEEL_PACKAGES); do \
+	    rm -f $(SAGE_VENV)/var/lib/sage/installed/$$a-*; \
+	done
+	$(MAKE_REC) SAGE_EDITABLE=no SAGE_WHEELS=yes $(WHEEL_PACKAGES)
+	@echo "Built wheels are in venv/var/lib/sage/wheels/"
+
 #==============================================================================
 # Setting SAGE_CHECK... variables
 #==============================================================================
@@ -409,7 +466,7 @@ define SET_SAGE_CHECK
 $(eval SAGE_CHECK_$(1) := $(2))
 endef
 # Set defaults
-$(foreach pkgname, $(NORMAL_PACKAGES),\
+$(foreach pkgname, $(NORMAL_PACKAGES) $(SCRIPT_PACKAGES),\
 	$(eval $(call SET_SAGE_CHECK,$(pkgname),$(SAGE_CHECK))))
 
 # Parsing the SAGE_CHECK_PACKAGES variable:
@@ -422,8 +479,9 @@ $(foreach pkgname, $(NORMAL_PACKAGES),\
 #
 # Since Python's self-tests seem to fail on all platforms, we disable
 # its test suite by default.
+# meson_python 0.10.0 fails on some platforms, so we reduce it to warnings.
 # However, if SAGE_CHECK=warn, we do not do that.
-SAGE_CHECK_PACKAGES_DEFAULT_yes := !python3
+SAGE_CHECK_PACKAGES_DEFAULT_yes := !python3,?meson_python
 SAGE_CHECK_PACKAGES_DEFAULT_warn :=
 SAGE_CHECK_PACKAGES_DEFAULT_no :=
 comma := ,
@@ -439,7 +497,7 @@ $(foreach clause, $(SAGE_CHECK_PACKAGES_sep),					\
 	       $(eval $(call SET_SAGE_CHECK,$(subst ?,,$(clause)),warn)),	\
 	       $(eval $(call SET_SAGE_CHECK,$(clause),yes)))))
 debug-check:
-	@echo $(foreach pkgname, $(NORMAL_PACKAGES), SAGE_CHECK_$(pkgname) = $(SAGE_CHECK_$(pkgname)))
+	@echo $(foreach pkgname, $(NORMAL_PACKAGES) $(SCRIPT_PACKAGES), SAGE_CHECK_$(pkgname) = $(SAGE_CHECK_$(pkgname)))
 
 
 #==============================================================================
@@ -483,7 +541,7 @@ pkg_deps = \
 # <pkgname>-no-deps:
 #     +$(AM_V_at)sage-logger -p '$(SAGE_SPKG) <pkgname>-<pkgvers>' '$(SAGE_LOGS)/<pkgname>-<pkgvers>.log'
 #
-# <pkgname>-clean:
+# <pkgname>-uninstall:
 #     sage-spkg-uninstall <pkgname> '$(SAGE_LOCAL)'
 #
 # So <pkgname>-build-deps installs just the dependencies, while
@@ -498,7 +556,7 @@ pkg_deps = \
 #
 # python3: $(INST)/python3-3.7.3
 #
-# python3-clean:
+# python3-uninstall:
 #     sage-spkg-uninstall python3 '$(SAGE_LOCAL)'
 #
 # Note: In these rules the $(INST)/<pkgname>-<pkgvers> target is used
@@ -528,21 +586,29 @@ $$($(4))/$(SPKG_INST_RELDIR)/$(1)-$(2): $(3)
 $(1): $$($(4))/$(SPKG_INST_RELDIR)/$(1)-$(2)
 
 $(1)-$(4)-no-deps:
-	+$(AM_V_at)sage-logger -p 'SAGE_CHECK=$$(SAGE_CHECK_$(1)) PATH=$$($(4))/bin:$$$$PATH $$(SAGE_SPKG) $$(SAGE_SPKG_OPTIONS) \
+	+@if [ -z '$$($(4))' ]; then \
+	    echo "Error: The installation tree $(4) has been disabled" 2>&1; \
+	    echo "$$($(4)_DISABLED_MESSAGE)" 2>&1; \
+	    exit 1; \
+	else \
+	    sage-logger -p 'SAGE_CHECK=$$(SAGE_CHECK_$(1)) PATH=$$(SAGE_SRC)/bin:$$($(4))/bin:$$$$PATH $$(SAGE_SPKG) $$(SAGE_SPKG_OPTIONS) \
 		$(if $(filter $(1),$(TOOLCHAIN_DEPS)),--keep-existing) \
-		$(1)-$(2) $$($(4))' '$$(SAGE_LOGS)/$(1)-$(2).log'
+		$(1)-$(2) $$($(4))' '$$(SAGE_LOGS)/$(1)-$(2).log'; \
+	fi
 
 $(1)-no-deps: $(1)-$(4)-no-deps
 
-$(1)-$(4)-clean:
+$(1)-$(4)-uninstall:
 	if [ -d '$$($(4))' ]; then \
 	    sage-spkg-uninstall $(if $(filter $(1),$(TOOLCHAIN_DEPS)),--keep-files) \
 		$(1) '$$($(4))'; \
 	fi
 
-$(1)-clean: $(1)-$(4)-clean
+$(1)-uninstall: $(1)-$(4)-uninstall
 
-.PHONY: $(1) $(1)-clean $(1)-build-deps $(1)-no-deps
+$(1)-clean: $(1)-uninstall
+
+.PHONY: $(1) $(1)-$(4)-uninstall $(1)-uninstall $(1)-clean $(1)-build-deps $(1)-no-deps
 endef #################################################################
 
 $(foreach pkgname, $(NORMAL_PACKAGES),\
@@ -565,7 +631,7 @@ endif
 # <pkgname>: <dependencies>
 #     $(AM_V_at)sage-logger -p 'sage --pip install ...' '$(SAGE_LOGS)/<pkgname>.log'
 #
-# <pkgname>-clean:
+# <pkgname>-uninstall:
 #     -sage --pip uninstall -y ...
 
 # Positional arguments:
@@ -580,10 +646,12 @@ $(1): $(2)
 $(1)-no-deps:
 	$(AM_V_at)sage-logger -p 'sage --pip install -r "$$(SAGE_ROOT)/build/pkgs/$(1)/requirements.txt"' '$$(SAGE_LOGS)/$(1).log'
 
-$(1)-clean:
+$(1)-uninstall:
 	-sage --pip uninstall --isolated --yes --no-input -r '$$(SAGE_ROOT)/build/pkgs/$(1)/requirements.txt'
 
-.PHONY: $(1) $(1)-clean $(1)-build-deps $(1)-no-deps
+$(1)-clean: $(1)-uninstall
+
+.PHONY: $(1) $(1)-uninstall $(1)-clean $(1)-build-deps $(1)-no-deps
 endef
 
 $(foreach pkgname,$(PIP_PACKAGES),\
@@ -609,7 +677,7 @@ endif
 #
 # <pkgname>: $(INST)/<pkgname>-<pkgvers>
 #
-# <pkgname>-clean:
+# <pkgname>-uninstall:
 #     -$(AM_V_at)cd '$SAGE_ROOT' && \\
 #         . '$SAGE_ROOT/src/bin/sage-env-config' && \\
 #         . '$SAGE_ROOT/src/bin/sage-env' && \\
@@ -632,8 +700,12 @@ $$($(4))/$(SPKG_INST_RELDIR)/$(1)-$(2): $(3)
 $(1): $$($(4))/$(SPKG_INST_RELDIR)/$(1)-$(2)
 
 $(1)-$(4)-no-deps:
-	@if [ -x '$$(SAGE_ROOT)/build/pkgs/$(1)/spkg-install' ]; then \
-	    $(AM_V_at)cd '$$(SAGE_ROOT)/build/pkgs/$(1)' && \
+	$(PLUS)@if [ -z '$$($(4))' ]; then \
+	    echo "Error: The installation tree $(4) has been disabled" 2>&1; \
+	    echo "$$($(4)_DISABLED_MESSAGE)" 2>&1; \
+	    exit 1; \
+	elif [ -x '$$(SAGE_ROOT)/build/pkgs/$(1)/spkg-install' ]; then \
+	    cd '$$(SAGE_ROOT)/build/pkgs/$(1)' && \
 		. '$$(SAGE_ROOT)/src/bin/sage-src-env-config' && \
 		. '$$(SAGE_ROOT)/src/bin/sage-env-config' && \
 		. '$$(SAGE_ROOT)/src/bin/sage-env' && \
@@ -641,11 +713,12 @@ $(1)-$(4)-no-deps:
 		. '$$(SAGE_ROOT)/build/bin/sage-build-env' && \
 		SAGE_SPKG_WHEELS=$$($(4))/var/lib/sage/wheels \
 		SAGE_INST_LOCAL=$$($(4)) \
-		sage-logger -p '$$(SAGE_ROOT)/build/pkgs/$(1)/spkg-install' '$$(SAGE_LOGS)/$(1)-$(2).log' && \
+		sage-logger -p 'SAGE_CHECK=$$(SAGE_CHECK_$(1)) $$(SAGE_ROOT)/build/pkgs/$(1)/spkg-install' '$$(SAGE_LOGS)/$(1)-$(2).log' && \
+	    rm -f "$$($(4))/$(SPKG_INST_RELDIR)/$(1)"-* && \
 	    touch "$$($(4))/$(SPKG_INST_RELDIR)/$(1)-$(2)"; \
-	else \
+	else ( \
 	    echo; \
-	    echo "Error: $(1) is a dummy script package that the Sage distribution uses"; \
+	    echo "Note: $(1) is a dummy package that the Sage distribution uses"; \
 	    echo "to provide information about equivalent system packages."; \
 	    echo "It cannot be installed using the Sage distribution."; \
 	    echo "Please install it manually, for example using the system packages"; \
@@ -653,7 +726,9 @@ $(1)-$(4)-no-deps:
 	    echo "See below for package-specific information."; \
 	    echo; \
 	    $$(SAGE_ROOT)/build/bin/sage-spkg-info $(1); \
-	    exit 1; \
+	    echo; \
+	    echo "Error: $(1) is a dummy package and "; \
+	    echo "cannot be installed using the Sage distribution." ) | sage-logger -p 'cat; exit 1' '$$(SAGE_LOGS)/$(1)-$(2).log'; \
 	fi
 
 $(1)-no-deps: $(1)-$(4)-no-deps
@@ -666,11 +741,18 @@ $(1)-$(4)-uninstall:
 		. '$$(SAGE_ROOT)/build/bin/sage-build-env-config' && \
 		. '$$(SAGE_ROOT)/build/bin/sage-build-env' && \
 		'$$(SAGE_ROOT)/build/pkgs/$(1)/spkg-uninstall'
-	-rm -f "$$($(4))/$(SPKG_INST_RELDIR)/$(1)-$(2)"
+	-rm -f "$$($(4))/$(SPKG_INST_RELDIR)/$(1)"-*
 
 $(1)-uninstall: $(1)-$(4)-uninstall
 
 $(1)-clean: $(1)-uninstall
+
+$(1)-sdist: FORCE python_build sage_setup cython
+	$(AM_V_at) cd '$$(SAGE_ROOT)' && \
+		. '$$(SAGE_ROOT)/src/bin/sage-src-env-config' && \
+		. '$$(SAGE_ROOT)/src/bin/sage-env-config' && \
+		. '$$(SAGE_ROOT)/src/bin/sage-env' && \
+		'$$(SAGE_ROOT)/build/pkgs/$(1)/spkg-src'
 
 # Recursive tox invocation (note - we do not set the environment here).
 # Setting SAGE_SPKG_WHEELS is for the benefit of sagelib's tox.ini
@@ -680,7 +762,7 @@ $(1)-tox-%: FORCE
 		SAGE_SPKG_WHEELS=$$(SAGE_LOCAL)/var/lib/sage/wheels \
 		tox -v -v -v -e $$*
 
-.PHONY: $(1) $(1)-uninstall $(1)-build-deps $(1)-no-deps $(1)-clean
+.PHONY: $(1) $(1)-uninstall $(1)-clean $(1)-build-deps $(1)-no-deps $(1)-clean
 
 endef
 

@@ -1,1 +1,2 @@
-sage-conf
+# This file is updated on every release by the sage-update-version script
+sage-conf ~= 10.0b8

@@ -816,7 +816,7 @@ lazy_import("sage.combinat.root_system.root_lattice_realizations",
             "RootLatticeRealizations")
 
 
-class PlotOptions(object):
+class PlotOptions():
     r"""
     A class for plotting options for root lattice realizations.
 
@@ -828,6 +828,7 @@ class PlotOptions(object):
         - :ref:`sage.combinat.root_system.plot` for a tutorial on root
           system plotting
     """
+
     def __init__(self, space,
                  projection=True,
                  bounding_box=3,
@@ -1026,7 +1027,7 @@ class PlotOptions(object):
             sage: options.index_of_object(30)
             sage: options.index_of_object("bla")
         """
-        if parent(i) in RootLatticeRealizations and  len(i) == 1 and i.leading_coefficient().is_one():
+        if parent(i) in RootLatticeRealizations and len(i) == 1 and i.leading_coefficient().is_one():
             i = i.leading_support()
         if i in self.space.cartan_type().index_set():
             return i
@@ -1392,8 +1393,8 @@ class PlotOptions(object):
         if self.level:
             old_rays = rays
             vertices = [self.intersection_at_level_1(ray) for ray in old_rays if ray.level() > 0]
-            rays     = [ray for ray in old_rays if ray.level() == 0]
-            rays    += [vertex - self.intersection_at_level_1(ray) for ray in old_rays if ray.level() < 0 for vertex in vertices]
+            rays = [ray for ray in old_rays if ray.level() == 0]
+            rays += [vertex - self.intersection_at_level_1(ray) for ray in old_rays if ray.level() < 0 for vertex in vertices]
         else:
             vertices = []
 
@@ -1485,9 +1486,9 @@ class PlotOptions(object):
         vectors = matrix([b.scalar(coroot) for b in L.basis()]).right_kernel().basis()
         basis = [L.from_vector(v) for v in vectors]
         if self.dimension == 3: # LaTeX labels not yet supported in 3D
-            text_label = "H_%s$"%(str(label))
+            text_label = "H_%s$" % (str(label))
         else:
-            text_label = "$H_{%s}$"%(latex(label))
+            text_label = "$H_{%s}$" % (latex(label))
         return self.cone(lines = basis, color = self.color(label), label=text_label,
                          as_polyhedron=as_polyhedron)
 

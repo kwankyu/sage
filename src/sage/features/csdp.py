@@ -3,10 +3,21 @@ r"""
 Feature for testing the presence of ``csdp``
 """
 
+# *****************************************************************************
+#       Copyright (C) 2016 Julian Rüth
+#                     2018 Jeroen Demeyer
+#                     2019 David Coudert
+#                     2021 Matthias Koeppe
+#
+#  Distributed under the terms of the GNU General Public License (GPL)
+#  as published by the Free Software Foundation; either version 2 of
+#  the License, or (at your option) any later version.
+#                  https://www.gnu.org/licenses/
+# *****************************************************************************
+
 import os
 import re
 import subprocess
-from sage.cpython.string import bytes_to_str
 
 from . import Executable, FeatureTestResult
 
@@ -44,6 +55,8 @@ class CSDP(Executable):
             FeatureTestResult('csdp', True)
         """
         from sage.misc.temporary_file import tmp_filename
+        from sage.cpython.string import bytes_to_str
+
         tf_name = tmp_filename()
         with open(tf_name, 'wb') as tf:
             tf.write("2\n1\n1 1".encode())

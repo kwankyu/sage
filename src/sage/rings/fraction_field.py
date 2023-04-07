@@ -55,6 +55,18 @@ TESTS::
     sage: F = FractionField(PolynomialRing(RationalField(),2,'x'))
     sage: F == loads(dumps(F))
     True
+
+Test that :trac:`15971` is fixed::
+
+    sage: for B in [QQ['t'], QQ['s, t'], ZZ['t'], ZZ['s, t']]:
+    ....:     F = B.fraction_field()
+    ....:     R = F['x, y']
+    ....:     x = R.gen(0)
+    ....:     print(x / x)
+    1
+    1
+    1
+    1
 """
 # ****************************************************************************
 #
@@ -291,6 +303,14 @@ class FractionField_generic(ring.Field):
             sage: 1/(R.gen(0) + R.gen(1))
             1/(x + y)
 
+        Test for :trac:`31320`::
+
+            sage: FQt = Frac(QQ['t'])
+            sage: LCt = LaurentPolynomialRing(CC,'t')
+            sage: coercion_model.common_parent(FQt, LCt)
+            Fraction Field of Univariate Polynomial Ring in t
+            over Complex Field with 53 bits of precision
+
         Coercion from a localization::
 
             sage: R.<x> = ZZ[]
@@ -305,7 +325,7 @@ class FractionField_generic(ring.Field):
         """
         from sage.rings.rational_field import QQ
         from sage.rings.number_field.number_field_base import NumberField
-        from sage.rings.polynomial.laurent_polynomial_ring import \
+        from sage.rings.polynomial.laurent_polynomial_ring_base import \
             LaurentPolynomialRing_generic
 
         if S is self._R:
@@ -333,7 +353,9 @@ class FractionField_generic(ring.Field):
                                       parent_as_first_arg=False)
 
         # special treatment for LaurentPolynomialRings
-        if isinstance(S, LaurentPolynomialRing_generic):
+        if (isinstance(S, LaurentPolynomialRing_generic) and
+                self._R.fraction_field().has_coerce_map_from(S.base_ring())):
+
             def converter(x, y=None):
                 if y is None:
                     return self._element_class(self, *x._fraction_pair())
@@ -894,7 +916,7 @@ class FractionField_generic(ring.Field):
         for a in self._R.some_elements():
             for b in self._R.some_elements():
                 if a != b and self(a) and self(b):
-                    ret.append(self(a)/self(b))
+                    ret.append(self(a) / self(b))
         return ret
 
     def _gcd_univariate_polynomial(self, f, g):
@@ -934,6 +956,7 @@ class FractionField_generic(ring.Field):
         f1 = Num(f.numerator())
         g1 = Num(g.numerator())
         return Pol(f1.gcd(g1)).monic()
+
 
 class FractionField_1poly_field(FractionField_generic):
     """
@@ -1025,7 +1048,7 @@ class FractionField_1poly_field(FractionField_generic):
             :meth:`sage.rings.function_field.RationalFunctionField.field`
 
         """
-        from sage.rings.all import FunctionField
+        from sage.rings.function_field.constructor import FunctionField
         return FunctionField(self.base_ring(), names=self.variable_name())
 
     def _coerce_map_from_(self, R):
@@ -1045,15 +1068,14 @@ class FractionField_1poly_field(FractionField_generic):
             1/t
 
         """
-        from sage.rings.function_field.function_field import RationalFunctionField
+        from sage.rings.function_field.function_field_rational import RationalFunctionField
         if isinstance(R, RationalFunctionField) and self.variable_name() == R.variable_name() and self.base_ring() is R.constant_base_field():
-            from sage.categories.all import Hom
+            from sage.categories.homset import Hom
             parent = Hom(R, self)
             from sage.rings.function_field.maps import FunctionFieldToFractionField
             return parent.__make_element_class__(FunctionFieldToFractionField)(parent)
 
-        return super(FractionField_1poly_field, self)._coerce_map_from_(R)
-
+        return super()._coerce_map_from_(R)
 
 
 class FractionFieldEmbedding(DefaultConvertMap_unique):
@@ -1128,7 +1150,7 @@ class FractionFieldEmbedding(DefaultConvertMap_unique):
 
         """
         from sage.categories.sets_with_partial_maps import SetsWithPartialMaps
-        from sage.all import Hom
+        from sage.categories.homset import Hom
         parent = Hom(self.codomain(), self.domain(), SetsWithPartialMaps())
         return parent.__make_element_class__(FractionFieldEmbeddingSection)(self)
 
@@ -1236,7 +1258,7 @@ class FractionFieldEmbeddingSection(Section):
             den = codom(x.denominator())
 
         if codom.is_exact() and den.is_one():
-           return num
+            return num
         if check and not den.is_unit():
             # This should probably be a ValueError.
             # However, too much existing code is expecting this to throw a
@@ -1246,7 +1268,7 @@ class FractionFieldEmbeddingSection(Section):
 
     def _call_with_args(self, x, args=(), kwds={}):
         r"""
-        Evaluation this map at ``x``.
+        Evaluate this map at ``x``.
 
         INPUT:
 
@@ -1258,10 +1280,9 @@ class FractionFieldEmbeddingSection(Section):
             sage: K = R.fraction_field()
             sage: R(K.gen(), check=True)
             x
-
         """
-        check = kwds.pop('check', True)
-        if args or kwds:
+        check = kwds.get('check', True)
+        if args or any(key != 'check' for key in kwds):
             raise NotImplementedError("__call__ cannot be called with additional arguments other than check=True/False")
         return self._call_(x, check=check)
 

@@ -25,14 +25,14 @@ library_order_list = aliases.get("SINGULAR_LIBRARIES", []) + [
     "giac", "intl", "curl",
     "ec", "ecm"
 ] + aliases.get("LINBOX_LIBRARIES", []) + aliases.get("FFLASFFPACK_LIBRARIES", []) + aliases.get("GSL_LIBRARIES", []) + [
-    "pari", "flint", "ratpoints", "ecl", "glpk", "ppl",
+    "pari", "flint", "ecl", "glpk", "ppl",
 ] + arb_dylib_names + [
     "mpfi", "mpfr", "mpc", "ntl", "gmp", "gmpxx",
     "brial",
     "brial_groebner",
     "m4rie",
 ] + aliases.get("M4RI_LIBRARIES", []) + [
-    "zn_poly", "gap",
+    "gap",
 ] + aliases.get("GDLIB_LIBRARIES", []) + aliases.get("LIBPNG_LIBRARIES", []) + [
     "m", "readline", "Lfunction",
 ] + aliases.get("CBLAS_LIBRARIES", []) + aliases.get("ZLIB_LIBRARIES", [])

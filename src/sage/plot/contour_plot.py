@@ -1,5 +1,5 @@
 """
-Contour Plots
+Contour plots
 """
 # ****************************************************************************
 #       Copyright (C) 2006 Alex Clemesha <clemesha@gmail.com>,
@@ -131,7 +131,7 @@ class ContourPlot(GraphicPrimitive):
 
     def _repr_(self):
         """
-        String representation of ContourPlot primitive.
+        String representation of ``ContourPlot`` primitive.
 
         EXAMPLES::
 
@@ -672,7 +672,7 @@ def contour_plot(f, xrange, yrange, **options):
 
     We can add a colorbar as well::
 
-        sage: f(x, y)=x^2-y^2
+        sage: f(x, y) = x^2 + y^2
         sage: contour_plot(f, (x,-3,3), (y,-3,3), colorbar=True)
         Graphics object consisting of 1 graphics primitive
 
@@ -822,7 +822,7 @@ def contour_plot(f, xrange, yrange, **options):
         g = contour_plot(f, (-pi,pi), (-pi,pi), fill=False, axes=True)
         sphinx_plot(g)
 
-    If you are plotting a sole countour and if all of your data lie on
+    If you are plotting a sole contour and if all of your data lie on
     one side of it, then (as part of :trac:`21042`) a heuristic may be
     used to improve the result; in that case, a warning is emitted::
 
@@ -848,9 +848,7 @@ def contour_plot(f, xrange, yrange, **options):
 
         sage: contour_plot(lambda x,y: 0, (-1,1), (-1,1),
         ....:              contours=[0], fill=False, cmap=['blue'])
-        ...
-        UserWarning: No contour levels were found within the data range.
-        Graphics object consisting of 1 graphics primitive
+        ...Graphics object consisting of 1 graphics primitive
 
     .. PLOT::
 
@@ -874,8 +872,7 @@ def contour_plot(f, xrange, yrange, **options):
     Check that :trac:`18074` is fixed::
 
         sage: contour_plot(0, (0,1), (0,1))
-        ... UserWarning: No contour levels were found within the data range.
-        Graphics object consisting of 1 graphics primitive
+        ...Graphics object consisting of 1 graphics primitive
 
     Domain points in :trac:`11648` with complex output are now skipped::
 
@@ -940,7 +937,7 @@ def contour_plot(f, xrange, yrange, **options):
         # This works OK for the examples in the doctests, but basing
         # it off the plot scale rather than how fast the function
         # changes can never be truly satisfactory.
-        tol = max(dx,dy)/4.0
+        tol = max(dx, dy) / 4.0
         xy_data_array = np.ma.asarray(xy_data_array, dtype=float)
 
         # Special case for constant functions. This is needed because
@@ -968,7 +965,7 @@ def contour_plot(f, xrange, yrange, **options):
             # those masked) by using a single, filled contour that
             # covers the entire plotting surface.
             options["cmap"] = ["white", oldcmap]
-            options["contours"] = (z0-1, z0)
+            options["contours"] = (z0 - 1, z0)
             options["fill"] = True
         else:
             # The "c" constant is set to plus/minus one to handle both
@@ -995,8 +992,8 @@ def contour_plot(f, xrange, yrange, **options):
                 if not isinstance(options["plot_points"], (list, tuple)):
                     options["plot_points"] = (options["plot_points"],
                                               options["plot_points"])
-                    options["plot_points"] = (options["plot_points"][0]*4,
-                                              options["plot_points"][1]*4)
+                    options["plot_points"] = (options["plot_points"][0] * 4,
+                                              options["plot_points"][1] * 4)
 
                 # Re-plot with more points...
                 F, ranges = setup_for_eval_on_grid(ev, [xrange, yrange],
@@ -1006,12 +1003,11 @@ def contour_plot(f, xrange, yrange, **options):
 
                 # ...and a function whose values are shifted towards
                 # z0 by "tol".
-                xy_data_array = [ [h(x, y) - c*tol
-                                   for x in xsrange(*ranges[0],
+                xy_data_array = [[h(x, y) - c * tol
+                                  for x in xsrange(*ranges[0],
                                                    include_endpoint=True)]
-                                  for y in xsrange(*ranges[1],
-                                                   include_endpoint=True) ]
-
+                                 for y in xsrange(*ranges[1],
+                                                  include_endpoint=True)]
 
     if region is not None:
         import numpy
@@ -1165,8 +1161,9 @@ def implicit_plot(f, xrange, yrange, **options):
 
     The same circle with different line and fill colors::
 
-        sage: implicit_plot(f, (-3,3), (-3,3), color='red', fill=True, fillcolor='green',
-        ....:                                  plot_points=500) # long time
+        sage: implicit_plot(f, (-3,3), (-3,3), color='red',  # long time
+        ....:               fill=True, fillcolor='green',
+        ....:               plot_points=500)
         Graphics object consisting of 2 graphics primitives
 
     .. PLOT::
@@ -1311,8 +1308,8 @@ def implicit_plot(f, xrange, yrange, **options):
     symbolic expression the user should increase the number of plot points to
     avoid artifacts::
 
-        sage: implicit_plot(lambda x, y: x^2 + y^2 - 2, (x,-3,3), (y,-3,3),
-        ....:               fill=True, plot_points=500) # long time
+        sage: implicit_plot(lambda x, y: x^2 + y^2 - 2, (x,-3,3),  # long time
+        ....:               (y,-3,3), fill=True, plot_points=500)
         Graphics object consisting of 2 graphics primitives
 
     .. PLOT::

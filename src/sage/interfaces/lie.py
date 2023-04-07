@@ -291,7 +291,7 @@ from sage.misc.misc_c import prod
 from sage.env import DOT_SAGE, LIE_INFO_DIR
 from sage.misc.sage_eval import sage_eval
 from sage.interfaces.tab_completion import ExtraTabCompletion
-from sage.docs.instancedoc import instancedoc
+from sage.misc.instancedoc import instancedoc
 import os
 
 
@@ -474,7 +474,7 @@ class LiE(ExtraTabCompletion, Expect):
         """
         EXAMPLES::
 
-            sage: lie.__reduce__()
+            sage: LiE().__reduce__()
             (<function reduce_load_lie at 0x...>, ())
         """
         return reduce_load_lie, tuple([])
@@ -801,6 +801,8 @@ class LiEElement(ExtraTabCompletion, ExpectElement):
             [12  4 -4  7]
             [-1  9  8  0]
             [ 3 -5 -2  9]
+            sage: lie('-1X[1,1]').sage() # optional - lie
+            -x0*x1
 
         """
         t = self.type()
@@ -811,7 +813,8 @@ class LiEElement(ExtraTabCompletion, ExpectElement):
             data = sage_eval(str(self).replace('\n', '').strip())
             return sage.matrix.constructor.matrix(data)
         elif t == 'pol':
-            from sage.rings.all import PolynomialRing, QQ
+            from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
+            from sage.rings.rational_field import QQ
 
             # Figure out the number of variables
             s = str(self)
@@ -833,8 +836,7 @@ class LiEElement(ExtraTabCompletion, ExpectElement):
                 terms += termgrp.split('+')
             # Make sure we don't accidentally add a negative
             # sign to the first monomial
-            if s[0] != "-":
-                terms[0] = terms[0][1:]
+            terms[0] = terms[0][1:]
 
             # go through all the terms in s
             for term in terms:
@@ -887,12 +889,17 @@ def is_LiEElement(x) -> bool:
     EXAMPLES::
 
         sage: from sage.interfaces.lie import is_LiEElement
+        sage: is_LiEElement(2)
+        doctest:...: DeprecationWarning: the function is_LiEElement is deprecated; use isinstance(x, sage.interfaces.abc.LiEElement) instead
+        See https://github.com/sagemath/sage/issues/34804 for details.
+        False
         sage: l = lie(2) # optional - lie
         sage: is_LiEElement(l) # optional - lie
         True
-        sage: is_LiEElement(2)
-        False
     """
+    from sage.misc.superseded import deprecation
+    deprecation(34804, "the function is_LiEElement is deprecated; use isinstance(x, sage.interfaces.abc.LiEElement) instead")
+
     return isinstance(x, LiEElement)
 
 

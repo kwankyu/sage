@@ -128,10 +128,10 @@ cdef class TimeSeries:
         cdef cnumpy.ndarray np
         cdef double *np_data
         cdef unsigned int j
-        if isinstance(values, (int, long, Integer)):
+        if isinstance(values, (int, Integer)):
             self._length = values
             values = None
-        elif isinstance(values, Vector_real_double_dense) or isinstance(values, cnumpy.ndarray):
+        elif isinstance(values, (Vector_real_double_dense, cnumpy.ndarray)):
             if isinstance(values, Vector_real_double_dense):
                 np  = values._vector_numpy
             else:
@@ -223,7 +223,7 @@ cdef class TimeSeries:
             return rich_to_bool(op, -1 if c < 0 else 1)
         return rich_to_bool(op, 0)
 
-    def  __dealloc__(self):
+    def __dealloc__(self):
         """
         Free up memory used by a time series.
 
@@ -310,10 +310,10 @@ cdef class TimeSeries:
         if len(self) > max_print:
             v0 = self[:max_print//2]
             v1 = self[-max_print//2:]
-            return '[' + ', '.join([format%x for x in v0]) + ' ... ' + \
-                         ', '.join([format%x for x in v1]) + ']'
+            return '[' + ', '.join(format%x for x in v0) + ' ... ' + \
+                         ', '.join(format%x for x in v1) + ']'
         else:
-            return '[' + ', '.join([format%x for x in self]) + ']'
+            return '[' + ', '.join(format%x for x in self) + ']'
 
     def __len__(self):
         """
@@ -1696,7 +1696,7 @@ cdef class TimeSeries:
             sage: import sage.finance.all as finance
             doctest:warning...
             DeprecationWarning: the package sage.finance is deprecated
-            See https://trac.sagemath.org/32427 for details.
+            See https://github.com/sagemath/sage/issues/32427 for details.
             sage: fbm = finance.fractional_brownian_motion_simulation(0.7,0.1,10^5,1)[0]
             sage: fbm.hurst_exponent()
             0.706511951...
@@ -1885,7 +1885,8 @@ cdef class TimeSeries:
         else:
             # Return everything between min and max
             j = 0
-            mn = min; mx = max
+            mn = min
+            mx = max
             for i from 0 <= i < self._length:
                 x = self._values[i]
                 if x >= mn and x <= mx:

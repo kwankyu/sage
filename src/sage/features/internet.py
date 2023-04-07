@@ -2,6 +2,16 @@ r"""
 Feature for testing if the Internet is available
 """
 
+# ****************************************************************************
+#       Copyright (C) 2021 Matthias Koeppe
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 2 of the License, or
+# (at your option) any later version.
+#                  https://www.gnu.org/licenses/
+# ****************************************************************************
+
 from . import Feature, FeatureTestResult
 
 
@@ -40,11 +50,11 @@ class Internet(Feature):
         """
         import urllib.error
         from urllib.request import Request, urlopen
-        from ssl import SSLContext
+        from ssl import create_default_context as default_context
 
         req = Request("https://www.sagemath.org", headers={"User-Agent": "sage-doctest"})
         try:
-            urlopen(req, timeout=1, context=SSLContext())
+            urlopen(req, timeout=1, context=default_context())
             return FeatureTestResult(self, True)
         except urllib.error.URLError:
             return FeatureTestResult(self, False)

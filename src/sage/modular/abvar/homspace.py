@@ -350,7 +350,7 @@ class Homspace(HomsetWithBase):
             elif M.domain() == self.domain() and M.codomain() == self.codomain():
                 M = M.matrix()
             else:
-                raise ValueError("cannot convert %s into %s" % (M, self)) 
+                raise ValueError("cannot convert %s into %s" % (M, self))
         elif is_Matrix(M):
             if M.base_ring() != ZZ:
                 M = M.change_ring(ZZ)
@@ -1011,6 +1011,3 @@ class EndomorphismSubring(Homspace, Ring):
 
         self.__hecke_algebra_image = EndomorphismSubring(A, V.basis())
         return self.__hecke_algebra_image
-
-
-

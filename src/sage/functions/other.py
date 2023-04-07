@@ -7,9 +7,9 @@ Check that gamma function imports are deprecated (:trac:`24411`)::
 
     sage: from sage.functions.other import beta
     sage: beta(x, x)
-    doctest:...: DeprecationWarning:
-    Importing beta from here is deprecated. If you need to use it, please import it directly from sage.functions.gamma
-    See http://trac.sagemath.org/24411 for details.
+    doctest:warning...: DeprecationWarning:
+    Importing beta from here is deprecated; please use "from sage.functions.gamma import beta" instead.
+    See https://github.com/sagemath/sage/issues/24411 for details.
     beta(x, x)
 """
 
@@ -25,7 +25,6 @@ from sage.rings.integer import Integer
 from sage.rings.integer_ring import ZZ
 from sage.rings.rational import Rational
 from sage.rings.complex_mpfr import ComplexField
-from sage.rings.real_mpfr import RealField
 from sage.misc.latex import latex
 from sage.structure.element import Element
 import math
@@ -37,7 +36,7 @@ from sage.structure.all import parent as s_parent
 
 from sage.functions.trig import arctan2
 
-from sage.arith.all import binomial as arith_binomial
+from sage.arith.misc import binomial as arith_binomial
 
 from sage.misc.functional import sqrt
 
@@ -221,7 +220,7 @@ def _eval_floor_ceil(self, x, method, bits=0, **kwds):
     # The strategy is to first reduce the absolute diameter of the
     # interval until its size is at most 10^(-6). Then we check for
     # (B) by simplifying the expression.
-    from sage.rings.all import RealIntervalField
+    from sage.rings.real_mpfi import RealIntervalField
 
     # Might it be needed to simplify x? This only applies for
     # elements of SR (or its subrings)
@@ -766,7 +765,7 @@ frac = Function_frac()
 
 
 # register sqrt in pynac symbol_table for conversion back from other systems
-register_symbol(sqrt, dict(mathematica='Sqrt'))
+register_symbol(sqrt, dict(mathematica='Sqrt'), 2)
 symbol_table['functions']['sqrt'] = sqrt
 
 Function_sqrt = type('deprecated_sqrt', (),
@@ -859,10 +858,28 @@ class Function_real_nth_root(BuiltinFunction):
             sage: real_nth_root(Reals(100)(2), 2)
             1.4142135623730950488016887242
         """
+        if hasattr(exp, 'real_part'):
+            # To allow complex "noise" while plotting, the fast_callable()
+            # interpreters used in plots will convert all intermediate
+            # expressions to CDF, returning only the final answer as a
+            # real number. However, for a symbolic function such as this,
+            # the "exp" argument is in fact an intermediate expression.
+            # Thus we are forced to deal with exponents of the form
+            # (n + 0*I), which a priori will throw a TypeError at the "%"
+            # below. Here we special-case only CDF and CC, leaving the
+            # python "complex" type unhandled: you have to try very hard
+            # to pass a python "complex" in as an exponent, and the extra
+            # effort/slowdown doesn't seem worth it.
+            if exp.imag_part().is_zero():
+                exp = exp.real_part()
+            else:
+                raise ValueError("exponent cannot be complex")
+        exp = ZZ(exp)
+
         negative = base < 0
 
         if negative:
-            if exp % 2 == 0:
+            if exp.mod(2) == 0:
                 raise ValueError('no real nth root of negative real number with even n')
             base = -base
 
@@ -1156,7 +1173,8 @@ class Function_real_part(GinacFunction):
         GinacFunction.__init__(self, "real_part",
                                conversions=dict(maxima='realpart',
                                                 sympy='re',
-                                                giac='re'),
+                                                mathematica='Re',
+                                                giac='re', fricas='real'),
                                alt_name="real")
 
     def __call__(self, x, **kwargs):
@@ -1217,6 +1235,8 @@ class Function_imag_part(GinacFunction):
         GinacFunction.__init__(self, "imag_part",
                                conversions=dict(maxima='imagpart',
                                                 sympy='im',
+                                                mathematica='Im',
+                                                fricas='imag',
                                                 giac='im'),
                                alt_name="imag")
 
@@ -1231,6 +1251,7 @@ class Function_imag_part(GinacFunction):
             return x.imag
         else:
             return GinacFunction.__call__(self, x, **kwargs)
+
 
 imag = imag_part = imaginary = Function_imag_part()
 
@@ -1316,7 +1337,10 @@ class Function_conjugate(GinacFunction):
         """
         GinacFunction.__init__(self, "conjugate",
                                conversions=dict(sympy='conjugate',
-                                                giac='conj'))
+                                                giac='conj',
+                                                mathematica='Conjugate',
+                                                fricas='conjugate'))
+
 
 conjugate = Function_conjugate()
 
@@ -1494,7 +1518,7 @@ class Function_factorial(GinacFunction):
             sage: type(factorial(float(3.2)))
             <class 'float'>
         """
-        if isinstance(x, Integer):
+        if isinstance(x, (int, Integer)):
             try:
                 return x.factorial()
             except OverflowError:
@@ -1795,10 +1819,10 @@ class Function_prod(BuiltinFunction):
             product(sin(m), m, 1, n)
             sage: isinstance(r.operator(), sage.functions.other.Function_prod)
             True
-            sage: r = sympy(sprod(sin(m), m, 1, n)).sage(); r # known bug
+            sage: r = sympy(sprod(sin(m), m, 1, n)).sage(); r  # known bug
             product(sin(m), m, 1, n)
-            sage: isinstance(r.operator(),
-            ....:     sage.functions.other.Function_prod) # known bug
+            sage: isinstance(r.operator(),                     # known bug
+            ....:     sage.functions.other.Function_prod)
             True
             sage: giac(sprod(m, m, 1, n)).sage()
             factorial(n)
@@ -2046,12 +2070,13 @@ class Function_cases(GinacFunction):
         from sympy import Piecewise as pw
         args = []
         for tup in l.operands():
-            cond,expr = tup.operands()
+            cond, expr = tup.operands()
             if SR(cond).is_numeric():
                 args.append((SR(expr)._sympy_(), bool(SR(cond)._sympy_())))
             else:
                 args.append((SR(expr)._sympy_(), SR(cond)._sympy_()))
         return pw(*args)
+
 
 cases = Function_cases()
 

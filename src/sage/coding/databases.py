@@ -33,8 +33,10 @@ def best_linear_code_in_guava(n, k, F):
 
         sage: codes.databases.best_linear_code_in_guava(10,5,GF(2))    # long time; optional - gap_packages (Guava package)
         [10, 5] linear code over GF(2)
-        sage: gap.eval("C:=BestKnownLinearCode(10,5,GF(2))")           # long time; optional - gap_packages (Guava package)
-        'a linear [10,5,4]2..4 shortened code'
+        sage: libgap.LoadPackage('guava')                              # long time; optional - gap_packages (Guava package)
+        ...
+        sage: libgap.BestKnownLinearCode(10,5,libgap.GF(2))            # long time; optional - gap_packages (Guava package)
+        a linear [10,5,4]2..4 shortened code
 
     This means that the best possible binary linear code of length 10 and
     dimension 5 is a code with minimum distance 4 and covering radius s somewhere
@@ -151,7 +153,7 @@ def best_linear_code_in_codetables_dot_de(n, k, F, verbose=False):
     from urllib.request import urlopen
     from sage.cpython.string import bytes_to_str
     q = F.order()
-    if not q in [2, 3, 4, 5, 7, 8, 9]:
+    if q not in [2, 3, 4, 5, 7, 8, 9]:
         raise ValueError("q (=%s) must be in [2,3,4,5,7,8,9]" % q)
     n = int(n)
     k = int(k)

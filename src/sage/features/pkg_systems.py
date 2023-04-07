@@ -1,6 +1,16 @@
 r"""
 Features for testing the presence of package systems
 """
+
+# *****************************************************************************
+#       Copyright (C) 2021-2022 Matthias Koeppe
+#
+#  Distributed under the terms of the GNU General Public License (GPL)
+#  as published by the Free Software Foundation; either version 2 of
+#  the License, or (at your option) any later version.
+#                  https://www.gnu.org/licenses/
+# *****************************************************************************
+
 from . import Feature
 
 
@@ -115,9 +125,16 @@ class SagePackageSystem(PackageSystem):
         try:
             # "sage -p" is a fast way of checking whether sage-spkg is available.
             run('sage -p', shell=True, stdout=DEVNULL, stderr=DEVNULL, check=True)
-            return True
         except CalledProcessError:
             return False
+        # Check if there are any installation records.
+        try:
+            from sage.misc.package import installed_packages
+        except ImportError:
+            return False
+        for pkg in installed_packages(exclude_pip=True):
+            return True
+        return False
 
     def _spkg_installation_hint(self, spkgs, prompt, feature):
         r"""

@@ -1027,7 +1027,7 @@ cdef class MatrixArgs:
         if self.base is None:
             self.set_base_from_entries(values)
 
-        if self.sparse == False:
+        if self.sparse is False:
             # If we actually want a dense result, convert to MA_ENTRIES_SEQ_FLAT
             self.entries = [self.base.zero()] * (self.nrows * self.ncols)
             self.typ = MA_ENTRIES_SEQ_FLAT
@@ -1223,7 +1223,7 @@ cdef class MatrixArgs:
             return self.sequence_type()
         if isinstance(self.entries, dict):
             return MA_ENTRIES_MAPPING
-        if isinstance(self.entries, (int, long, float, complex)):
+        if isinstance(self.entries, (int, float, complex)):
             return MA_ENTRIES_SCALAR
 
         # Note: some objects are callable, iterable and act like a
@@ -1296,7 +1296,7 @@ cdef class MatrixArgs:
                 return MA_ENTRIES_SEQ_SEQ
             else:
                 return MA_ENTRIES_SEQ_FLAT
-        if isinstance(x, (int, long, float, complex)):
+        if isinstance(x, (int, float, complex)):
             return MA_ENTRIES_SEQ_FLAT
         if isinstance(x, Element) and element_is_scalar(<Element>x):
             return MA_ENTRIES_SEQ_FLAT

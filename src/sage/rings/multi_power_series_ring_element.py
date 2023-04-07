@@ -475,7 +475,7 @@ class MPowerSeries(PowerSeries):
         valn_list = []
         for i in range(len(x)):
             try:
-                 xi = self.parent(x[i])
+                xi = self.parent(x[i])
             except (AttributeError, TypeError):
                 # Input does not coerce to parent ring of self
                 # attempt formal substitution
@@ -483,7 +483,7 @@ class MPowerSeries(PowerSeries):
             if xi.valuation() == 0 and self.prec() is not infinity:
                 raise TypeError("Substitution defined only for elements of positive valuation, unless self has infinite precision.")
             elif xi.valuation() > 0:
-                sub_dict[self.parent()._poly_ring().gens()[i]] = xi.add_bigoh(xi.valuation()*self.prec())
+                sub_dict[self.parent()._poly_ring().gens()[i]] = xi.add_bigoh(xi.valuation() * self.prec())
                 valn_list.append(xi.valuation())
             else:
                 sub_dict[self.parent()._poly_ring().gens()[i]] = xi
@@ -1668,8 +1668,10 @@ class MPowerSeries(PowerSeries):
         """
         Formal integral for multivariate power series.
 
-        INPUT: ``xx`` - a generator of the power series ring (the
-        one with respect to which to integrate)
+        INPUT:
+
+        - ``xx`` -- a generator of the power series ring (the
+          one with respect to which to integrate)
 
         EXAMPLES::
 
@@ -2080,7 +2082,7 @@ class MPowerSeries(PowerSeries):
         raise NotImplementedError("laurent_series not defined for multivariate power series.")
 
 
-class MO(object):
+class MO():
     """
     Object representing a zero element with given precision.
 

@@ -1,5 +1,5 @@
 """
-`p`-Adic Generic Nodes
+`p`-adic Generic Nodes
 
 This file contains a bunch of intermediate classes for the `p`-adic
 parents, allowing a function to be implemented at the right level of
@@ -285,7 +285,7 @@ class pAdicLatticeGeneric(pAdicGeneric):
 
         sage: R = ZpLC(17)   # indirect doctest
         doctest:...: FutureWarning: This class/method/function is marked as experimental. It, its functionality or its interface might change without a formal deprecation.
-        See http://trac.sagemath.org/23505 for details.
+        See https://github.com/sagemath/sage/issues/23505 for details.
         sage: R._prec_type()
         'lattice-cap'
 
@@ -1027,7 +1027,7 @@ class pAdicRelaxedGeneric(pAdicGeneric):
         of the previous ones. This method is used to declare a self-referent
         number (and optionally, to set its first digits).
         The definition of the number itself will be given afterwords using
-        to method meth:`sage.rings.padics.relaxed_template.RelaxedElement_unknown.set`
+        to method :meth:`sage.rings.padics.relaxed_template.RelaxedElement_unknown.set`
         of the element.
 
         EXAMPLES:
@@ -1044,7 +1044,7 @@ class pAdicRelaxedGeneric(pAdicGeneric):
             sage: a
             O(5^0)
 
-        We can now use the method meth:`sage.rings.padics.relaxed_template.RelaxedElement_unknown.set`
+        We can now use the method :meth:`sage.rings.padics.relaxed_template.RelaxedElement_unknown.set`
         to define `a`. Below, for example, we say that the digits of `a` have to
         agree with the digits of `1 + 5 a`. Note that the factor `5` shifts the
         digits; the `n`-th digit of `a` is then defined by the previous ones::
@@ -1189,7 +1189,7 @@ def is_pAdicRing(R):
         sage: is_pAdicRing(Zp(5))
         doctest:warning...
         DeprecationWarning: is_pAdicRing is deprecated; use isinstance(..., sage.rings.abc.pAdicRing) instead
-        See https://trac.sagemath.org/32750 for details.
+        See https://github.com/sagemath/sage/issues/32750 for details.
         True
         sage: is_pAdicRing(RR)
         False
@@ -1335,7 +1335,7 @@ def is_pAdicField(R):
         sage: is_pAdicField(Zp(17))
         doctest:warning...
         DeprecationWarning: is_pAdicField is deprecated; use isinstance(..., sage.rings.abc.pAdicField) instead
-        See https://trac.sagemath.org/32750 for details.
+        See https://github.com/sagemath/sage/issues/32750 for details.
         False
         sage: is_pAdicField(Qp(17))
         True

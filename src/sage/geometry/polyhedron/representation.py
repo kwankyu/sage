@@ -22,6 +22,14 @@ from sage.modules.free_module_element import vector
 from copy import copy
 
 
+# Numeric values to distinguish representation types
+INEQUALITY = 0
+EQUATION = 1
+VERTEX = 2
+RAY = 3
+LINE = 4
+
+
 #########################################################################
 #                      PolyhedronRepresentation
 #                       /                     \
@@ -51,11 +59,11 @@ class PolyhedronRepresentation(SageObject):
     """
 
     # Numeric values for the output of the type() method
-    INEQUALITY = 0
-    EQUATION = 1
-    VERTEX = 2
-    RAY = 3
-    LINE = 4
+    INEQUALITY = INEQUALITY
+    EQUATION = EQUATION
+    VERTEX = VERTEX
+    RAY = RAY
+    LINE = LINE
 
     def __len__(self):
         """
@@ -712,7 +720,7 @@ class Hrepresentation(PolyhedronRepresentation):
             ....:     print(latex(h))
             x_{0} + x_{1} - x_{2} = 1
             x_{0} \geq 0
-            2x_{0} + x_{1} \geq -1
+            2 x_{0} + x_{1} \geq -1
         """
         return self.repr_pretty(latex=True)
 
@@ -1028,7 +1036,6 @@ class Equation(Hrepresentation):
             False
         """
         return self.EQUATION
-
 
     def is_equation(self):
         """
@@ -1662,7 +1669,7 @@ def repr_pretty(coefficients, type, prefix='x', indices=None,
     - ``type`` -- either ``0`` (``PolyhedronRepresentation.INEQUALITY``)
       or ``1`` (``PolyhedronRepresentation.EQUATION``)
 
-    - ``prefix`` -- a string
+    - ``prefix`` -- a string (default: ``x``)
 
     - ``indices`` -- a tuple or other iterable
 
@@ -1697,9 +1704,9 @@ def repr_pretty(coefficients, type, prefix='x', indices=None,
         indices = range(len(coeffs)-1)
     vars = [1]
     if latex:
-        vars += ['x_{{{}}}'.format(i) for i in indices]
+        vars += [f'{prefix}_{{{i}}}' for i in indices]
     else:
-        vars += ['x{}'.format(i) for i in indices]
+        vars += [f'{prefix}{i}' for i in indices]
     if type == PolyhedronRepresentation.EQUATION:
         rel = '=' if latex else '=='
     elif type == PolyhedronRepresentation.INEQUALITY:

@@ -18,6 +18,7 @@ The cdd backend for polyhedral computations
 from subprocess import Popen, PIPE
 from sage.rings.integer_ring import ZZ
 from sage.matrix.constructor import matrix
+from sage.features.cddlib import CddExecutable
 
 from .base import Polyhedron_base
 from .base_QQ import Polyhedron_QQ
@@ -53,8 +54,8 @@ class Polyhedron_cdd(Polyhedron_base):
 
         EXAMPLES::
 
-            sage: Polyhedron(vertices=[(0,0)], rays=[(1,1)],
-            ....:            lines=[(1,-1)], backend='cdd', base_ring=QQ)  # indirect doctest
+            sage: Polyhedron(vertices=[(0,0)], rays=[(1,1)],               # indirect doctest
+            ....:            lines=[(1,-1)], backend='cdd', base_ring=QQ)
             A 2-dimensional polyhedron in QQ^2 defined as the
             convex hull of 1 vertex, 1 ray, 1 line
         """
@@ -105,8 +106,8 @@ class Polyhedron_cdd(Polyhedron_base):
 
         EXAMPLES::
 
-            sage: Polyhedron(ieqs=[(0,1,1)], eqns=[(0,1,-1)],
-            ....:            backend='cdd', base_ring=QQ)  # indirect doctest
+            sage: Polyhedron(ieqs=[(0,1,1)], eqns=[(0,1,-1)],  # indirect doctest
+            ....:            backend='cdd', base_ring=QQ)
             A 1-dimensional polyhedron in QQ^2 defined as the
             convex hull of 1 vertex and 1 ray
 
@@ -157,7 +158,7 @@ class Polyhedron_cdd(Polyhedron_base):
             print('---- CDD input -----')
             print(cdd_input_string)
 
-        cdd_proc = Popen([self._cdd_executable, cmdline_arg],
+        cdd_proc = Popen([CddExecutable(self._cdd_executable).absolute_filename(), cmdline_arg],
                          stdin=PIPE, stdout=PIPE, stderr=PIPE,
                          encoding='latin-1')
         ans, err = cdd_proc.communicate(input=cdd_input_string)
@@ -216,7 +217,7 @@ class Polyhedron_cdd(Polyhedron_base):
 
         TESTS::
 
-            sage: p = Polyhedron(vertices = [[0,0],[1,0],[0,1],[1,1]], backend='cdd', base_ring=QQ) # indirect doctest
+            sage: p = Polyhedron(vertices = [[0,0],[1,0],[0,1],[1,1]], backend='cdd', base_ring=QQ)  # indirect doctest
             sage: p.vertices()
             (A vertex at (0, 0), A vertex at (1, 0), A vertex at (0, 1), A vertex at (1, 1))
 
@@ -243,19 +244,19 @@ class Polyhedron_cdd(Polyhedron_base):
 
         Check that :trac:`31253` is fixed::
 
-        sage: P = polytopes.permutahedron(2, backend='cdd')
-        sage: P.Hrepresentation()
-        (An inequality (0, 1) x - 1 >= 0,
-         An inequality (1, 0) x - 1 >= 0,
-         An equation (1, 1) x - 3 == 0)
-        sage: Q = Polyhedron(P.vertices(), backend='cdd')
-        sage: Q.Hrepresentation()
-        (An inequality (-1, 0) x + 2 >= 0,
-         An inequality (1, 0) x - 1 >= 0,
-         An equation (1, 1) x - 3 == 0)
-        sage: [x.ambient_Hrepresentation() for x in P.facets()]
-        [(An inequality (1, 0) x - 1 >= 0, An equation (1, 1) x - 3 == 0),
-         (An inequality (0, 1) x - 1 >= 0, An equation (1, 1) x - 3 == 0)]
+            sage: P = polytopes.permutahedron(2, backend='cdd')
+            sage: P.Hrepresentation()
+            (An inequality (0, 1) x - 1 >= 0,
+             An inequality (1, 0) x - 1 >= 0,
+             An equation (1, 1) x - 3 == 0)
+            sage: Q = Polyhedron(P.vertices(), backend='cdd')
+            sage: Q.Hrepresentation()
+            (An inequality (-1, 0) x + 2 >= 0,
+             An inequality (1, 0) x - 1 >= 0,
+             An equation (1, 1) x - 3 == 0)
+            sage: [x.ambient_Hrepresentation() for x in P.facets()]
+            [(An inequality (1, 0) x - 1 >= 0, An equation (1, 1) x - 3 == 0),
+             (An inequality (0, 1) x - 1 >= 0, An equation (1, 1) x - 3 == 0)]
         """
         cddout = cddout.splitlines()
 
@@ -333,7 +334,7 @@ class Polyhedron_cdd(Polyhedron_base):
                 else:
                     self.parent()._make_Vertex(self, coefficients)
                     has_vertex = True
-            if len(self._Vrepresentation) and not has_vertex:
+            if self._Vrepresentation and not has_vertex:
                 # when the Polyhedron consists only of lines/rays from the
                 # origin, cddlib does not output the single vertex at the
                 # origin so we have to add it here as the Polyhedron class

@@ -354,7 +354,7 @@ mutating at the initial seed::
 
 from copy import copy
 
-from sage.arith.all import binomial
+from sage.arith.misc import binomial
 from sage.categories.homset import Hom
 from sage.categories.morphism import SetMorphism
 from sage.categories.rings import Rings
@@ -1331,14 +1331,14 @@ class ClusterAlgebra(Parent, UniqueRepresentation):
         # mutate_initial to name new cluster variables.
         splitnames = map(lambda w: w.partition(kwargs['cluster_variable_prefix']),
                 kwargs['cluster_variable_names'] + kwargs['coefficient_names'])
-        nfi = 1 + max([-1] + [int(v) for u, _, v in splitnames
-                              if u == '' and v.isdigit()])
+        nfi = 1 + max((int(v) for u, _, v in splitnames
+                       if u == '' and v.isdigit()), default=-1)
         kwargs.setdefault('next_free_index', nfi)
 
         # Determine scalars
         kwargs.setdefault('scalars', ZZ)
 
-        return super(ClusterAlgebra, self).__classcall__(self, B0, **kwargs)
+        return super().__classcall__(self, B0, **kwargs)
 
     def __init__(self, B, **kwargs):
         """
@@ -1540,12 +1540,12 @@ class ClusterAlgebra(Parent, UniqueRepresentation):
             sage: A.coxeter_element()
             Traceback (most recent call last):
             ...
-            ValueError: the initial exchange matrix is not acyclic.
+            ValueError: the initial exchange matrix is not acyclic
         """
         dg = DiGraph(self.b_matrix().apply_map(lambda x: ZZ(0) if x <= 0 else ZZ(1)))
         acyclic, coxeter = dg.is_directed_acyclic(certificate=True)
         if not acyclic:
-            raise ValueError("the initial exchange matrix is not acyclic.")
+            raise ValueError("the initial exchange matrix is not acyclic")
         return coxeter
 
     @cached_method
@@ -1737,11 +1737,10 @@ class ClusterAlgebra(Parent, UniqueRepresentation):
             sage: A.euler_matrix()
             Traceback (most recent call last):
             ...
-            ValueError: the initial exchange matrix is not acyclic.
+            ValueError: the initial exchange matrix is not acyclic
         """
-
         if not self.is_acyclic():
-            raise ValueError("the initial exchange matrix is not acyclic.")
+            raise ValueError("the initial exchange matrix is not acyclic")
         return 1 + self.b_matrix().apply_map(lambda x: min(ZZ(0), x))
 
     def d_vector_to_g_vector(self, d):
@@ -2591,7 +2590,7 @@ class ClusterAlgebra(Parent, UniqueRepresentation):
             sage: A.theta_basis_element((1, 0, 0, 0))
             Traceback (most recent call last):
             ...
-            NotImplementedError: Currently only implemented for cluster algebras of rank 2.
+            NotImplementedError: currently only implemented for cluster algebras of rank 2
 
         .. NOTE::
 
@@ -2656,10 +2655,10 @@ class ClusterAlgebra(Parent, UniqueRepresentation):
             sage: A.theta_basis_F_polynomial((1, 0, 0, 0))
             Traceback (most recent call last):
             ...
-            NotImplementedError: Currently only implemented for cluster algebras of rank 2.
+            NotImplementedError: currently only implemented for cluster algebras of rank 2
         """
         if self.rank() != 2:
-            raise NotImplementedError("Currently only implemented for cluster algebras of rank 2.")
+            raise NotImplementedError("currently only implemented for cluster algebras of rank 2")
 
         # extract the part of g_vector not coming from the initial cluster
         d = tuple( max(x, 0) for x in self.g_vector_to_d_vector(g_vector) )

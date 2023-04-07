@@ -572,7 +572,7 @@ def string_to_list_of_solutions(s):
         sage: sage.symbolic.relation.string_to_list_of_solutions(s)
          [x == -1/2*a - 1/2*sqrt(a^2 - 4*b), x == -1/2*a + 1/2*sqrt(a^2 - 4*b)]
     """
-    from sage.categories.all import Objects
+    from sage.categories.objects import Objects
     from sage.structure.sequence import Sequence
     from sage.calculus.calculus import symbolic_expression_from_maxima_string
     v = symbolic_expression_from_maxima_string(s, equals_sub=True)
@@ -644,7 +644,7 @@ def solve(f, *args, **kwds):
          [x == 0, y == 1]]
         sage: solve([sqrt(x) + sqrt(y) == 5, x + y == 10], x, y)
         [[x == -5/2*I*sqrt(5) + 5, y == 5/2*I*sqrt(5) + 5], [x == 5/2*I*sqrt(5) + 5, y == -5/2*I*sqrt(5) + 5]]
-        sage: solutions=solve([x^2+y^2 == 1, y^2 == x^3 + x + 1], x, y, solution_dict=True)
+        sage: solutions = solve([x^2+y^2 == 1, y^2 == x^3 + x + 1], x, y, solution_dict=True)
         sage: for solution in solutions: print("{} , {}".format(solution[x].n(digits=3), solution[y].n(digits=3)))
         -0.500 - 0.866*I , -1.27 + 0.341*I
         -0.500 - 0.866*I , 1.27 - 0.341*I
@@ -779,9 +779,9 @@ def solve(f, *args, **kwds):
 
         sage: solve(x^2>8,x)
         [[x < -2*sqrt(2)], [x > 2*sqrt(2)]]
-        sage: x,y=var('x,y'); (ln(x)-ln(y)>0).solve(x)
+        sage: x,y = var('x,y'); (ln(x)-ln(y)>0).solve(x)
         [[log(x) - log(y) > 0]]
-        sage: x,y=var('x,y'); (ln(x)>ln(y)).solve(x)  # random
+        sage: x,y = var('x,y'); (ln(x)>ln(y)).solve(x)  # random
         [[0 < y, y < x, 0 < x]]
         [[y < x, 0 < y]]
 
@@ -871,7 +871,9 @@ def solve(f, *args, **kwds):
     We use ``use_grobner`` in Maxima if no solution is obtained from
     Maxima's ``to_poly_solve``::
 
-        sage: x,y=var('x y'); c1(x,y)=(x-5)^2+y^2-16; c2(x,y)=(y-3)^2+x^2-9
+        sage: x,y = var('x y')
+        sage: c1(x,y) = (x-5)^2+y^2-16
+        sage: c2(x,y) = (y-3)^2+x^2-9
         sage: solve([c1(x,y),c2(x,y)],[x,y])
         [[x == -9/68*sqrt(55) + 135/68, y == -15/68*sqrt(55) + 123/68],
          [x == 9/68*sqrt(55) + 135/68, y == 15/68*sqrt(55) + 123/68]]
@@ -933,8 +935,7 @@ def solve(f, *args, **kwds):
 
         sage: f = (sin(x) - 8*cos(x)*sin(x))*(sin(x)^2 + cos(x)) - (2*cos(x)*sin(x) - sin(x))*(-2*sin(x)^2 + 2*cos(x)^2 - cos(x))
         sage: solve(f, x, algorithm='giac')
-        ...
-        [-2*arctan(sqrt(2)), 0, 2*arctan(sqrt(2)), pi]
+        ...[-2*arctan(sqrt(2)), 0, 2*arctan(sqrt(2)), pi]
 
         sage: x, y = SR.var('x,y')
         sage: solve([x+y-4,x*y-3],[x,y],algorithm='giac')
@@ -1116,7 +1117,7 @@ def solve(f, *args, **kwds):
                     return l
                 else:
                     return [[v._sage_() == ex._sage_()
-                             for v, ex in d.iteritems()]
+                             for v, ex in d.items()]
                             for d in ret]
             elif isinstance(ret, list):
                 l = []
@@ -1154,7 +1155,7 @@ def solve(f, *args, **kwds):
 
     if len(s) == 0: # if to_poly_solve gave no solutions, try use_grobner
         try:
-            s = m.to_poly_solve(variables,'use_grobner=true')
+            s = m.to_poly_solve(variables, 'use_grobner=true')
         except Exception: # if that gives an error, stick with no solutions
             s = []
 
@@ -1195,16 +1196,20 @@ def _solve_expression(f, x, explicit_solutions, multiplicities,
     Catch error message from Maxima::
 
         sage: solve(acot(x),x)
-        []
+        Traceback (most recent call last):
+        ...
+        TypeError: ECL says: cot: argument 0 isn't in the domain of cot.
 
     ::
 
         sage: solve(acot(x),x,to_poly_solve=True)
-        []
+        Traceback (most recent call last):
+        ...
+        TypeError: ECL says: cot: argument 0 isn't in the domain of cot.
 
     :trac:`7491` fixed::
 
-        sage: y=var('y')
+        sage: y = var('y')
         sage: solve(y==y,y)
         [y == r1]
         sage: solve(y==y,y,multiplicities=True)
@@ -1300,7 +1305,7 @@ def _solve_expression(f, x, explicit_solutions, multiplicities,
         from sage.symbolic.assumptions import assumptions, GenericDeclaration
         alist = assumptions()
         return any(isinstance(a, GenericDeclaration) and a.has(v) and
-                   a._assumption in ['even','odd','integer','integervalued']
+                   a._assumption in ['even', 'odd', 'integer', 'integervalued']
             for a in alist)
     if len(ex.variables()) and all(has_integer_assumption(var) for var in ex.variables()):
         return f.solve_diophantine(x, solution_dict=solution_dict)
@@ -1434,19 +1439,15 @@ def _giac_solver(f, x, solution_dict=False):
     EXAMPLES::
 
         sage: solve([(2/3)^x-2], [x], algorithm='giac')
-        ...
-        [[-log(2)/(log(3) - log(2))]]
+        ...[[-log(2)/(log(3) - log(2))]]
         sage: solve([(2/3)^x-2], [x], algorithm='giac', solution_dict=True)
-        ...
-        [{x: -log(2)/(log(3) - log(2))}]
+        ...[{x: -log(2)/(log(3) - log(2))}]
 
         sage: f = (sin(x) - 8*cos(x)*sin(x))*(sin(x)^2 + cos(x)) - (2*cos(x)*sin(x) - sin(x))*(-2*sin(x)^2 + 2*cos(x)^2 - cos(x))
         sage: solve(f, x, algorithm='giac')
-        ...
-        [-2*arctan(sqrt(2)), 0, 2*arctan(sqrt(2)), pi]
+        ...[-2*arctan(sqrt(2)), 0, 2*arctan(sqrt(2)), pi]
         sage: solve(f, x, algorithm='giac', solution_dict=True)
-        ...
-        [{x: -2*arctan(sqrt(2))}, {x: 0}, {x: 2*arctan(sqrt(2))}, {x: pi}]
+        ...[{x: -2*arctan(sqrt(2))}, {x: 0}, {x: 2*arctan(sqrt(2))}, {x: pi}]
 
         sage: x, y = SR.var('x,y')
         sage: solve([x+y-7,x*y-10],[x,y],algorithm='giac')
@@ -1568,9 +1569,11 @@ def solve_mod(eqns, modulus, solution_dict=False):
 
 
     """
-    from sage.rings.all import Integer, Integers, crt_basis
+    from sage.rings.finite_rings.integer_mod_ring import Integers
+    from sage.rings.integer import Integer
+    from sage.rings.integer_ring import crt_basis
     from sage.structure.element import Expression
-    from sage.misc.all import cartesian_product_iterator
+    from sage.misc.mrange import cartesian_product_iterator
     from sage.modules.free_module_element import vector
     from sage.matrix.constructor import matrix
 
@@ -1588,11 +1591,11 @@ def solve_mod(eqns, modulus, solution_dict=False):
         return ans
 
     factors = modulus.factor()
-    crt_basis = vector(Integers(modulus), crt_basis([p**i for p,i in factors]))
+    crt_basis = vector(Integers(modulus), crt_basis([p**i for p, i in factors]))
     solutions = []
 
     has_solution = True
-    for p,i in factors:
+    for p, i in factors:
         solution = _solve_mod_prime_power(eqns, p, i, vars)
         if len(solution) > 0:
             solutions.append(solution)
@@ -1684,9 +1687,10 @@ def _solve_mod_prime_power(eqns, p, m, vars):
         13241296179, 19473547571, 2263241296179]
 
     """
-    from sage.rings.all import Integers, PolynomialRing
+    from sage.rings.finite_rings.integer_mod_ring import Integers
+    from sage.rings.polynomial.polynomial_ring_constructor import PolynomialRing
     from sage.modules.free_module_element import vector
-    from sage.misc.all import cartesian_product_iterator
+    from sage.misc.mrange import cartesian_product_iterator
 
     mrunning = 1
     ans = []
@@ -1781,7 +1785,7 @@ def solve_ineq_fourier(ineq, vars=None):
     EXAMPLES::
 
         sage: from sage.symbolic.relation import solve_ineq_fourier
-        sage: y=var('y')
+        sage: y = var('y')
         sage: solve_ineq_fourier([x+y<9,x-y>4],[x,y])
         [[y + 4 < x, x < -y + 9, y < (5/2)]]
         sage: solve_ineq_fourier([x+y<9,x-y>4],[y,x])
@@ -1817,7 +1821,7 @@ def solve_ineq_fourier(ineq, vars=None):
             vars = [i for i in setvars]
     ineq0 = [i._maxima_() for i in ineq]
     ineq0[0].parent().eval("if fourier_elim_loaded#true then (fourier_elim_loaded:true,load(\"fourier_elim\"))")
-    sol = ineq0[0].parent().fourier_elim(ineq0,vars)
+    sol = ineq0[0].parent().fourier_elim(ineq0, vars)
     ineq0[0].parent().eval("or_to_list(x):=\
         if not atom(x) and op(x)=\"or\" then args(x) \
         else [x]")
@@ -1879,7 +1883,7 @@ def solve_ineq(ineq, vars=None):
 
     System of inequalities with automatically detected inequalities::
 
-        sage: y=var('y')
+        sage: y = var('y')
         sage: solve_ineq([x-y<0,x+y-3<0],[y,x])
         [[x < y, y < -x + 3, x < (3/2)]]
         sage: solve_ineq([x-y<0,x+y-3<0],[x,y])

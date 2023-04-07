@@ -1,5 +1,5 @@
 r"""
-Vector Space Morphisms (aka Linear Transformations)
+Morphisms of vector spaces (linear transformations)
 
 AUTHOR:
 
@@ -139,7 +139,7 @@ Injectivity and surjectivity can be checked.  ::
     sage: phi.is_surjective()
     False
 
-Restrictions and Representations
+Restrictions and representations
 --------------------------------
 
 It is possible to restrict the domain and codomain of a linear
@@ -865,7 +865,6 @@ class VectorSpaceMorphism(free_module_morphism.FreeModuleMorphism):
                 raise TypeError('Domain dimension is incompatible with matrix size')
             if homspace.domain().dimension() != A.ncols():
                 raise TypeError('codomain dimension is incompatible with matrix size')
-
 
         A = homspace._matrix_space(side)(A)
         free_module_morphism.FreeModuleMorphism.__init__(self, homspace, A, side)

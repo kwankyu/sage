@@ -25,7 +25,7 @@ metaclass:
 .. code-block:: cython
 
     cimport sage.cpython.cython_metaclass
-    cdef class MyCustomType(object):
+    cdef class MyCustomType():
         def __getmetaclass__(_):
             from foo import MyMetaclass
             return MyMetaclass
@@ -61,9 +61,10 @@ In Python, this would be ``meta.__init__(cls, name, bases, dict)``.
 
 EXAMPLES::
 
-    sage: cython('''
+    sage: cython(                                                               # optional - sage.misc.cython
+    ....: '''
     ....: cimport sage.cpython.cython_metaclass
-    ....: cdef class MyCustomType(object):
+    ....: cdef class MyCustomType():
     ....:     def __getmetaclass__(_):
     ....:         class MyMetaclass(type):
     ....:             def __init__(*args):
@@ -75,9 +76,9 @@ EXAMPLES::
     ....: ''')
     Calling MyMetaclass.__init__(<class '...MyCustomType'>, None, None, None)
     Calling MyMetaclass.__init__(<class '...MyDerivedType'>, None, None, None)
-    sage: MyCustomType.__class__
+    sage: MyCustomType.__class__                                                # optional - sage.misc.cython
     <class '...MyMetaclass'>
-    sage: class MyPythonType(MyDerivedType):
+    sage: class MyPythonType(MyDerivedType):                                    # optional - sage.misc.cython
     ....:     pass
     Calling MyMetaclass.__init__(<class '...MyPythonType'>, 'MyPythonType', (<class '...MyDerivedType'>,), {...})
 
@@ -98,9 +99,10 @@ TESTS:
 Check that a proper exception is raised if ``__getmetaclass__``
 returns a non-type::
 
-    sage: cython('''
+    sage: cython(                                                               # optional - sage.misc.cython
+    ....: '''
     ....: cimport sage.cpython.cython_metaclass
-    ....: cdef class MyCustomType(object):
+    ....: cdef class MyCustomType():
     ....:     def __getmetaclass__(_):
     ....:         return 2
     ....: ''')
@@ -109,12 +111,12 @@ returns a non-type::
     TypeError: __getmetaclass__ did not return a type
 """
 
-#*****************************************************************************
+# ****************************************************************************
 #       Copyright (C) 2015 Jeroen Demeyer <jdemeyer@cage.ugent.be>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 2 of the License, or
 # (at your option) any later version.
-#                  http://www.gnu.org/licenses/
-#*****************************************************************************
+#                  https://www.gnu.org/licenses/
+# ****************************************************************************

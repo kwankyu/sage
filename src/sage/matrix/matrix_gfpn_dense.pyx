@@ -25,19 +25,18 @@ AUTHORS:
 
 """
 
-#*****************************************************************************
+# ***************************************************************************
 #       Copyright (C) 2015 Simon King <simon.king@uni-jena.de>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 2 of the License, or
 # (at your option) any later version.
-#                  http://www.gnu.org/licenses/
-#*****************************************************************************
+#                  https://www.gnu.org/licenses/
+# ***************************************************************************
 
 from cysignals.memory cimport check_realloc, check_malloc, sig_free
 from cpython.bytes cimport PyBytes_AsString, PyBytes_FromStringAndSize
-from sage.cpython.string cimport str_to_bytes
 from cysignals.signals cimport sig_on, sig_off, sig_check
 cimport cython
 
@@ -105,11 +104,11 @@ cdef class FieldConverter_class:
         sage: C = M._converter
         sage: C.fel_to_field(15)
         3*y
-        sage: F.fetch_int(15)
+        sage: F.from_integer(15)
         3*y
         sage: C.field_to_fel(y)
         5
-        sage: y.integer_representation()
+        sage: y.to_integer()
         5
     """
     def __init__(self, field):
@@ -139,7 +138,7 @@ cdef class FieldConverter_class:
             sage: C = FieldConverter_class(F)
             sage: C.fel_to_field(15)
             3*y
-            sage: F.fetch_int(15)
+            sage: F.from_integer(15)
             3*y
         """
         return self.field(FfToInt(x))
@@ -155,7 +154,7 @@ cdef class FieldConverter_class:
             sage: C = FieldConverter_class(F)
             sage: C.field_to_fel(y)
             5
-            sage: y.integer_representation()
+            sage: y.to_integer()
             5
 
         TESTS:
@@ -165,9 +164,9 @@ cdef class FieldConverter_class:
             sage: C.field_to_fel('foo')
             Traceback (most recent call last):
             ...
-            AttributeError: 'str' object has no attribute 'integer_representation'
+            AttributeError: 'str' object has no attribute 'to_integer'
         """
-        return FfFromInt(x.integer_representation())
+        return FfFromInt(x.to_integer())
 
 
 cdef class PrimeFieldConverter_class(FieldConverter_class):
@@ -584,7 +583,7 @@ cdef class Matrix_gfpn_dense(Matrix_dense):
         # This method is here for speed!
         return FfToInt(FfExtract(MatGetPtr(self.Data,i), j))
 
-    cdef bint get_is_zero_unsafe(self, Py_ssize_t i, Py_ssize_t j):
+    cdef bint get_is_zero_unsafe(self, Py_ssize_t i, Py_ssize_t j) except -1:
         r"""
         Return 1 if the entry ``(i, j)`` is zero, otherwise 0.
 
@@ -667,7 +666,7 @@ cdef class Matrix_gfpn_dense(Matrix_dense):
         FfSetField(self.Data.Field)
         FfInsert(MatGetPtr(self.Data,i), j, self._converter.field_to_fel(value))
 
-    cdef set_unsafe_int(self, Py_ssize_t i, Py_ssize_t j, int value):
+    cdef void set_unsafe_int(self, Py_ssize_t i, Py_ssize_t j, int value):
         # NOTE:
         # It is essential that you call FfSetField and FfSetNoc YOURSELF
         # and that you assert that the matrix is not empty!
@@ -701,36 +700,25 @@ cdef class Matrix_gfpn_dense(Matrix_dense):
 
             sage: MS = MatrixSpace(GF(27,'z'),6,6)
             sage: M = MS.random_element()       # indirect doctest
-            sage: M
-            [              1           z + 1     z^2 + z + 1             z^2       2*z^2 + z           z + 1]
-            [2*z^2 + 2*z + 2   2*z^2 + z + 2         z^2 + 1 2*z^2 + 2*z + 2         z^2 + z   2*z^2 + z + 1]
-            [        2*z + 2     z^2 + z + 2           z + 2 2*z^2 + 2*z + 2           2*z^2           2*z^2]
-            [  2*z^2 + z + 2             z^2           z + 2         z^2 + z       2*z^2 + 2         z^2 + 2]
-            [      2*z^2 + z             2*z 2*z^2 + 2*z + 1       2*z^2 + 1 2*z^2 + 2*z + 1       2*z^2 + z]
-            [        2*z + 1         z^2 + z             z^2             z^2     2*z^2 + 2*z           z + 1]
             sage: type(M)
             <class 'sage.matrix.matrix_gfpn_dense.Matrix_gfpn_dense'>
-            sage: MS.random_element(nonzero=True)
-            [            2*z               1   z^2 + 2*z + 1   2*z^2 + z + 1             z^2     z^2 + z + 1]
-            [    2*z^2 + 2*z   2*z^2 + z + 2         2*z + 1       z^2 + 2*z     2*z^2 + 2*z             z^2]
-            [        z^2 + z     z^2 + z + 2 2*z^2 + 2*z + 1         z^2 + 2               1           2*z^2]
-            [              z     2*z^2 + 2*z           2*z^2         2*z + 1           z + 2           z + 2]
-            [        z^2 + z             z^2           z + 2     2*z^2 + 2*z         2*z + 1         z^2 + z]
-            [    z^2 + z + 2       2*z^2 + z             z^2           z + 1     2*z^2 + 2*z   z^2 + 2*z + 1]
-            sage: MS.random_element(density=0.5)
-            [        z^2 + 2               0   z^2 + 2*z + 2       2*z^2 + z               0     z^2 + z + 2]
-            [              0               1               0               0               0               0]
-            [  2*z^2 + z + 1   2*z^2 + z + 2               0     z^2 + z + 2               0     z^2 + z + 1]
-            [              0               0               0               0               0               0]
-            [2*z^2 + 2*z + 2               0               0   2*z^2 + z + 2               0         2*z + 1]
-            [              0       2*z^2 + z               0               1               0   2*z^2 + z + 1]
+            sage: M = MS.random_element(nonzero=True)
+            sage: all(M[i,j] for i in range(6) for j in range(6))
+            True
+            sage: avg_density = sum(MS.random_element(density=0.5).density()
+            ....:                   for _ in range(100))
+            sage: avg_density /= 100
+            sage: RR(avg_density)  # abs tol 0.05
+            0.5
 
-        The following tests against a bug that was fixed in :trac:`23352`::
+        TESTS:
+
+        The following tests against a bug that was fixed in :trac:`23352`.
+        This test could fail for some seed, but it would be highly unlikely::
 
             sage: MS = MatrixSpace(GF(9,'x'),1,5)
-            sage: MS.random_element()
-            [x + 1     x     2 x + 2 x + 2]
-
+            sage: any(MS.random_element()[0,4] for _ in range(50))
+            True
         """
         self.check_mutability()
         cdef int fl = self.Data.Field
@@ -901,13 +889,13 @@ cdef class Matrix_gfpn_dense(Matrix_dense):
 
         EXAMPLES::
 
+            sage: k.<x> = GF(25,'x')
             sage: M = random_matrix(GF(25,'x'), 5,5)
-            sage: M
-            [      4     4*x   x + 3 4*x + 2 3*x + 4]
-            [  x + 2 3*x + 1       3       0       3]
-            [    3*x 2*x + 4       1       0     2*x]
-            [4*x + 4 2*x + 3     4*x       1 3*x + 1]
-            [3*x + 3   x + 3   x + 2   x + 1 3*x + 2]
+            sage: M = matrix(k,[[      4,     4*x, x + 3, 4*x + 2, 3*x + 4],
+            ....:               [  x + 2, 3*x + 1,     3,       0,       3],
+            ....:               [    3*x, 2*x + 4,     1,       0,     2*x],
+            ....:               [4*x + 4, 2*x + 3,   4*x,       1, 3*x + 1],
+            ....:               [3*x + 3,   x + 3, x + 2,   x + 1, 3*x + 2]])
             sage: M._rowlist_(1)
             [7, 16, 3, 0, 3]
             sage: [M[1,i]._int_repr() for i in range(5)]
@@ -1896,7 +1884,7 @@ def mtx_unpickle(f, int nr, int nc, data, bint m):
         doctest:warning
         ...
         DeprecationWarning: Reading this pickle may be machine dependent
-        See http://trac.sagemath.org/23411 for details.
+        See https://github.com/sagemath/sage/issues/23411 for details.
         True
 
     Unpickling would even work in the case that the machine creating
@@ -1948,7 +1936,7 @@ def mtx_unpickle(f, int nr, int nc, data, bint m):
     # in the following line, we use a helper function that would return bytes,
     # regardless whether the input is bytes or str.
     cdef bytes Data = str_to_bytes(data, encoding='latin1')
-    if isinstance(f, (int, long)):
+    if isinstance(f, int):
         # This is for old pickles created with the group cohomology spkg
         MS = MatrixSpace(GF(f, 'z'), nr, nc, implementation=Matrix_gfpn_dense)
     else:

@@ -228,13 +228,16 @@ constants_name_table[repr(unsigned_infinity)] = unsigned_infinity
 constants_name_table[repr(minus_infinity)] = minus_infinity
 
 from sage.symbolic.expression import register_symbol, I
-register_symbol(infinity, {'maxima':'inf'})
-register_symbol(minus_infinity, {'maxima':'minf'})
-register_symbol(unsigned_infinity, {'maxima':'infinity'})
-register_symbol(I, {'mathematica':'I'})
-register_symbol(True, {'giac':'true', 'mathematica':'True', 'maxima':'true'})
-register_symbol(False, {'giac':'false', 'mathematica':'False',
-                        'maxima':'false'})
+register_symbol(infinity, {'maxima':'inf'}, 0)
+register_symbol(minus_infinity, {'maxima':'minf'}, 0)
+register_symbol(unsigned_infinity, {'maxima':'infinity'}, 0)
+register_symbol(I, {'mathematica':'I'}, 0)
+register_symbol(True, {'giac':'true',
+                       'mathematica':'True',
+                       'maxima':'true'}, 0)
+register_symbol(False, {'giac':'false',
+                        'mathematica':'False',
+                        'maxima':'false'}, 0)
 
 
 def unpickle_Constant(class_name, name, conversions, latex, mathml, domain):
@@ -266,7 +269,7 @@ def unpickle_Constant(class_name, name, conversions, latex, mathml, domain):
         return cls(name=name)
 
 @richcmp_method
-class Constant(object):
+class Constant():
     def __init__(self, name, conversions=None, latex=None, mathml="",
                  domain='complex'):
         """
@@ -343,7 +346,6 @@ class Constant(object):
         return (unpickle_Constant, (self.__class__.__name__, self._name,
                                     self._conversions, self._latex,
                                     self._mathml, self._domain))
-
 
     def domain(self):
         """
@@ -812,7 +814,6 @@ class GoldenRatio(Constant):
         """
         return R('1.61803398874989484820458')
 
-
     def _mpfr_(self,R):
         """
         EXAMPLES::
@@ -913,7 +914,6 @@ class Log2(Constant):
             0.6931471805599453
         """
         return R.log2()
-
 
     def _mpfr_(self,R):
         """
@@ -1029,7 +1029,6 @@ class Catalan(Constant):
         Constant.__init__(self, name, conversions=conversions,
                           domain='positive')
 
-
     def _mpfr_(self, R):
         """
         EXAMPLES::
@@ -1049,7 +1048,6 @@ class Catalan(Constant):
             0.915965594177219
         """
         return R('0.91596559417721901505460351493252')
-
 
     def __float__(self):
         """

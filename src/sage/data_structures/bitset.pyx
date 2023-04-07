@@ -457,6 +457,19 @@ cdef class FrozenBitset:
         """
         return iter(bitset_list(self._bitset))
 
+    def __reversed__(self):
+        """
+        Return an iterator over ``self``, starting with the largest element.
+
+        EXAMPLES::
+
+            sage: list(reversed(FrozenBitset('11011')))
+            [4, 3, 1, 0]
+            sage: list(reversed(FrozenBitset('00001' * 20)))
+            [99, 94, 89, 84, 79, 74, 69, 64, 59, 54, 49, 44, 39, 34, 29, 24, 19, 14, 9, 4]
+        """
+        return reversed(bitset_list(self._bitset))
+
     cpdef FrozenBitset _larger_capacity_(self, long capacity):
         """
         Return a copy of ``self`` where the bitset has the maximum of the
@@ -2359,3 +2372,25 @@ def test_bitset_unpickle(data):
     L = bitset_list(bs)
     bitset_free(bs)
     return L
+
+
+def test_bitset_copy_flex(py_a):
+    """
+    TESTS:
+
+    Check that :trac:`33012` is fixed::
+
+        sage: from sage.data_structures.bitset import test_bitset_copy_flex
+        sage: test_bitset_copy_flex('0101'*100)
+    """
+    cdef bitset_t a, b
+
+    bitset_from_str(a, py_a)
+    bitset_init(b, a.size*2)
+
+    bitset_copy_flex(b, a)
+    if not bitset_list(b) == bitset_list(a):
+        raise ValueError
+
+    bitset_free(a)
+    bitset_free(b)

@@ -1,5 +1,5 @@
 r"""
-Rubinstein's `L`-function Calculator
+Rubinstein's `L`-function calculator
 
 This interface provides complete
 access to Rubinstein's lcalc calculator with extra PARI
@@ -30,7 +30,7 @@ AUTHORS:
 import os
 
 from sage.structure.sage_object import SageObject
-from sage.misc.all import pager
+from sage.misc.pager import pager
 import sage.rings.all
 import sage.schemes.elliptic_curves.ell_generic
 

@@ -30,13 +30,14 @@ EXAMPLES::
 # (at your option) any later version.
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
+from itertools import islice, groupby
 
 from sage.structure.sage_object import SageObject
 from sage.combinat.words.word_options import word_options
-from itertools import islice, groupby
-from sage.rings.all import Integers, ZZ, Infinity
-from sage.structure.richcmp import (richcmp_method, rich_to_bool,
-                                    richcmp_item)
+from sage.rings.finite_rings.integer_mod_ring import Integers
+from sage.rings.infinity import Infinity
+from sage.rings.integer_ring import ZZ
+from sage.structure.richcmp import richcmp_method, rich_to_bool, richcmp_item
 
 
 @richcmp_method
@@ -126,7 +127,7 @@ class Word_class(SageObject):
             suffix = ""
         if word_options['display'] == 'string':
             ls = word_options['letter_separator']
-            letters = [str(_) for _ in letters]
+            letters = [str(a) for a in letters]
             if all(len(a) == 1 for a in letters):
                 return ''.join(letters) + suffix
             elif suffix == "...":

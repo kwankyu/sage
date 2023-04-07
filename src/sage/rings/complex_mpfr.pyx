@@ -134,7 +134,7 @@ def is_ComplexNumber(x):
     EXAMPLES::
 
         sage: from sage.rings.complex_mpfr import is_ComplexNumber
-        sage: a = ComplexNumber(1,2); a
+        sage: a = ComplexNumber(1, 2); a
         1.00000000000000 + 2.00000000000000*I
         sage: is_ComplexNumber(a)
         True
@@ -143,9 +143,10 @@ def is_ComplexNumber(x):
         sage: is_ComplexNumber(b)
         True
 
-    Note that the global element ``I`` is of type :class:`SymbolicConstant`.
-    However, elements of the class :class:`ComplexField_class` are of type
-    :class:`ComplexNumber`::
+    Note that the global element ``I`` is a number field element, of type
+    :class:`sage.rings.number_field.number_field_element_quadratic.NumberFieldElement_gaussian`,
+    while elements of the class :class:`ComplexField_class`
+    are of type :class:`ComplexNumber`::
 
         sage: c = 1 + 2*I
         sage: is_ComplexNumber(c)
@@ -171,7 +172,7 @@ def is_ComplexField(x):
         doctest:warning...
         DeprecationWarning: is_ComplexField is deprecated;
         use isinstance(..., sage.rings.abc.ComplexField) instead
-        See https://trac.sagemath.org/32610 for details.
+        See https://github.com/sagemath/sage/issues/32610 for details.
         True
         sage: is_CF(ComplexField(12))
         True
@@ -205,7 +206,7 @@ def ComplexField(prec=53, names=None):
     if prec in cache:
         X = cache[prec]
         C = X()
-        if not C is None:
+        if C is not None:
             return C
     C = ComplexField_class(prec)
     cache[prec] = weakref.ref(C)
@@ -419,18 +420,18 @@ class ComplexField_class(sage.rings.abc.ComplexField):
         return self._prec == other._prec
 
     def __hash__(self):
-         """
-         Return the hash.
+        """
+        Return the hash.
 
-         EXAMPLES::
+        EXAMPLES::
 
-             sage: C = ComplexField(200)
-             sage: from sage.rings.complex_mpfr import ComplexField_class
-             sage: D = ComplexField_class(200)
-             sage: hash(C) == hash(D)
-             True
-         """
-         return hash((self.__class__, self._prec))
+            sage: C = ComplexField(200)
+            sage: from sage.rings.complex_mpfr import ComplexField_class
+            sage: D = ComplexField_class(200)
+            sage: hash(C) == hash(D)
+            True
+        """
+        return hash((self.__class__, self._prec))
 
     def __ne__(self, other):
         """
@@ -957,7 +958,7 @@ cdef class ComplexNumber(sage.structure.element.FieldElement):
                 real, imag = (<ComplexNumber>real).real(), (<ComplexNumber>real).imag()
             elif isinstance(real, sage.libs.pari.all.pari_gen):
                 real, imag = real.real(), real.imag()
-            elif isinstance(real, list) or isinstance(real, tuple):
+            elif isinstance(real, (list, tuple)):
                 re, imag = real
                 real = re
             elif isinstance(real, complex):
@@ -975,8 +976,7 @@ cdef class ComplexNumber(sage.structure.element.FieldElement):
         except TypeError:
             raise TypeError("unable to coerce to a ComplexNumber: %s" % type(real))
 
-
-    def  __dealloc__(self):
+    def __dealloc__(self):
         """
         TESTS:
 
@@ -1132,24 +1132,20 @@ cdef class ComplexNumber(sage.structure.element.FieldElement):
         else:
             return sib(self.parent())(sum)
 
-        # The following is an (untested) implementation that produces
-        # CC_I = CC.gen()
-        # 2 + 3*CC_I
-        # instead of CC(2 + 3*I)
-#         cdef int prec
-
-#         if self.real().is_zero() and self.imag() == 1:
-#             v = sib(self.parent()).gen()
-#             prec = self.prec()
-#             if prec == 53:
-#                 gen_name = 'CC_I'
-#             else:
-#                 gen_name = 'CC%d_I' % prec
-#             sib.cache(self, v, gen_name)
-
-#         real_part = sib(self.real())
-#         imag_part = sib.prod([self.imag(), self.parent().gen()], simplify=True)
-#         return sib.sum([real_part, imag_part], simplify=True)
+        # The following (untested) implementation sets CC_I = CC.gen(),
+        # allowing to write 2 + 3*CC_I instead of CC(2 + 3*I).
+        # cdef int prec
+        # if self.real().is_zero() and self.imag() == 1:
+        #     v = sib(self.parent()).gen()
+        #     prec = self.prec()
+        #     if prec == 53:
+        #         gen_name = 'CC_I'
+        #     else:
+        #         gen_name = 'CC%d_I' % prec
+        #     sib.cache(self, v, gen_name)
+        # real_part = sib(self.real())
+        # imag_part = sib.prod([self.imag(), self.parent().gen()], simplify=True)
+        # return sib.sum([real_part, imag_part], simplify=True)
 
     def _repr_(self):
         r"""
@@ -1252,13 +1248,6 @@ cdef class ComplexNumber(sage.structure.element.FieldElement):
             5
             sage: a^5
             -38.0000000000000 + 41.0000000000000*I
-
-        TESTS:
-
-        Check that :trac:`11323` is fixed::
-
-            sage: float(5)^(0.5 + 14.1347251*i)
-            -1.62414637645790 - 1.53692828324508*I
         """
         self._multiplicative_order = Integer(n)
 
@@ -1716,8 +1705,15 @@ cdef class ComplexNumber(sage.structure.element.FieldElement):
             0.20788
             sage: (2+i)^(0.5)
             1.4553 + 0.34356*I
+
+        TESTS:
+
+        Check that :trac:`11323` is fixed::
+
+            sage: float(5)^(0.5 + 14.1347251*I)
+            -1.62414637645790 - 1.53692828324508*I
         """
-        if isinstance(right, (int, long, Integer)):
+        if isinstance(right, (int, Integer)):
             return RingElement.__pow__(self, right)
 
         try:
@@ -1760,7 +1756,7 @@ cdef class ComplexNumber(sage.structure.element.FieldElement):
                                       real_string, digit_precision_bound,
                                       imag_string, digit_precision_bound)
 
-    def __nonzero__(self):
+    def __bool__(self):
         """
         Return ``True`` if ``self`` is not zero. This is an internal function;
         use :meth:`is_zero()` instead.
@@ -2069,7 +2065,7 @@ cdef class ComplexNumber(sage.structure.element.FieldElement):
             return Integer(4)
         elif self == -self._parent.gen():
             return Integer(4)
-        elif not self._multiplicative_order is None:
+        elif self._multiplicative_order is not None:
             return Integer(self._multiplicative_order)
         elif abs(abs(self) - 1) > 0.1:  # clearly not a root of unity
             return infinity.infinity
@@ -2552,7 +2548,7 @@ cdef class ComplexNumber(sage.structure.element.FieldElement):
 
     # Other special functions
     def agm(self, right, algorithm="optimal"):
-        """
+        r"""
         Return the Arithmetic-Geometric Mean (AGM) of ``self`` and ``right``.
 
         INPUT:
@@ -3282,7 +3278,7 @@ cdef class ComplexNumber(sage.structure.element.FieldElement):
             sage: p(z)
             1.11022302462516e-16
         """
-        from sage.arith.all import algdep
+        from sage.arith.misc import algdep
         return algdep(self, n, **kwds)
 
     # Alias
