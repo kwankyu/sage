@@ -29,7 +29,6 @@ AUTHORS:
 #
 #                  http://www.gnu.org/licenses/
 #*****************************************************************************
-from __future__ import absolute_import
 
 from sage.libs.gap.libgap import libgap
 from sage.misc.randstate import current_randstate
@@ -63,7 +62,7 @@ def QuasiQuadraticResidueCode(p):
         sage: C = codes.QuasiQuadraticResidueCode(11); C   # optional - gap_packages (Guava package)
         [22, 11] linear code over GF(2)
 
-    These are self-orthogonal in general and self-dual when $p \\equiv 3 \\pmod 4$.
+    These are self-orthogonal in general and self-dual when `p \equiv 3 \pmod 4`.
 
     AUTHOR: David Joyner (11-2005)
     """

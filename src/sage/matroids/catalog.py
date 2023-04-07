@@ -34,14 +34,13 @@ Functions
 #  the License, or (at your option) any later version.
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
-from six.moves import range
 
 from sage.matrix.constructor import Matrix
-from sage.graphs.all import graphs
+from sage.graphs.graph_generators import graphs
 
-from sage.rings.all import ZZ, GF
-from sage.schemes.all import ProjectiveSpace
-from sage.symbolic.ring import SR
+from sage.rings.integer_ring import ZZ
+from sage.rings.finite_rings.finite_field_constructor import GF
+from sage.schemes.projective.projective_space import ProjectiveSpace
 
 import sage.matroids.matroid
 import sage.matroids.basis_exchange_matroid
@@ -971,7 +970,7 @@ def PG(n, q, x=None):
         the Finite Field of size 7
     """
     if x is None:
-        x = SR.var('x')
+        x = 'x'
     F = GF(q, x)
     P = ProjectiveSpace(n, F)
     A = Matrix(F, [list(p) for p in P]).transpose()
@@ -1015,7 +1014,7 @@ def AG(n, q, x=None):
 
     """
     if x is None:
-        x = SR.var('x')
+        x = 'x'
     F = GF(q, x)
     P = ProjectiveSpace(n, F)
     A = Matrix(F, [list(p) for p in P if not list(p)[0] == 0]).transpose()

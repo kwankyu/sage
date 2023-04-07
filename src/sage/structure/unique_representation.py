@@ -179,7 +179,7 @@ preprocessing::
     sage: class WrongUsage(CachedRepresentation):
     ....:     @staticmethod
     ....:     def __classcall__(cls, n):
-    ....:         return super(WrongUsage,cls).__classcall__(cls, n^2)
+    ....:         return super().__classcall__(cls, n^2)
     ....:     def __init__(self, n):
     ....:         self.n = n
     ....:     def __repr__(self):
@@ -205,7 +205,7 @@ where it won't mess with the cache::
     sage: class BetterUsage(CachedRepresentation):
     ....:     @staticmethod
     ....:     def __classcall__(cls, n):
-    ....:         return super(BetterUsage, cls).__classcall__(cls, abs(n))
+    ....:         return super().__classcall__(cls, abs(n))
     ....:     def __init__(self, n):
     ....:         self.n = n^2
     ....:     def __repr__(self):
@@ -249,8 +249,8 @@ sub-class (in contrast to a ``__classcall_private__`` method!).  ::
     ....:     @staticmethod
     ....:     def __classcall__(cls, n, implementation=0):
     ....:         if implementation:
-    ....:             return super(C2, cls).__classcall__(cls, (n,)*implementation)
-    ....:         return super(C2, cls).__classcall__(cls, n)
+    ....:             return super().__classcall__(cls, (n,)*implementation)
+    ....:         return super().__classcall__(cls, n)
     ....:     def __init__(self, t):
     ....:         self.t = t
     ....:     def __repr__(self):
@@ -326,7 +326,7 @@ For creating a cached representation using a factory, one has to
 
 An example::
 
-    sage: class C(object):
+    sage: class C():
     ....:     def __init__(self, t):
     ....:         self.t = t
     ....:     def __repr__(self):
@@ -550,15 +550,13 @@ accordingly, for example by inheriting from
 #
 #                  https://www.gnu.org/licenses/
 # *****************************************************************************
-from __future__ import print_function
 
-from sage.misc import six
 from sage.misc.cachefunc import weak_cached_function
 from sage.misc.classcall_metaclass import ClasscallMetaclass, typecall
 from sage.misc.fast_methods import WithEqualityById
 
 
-class CachedRepresentation(six.with_metaclass(ClasscallMetaclass)):
+class CachedRepresentation(metaclass=ClasscallMetaclass):
     """
     Classes derived from CachedRepresentation inherit a weak cache for their
     instances.
@@ -642,7 +640,7 @@ class CachedRepresentation(six.with_metaclass(ClasscallMetaclass)):
         ....:     @staticmethod
         ....:     def __classcall__(cls, iterable):
         ....:         t = tuple(iterable)
-        ....:         return super(MyClass2, cls).__classcall__(cls, t)
+        ....:         return super().__classcall__(cls, t)
         ....:
         ....:     def __init__(self, value):
         ....:         self.value = value
@@ -669,7 +667,7 @@ class CachedRepresentation(six.with_metaclass(ClasscallMetaclass)):
         sage: class MyClass3(UniqueRepresentation):
         ....:     @staticmethod
         ....:     def __classcall__(cls, value = 3):
-        ....:         return super(MyClass3, cls).__classcall__(cls, value)
+        ....:         return super().__classcall__(cls, value)
         ....:
         ....:     def __init__(self, value):
         ....:         self.value = value
@@ -718,7 +716,7 @@ class CachedRepresentation(six.with_metaclass(ClasscallMetaclass)):
         sage: class WrongUsage(CachedRepresentation):
         ....:     @staticmethod
         ....:     def __classcall__(cls, n):
-        ....:         return super(WrongUsage,cls).__classcall__(cls, n^2)
+        ....:         return super().__classcall__(cls, n^2)
         ....:     def __init__(self, n):
         ....:         self.n = n
         ....:     def __repr__(self):
@@ -744,7 +742,7 @@ class CachedRepresentation(six.with_metaclass(ClasscallMetaclass)):
         sage: class BetterUsage(CachedRepresentation):
         ....:     @staticmethod
         ....:     def __classcall__(cls, n):
-        ....:         return super(BetterUsage, cls).__classcall__(cls, abs(n))
+        ....:         return super().__classcall__(cls, abs(n))
         ....:     def __init__(self, n):
         ....:         self.n = n^2
         ....:     def __repr__(self):
@@ -885,7 +883,7 @@ class CachedRepresentation(six.with_metaclass(ClasscallMetaclass)):
     older pickles can still be reasonably unpickled. Let us create a
     (new style) class, and pickle one of its instances::
 
-        sage: class MyClass4(object):
+        sage: class MyClass4():
         ....:     def __init__(self, value):
         ....:         self.value = value
         sage: import __main__; __main__.MyClass4 = MyClass4  # Fake MyClass4 being defined in a python module
@@ -1030,7 +1028,7 @@ class CachedRepresentation(six.with_metaclass(ClasscallMetaclass)):
             sage: class B(A):
             ....:     @staticmethod
             ....:     def __classcall__(cls, *args, **kwds):
-            ....:          return super(B,cls).__classcall__(cls,*args,**kwds)
+            ....:          return super().__classcall__(cls,*args,**kwds)
             sage: class C(B): pass
             sage: a = A(1)
             sage: b = B(2)
@@ -1063,7 +1061,7 @@ class CachedRepresentation(six.with_metaclass(ClasscallMetaclass)):
             ....:     @staticmethod
             ....:     def __classcall_private__(cls, *args, **kwds):
             ....:         print("Private B")
-            ....:         return super(B,cls).__classcall__(cls,*args,**kwds)
+            ....:         return super().__classcall__(cls,*args,**kwds)
             sage: class C(B): pass
             sage: a = A(1)
             sage: b = B(2)
@@ -1220,14 +1218,10 @@ class UniqueRepresentation(CachedRepresentation, WithEqualityById):
 
     This nice behaviour is not available when one just uses a factory::
 
-        sage: isinstance(GF(7), GF)  # py2
+        sage: isinstance(GF(7), GF)
         Traceback (most recent call last):
         ...
-        TypeError: isinstance() arg 2 must be a class, type, or tuple of classes and types
-        sage: isinstance(GF(7), GF)  # py3
-        Traceback (most recent call last):
-        ...
-        TypeError: isinstance() arg 2 must be a type or tuple of types
+        TypeError: isinstance() arg 2 must be a type...
 
         sage: isinstance(GF, sage.structure.factory.UniqueFactory)
         True

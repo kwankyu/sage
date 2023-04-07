@@ -42,7 +42,6 @@ structure morphisms::
     True
 
 """
-from __future__ import absolute_import
 #*****************************************************************************
 #       Copyright (C) 2014 Julian Rueth <julian.rueth@fsfe.org>
 #
@@ -152,7 +151,7 @@ class NameChange(NumberFieldStructure):
         sage: NameChange(K)
         <sage.rings.number_field.structure.NameChange object at 0x...>
 
-    Check for memory leaks:
+    Check for memory leaks::
 
         sage: u=id(NumberField(x^2-5,'a').absolute_field('b'))
         sage: import gc

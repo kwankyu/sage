@@ -348,7 +348,7 @@ def lazy_list_formatter(L, name='lazy list',
     return s
 
 
-cdef class lazy_list_generic(object):
+cdef class lazy_list_generic():
     r"""
     A lazy list
 
@@ -763,7 +763,6 @@ cdef class lazy_list_generic(object):
 
         We check commutation::
 
-            sage: from six.moves import range
             sage: l = lazy_list(iter(range(10000)))
             sage: l1 = l[::2][:3001]
             sage: l2 = l[:6002][::2]

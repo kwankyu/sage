@@ -4,8 +4,7 @@ Embeddings into ambient fields
 This module provides classes to handle embeddings of number fields into ambient
 fields (generally `\RR` or `\CC`).
 """
-
-#*****************************************************************************
+# ****************************************************************************
 #      Copyright (C) 2008 Robert Bradshaw <robertwb@math.washington.edu>
 #
 #  Distributed under the terms of the GNU General Public License (GPL)
@@ -17,8 +16,8 @@ fields (generally `\RR` or `\CC`).
 #
 #  The full text of the GPL is available at:
 #
-#                  http://www.gnu.org/licenses/
-#*****************************************************************************
+#                  https://www.gnu.org/licenses/
+# ****************************************************************************
 
 import sage.rings.complex_double
 
@@ -28,7 +27,7 @@ from sage.categories.map cimport Map
 from sage.categories.pushout import pushout
 
 from sage.rings.real_mpfr import RealField, mpfr_prec_min
-from sage.rings.complex_field import ComplexField
+from sage.rings.complex_mpfr import ComplexField
 from sage.rings.real_lazy import RLF, CLF, LazyField, LazyAlgebraic
 
 
@@ -345,7 +344,7 @@ cpdef matching_root(poly, target, ambient_field=None, margin=1, max_prec=None):
     target best approximates as compared in ambient_field.
 
     If the parent of target is exact, the equality is required, otherwise
-    find closest root (with respect to the \code{abs} function) in the
+    find closest root (with respect to the ``abs`` function) in the
     ambient field to the target, and return the root of poly (if any) that
     approximates it best.
 
@@ -405,7 +404,7 @@ cpdef matching_root(poly, target, ambient_field=None, margin=1, max_prec=None):
 cpdef closest(target, values, margin=1):
     """
     This is a utility function that returns the item in values closest to
-    target (with respect to the \code{abs} function). If margin is greater
+    target (with respect to the ``abs`` function). If margin is greater
     than 1, and x and y are the first and second closest elements to target,
     then only return x if x is margin times closer to target than y, i.e.
     margin * abs(target-x) < abs(target-y).
@@ -692,3 +691,87 @@ cdef class CyclotomicFieldEmbedding(NumberFieldEmbedding):
             zeta21^6 + 3
         """
         return x._lift_cyclotomic_element(self.codomain(), False, self.ratio)
+
+    def section(self):
+        """
+        Return the section of ``self``.
+
+        EXAMPLES::
+
+            sage: from sage.rings.number_field.number_field_morphisms import CyclotomicFieldEmbedding
+            sage: K = CyclotomicField(7)
+            sage: L = CyclotomicField(21)
+            sage: f = CyclotomicFieldEmbedding(K, L)
+            sage: h = f.section()
+            sage: h(f(K.gen())) # indirect doctest
+            zeta7
+        """
+        return CyclotomicFieldConversion(self.codomain(), self.domain())
+
+cdef class CyclotomicFieldConversion(Map):
+    r"""
+    This allows one to cast one cyclotomic field in another consistently.
+
+    EXAMPLES::
+
+        sage: from sage.rings.number_field.number_field_morphisms import CyclotomicFieldConversion
+        sage: K1.<z1> = CyclotomicField(12)
+        sage: K2.<z2> = CyclotomicField(18)
+        sage: f = CyclotomicFieldConversion(K1, K2)
+        sage: f(z1^2)
+        z2^3
+        sage: f(z1)
+        Traceback (most recent call last):
+        ...
+        ValueError: Element z1 has no image in the codomain
+
+    Tests from :trac:`29511`::
+
+        sage: K.<z> = CyclotomicField(12)
+        sage: K1.<z1> = CyclotomicField(3)
+        sage: K(2) in K1 # indirect doctest
+        True
+        sage: K1(K(2)) # indirect doctest
+        2
+    """
+    cdef ambient_field
+    cdef phi
+
+    def __init__(self, K, L):
+        """
+        Construct a conversion map between cyclotomic fields.
+
+        EXAMPLES::
+
+            sage: from sage.rings.number_field.number_field_morphisms import CyclotomicFieldEmbedding
+            sage: K.<a> = CyclotomicField(7)
+            sage: L.<b> = CyclotomicField(21)
+            sage: K(b^3) # indirect doctest
+            a
+        """
+        from sage.rings.number_field.number_field import CyclotomicField
+        n1 = K._n()
+        n2 = L._n()
+        n3 = n1.lcm(n2)
+        M = CyclotomicField(n3)
+        self.ambient_field = M
+        self.phi = L.hom([M.gen()**(n3//n2)])
+        Map.__init__(self, K, L)
+
+    cpdef Element _call_(self, x):
+        """
+        Call a conversion map between cyclotomic fields.
+
+        EXAMPLES::
+
+            sage: from sage.rings.number_field.number_field_morphisms import CyclotomicFieldEmbedding
+            sage: K.<a> = CyclotomicField(7)
+            sage: L.<b> = CyclotomicField(21)
+            sage: K(b^3) # indirect doctest
+            a
+        """
+        M = self.ambient_field
+        try:
+            return self.phi.preimage(M(x))
+        except ValueError:
+            raise ValueError('Element {} has no image in the codomain'.format(x))

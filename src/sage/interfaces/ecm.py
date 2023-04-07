@@ -10,7 +10,7 @@ ECM with a primality test to compute the prime factorization of integers.
 
 Sage includes GMP-ECM, which is a highly optimized implementation of
 Lenstra's elliptic curve factorization method.  See
-http://ecm.gforge.inria.fr for more about GMP-ECM.
+https://gitlab.inria.fr/zimmerma/ecm for more about GMP-ECM.
 
 AUTHORS:
 
@@ -46,14 +46,11 @@ Check that the issues from :trac:`27199` are fixed::
 #   Distributed under the terms of the GNU General Public License (GPL)
 #   as published by the Free Software Foundation; either version 3 of
 #   the License, or (at your option) any later version.
-#                   http://www.gnu.org/licenses/
+#                   https://www.gnu.org/licenses/
 ###############################################################################
-from __future__ import print_function
 
-from six import iteritems, PY2
-
-import subprocess
 import re
+from subprocess import Popen, PIPE, call
 
 from sage.structure.sage_object import SageObject
 from sage.rings.integer_ring import ZZ
@@ -66,7 +63,7 @@ class ECM(SageObject):
         Create an interface to the GMP-ECM elliptic curve method
         factorization program.
 
-        See http://ecm.gforge.inria.fr
+        See https://gitlab.inria.fr/zimmerma/ecm
 
         INPUT:
 
@@ -187,7 +184,7 @@ class ECM(SageObject):
     def _make_cmd(self, B1, B2, kwds):
         ecm = ['ecm']
         options = []
-        for x, v in iteritems(kwds):
+        for x, v in kwds.items():
             if v is False:
                 continue
             options.append('-{0}'.format(x))
@@ -219,18 +216,11 @@ class ECM(SageObject):
             sage: ecm._run_ecm(['cat'], 1234)
             '1234'
         """
-        from subprocess import Popen, PIPE
-
-        if PY2:
-            enc_kwds = {}
-        else:
-            # Under normal usage this program only returns ASCII; anything
-            # else mixed is garbage and an error
-            # So just accept latin-1 without encoding errors, and let the
-            # output parser deal with the rest
-            enc_kwds = {'encoding': 'latin-1'}
-
-        p = Popen(cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE, **enc_kwds)
+        # Under normal usage this program only returns ASCII; anything
+        # else mixed is garbage and an error
+        # So just accept latin-1 without encoding errors, and let the
+        # output parser deal with the rest
+        p = Popen(cmd, stdout=PIPE, stdin=PIPE, stderr=PIPE, encoding='latin-1')
         out, err = p.communicate(input=str(n))
         if err != '':
             raise ValueError(err)
@@ -269,7 +259,7 @@ class ECM(SageObject):
         """
         print("Enter numbers to run ECM on them.")
         print("Press control-D to exit.")
-        subprocess.call(self._cmd)
+        call(self._cmd)
 
     # Recommended settings from
     # http://www.mersennewiki.org/index.php/Elliptic_Curve_Method
@@ -344,8 +334,8 @@ class ECM(SageObject):
         r'(?P<primality>.*) cofactor (?P<cofactor>\d+) has [\s]*(?P<digits>\d+) digits')
 
     def _parse_output(self, n, out):
-        """
-        Parse the ECM output
+        r"""
+        Parse the ECM output.
 
         INPUT:
 
@@ -356,10 +346,9 @@ class ECM(SageObject):
         OUTPUT:
 
         List of pairs ``(integer, bool)`` consisting of factors of the
-        ECM input and whether they are deemed to be probable
-        prime. Note that ECM is not a good primality test, and there
-        is a sizeable probability that the "probable prime" is
-        actually composite.
+        ECM input and whether they are deemed to be probable prime.
+        Note that ECM is not a good primality test, and there is a
+        sizeable probability that the "probable prime" is actually composite.
 
         EXAMPLES::
 
@@ -670,7 +659,7 @@ class ECM(SageObject):
             # Step 3: Call find_factor until a factorization is found
             n_factorization = [n]
             while len(n_factorization) == 1:
-                n_factorization = self.find_factor(n,B1=B1)
+                n_factorization = self.find_factor(n, B1=B1)
             factors.extend(n_factorization)
 
         return sorted(probable_prime_factors)
@@ -762,7 +751,7 @@ class ECM(SageObject):
             <BLANKLINE>
             Expected curves: 4911, Expected time: 32.25m
         """
-        title_curves = 'Expected number of curves to find a factor of n digits:'
+        title_curves = 'Expected number of curves to find a factor of n digits'
         title_time = 'Expected time to find a factor of n digits:'
         n = self._validate(n)
         B1 = self.recommended_B1(factor_digits)
@@ -775,7 +764,7 @@ class ECM(SageObject):
             return
 
         out_lines = iter(out.splitlines())
-        while next(out_lines) != title_curves:
+        while next(out_lines)[:len(title_curves)] != title_curves:
             pass
         header_curves = next(out_lines)
         curve_count_table = next(out_lines)

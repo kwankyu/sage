@@ -17,10 +17,8 @@ AUTHOR:
     -- William Stein, based on code by Fernando Perez included in IPython
 """
 
-import six
 
-
-class SageTimeitResult(object):
+class SageTimeitResult():
     r"""
     Represent the statistics of a timeit() command.
 
@@ -92,9 +90,9 @@ class SageTimeitResult(object):
             1 loop, best of 2: 3.14 ns per loop
         """
         if self.stats[0] > 1:
-            s =  u"%d loops, best of %d: %.*g %s per loop" % self.stats
+            s = u"%d loops, best of %d: %.*g %s per loop" % self.stats
         else:
-            s =  u"%d loop, best of %d: %.*g %s per loop" % self.stats
+            s = u"%d loop, best of %d: %.*g %s per loop" % self.stats
 
         if isinstance(s, str):
             return s
@@ -203,7 +201,7 @@ def sage_timeit(stmt, globals_dict=None, preparse=None, number=0, repeat=3, prec
         sage: gc.isenabled()
         True
     """
-    import time, math
+    import math
     import timeit as timeit_
 
     import sage.repl.interpreter as interpreter
@@ -228,19 +226,14 @@ def sage_timeit(stmt, globals_dict=None, preparse=None, number=0, repeat=3, prec
     # but is there a better way to achieve that the code stmt has access
     # to the shell namespace?
 
-    if six.PY2:
-        src = timeit_.template % {'stmt': timeit_.reindent(stmt, 8),
-                                 'setup': "pass", 'init': ''}
-    else:
-        src = timeit_.template.format(stmt=timeit_.reindent(stmt, 8),
-                                      setup="pass", init='')
+    src = timeit_.template.format(stmt=timeit_.reindent(stmt, 8),
+                                  setup="pass", init='')
     code = compile(src, "<magic-timeit>", "exec")
     ns = {}
     if not globals_dict:
         globals_dict = globals()
     exec(code, globals_dict, ns)
     timer.inner = ns["inner"]
-
 
     try:
         import sys
@@ -255,7 +248,7 @@ def sage_timeit(stmt, globals_dict=None, preparse=None, number=0, repeat=3, prec
                 if timer.timeit(number) >= 0.2:
                     break
 
-        series = [s/number for s in timer.repeat(repeat, number)]
+        series = [s / number for s in timer.repeat(repeat, number)]
         best = min(series)
 
     finally:
@@ -272,5 +265,4 @@ def sage_timeit(stmt, globals_dict=None, preparse=None, number=0, repeat=3, prec
     else:
         order = 3
     stats = (number, repeat, precision, best * scaling[order], units[order])
-    return SageTimeitResult(stats,series=series)
-
+    return SageTimeitResult(stats, series=series)

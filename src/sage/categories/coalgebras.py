@@ -8,10 +8,9 @@ Coalgebras
 #  Distributed under the terms of the GNU General Public License (GPL)
 #                  https://www.gnu.org/licenses/
 # *****************************************************************************
-from __future__ import absolute_import
 
 from .category_types import Category_over_base_ring
-from sage.categories.all import Modules
+from sage.categories.modules import Modules
 from sage.categories.category_with_axiom import CategoryWithAxiom_over_base_ring
 from sage.categories.tensor import TensorProductsCategory
 from sage.categories.dual import DualObjectsCategory
@@ -79,7 +78,6 @@ class Coalgebras(Category_over_base_ring):
             TODO: implement some tests of the axioms of coalgebras, bialgebras
             and Hopf algebras using the counit.
             """
-
 
         @abstract_method
         def coproduct(self, x):
@@ -390,4 +388,3 @@ class Coalgebras(Category_over_base_ring):
                 """
                 R = self.realization_of().a_realization()
                 return R(x).counit()
-

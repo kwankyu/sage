@@ -26,7 +26,7 @@ REFERENCE:
 #                  http://www.gnu.org/licenses/
 #*****************************************************************************
 
-include "sage/data_structures/bitset.pxi"
+from sage.data_structures.bitset_base cimport *
 from .data_structures cimport *
 from sage.rings.integer cimport Integer
 from sage.structure.element import is_Matrix
@@ -153,7 +153,7 @@ cdef class LinearBinaryCodeStruct(BinaryCodeStruct):
             sage: B.automorphism_group()[1]
             2304
 
-            sage: M=Matrix(GF(2),[\
+            sage: M = Matrix(GF(2),[\
             ....: [1,0,0,1,1,1,1,0,0,1,0,0,0,0,0,0,0],\
             ....: [0,1,0,0,1,1,1,1,0,0,1,0,0,0,0,0,0],\
             ....: [0,0,1,0,0,1,1,1,1,0,0,1,0,0,0,0,0],\
@@ -177,7 +177,7 @@ cdef class LinearBinaryCodeStruct(BinaryCodeStruct):
             sage: B.automorphism_group()[1]
             2160
 
-            sage: M=Matrix(GF(2),[\
+            sage: M = Matrix(GF(2),[\
             ....: [0,1,0,1,1,1,0,0,0,1,0,0,0,1,0,0,0,1,1,1,0,1],\
             ....: [1,0,1,1,1,0,0,0,1,0,0,0,1,0,0,0,1,1,1,0,1,0],\
             ....: [0,1,1,1,0,0,0,1,0,0,1,1,0,0,0,1,1,1,0,1,0,0],\
@@ -607,7 +607,7 @@ cdef int ith_word_nonlinear(BinaryCodeStruct self, int i, bitset_s *word):
     return 0
 
 cdef int refine_by_bip_degree(PartitionStack *col_ps, void *S, int *cells_to_refine_by, int ctrb_len):
-    """
+    r"""
     Refines the input partition by checking degrees of vertices to the given
     cells in the associated bipartite graph (vertices split into columns and
     words).
@@ -731,11 +731,14 @@ cdef int refine_by_bip_degree(PartitionStack *col_ps, void *S, int *cells_to_ref
     return invariant
 
 cdef int compare_linear_codes(int *gamma_1, int *gamma_2, void *S1, void *S2, int degree):
-    """
+    r"""
     Compare gamma_1(S1) and gamma_2(S2).
 
-    Return return -1 if gamma_1(S1) < gamma_2(S2), 0 if gamma_1(S1) == gamma_2(S2),
-    1 if gamma_1(S1) > gamma_2(S2).  (Just like the python \code{cmp}) function.
+    This returns:
+
+    - -1 if gamma_1(S1) < gamma_2(S2),
+    - 0 if gamma_1(S1) == gamma_2(S2),
+    - 1 if gamma_1(S1) > gamma_2(S2).
 
     Abstractly, what this function does is relabel the basis of B by gamma_1 and
     gamma_2, run a row reduction on each, and verify that the matrices are the
@@ -745,9 +748,9 @@ cdef int compare_linear_codes(int *gamma_1, int *gamma_2, void *S1, void *S2, in
     code has a 1 in the entry in which they differ is reported as larger.
 
     INPUT:
-    gamma_1, gamma_2 -- list permutations (inverse)
-    S1, S2 -- binary code struct objects
 
+    - gamma_1, gamma_2 -- list permutations (inverse)
+    - S1, S2 -- binary code struct objects
     """
     cdef int i, piv_loc_1, piv_loc_2, cur_col, cur_row=0
     cdef bint is_pivot_1, is_pivot_2
@@ -804,16 +807,19 @@ cdef int compare_linear_codes(int *gamma_1, int *gamma_2, void *S1, void *S2, in
     return 0
 
 cdef int compare_nonlinear_codes(int *gamma_1, int *gamma_2, void *S1, void *S2, int degree):
-    """
+    r"""
     Compare gamma_1(S1) and gamma_2(S2).
 
-    Return return -1 if gamma_1(S1) < gamma_2(S2), 0 if gamma_1(S1) == gamma_2(S2),
-    1 if gamma_1(S1) > gamma_2(S2).  (Just like the python \code{cmp}) function.
+    This returns:
+
+    - -1 if gamma_1(S1) < gamma_2(S2),
+    - 0 if gamma_1(S1) == gamma_2(S2),
+    - 1 if gamma_1(S1) > gamma_2(S2).
 
     INPUT:
-    gamma_1, gamma_2 -- list permutations (inverse)
-    S1, S2 -- a binary code struct object
 
+    - gamma_1, gamma_2 -- list permutations (inverse)
+    - S1, S2 -- a binary code struct object
     """
     cdef int side=0, i, start, end, n_one_1, n_one_2, cur_col
     cdef int where_0, where_1
@@ -1086,10 +1092,10 @@ def random_tests(num=50, n_max=50, k_max=6, nwords_max=200, perms_per_code=10, d
             C_n = NonlinearBinaryCodeStruct( matrix(GF(2), B_n.nwords, B_n.degree) )
             for j from 0 <= j < B.dimension:
                 for h from 0 <= h < B.degree:
-                    bitset_set_to(&C.basis[j], perm[h], bitset_check(&B.basis[j], h))
+                    bitset_set_to(&C.basis[j], <mp_bitcnt_t> perm[h], bitset_check(&B.basis[j], h))
             for j from 0 <= j < B_n.nwords:
                 for h from 0 <= h < B_n.degree:
-                    bitset_set_to(&C_n.words[j], perm[h], bitset_check(&B_n.words[j], h))
+                    bitset_set_to(&C_n.words[j], <mp_bitcnt_t> perm[h], bitset_check(&B_n.words[j], h))
             # now C is a random permutation of B, and C_n of B_n
             C.run()
             C_n.run()
@@ -1142,5 +1148,3 @@ def random_tests(num=50, n_max=50, k_max=6, nwords_max=200, perms_per_code=10, d
         num_codes += 2
 
     print("All passed: %d random tests on %d codes." % (num_tests, num_codes))
-
-

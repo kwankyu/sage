@@ -13,7 +13,7 @@ AUTHORS:
   re-implementation of the default call method,
   making functors applicable to morphisms (not only to objects)
 
-- Simon King (2010-12): Pickling of functors without loosing domain and codomain
+- Simon King (2010-12): Pickling of functors without losing domain and codomain
 
 """
 
@@ -292,9 +292,8 @@ cdef class Functor(SageObject):
             Traceback (most recent call last):
             ...
             TypeError: x (=Integer Ring) is not in Category of fields
-
         """
-        if not (x in  self.__domain):
+        if x not in self.__domain:
             raise TypeError("x (=%s) is not in %s" % (x, self.__domain))
         return x
 
@@ -500,7 +499,7 @@ class ForgetfulFunctor_generic(Functor):
 
             sage: F1 = ForgetfulFunctor(FiniteFields(),Fields())
 
-        This is to test against a bug occuring in a previous version
+        This is to test against a bug occurring in a previous version
         (see :trac:`8800`)::
 
             sage: F1 == QQ #indirect doctest
@@ -681,11 +680,9 @@ def ForgetfulFunctor(domain, codomain):
 
         sage: ForgetfulFunctor(abgrps, abgrps) == IdentityFunctor(abgrps)
         True
-
     """
     if domain == codomain:
         return IdentityFunctor(domain)
     if not domain.is_subcategory(codomain):
         raise ValueError("Forgetful functor not supported for domain %s" % domain)
     return ForgetfulFunctor_generic(domain, codomain)
-

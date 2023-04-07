@@ -30,10 +30,8 @@ This documentation is licensed under a `Creative Commons Attribution-Share Alike
 Introduction to Sage
 --------------------
 
-* `Logging on to a Sage Server and Creating a Worksheet (PREP) <../prep/Logging-On.html>`_
 * `Introductory Sage Tutorial (PREP) <../prep/Intro-Tutorial.html>`_
-* :ref:`tutorial-notebook-and-help-long`
-* `Sage's main tutorial <../tutorial/>`_
+* `Sage's main tutorial <../tutorial/index.html>`_
 
 .. _programming_design:
 
@@ -60,6 +58,7 @@ Algebra
 * :ref:`group_theory`
 * :ref:`lie`
 * :ref:`sage.modules.tutorial_free_modules`
+* :ref:`steenrod_algebra_modules`
 
 Number Theory
 -------------
@@ -121,7 +120,7 @@ Advanced Programming
 Documentation
 =============
 
-* :ref:`sws2srt`
+* :ref:`sws2rst`
 
 .. Sage development
 .. ----------------

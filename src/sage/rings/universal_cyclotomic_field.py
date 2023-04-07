@@ -162,14 +162,13 @@ AUTHORS:
 - Sebastian Oehms (2018): deleting the method is_finite since it returned the wrong result (see :trac:`25686`)
 - Sebastian Oehms (2019): add :meth:`_factor_univariate_polynomial` (see :trac:`28631`)
 """
-from __future__ import absolute_import, print_function
-from six.moves import range
 
 from sage.misc.cachefunc import cached_method
 
 from sage.structure.richcmp import rich_to_bool
 from sage.structure.unique_representation import UniqueRepresentation
 from sage.structure.element import FieldElement, parent
+
 from sage.structure.coerce import py_scalar_to_element
 from sage.categories.morphism import Morphism
 from sage.rings.ring import Field
@@ -178,6 +177,7 @@ from sage.rings.integer import Integer
 from sage.rings.rational import Rational
 
 from sage.rings.integer_ring import ZZ
+from sage.rings.number_field.number_field_element_base import NumberFieldElement_base
 from sage.rings.rational_field import QQ
 from sage.rings.infinity import Infinity
 from sage.rings.qqbar import AA, QQbar
@@ -205,6 +205,7 @@ def late_import():
                                        GapElement_Rational,
                                        GapElement_Cyclotomic)
     from sage.interfaces import (gap, gap3)
+
 
 def UCF_sqrt_int(N, UCF):
     r"""
@@ -235,15 +236,16 @@ def UCF_sqrt_int(N, UCF):
         return UCF.zero()
 
     res = UCF.one() if N > 0 else UCF.zeta(4)
-    for p,e in N.factor():
+    for p, e in N.factor():
         if p == 2:
-            res *= (UCF.zeta(8) + UCF.zeta(8,7))**e
+            res *= (UCF.zeta(8) + UCF.zeta(8, 7))**e
         else:
             res *= UCF.sum(UCF.zeta(p, n**2) for n in range(p))**e
         if p % 4 == 3:
             res *= (UCF.zeta(4))**e
 
     return res
+
 
 class UCFtoQQbar(Morphism):
     r"""
@@ -256,7 +258,7 @@ class UCFtoQQbar(Morphism):
         -0.500000000000000? + 0.866025403784439?*I
 
         sage: CC(UCF.gen(7,2) + UCF.gen(7,6))
-        0.400968867902419 + 0.193096429713794*I
+        0.400968867902419 + 0.193096429713793*I
 
         sage: complex(E(7)+E(7,2))
         (0.40096886790241915+1.7567593946498534j)
@@ -332,7 +334,7 @@ class UniversalCyclotomicFieldElement(FieldElement):
         """
         return bool(self._obj)
 
-    __nonzero__ = __bool__
+
 
     def __reduce__(self):
         r"""
@@ -531,8 +533,7 @@ class UniversalCyclotomicFieldElement(FieldElement):
             sage: SR(1+E(4))
             I + 1
         """
-        from sage.symbolic.constants import pi
-        from sage.symbolic.all import i as I
+        from sage.symbolic.constants import pi, I
         k = ZZ(self._obj.Conductor())
         coeffs = self._obj.CoeffsCyc(k).sage()
         s = R.zero()
@@ -562,7 +563,7 @@ class UniversalCyclotomicFieldElement(FieldElement):
             sage: CF(E(5)) # indirect doctest
             Traceback (most recent call last):
             ...
-            TypeError: Cannot coerce zeta5 into Cyclotomic Field of order 7 and
+            TypeError: cannot coerce zeta5 into Cyclotomic Field of order 7 and
             degree 6
 
             sage: CF = CyclotomicField(10)
@@ -614,9 +615,8 @@ class UniversalCyclotomicFieldElement(FieldElement):
             sage: UCF = UniversalCyclotomicField()
             sage: hash(UCF.zero())  # indirect doctest
             0
-            sage: hash(UCF.gen(3,2))
-            313156239               # 32-bit
-            1524600308199219855     # 64-bit
+            sage: hash(UCF.gen(3,2)) == hash((3,0,0,1))
+            True
 
         TESTS:
 
@@ -1115,10 +1115,10 @@ class UniversalCyclotomicFieldElement(FieldElement):
         k = self._obj.Conductor()
         coeffs = self._obj.CoeffsCyc(k).sage()
         if sum(bool(x) for x in coeffs) == 1:
-            for i,x in enumerate(coeffs):
+            for i, x in enumerate(coeffs):
                 if x:
                     break
-            return UCF(x).sqrt() * UCF.zeta(2*k, i)
+            return UCF(x).sqrt() * UCF.zeta(2 * k, i)
 
         # no method to construct square roots yet...
         if extend:
@@ -1307,7 +1307,7 @@ class UniversalCyclotomicField(UniqueRepresentation, Field):
             sage: E(3,2)
             E(3)^2
         """
-        return super(UniversalCyclotomicField, cls).__classcall__(cls, None)
+        return super().__classcall__(cls, None)
 
     def __init__(self, names=None):
         r"""
@@ -1479,7 +1479,7 @@ class UniversalCyclotomicField(UniqueRepresentation, Field):
             Traceback (most recent call last):
             ...
             TypeError: [ [ 0, 1 ], [ 0, 2 ] ]
-            of type <type 'sage.libs.gap.element.GapElement_List'> not valid
+            of type <class 'sage.libs.gap.element.GapElement_List'> not valid
             to initialize an element of the universal cyclotomic field
 
         Some conversions from symbolic functions are possible::
@@ -1536,14 +1536,15 @@ class UniversalCyclotomicField(UniqueRepresentation, Field):
             return self.element_class(self, obj)
 
         # late import to avoid slowing down the above conversions
-        from sage.rings.number_field.number_field_element import NumberFieldElement
-        from sage.rings.number_field.number_field import NumberField_cyclotomic, CyclotomicField
+        import sage.rings.abc
         P = parent(elt)
-        if isinstance(elt, NumberFieldElement) and isinstance(P, NumberField_cyclotomic):
-            n = P.gen().multiplicative_order()
-            elt = CyclotomicField(n)(elt)
-            return sum(c * self.gen(n, i)
-                       for i, c in enumerate(elt._coefficients()))
+        if isinstance(P, sage.rings.abc.NumberField_cyclotomic):
+            if isinstance(elt, NumberFieldElement_base):
+                from sage.rings.number_field.number_field import CyclotomicField
+                n = P.gen().multiplicative_order()
+                elt = CyclotomicField(n)(elt)
+                return sum(c * self.gen(n, i)
+                           for i, c in enumerate(elt._coefficients()))
 
         if hasattr(elt, '_algebraic_'):
             return elt._algebraic_(self)
@@ -1570,8 +1571,8 @@ class UniversalCyclotomicField(UniqueRepresentation, Field):
         """
         if other is ZZ or other is QQ:
             return True
-        from sage.rings.number_field.number_field import NumberField_cyclotomic
-        if isinstance(other, NumberField_cyclotomic):
+        import sage.rings.abc
+        if isinstance(other, sage.rings.abc.NumberField_cyclotomic):
             return True
 
     def _factor_univariate_polynomial(self, f):
@@ -1640,7 +1641,6 @@ class UniversalCyclotomicField(UniqueRepresentation, Field):
             sage: p(r[0][0])
             0
         """
-        from sage.arith.all import gcd
         from sage.structure.factorization import Factorization
 
         UCF = self
@@ -1664,7 +1664,7 @@ class UniversalCyclotomicField(UniqueRepresentation, Field):
         f = f.change_ring(QQ)
 
         factors = []
-        for p,e in f.factor():
+        for p, e in f.factor():
             if p.degree() == 1:
                 factors.append((x + p[0], e))
 
@@ -1672,9 +1672,9 @@ class UniversalCyclotomicField(UniqueRepresentation, Field):
                 c = p[0]
                 b = p[1]
                 a = p[2]
-                D = UCF(b**2 - 4*a*c).sqrt()
-                r1 = (-b - D) / (2*a)
-                r2 = (-b + D) / (2*a)
+                D = UCF(b**2 - 4 * a * c).sqrt()
+                r1 = (-b - D) / (2 * a)
+                r2 = (-b + D) / (2 * a)
                 factors.append((x - r1, e))
                 factors.append((x - r2, e))
 
@@ -1682,12 +1682,10 @@ class UniversalCyclotomicField(UniqueRepresentation, Field):
                 m = p.is_cyclotomic(certificate=True)
                 if not m:
                     raise NotImplementedError('no known factorization for this polynomial')
-                for i in range(1, m):
-                    if gcd(m, i) == 1:
-                        factors.append((x - UCF.zeta(m, i), e))
+                for i in m.coprime_integers(m):
+                    factors.append((x - UCF.zeta(m, i), e))
 
         return Factorization(factors, unit)
-
 
     def degree(self):
         r"""

@@ -15,10 +15,8 @@
 #
 #                  https://www.gnu.org/licenses/
 ########################################################################
-
-from __future__ import print_function
-
 import sys
+import os
 import time
 import gc
 import warnings
@@ -37,10 +35,7 @@ parent = None
 index_to_parent = dict()
 all_modules = dict()
 
-if sys.version_info[0] == 2:
-    DEFAULT_LEVEL = -1
-else:
-    DEFAULT_LEVEL = 0
+DEFAULT_LEVEL = 0
 
 
 def new_import(name, globals={}, locals={}, fromlist=[], level=DEFAULT_LEVEL):
@@ -116,32 +111,53 @@ def print_table(module_list, limit):
                                 len(data['parents']), module.__name__))
 
 
+def guess_module_name(src):
+    module = []
+    src, ext = os.path.splitext(src)
+    while src and src != '/':
+        head, tail = os.path.split(os.path.abspath(src))
+        if (tail == 'src' or any(os.path.exists(os.path.join(head, tail, f))
+                                 for f in ('setup.py', 'pyproject.toml'))):
+            return '.'.join(module)
+        module.insert(0, tail)
+        src = head
+    return None
+
+
 if not have_cmdline_args:
     print('== Slowest module imports (excluding / including children) ==')
     print_table(module_by_speed, 50)
     print('Total time (sum over exclusive time): {:.3f}ms'.format(1000 * sum(data[0] for data in module_by_speed)))
-    print('Use sage -startuptime <module_name> to get more details about <module_name>.')
+    print('Use sage -startuptime <module_name|file_name>... to get more details about specific modules.')
 else:
     for module_arg in cmdline_args:
         matching_modules = [m for m in all_modules if m.__name__ == module_arg]
         if not matching_modules:
-            matching_modules = [m for m in all_modules if m.__name__.endswith(module_arg)]
-            if len(matching_modules) != 1:
-                print(matching_modules)
-                raise ValueError('"' + module_arg + '" does not uniquely determine Sage module.')
-        module_arg = matching_modules[0]
-        parents = all_modules[module_arg]['parents']
-        print()
-        print_separator()
-        print_headline('Slowest modules importing {0}'.format(module_arg.__name__))
-        print_table([m for m in module_by_speed if m[1] in parents], 10)
-        print()
-        print_headline('Slowest modules imported by {0}'.format(module_arg.__name__))
-        print_table([m for m in module_by_speed if module_arg in m[2]['parents']], 10)
-        print()
-        data = all_modules[module_arg]
-        print_headline('module ' + module_arg.__name__)
-        print('Time to import:  {0:.3f}ms'.format(1000 * data['time']))
-        print('Cumulative time: {0:.3f}ms'.format(1000 * data['cumulative_time']))
-        print('Names: {0}'.format(', '.join(data['import_names'])))
-        print('File: {0}'.format(module_arg.__file__))
+            if '/' in module_arg or any(module_arg.endswith(ext) for ext in ('.py', '.pyx')) or os.path.isdir(module_arg):
+                file_name = module_arg
+                module_arg = guess_module_name(file_name)
+                if not module_arg:
+                    print('Warning: "' + file_name + '" does not appear to be a Python module source file or package directory.')
+                    continue
+                else:
+                    matching_modules = [m for m in all_modules if m.__name__.startswith(module_arg)]
+            else:
+                matching_modules = [m for m in all_modules if m.__name__.endswith(module_arg)]
+        if not matching_modules:
+            print('Warning: No modules loaded at startup correspond to {}'.format(module_arg))
+        for module_name in matching_modules:
+            parents = all_modules[module_name]['parents']
+            print()
+            print_separator()
+            print_headline('Slowest modules importing {0}'.format(module_name.__name__))
+            print_table([m for m in module_by_speed if m[1] in parents], 10)
+            print()
+            print_headline('Slowest modules imported by {0}'.format(module_name.__name__))
+            print_table([m for m in module_by_speed if module_name in m[2]['parents']], 10)
+            print()
+            data = all_modules[module_name]
+            print_headline('module ' + module_name.__name__)
+            print('Time to import:  {0:.3f}ms'.format(1000 * data['time']))
+            print('Cumulative time: {0:.3f}ms'.format(1000 * data['cumulative_time']))
+            print('Names: {0}'.format(', '.join(data['import_names'])))
+            print('File: {0}'.format(module_name.__file__))

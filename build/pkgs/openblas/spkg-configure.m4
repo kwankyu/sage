@@ -7,7 +7,12 @@ SAGE_SPKG_CONFIGURE([openblas], [
   m4_pushdef([SAGE_OPENBLAS_MIN_VERSION_MINOR], [2])
   m4_pushdef([SAGE_OPENBLAS_MIN_VERSION_MICRO], [20])
   m4_pushdef([SAGE_OPENBLAS_MIN_VERSION], [SAGE_OPENBLAS_MIN_VERSION_MAJOR.SAGE_OPENBLAS_MIN_VERSION_MINOR.SAGE_OPENBLAS_MIN_VERSION_MICRO])
-  PKG_CHECK_MODULES([OPENBLAS], [openblas >= ]SAGE_OPENBLAS_MIN_VERSION, [
+  dnl Reject openblas 0.3.22 - https://github.com/sagemath/sage/pull/35371
+  m4_pushdef([SAGE_OPENBLAS_LT_VERSION_MAJOR], [0])
+  m4_pushdef([SAGE_OPENBLAS_LT_VERSION_MINOR], [3])
+  m4_pushdef([SAGE_OPENBLAS_LT_VERSION_MICRO], [22])
+  m4_pushdef([SAGE_OPENBLAS_LT_VERSION], [SAGE_OPENBLAS_LT_VERSION_MAJOR.SAGE_OPENBLAS_LT_VERSION_MINOR.SAGE_OPENBLAS_LT_VERSION_MICRO])
+  PKG_CHECK_MODULES([OPENBLAS], [openblas >= ]SAGE_OPENBLAS_MIN_VERSION [openblas < ]SAGE_OPENBLAS_LT_VERSION, [
     LIBS="$OPENBLAS_LIBS $LIBS"
     CFLAGS="$OPENBLAS_CFLAGS $CFLAGS"
     PKG_CHECK_VAR([OPENBLASPCDIR], [openblas], [pcfiledir], [
@@ -74,8 +79,16 @@ SAGE_SPKG_CONFIGURE([openblas], [
                                                  < 10000 * ]]SAGE_OPENBLAS_MIN_VERSION_MAJOR[[
                                                    + 100 * ]]SAGE_OPENBLAS_MIN_VERSION_MINOR[[
                                                          + ]]SAGE_OPENBLAS_MIN_VERSION_MICRO[[)
+                                               return 1;
+                                             if (  10000 * version[0]
+                                                   + 100 * version[1]
+                                                         + version[2]
+                                                 >=10000 * ]]SAGE_OPENBLAS_LT_VERSION_MAJOR[[
+                                                   + 100 * ]]SAGE_OPENBLAS_LT_VERSION_MINOR[[
+                                                         + ]]SAGE_OPENBLAS_LT_VERSION_MICRO[[)
                                                return 1;]])
-                         ], [AS_VAR_SET([HAVE_OPENBLAS], [yes])], [AS_VAR_SET([HAVE_OPENBLAS], [no])])
+                         ], [AS_VAR_SET([HAVE_OPENBLAS], [yes])], [AS_VAR_SET([HAVE_OPENBLAS], [no])],
+                            [AS_VAR_SET([HAVE_OPENBLAS], [yes])])
                          AC_LANG_POP([C])
                          AC_MSG_RESULT([$HAVE_OPENBLAS])
                        ])
@@ -109,26 +122,5 @@ SAGE_SPKG_CONFIGURE([openblas], [
   LIBS="$SAVE_LIBS"
   CFLAGS="$SAVE_CFLAGS"
  ])
- ], [
-  dnl REQUIRED-CHECK
-  AS_IF([test "x$with_blas" = xopenblas], [
-     sage_require_openblas=yes
-     sage_require_atlas=no])
-  ], [
-  dnl PRE
-  AC_MSG_CHECKING([BLAS library])
-  AC_ARG_WITH([blas],
-  [AS_HELP_STRING([--with-blas=openblas],
-    [use OpenBLAS as BLAS library (default)])]
-  [AS_HELP_STRING([--with-blas=atlas],
-    [use ATLAS as BLAS library])],,
-    [with_blas=openblas]  # default
-  )
-  AS_CASE(["$with_blas"],
-    [openblas], [],
-    [atlas],    [sage_spkg_install_openblas=no],
-                [AC_MSG_ERROR([allowed values for --with-blas are 'atlas' and 'openblas'])])
-  AC_MSG_RESULT([$with_blas])
-  AC_SUBST([SAGE_BLAS], [$with_blas])
-  ]
+ ]
 )

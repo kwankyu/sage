@@ -13,8 +13,8 @@ Sage, you get output similar to the following:
 .. CODE-BLOCK:: text
 
     ┌────────────────────────────────────────────────────────────────────┐
-    │ SageMath version 9.0, Release Date: 2020-01-01                     │
-    │ Using Python 3.7.3. Type "help()" for help.                        │
+    │ SageMath version 9.7, Release Date: 2022-01-10                     │
+    │ Using Python 3.10.4. Type "help()" for help.                       │
     └────────────────────────────────────────────────────────────────────┘
 
 
@@ -28,7 +28,7 @@ To quit Sage either press Ctrl-D or type
 ::
 
     sage: quit
-    Exiting SAGE (CPU time 0m0.00s, Wall time 0m0.89s)
+    Exiting Sage (CPU time 0m0.00s, Wall time 0m0.89s)
 
 The wall time is the time that elapsed on the clock hanging from
 your wall. This is relevant, since CPU time does not track time
@@ -173,8 +173,8 @@ file).
 
     was@form:~$ sage
     ┌────────────────────────────────────────────────────────────────────┐
-    │ SageMath version 9.0, Release Date: 2020-01-01                     │
-    │ Using Python 3.7.3. Type "help()" for help.                        │
+    │ SageMath version 9.7, Release Date: 2022-01-10                     │
+    │ Using Python 3.10.4. Type "help()" for help.                       │
     └────────────────────────────────────────────────────────────────────┘
 
     sage: logstart setup
@@ -189,11 +189,11 @@ file).
     sage: x,y = QQ['x,y'].gens()
     sage: G = E.gens()
     sage:
-    Exiting SAGE (CPU time 0m0.61s, Wall time 0m50.39s).
+    Exiting Sage (CPU time 0m0.61s, Wall time 0m50.39s).
     was@form:~$ sage
     ┌────────────────────────────────────────────────────────────────────┐
-    │ SageMath version 9.0, Release Date: 2020-01-01                     │
-    │ Using Python 3.7.3. Type "help()" for help.                        │
+    │ SageMath version 9.7, Release Date: 2022-01-10                     │
+    │ Using Python 3.10.4. Type "help()" for help.                       │
     └────────────────────────────────────────────────────────────────────┘
 
     sage: load("setup")
@@ -314,7 +314,7 @@ the ``cputime`` command, as illustrated below:
 
     sage: cputime?
     ...
-        Return the time in CPU second since SAGE started, or with optional
+        Return the time in CPU second since Sage started, or with optional
         argument t, return the time since time t.
         INPUT:
             t -- (optional) float, time in CPU seconds
@@ -453,7 +453,7 @@ Errors and Exceptions
 When something goes wrong, you will usually see a Python
 "exception". Python even tries to suggest what raised the
 exception. Often you see the name of the exception, e.g.,
-``NameError`` or ``ValueError`` (see the Python Reference Manual [Py]_
+``NameError`` or ``ValueError`` (see the Python Library Reference [PyLR]_
 for a complete list of exceptions). For example,
 
 .. skip
@@ -465,7 +465,7 @@ for a complete list of exceptions). For example,
        File "<console>", line 1
          ZZ(3)_2
                ^
-    SyntaxError: invalid syntax
+    SyntaxError: invalid ...
 
     sage: EllipticCurve([0,infinity])
     ------------------------------------------------------------
@@ -488,7 +488,7 @@ execution stack. For example,
     Automatic pdb calling has been turned ON
     sage: EllipticCurve([1,infinity])
     ---------------------------------------------------------------------------
-    <type 'exceptions.TypeError'>             Traceback (most recent call last)
+    <class 'exceptions.TypeError'>             Traceback (most recent call last)
     ...
 
     ipdb>
@@ -549,7 +549,7 @@ You can also use the following more concise notation:
     sage: V = QQ^3
 
 Then it is easy to list all member functions for :math:`V` using tab
-completion. Just type ``V.``, then type the ``[tab key]`` key on your
+completion. Just type ``V.``, then type the :kbd:`Tab` key on your
 keyboard:
 
 .. skip
@@ -567,7 +567,7 @@ keyboard:
     ...
     V.zero_vector
 
-If you type the first few letters of a function, then ``[tab key]``,
+If you type the first few letters of a function, then the :kbd:`Tab` key,
 you get only functions that begin as indicated.
 
 .. skip
@@ -597,7 +597,7 @@ followed by ? for the documentation for that function.
     sage: V = QQ^3
     sage: V.coordinates?
     Type:           instancemethod
-    Base Class:     <type 'instancemethod'>
+    Base Class:     <class 'instancemethod'>
     String Form:    <bound method FreeModule_ambient_field.coordinates of Vector
     space of dimension 3 over Rational Field>
     Namespace:      Interactive
@@ -945,98 +945,3 @@ Each saved variable is again available. Moreover, the variable
     sage: a
     389
 
-
-
-.. _section-notebook:
-
-The legacy Notebook Interface
-=============================
-
-This section refers to the legacy Sage notebook, or "sagenb".
-
-SageMath is transitioning to using the
-`Jupyter notebook
-<http://jupyter-notebook.readthedocs.io/en/latest/notebook.html>`_
-as a default, which has a different structure.  The most important
-difference for users is that individual worksheets in Jupyter
-are saved on your local system just like any other file, whereas
-in the Sage notebook the main point of access is in the files
-described below via the server.
-
-
-Legacy SageNB Notebook
-----------------------
-
-The Sage notebook is run by choosing it after starting Sage with ``-n`` option.
-This starts the Sage notebook and
-opens your default web browser to view it. The server's state files
-are stored in ``$HOME/.sage/sage\_notebook.sagenb``.
-
-When you start the notebook, it first creates the following files
-in ``$HOME/.sage/sage_notebook.sagenb``:
-
-.. CODE-BLOCK:: text
-
-    conf.pickle
-    openid.pickle
-    twistedconf.tac
-    sagenb.pid
-    users.pickle
-    home/admin/ (a directory for the admin user)
-    home/guest/ (a directory for guests)
-    home/pub/ (a directory for published worksheets)
-
-After creating the above files, the notebook starts a web server.
-
-A "notebook" is a collection of user accounts, each of which can
-have any number of worksheets. When you create a new worksheet, the
-data that defines it is stored in the ``home/username/number``
-directories. In each such directory there is a plain text file
-``worksheet.html`` - if anything ever happens to your worksheets, or Sage,
-or whatever, that human-readable file contains everything needed to
-reconstruct your worksheet.  Each worksheet also has, at a minimum,
-the files/folders:
-
-.. CODE-BLOCK:: text
-
-    cells/
-    worksheet.html
-    data/
-    worksheet_conf.pickle
-
-
-From within Sage, type ``notebook?`` for much more about how to start a
-notebook server.
-
-The following diagram illustrates the architecture of the Sage
-Notebook:
-
-.. CODE-BLOCK:: text
-
-    ----------------------
-    |                    |
-    |                    |
-    |   firefox/safari   |
-    |                    |
-    |     javascript     |
-    |      program       |
-    |                    |
-    |                    |
-    ----------------------
-          |      ^
-          | AJAX |
-          V      |
-    ----------------------
-    |                    |
-    |       sage         |                SAGE process 1
-    |       web          | ------------>  SAGE process 2    (Python processes)
-    |      server        |   pexpect      SAGE process 3
-    |                    |                    .
-    |                    |                    .
-    ----------------------                    .
-
-For help on a Sage command, ``cmd``, in the notebook browser box,
-type ``cmd?`` and now hit ``<tab>`` (not ``<shift-enter>``).
-
-For help on the keyboard shortcuts available in the notebook
-interface, click on the ``Help`` link.

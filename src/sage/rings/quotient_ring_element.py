@@ -16,10 +16,14 @@ AUTHORS:
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 
-
 from sage.structure.element import RingElement
 from sage.structure.richcmp import richcmp, rich_to_bool
-from sage.interfaces.singular import singular as singular_default
+
+
+try:
+    from sage.interfaces.singular import singular as singular_default
+except ImportError:
+    singular_default = None
 
 
 class QuotientRingElement(RingElement):
@@ -149,15 +153,11 @@ class QuotientRingElement(RingElement):
         """
         return self.__rep not in self.parent().defining_ideal()
 
-    __nonzero__ = __bool__
+
 
     def is_unit(self):
         """
         Return True if self is a unit in the quotient ring.
-
-        TODO: This is not fully implemented, as illustrated in the
-        example below.  So far, self is determined to be unit only if
-        its representation in the cover ring `R` is also a unit.
 
         EXAMPLES::
 
@@ -165,18 +165,26 @@ class QuotientRingElement(RingElement):
             <class 'sage.rings.quotient_ring.QuotientRing_generic_with_category.element_class'>
             sage: a*b
             1
-            sage: a.is_unit()
-            Traceback (most recent call last):
-            ...
-            NotImplementedError
-            sage: S(1).is_unit()
+            sage: S(2).is_unit()
             True
+
+        Check that :trac:`29469` is fixed::
+
+            sage: a.is_unit()
+            True
+            sage: (a+b).is_unit()
+            False
         """
         if self.__rep.is_unit():
             return True
         from sage.categories.fields import Fields
-        if self.parent() in Fields:
+        if self.parent() in Fields():
             return not self.is_zero()
+        try:
+            self.__invert__()
+            return True
+        except ArithmeticError:
+            return False
         raise NotImplementedError
 
     def _repr_(self):
@@ -215,6 +223,31 @@ class QuotientRingElement(RingElement):
             return str(self.__rep)
         with localvars(R, P.variable_names(), normalize=False):
             return str(self.__rep)
+
+    def _latex_(self):
+        """
+        Return the LaTeX representation as a string.
+
+        EXAMPLES::
+
+            sage: R = PolynomialRing(QQ, 'a, b, c')
+            sage: a = R.gen(0)
+            sage: I = R.ideal(a**2 + a + 1)
+            sage: S = R.quotient(I, names=R.variable_names())
+            sage: a = S.gen(0)
+            sage: latex(a)
+            a
+        """
+        from sage.structure.parent_gens import localvars
+        P = self.parent()
+        R = P.cover_ring()
+        # see _repr_ above for the idea
+        try:
+            P.variable_names()
+        except ValueError:
+            return self.__rep._latex_()
+        with localvars(R, P.variable_names(), normalize=False):
+            return self.__rep._latex_()
 
     def __pari__(self):
         """
@@ -380,7 +413,8 @@ class QuotientRingElement(RingElement):
         """
         # Special case: if self==0 (and right is nonzero), just return self.
         if not self:
-            if not right: raise ZeroDivisionError
+            if not right:
+                raise ZeroDivisionError
             return self
 
         # We are computing L/R modulo the ideal.
@@ -408,12 +442,12 @@ class QuotientRingElement(RingElement):
         # makes the implicit Groebner basis computation of [R]+B
         # that is done in the lift command below faster.
 
-        B  = I.groebner_basis()
+        B = I.groebner_basis()
         try:
             XY = L.lift((R,) + tuple(B))
         except ValueError:
-             raise ArithmeticError("Division failed. The numerator is not "
-                                   "a multiple of the denominator.")
+            raise ArithmeticError("Division failed. The numerator is not "
+                                  "a multiple of the denominator.")
         return P(XY[0])
 
     def _im_gens_(self, codomain, im_gens, base_map=None):
@@ -470,11 +504,11 @@ class QuotientRingElement(RingElement):
             sage: int(a)
             Traceback (most recent call last):
             ...
-            TypeError: unable to convert non-constant polynomial x to an integer
+            TypeError: unable to convert non-constant polynomial x to <class 'int'>
         """
         return int(self.lift())
 
-    def _integer_(self, Z=None):
+    def _integer_(self, Z):
         """
         EXAMPLES::
 
@@ -485,13 +519,10 @@ class QuotientRingElement(RingElement):
 
         TESTS::
 
-            sage: type(S(-3)._integer_())
-            <type 'sage.rings.integer.Integer'>
+            sage: type(ZZ(S(-3)))
+            <class 'sage.rings.integer.Integer'>
         """
-        try:
-            return self.lift()._integer_(Z)
-        except AttributeError:
-            raise NotImplementedError
+        return Z(self.lift())
 
     def _rational_(self):
         """
@@ -505,23 +536,10 @@ class QuotientRingElement(RingElement):
         TESTS::
 
             sage: type(S(-2/3)._rational_())
-            <type 'sage.rings.rational.Rational'>
+            <class 'sage.rings.rational.Rational'>
         """
-        try:
-            return self.lift()._rational_()
-        except AttributeError:
-            raise NotImplementedError
-
-    def __long__(self):
-        """
-        EXAMPLES::
-
-            sage: R.<x,y> = QQ[]; S.<a,b> = R.quo(x^2 + y^2); type(a)
-            <class 'sage.rings.quotient_ring.QuotientRing_generic_with_category.element_class'>
-            sage: long(S(-3))            # indirect doctest
-            -3L
-        """
-        return long(self.lift())
+        from sage.rings.rational_field import QQ
+        return QQ(self.lift())
 
     def __neg__(self):
         """
@@ -587,7 +605,7 @@ class QuotientRingElement(RingElement):
             sage: float(a)
             Traceback (most recent call last):
             ...
-            TypeError: unable to convert non-constant polynomial x to a float
+            TypeError: unable to convert non-constant polynomial x to <class 'float'>
         """
         return float(self.lift())
 
@@ -649,9 +667,9 @@ class QuotientRingElement(RingElement):
 
         # Since we have to compute normal forms anyway, it makes sense
         # to use it for comparison in the case of an inequality as well.
-        if self.__rep == other.__rep: # Use a shortpath, so that we
-                                      # avoid expensive reductions
-             return rich_to_bool(op, 0)
+        if self.__rep == other.__rep:
+            # Use a shortpath, so that we avoid expensive reductions
+            return rich_to_bool(op, 0)
         I = self.parent().defining_ideal()
         return richcmp(I.reduce(self.__rep), I.reduce(other.__rep), op)
 
@@ -809,6 +827,8 @@ class QuotientRingElement(RingElement):
             sage: S((a-2/3*b)._singular_())
             a - 2/3*b
         """
+        if singular is None:
+            raise ImportError("could not import singular")
         return self.__rep._singular_(singular)
 
     def _magma_init_(self, magma):
@@ -901,9 +921,14 @@ class QuotientRingElement(RingElement):
 
         INPUT:
 
-
         -  ``G`` - a list of quotient ring elements
 
+        .. WARNING::
+
+            This method is not guaranteed to return unique minimal results.
+            For quotients of polynomial rings, use
+            :meth:`~sage.rings.polynomial.multi_polynomial_ideal.MPolynomialIdeal.reduce`
+            on the ideal generated by ``G``, instead.
 
         EXAMPLES::
 
@@ -914,6 +939,11 @@ class QuotientRingElement(RingElement):
             sage: f = Q((a*b + c*d + 1)^2  + e)
             sage: f.reduce(I2.gens())
             ebar
+
+        Notice that the result above is not minimal::
+
+            sage: I2.reduce(f)
+            0
         """
         try:
             G = [f.lift() for f in G]
@@ -922,4 +952,3 @@ class QuotientRingElement(RingElement):
         # reduction w.r.t. the defining ideal is performed in the
         # constructor
         return self.__class__(self.parent(), self.__rep.reduce(G))
-

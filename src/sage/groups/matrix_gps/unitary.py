@@ -49,8 +49,8 @@ AUTHORS:
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 
-from sage.rings.all import GF
-from sage.rings.finite_rings.finite_field_base import is_FiniteField
+from sage.rings.finite_rings.finite_field_constructor import GF
+from sage.rings.finite_rings.finite_field_base import FiniteField
 from sage.misc.latex import latex
 from sage.misc.cachefunc import cached_method
 from sage.groups.matrix_gps.named_group import (
@@ -77,7 +77,7 @@ def finite_field_sqrt(ring):
         sage: finite_field_sqrt(GF(4, 'a'))
         2
     """
-    if not is_FiniteField(ring):
+    if not isinstance(ring, FiniteField):
         raise ValueError('not a finite field')
     q, rem = ring.cardinality().sqrtrem()
     if rem:
@@ -107,7 +107,7 @@ def _UG(n, R, special, var='a', invariant_form=None):
         latex_prefix ='S'
 
     degree, ring = normalize_args_vectorspace(n, R, var=var)
-    if is_FiniteField(ring):
+    if isinstance(ring, FiniteField):
         q = ring.cardinality()
         ring = GF(q**2, name=var)
         if invariant_form is not None:
@@ -120,9 +120,9 @@ def _UG(n, R, special, var='a', invariant_form=None):
 
         try:
             if invariant_form.is_positive_definite():
-               inserted_text = "with respect to positive definite hermitian form"
+                inserted_text = "with respect to positive definite hermitian form"
             else:
-               inserted_text = "with respect to non positive definite hermitian form"
+                inserted_text = "with respect to non positive definite hermitian form"
         except ValueError:
             inserted_text = "with respect to hermitian form"
 
@@ -134,12 +134,11 @@ def _UG(n, R, special, var='a', invariant_form=None):
         name = '{0} Unitary Group of degree {1} over {2}'.format(prefix, degree, ring)
         ltx  = r'\text{{{0}U}}_{{{1}}}({2})'.format(latex_prefix, degree, latex(ring))
 
-    if is_FiniteField(ring):
+    if isinstance(ring, FiniteField):
         cmd = '{0}U({1}, {2})'.format(latex_prefix, degree, q)
         return UnitaryMatrixGroup_gap(degree, ring, special, name, ltx, cmd)
     else:
         return UnitaryMatrixGroup_generic(degree, ring, special, name, ltx, invariant_form=invariant_form)
-
 
 
 ###############################################################################
@@ -211,7 +210,7 @@ def GU(n, R, var='a', invariant_form=None):
     Using the ``invariant_form`` option::
 
         sage: UCF = UniversalCyclotomicField(); e5=UCF.gen(5)
-        sage: m=matrix(UCF, 3,3, [[1,e5,0],[e5.conjugate(),2,0],[0,0,1]])
+        sage: m = matrix(UCF, 3,3, [[1,e5,0],[e5.conjugate(),2,0],[0,0,1]])
         sage: G  = GU(3, UCF)
         sage: Gm = GU(3, UCF, invariant_form=m)
         sage: G == Gm
@@ -224,7 +223,7 @@ def GU(n, R, var='a', invariant_form=None):
         [     1   E(5)      0]
         [E(5)^4      2      0]
         [     0      0      1]
-        sage: pm=Permutation((1,2,3)).to_matrix()
+        sage: pm = Permutation((1,2,3)).to_matrix()
         sage: g = G(pm); g in G; g
         True
         [0 0 1]
@@ -255,7 +254,6 @@ def GU(n, R, var='a', invariant_form=None):
         General Unitary Group of degree 2 over Finite Field in a of size 3^2
     """
     return _UG(n, R, False, var=var, invariant_form=invariant_form)
-
 
 
 ###############################################################################
@@ -311,7 +309,7 @@ def SU(n, R, var='a', invariant_form=None):
     Using the ``invariant_form`` option::
 
         sage: CF3 = CyclotomicField(3); e3 = CF3.gen()
-        sage: m=matrix(CF3, 3,3, [[1,e3,0],[e3.conjugate(),2,0],[0,0,1]])
+        sage: m = matrix(CF3, 3,3, [[1,e3,0],[e3.conjugate(),2,0],[0,0,1]])
         sage: G  = SU(3, CF3)
         sage: Gm = SU(3, CF3, invariant_form=m)
         sage: G == Gm
@@ -324,7 +322,7 @@ def SU(n, R, var='a', invariant_form=None):
         [         1      zeta3          0]
         [-zeta3 - 1          2          0]
         [         0          0          1]
-        sage: pm=Permutation((1,2,3)).to_matrix()
+        sage: pm = Permutation((1,2,3)).to_matrix()
         sage: G(pm)
         [0 0 1]
         [1 0 0]
@@ -351,7 +349,6 @@ def SU(n, R, var='a', invariant_form=None):
     return _UG(n, R, True, var=var, invariant_form=invariant_form)
 
 
-
 ########################################################################
 # Unitary Group class
 ########################################################################
@@ -373,7 +370,7 @@ class UnitaryMatrixGroup_generic(NamedMatrixGroup_generic):
         \text{SU}_{3}(\Bold{F}_{5^{2}})
 
         sage: CF3 = CyclotomicField(3); e3 = CF3.gen()
-        sage: m=matrix(CF3, 3,3, [[1,e3,0],[e3.conjugate(),2,0],[0,0,1]])
+        sage: m = matrix(CF3, 3,3, [[1,e3,0],[e3.conjugate(),2,0],[0,0,1]])
         sage: G = SU(3, CF3, invariant_form=m)
         sage: latex(G)
         \text{SU}_{3}(\Bold{Q}(\zeta_{3}))\text{ with respect to positive definite hermitian form }\left(\begin{array}{rrr}
@@ -409,7 +406,6 @@ class UnitaryMatrixGroup_generic(NamedMatrixGroup_generic):
         m = identity_matrix(self.base_ring(), self.degree())
         m.set_immutable()
         return m
-
 
     def _check_matrix(self, x, *args):
         """
@@ -474,4 +470,3 @@ class UnitaryMatrixGroup_gap(UnitaryMatrixGroup_generic, NamedMatrixGroup_gap, F
         m = matrix(R, d, d, self.gap().InvariantSesquilinearForm()['matrix'].matrix())
         m.set_immutable()
         return m
-

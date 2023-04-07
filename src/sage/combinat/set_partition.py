@@ -16,7 +16,7 @@ AUTHORS:
 This module defines a class for immutable partitioning of a set. For
 mutable version see :func:`DisjointSet`.
 """
-#*****************************************************************************
+# ****************************************************************************
 #       Copyright (C) 2007 Mike Hansen <mhansen@gmail.com>,
 #
 #  Distributed under the terms of the GNU General Public License (GPL)
@@ -28,12 +28,9 @@ mutable version see :func:`DisjointSet`.
 #
 #  The full text of the GPL is available at:
 #
-#                  http://www.gnu.org/licenses/
-#*****************************************************************************
-from __future__ import print_function, absolute_import, division
-from six.moves import range
-from six import add_metaclass
-
+#                  https://www.gnu.org/licenses/
+# ****************************************************************************
+from itertools import repeat
 from sage.sets.set import Set, Set_generic
 
 import itertools
@@ -52,17 +49,19 @@ from sage.combinat.combinat_cython import (set_partition_iterator,
 from sage.combinat.partition import Partition, Partitions
 from sage.combinat.combinat import bell_number, stirling_number2
 from sage.combinat.permutation import Permutation
-from sage.functions.other import factorial
-from sage.misc.prandom import random, randint
+from sage.arith.misc import factorial
+from sage.misc.prandom import random, randint, sample
 from sage.probability.probability_distribution import GeneralDiscreteDistribution
 from sage.sets.disjoint_set import DisjointSet
 from sage.combinat.posets.hasse_diagram import HasseDiagram
 
-@add_metaclass(InheritComparisonClasscallMetaclass)
-class AbstractSetPartition(ClonableArray):
+
+class AbstractSetPartition(ClonableArray,
+        metaclass=InheritComparisonClasscallMetaclass):
     r"""
     Methods of set partitions which are independent of the base set
     """
+
     def _repr_(self):
         """
         Return a string representation of ``self``.
@@ -194,7 +193,7 @@ class AbstractSetPartition(ClonableArray):
         """
         if not isinstance(y, AbstractSetPartition):
             return False
-        return [sorted(_) for _ in self] < [sorted(_) for _ in y]
+        return [sorted(i) for i in self] < [sorted(i) for i in y]
 
     def __gt__(self, y):
         """
@@ -222,7 +221,7 @@ class AbstractSetPartition(ClonableArray):
         """
         if not isinstance(y, AbstractSetPartition):
             return False
-        return [sorted(_) for _ in self] > [sorted(_) for _ in y]
+        return [sorted(i) for i in self] > [sorted(i) for i in y]
 
     def __le__(self, y):
         """
@@ -390,7 +389,7 @@ class AbstractSetPartition(ClonableArray):
             sage: SetPartition([(1, 9, 8), (2, 3, 4, 5, 6, 7)]).standard_form()
             [[1, 8, 9], [2, 3, 4, 5, 6, 7]]
         """
-        return [sorted(_) for _ in self]
+        return [sorted(i) for i in self]
 
     def base_set(self):
         """
@@ -447,6 +446,7 @@ class AbstractSetPartition(ClonableArray):
             [{}]
         """
         SP = SetPartitions(len(self))
+
         def union(s):
             # Return the partition obtained by combining, for every
             # part of s, those parts of self which are indexed by
@@ -477,9 +477,63 @@ class AbstractSetPartition(ClonableArray):
         """
         return max(len(block) for block in self)
 
+    def conjugate(self):
+        r"""
+        An involution exchanging singletons and circular adjacencies.
 
-@add_metaclass(InheritComparisonClasscallMetaclass)
-class SetPartition(AbstractSetPartition):
+        This method implements the definition of the conjugate of
+        a set partition defined in [Cal2005]_.
+
+        INPUT:
+
+        - ``self`` -- a set partition of an ordered set
+
+        OUTPUT:
+
+        - a set partition
+
+        EXAMPLES::
+
+            sage: SetPartition([[1,6,7],[2,8],[3,4,5]]).conjugate()
+            {{1, 4, 7}, {2, 8}, {3}, {5}, {6}}
+            sage: all(sp.conjugate().conjugate()==sp for sp in SetPartitions([1,3,5,7]))
+            True
+            sage: SetPartition([]).conjugate()
+            {}
+        """
+        def next(a, support):
+            return support[(support.index(a)+1) % len(support)]
+
+        def addback(S, terminals, rsupport):
+            out = list(S)
+            for a in terminals*2:
+                if a not in out and next(a, rsupport) in out:
+                    out.append(a)
+            return out
+
+        def pre_conjugate(sp):
+            if len(sp) <= 1:
+                return SetPartition([[a] for S in sp for a in S])
+            if sp.max_block_size() == 1:
+                return SetPartition([sp.base_set()])
+            support = sorted(a for S in sp for a in S)
+            initials = [a for S in sp for a in S if next(a,support) in S]
+            singletons = [a for S in sp for a in S if len(S) == 1]
+            if not initials and not singletons:
+                return sp
+            rho = pre_conjugate(
+                SetPartition([[a for a in S if a not in initials]
+                for S in sp if len(S)>1 and any(a not in initials for a in S)]))
+            # add back initials as singletons and singletons as terminals
+            return SetPartition([addback(S, singletons, support[::-1])
+                for S in rho]+[[a] for a in initials])
+        support = sorted(a for S in self for a in S)
+        return SetPartition([[support[-support.index(a)-1] for a in S]
+            for S in pre_conjugate(self)])
+
+
+class SetPartition(AbstractSetPartition,
+        metaclass=InheritComparisonClasscallMetaclass):
     r"""
     A partition of a set.
 
@@ -594,7 +648,7 @@ class SetPartition(AbstractSetPartition):
             TypeError: 'sage.rings.integer.Integer' object is not iterable
         """
         if self not in self.parent():
-            raise ValueError("%s is not an element of %s"%(self, self.parent()))
+            raise ValueError(f"{self} is not an element of {self.parent()}")
 
     def set_latex_options(self, **kwargs):
         r"""
@@ -640,7 +694,7 @@ class SetPartition(AbstractSetPartition):
 
         for key in kwargs:
             if key not in valid_args:
-                raise ValueError("unknown keyword argument: %s"%key)
+                raise ValueError("unknown keyword argument: %s" % key)
             if key == 'plot':
                 if not (kwargs['plot'] == 'cyclic'
                         or kwargs['plot'] == 'linear'
@@ -955,7 +1009,7 @@ class SetPartition(AbstractSetPartition):
         elif bijection == "intertwining":
             return self.to_restricted_growth_word_intertwining()
         else:
-            raise ValueError("The given bijection is not valid.")
+            raise ValueError("the given bijection is not valid")
 
     def to_restricted_growth_word_blocks(self):
         r"""
@@ -1096,7 +1150,7 @@ class SetPartition(AbstractSetPartition):
         elif bijection == "psi":
             return self.to_rook_placement_psi()
         else:
-            raise ValueError("The given map is not valid.")
+            raise ValueError("the given map is not valid")
 
     def to_rook_placement_gamma(self):
         """
@@ -1731,9 +1785,9 @@ class SetPartition(AbstractSetPartition):
             sub_parts = [list(self[i-1]) for i in part] # -1 for indexing
             # Standardizing sub_parts (the cur variable not being reset
             # to 1 gives us the offset we want):
-            mins = [min(_) for _ in sub_parts]
+            mins = [min(i) for i in sub_parts]
             over_max = max(map(max, sub_parts)) + 1
-            temp = [[] for i in range(len(part))]
+            temp = [[] for _ in repeat(None, len(part))]
             while min(mins) != over_max:
                 m = min(mins)
                 i = mins.index(m)
@@ -1949,6 +2003,7 @@ class SetPartition(AbstractSetPartition):
         diag.axes(False)
         return diag
 
+
 class SetPartitions(UniqueRepresentation, Parent):
     r"""
     An (unordered) partition of a set `S` is a set of pairwise
@@ -2011,7 +2066,7 @@ class SetPartitions(UniqueRepresentation, Parent):
         else:
             try:
                 if s.cardinality() == infinity:
-                    raise ValueError("The set must be finite")
+                    raise ValueError("the set must be finite")
             except AttributeError:
                 pass
             s = frozenset(s)
@@ -2020,13 +2075,12 @@ class SetPartitions(UniqueRepresentation, Parent):
             if isinstance(part, (int, Integer)):
                 if len(s) < part:
                     raise ValueError("part must be <= len(set)")
-                else:
-                    return SetPartitions_setn(s, part)
+                return SetPartitions_setn(s, part)
             else:
+                part = sorted(part, reverse=True)
                 if part not in Partitions(len(s)):
-                    raise ValueError("part must be a partition of %s"%len(s))
-                else:
-                    return SetPartitions_setparts(s, Partition(part))
+                    raise ValueError("part must be an integer partition of %s"%len(s))
+                return SetPartitions_setparts(s, Partition(part))
         else:
             return SetPartitions_set(s)
 
@@ -2132,7 +2186,7 @@ class SetPartitions(UniqueRepresentation, Parent):
         elif bijection == "intertwining":
             return self.from_restricted_growth_word_intertwining(w)
         else:
-            raise ValueError("The given bijection is not valid.")
+            raise ValueError("the given bijection is not valid")
 
     def from_restricted_growth_word_blocks(self, w):
         r"""
@@ -2140,7 +2194,7 @@ class SetPartitions(UniqueRepresentation, Parent):
         integers such that each letter is at most 1 larger than all
         the letters before to a set partition of `\{1,...,n\}`.
 
-        ``w[i]` is the index of the block containing ``i+1`` when
+        ``w[i]`` is the index of the block containing ``i+1`` when
         sorting the blocks by their minimal element.
 
         INPUT:
@@ -2225,7 +2279,7 @@ class SetPartitions(UniqueRepresentation, Parent):
 
         If ``n`` is not given, it is first checked whether it can be
         determined from the parent, otherwise it is the maximal
-        occuring integer in the set of rooks.
+        occurring integer in the set of rooks.
 
         INPUT:
 
@@ -2292,7 +2346,7 @@ class SetPartitions(UniqueRepresentation, Parent):
         elif bijection == "psi":
             return self.from_rook_placement_psi(rooks, n)
         else:
-            raise ValueError("The given bijection is not valid.")
+            raise ValueError("the given bijection is not valid")
 
     def from_arcs(self, arcs, n):
         r"""
@@ -2439,12 +2493,12 @@ class SetPartitions(UniqueRepresentation, Parent):
         # block is before the block of i
         rs = [C_flat.count(i) for i in range(1,n+1)]
         # create the blocks
-        P = [[] for c in R]
+        P = [[] for _ in R]
         for i in range(1, n+1):
             k = rs[i-1]
             # find k-th block which does not yet have a closer
             b = 0
-            while k > 0 or (P[b] != [] and P[b][-1] in R):
+            while k > 0 or (P[b] and P[b][-1] in R):
                 if P[b][-1] not in R:
                     k -= 1
                 b += 1
@@ -2605,10 +2659,12 @@ class SetPartitions(UniqueRepresentation, Parent):
                 return False
         return True
 
+
 class SetPartitions_all(SetPartitions):
     r"""
     All set partitions.
     """
+
     def __init__(self):
         """
         Initialize ``self``.
@@ -2619,6 +2675,21 @@ class SetPartitions_all(SetPartitions):
             sage: TestSuite(S).run()
         """
         SetPartitions.__init__(self, category=InfiniteEnumeratedSets())
+
+    def subset(self, size=None, **kwargs):
+        """
+        Return the subset of set partitions of a given size and
+        additional keyword arguments.
+
+        EXAMPLES::
+
+            sage: P = SetPartitions()
+            sage: P.subset(4)
+            Set partitions of {1, 2, 3, 4}
+        """
+        if size is None:
+            return self
+        return SetPartitions(size, **kwargs)
 
     def _repr_(self):
         """
@@ -2648,6 +2719,7 @@ class SetPartitions_all(SetPartitions):
                 yield self.element_class(self, list(x))
             n += 1
 
+
 class SetPartitions_set(SetPartitions):
     """
     Set partitions of a fixed set `S`.
@@ -2665,7 +2737,7 @@ class SetPartitions_set(SetPartitions):
             sage: S1 is S2, S1 is S3
             (True, True)
         """
-        return super(SetPartitions_set, cls).__classcall__(cls, frozenset(s))
+        return super().__classcall__(cls, frozenset(s))
 
     def __init__(self, s):
         """
@@ -2730,12 +2802,16 @@ class SetPartitions_set(SetPartitions):
         EXAMPLES::
 
             sage: S = SetPartitions(10)
-            sage: S.random_element()
-            {{1, 4, 9}, {2, 5, 7}, {3}, {6}, {8, 10}}
+            sage: s = S.random_element()
+            sage: s.parent() is S
+            True
+            sage: assert s in S, s
 
             sage: S = SetPartitions(["a", "b", "c"])
-            sage: S.random_element() # random
-            {{'a'}, {'b', 'c'}}
+            sage: s = S.random_element()
+            sage: s.parent() is S
+            True
+            sage: assert s in S, s
         """
         base_set = list(self.base_set())
         N = len(base_set)
@@ -2815,6 +2891,7 @@ class SetPartitions_set(SetPartitions):
         """
         return len(self._set)
 
+
 class SetPartitions_setparts(SetPartitions_set):
     r"""
     Set partitions with fixed partition sizes corresponding to an
@@ -2831,16 +2908,21 @@ class SetPartitions_setparts(SetPartitions_set):
             sage: T = SetPartitions([1,2,3,4], Partition([2,2]))
             sage: S is T
             True
+
+            sage: S = SetPartitions(4, [3,1])
+            sage: T = SetPartitions(4, (1,3))
+            sage: S is T
+            True
         """
         if isinstance(s, (int, Integer)):
             s = list(range(1, s + 1))
-        return super(SetPartitions_setparts, cls).__classcall__(cls, frozenset(s), Partition(parts))
+        return super().__classcall__(cls, frozenset(s), Partition(parts))
 
     def __init__(self, s, parts):
         """
         Initialize the data structure.
 
-        We can assume here that `parts` is a :cls:`Partition`.
+        We can assume here that ``parts`` is a :class:`Partition`.
 
         TESTS::
 
@@ -2868,7 +2950,7 @@ class SetPartitions_setparts(SetPartitions_set):
 
             sage: SetPartitions(5, [2,2,1]).parts
             doctest:...: DeprecationWarning: The attribute parts for the partition of block sizes is deprecated, use the method shape instead.
-            See https://trac.sagemath.org/25865 for details.
+            See https://github.com/sagemath/sage/issues/25865 for details.
             [2, 2, 1]
         """
         from sage.misc.superseded import deprecation
@@ -2974,7 +3056,6 @@ class SetPartitions_setparts(SetPartitions_set):
                     covers[first].append(i)
         return HasseDiagram(covers)
 
-
     def __iter__(self):
         """
         An iterator for all the set partitions of the given set with
@@ -3031,7 +3112,47 @@ class SetPartitions_setparts(SetPartitions_set):
         """
         if not SetPartitions_set.__contains__(self, x):
             return False
-        return sorted(map(len, x)) == list(reversed(self._parts))
+        return sorted(map(len, x), reverse=True) == self._parts
+
+    def random_element(self):
+        r"""
+        Return a random set partition of ``self``.
+
+        ALGORITHM:
+
+        Based on the cardinality method. For each block size `k_i`,
+        we choose a uniformly random subset `X_i \subseteq S_i` of
+        size `k_i` of the elements `S_i` that have not yet been selected.
+        Thus, we define `S_{i+1} = S_i \setminus X_i` with `S_i = S`
+        being the defining set. This is not yet proven to be uniformly
+        distributed, but numerical tests show this is likely uniform.
+
+        EXAMPLES::
+
+            sage: S = SetPartitions(10, [4,3,2,1])
+            sage: s = S.random_element()
+            sage: s.parent() is S
+            True
+            sage: assert s in S, s
+
+            sage: S = SetPartitions(["a", "b", "c", "d"], [2,2])
+            sage: s = S.random_element()
+            sage: s.parent() is S
+            True
+            sage: assert s in S, s
+        """
+        base_set = list(self.base_set())
+        N = len(base_set)
+        ret = []
+        for p in self._parts:
+            X = sample(range(N), p)
+            ret.append([base_set[i] for i in X])
+            for i in sorted(X, reverse=True):
+                del base_set[i]
+            N -= p
+
+        return self.element_class(self, ret, check=False)
+
 
 class SetPartitions_setn(SetPartitions_set):
     """
@@ -3050,7 +3171,7 @@ class SetPartitions_setn(SetPartitions_set):
             sage: S1 is S2, S1 is S3
             (True, True)
         """
-        return super(SetPartitions_setn, cls).__classcall__(cls, frozenset(s), k)
+        return super().__classcall__(cls, frozenset(s), k)
 
     def __init__(self, s, k):
         """
@@ -3080,7 +3201,7 @@ class SetPartitions_setn(SetPartitions_set):
 
             sage: SetPartitions(5, 3).n
             doctest:...: DeprecationWarning: The attribute n for the number of blocks is deprecated, use the method number_of_blocks instead.
-            See https://trac.sagemath.org/25462 for details.
+            See https://github.com/sagemath/sage/issues/25462 for details.
             3
         """
         from sage.misc.superseded import deprecation
@@ -3161,12 +3282,16 @@ class SetPartitions_setn(SetPartitions_set):
         EXAMPLES::
 
             sage: S = SetPartitions(10, 4)
-            sage: S.random_element()
-            {{1, 2, 4, 6, 9, 10}, {3}, {5, 7}, {8}}
+            sage: s = S.random_element()
+            sage: s.parent() is S
+            True
+            sage: assert s in S, s
 
-            sage: SetPartitions(["a", "b", "c"], 2).random_element() # random
-            {{'a'}, {'b', 'c'}}
-
+            sage: S = SetPartitions(["a", "b", "c"], 2)
+            sage: s = S.random_element()
+            sage: s.parent() is S
+            True
+            sage: assert s in S, s
         """
         def re(N, k):
             if N == 0:
@@ -3189,7 +3314,7 @@ class SetPartitions_setn(SetPartitions_set):
 
 def cyclic_permutations_of_set_partition(set_part):
     """
-    Returns all combinations of cyclic permutations of each cell of the
+    Return all combinations of cyclic permutations of each cell of the
     set partition.
 
     AUTHORS:
@@ -3214,6 +3339,7 @@ def cyclic_permutations_of_set_partition(set_part):
          [[1, 4, 3, 2], [5, 7, 6]]]
     """
     return list(cyclic_permutations_of_set_partition_iterator(set_part))
+
 
 def cyclic_permutations_of_set_partition_iterator(set_part):
     """

@@ -1,8 +1,40 @@
 r"""
-Base class for Codes
+Codes
 
 Class supporting methods available for any type of code (linear, non-linear) and
 over any metric (Hamming, rank).
+
+There are further abstract classes representing certain types of codes. For
+linear codes,
+:class:`~sage.coding.linear_code_no_metric.AbstractLinearCodeNoMetric` contains
+all the methods that any linear code can use regardless of its metric.
+Inheriting from this class are base classes for linear codes over specific
+metrics. For example, :class:`~sage.coding.linear_code.AbstractLinearCode` is a
+base class for all linear codes over the Hamming metric.
+
+Take the class :class:`~sage.coding.hamming_code.HammingCode`. This
+class inherits from :class:`~sage.coding.linear_code.AbstractLinearCode`, since
+it is a linear code over the Hamming metric.
+:class:`~sage.coding.linear_code.AbstractLinearCode` then inherits from
+:class:`~sage.coding.linear_code_no_metric.AbstractLinearCodeNoMetric`, since it
+is a linear code. Finally, this class inherits from
+:class:`~sage.coding.abstract_code.AbstractCode`, since it is a code.
+
+
+The following diagram shows the inheritance relationship in the coding module::
+
+    AbstractCode
+    + AbstractLinearCodeNoMetric
+    | + AbstractLinearCode
+    | | + ParityCheckCode
+    | | + HammingCode
+    | | + CyclicCode
+    | | + BCHCode
+    | | + GolayCode
+    | | + ReedMullerCode
+    | | + GeneralizedReedSolomonCode
+    | | + GoppaCode
+    | + AbstractLinearRankMetricCode
 
 Any class inheriting from AbstractCode can use the encode/decode framework.
 
@@ -48,8 +80,6 @@ For more information about the Decoder class, see
 from sage.structure.parent import Parent
 from sage.misc.cachefunc import cached_method
 from copy import copy
-from .encoder import Encoder
-from .decoder import Decoder, DecodingError
 from sage.rings.integer import Integer
 
 import inspect
@@ -93,7 +123,7 @@ def _explain_constructor(cl):
         reqs = "The constructor requires the arguments {}.".format(args)
     else:
         reqs = "The constructor requires no arguments."
-    if argspec.varargs or argspec.keywords:
+    if argspec.varargs or argspec.varkw:
         var = "It accepts unspecified arguments as well.\n"
     else:
         var = ""
@@ -124,7 +154,7 @@ class AbstractCode(Parent):
     - inherit from AbstractCode
 
     - call AbstractCode ``__init__`` method in the subclass constructor.
-      Example: ``super(SubclassName, self).__init__(length, "EncoderName",
+      Example: ``super().__init__(length, "EncoderName",
       "DecoderName", "metric")``. "EncoderName" and "DecoderName" are set to
       ``None`` by default, a generic code class such as AbstractCode does
       not necessarily have to have general encoders/decoders. However, if you
@@ -202,7 +232,7 @@ class AbstractCode(Parent):
             sage: from sage.coding.abstract_code import AbstractCode
             sage: class MyCodeFamily(AbstractCode):
             ....:   def __init__(self, length):
-            ....:       super(MyCodeFamily, self).__init__(length)
+            ....:       super().__init__(length)
             ....:   def __iter__(self):
             ....:       for i in range(self.length() + 1):
             ....:            yield vector([1 for j in range(i)] + [0 for k in range(i, self.length())])
@@ -259,9 +289,6 @@ class AbstractCode(Parent):
             ValueError: length must be a non-zero positive integer
         """
 
-        _registered_encoders = {}
-        _registered_decoders = {}
-
         if not isinstance(length, (int, Integer)):
             raise ValueError("length must be a Python int or a Sage Integer")
         if length <= 0:
@@ -287,7 +314,7 @@ class AbstractCode(Parent):
             sage: '_registered_encoders' in C.__getstate__()
             True
         """
-        d = super(AbstractCode, self).__getstate__()
+        d = super().__getstate__()
         d['_registered_encoders'] = self._registered_encoders
         d['_registered_decoders'] = self._registered_decoders
         return d
@@ -307,10 +334,10 @@ class AbstractCode(Parent):
             sage: from sage.coding.abstract_code import AbstractCode
             sage: class MyCode(AbstractCode):
             ....:    def __init__(self):
-            ....:        super(MyCode, self).__init__(10)
+            ....:        super().__init__(10)
 
         We check we get a sensible error message while asking for an
-        iterator over the elements of our new class:
+        iterator over the elements of our new class::
 
             sage: C = MyCode()
             sage: list(C)
@@ -335,10 +362,10 @@ class AbstractCode(Parent):
             sage: from sage.coding.abstract_code import AbstractCode
             sage: class MyCode(AbstractCode):
             ....:    def __init__(self, length):
-            ....:        super(MyCode, self).__init__(length)
+            ....:        super().__init__(length)
 
         We check we get a sensible error message while asking if an element is
-        in our new class:
+        in our new class::
 
             sage: C = MyCode(3)
             sage: vector((1, 0, 0, 0, 0, 1, 1)) in C
@@ -359,7 +386,7 @@ class AbstractCode(Parent):
             sage: from sage.coding.abstract_code import AbstractCode
             sage: class MyCode(AbstractCode):
             ....:    def __init__(self, length):
-            ....:        super(MyCode, self).__init__(length)
+            ....:        super().__init__(length)
             sage: C = MyCode(3)
             sage: C.ambient_space()
             Traceback (most recent call last):
@@ -431,10 +458,10 @@ class AbstractCode(Parent):
             sage: from sage.coding.abstract_code import AbstractCode
             sage: class MyCode(AbstractCode):
             ....:    def __init__(self):
-            ....:        super(MyCode, self).__init__(10)
+            ....:        super().__init__(10)
 
         We check we get a sensible error message while asking for a string
-        representation of an instance of our new class:
+        representation of an instance of our new class::
 
             sage: C = MyCode()
             sage: C #random
@@ -459,10 +486,10 @@ class AbstractCode(Parent):
             sage: from sage.coding.abstract_code import AbstractCode
             sage: class MyCode(AbstractCode):
             ....:    def __init__(self):
-            ....:        super(MyCode, self).__init__(10)
+            ....:        super().__init__(10)
 
         We check we get a sensible error message while asking for a string
-        representation of an instance of our new class:
+        representation of an instance of our new class::
 
             sage: C = MyCode()
             sage: latex(C)
@@ -534,7 +561,7 @@ class AbstractCode(Parent):
 
             sage: class MyDecoder(sage.coding.decoder.Decoder):
             ....:   def __init__(self, code):
-            ....:       super(MyDecoder, self).__init__(code)
+            ....:       super().__init__(code)
             ....:   def _repr_(self):
             ....:       return "MyDecoder decoder with associated code %s" % self.code()
 
@@ -596,7 +623,7 @@ class AbstractCode(Parent):
 
             sage: class MyEncoder(sage.coding.encoder.Encoder):
             ....:   def __init__(self, code):
-            ....:       super(MyEncoder, self).__init__(code)
+            ....:       super().__init__(code)
             ....:   def _repr_(self):
             ....:       return "MyEncoder encoder with associated code %s" % self.code()
 

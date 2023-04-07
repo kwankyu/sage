@@ -1,4 +1,5 @@
-"""
+# -*- coding: utf-8 -*-
+r"""
 Elements of Affine Groups
 
 The class in this module is used to represent the elements of
@@ -131,11 +132,11 @@ class AffineGroupElement(MultiplicativeGroupElement):
             if not is_Matrix(A):
                 raise TypeError('A must be a matrix')
             if not (A.parent() is parent.matrix_space()):
-                raise TypeError('A must be an element of '+str(parent.matrix_space()))
+                raise TypeError('A must be an element of ' + str(parent.matrix_space()))
             if not (b.parent() is parent.vector_space()):
-                raise TypeError('b must be an element of '+str(parent.vector_space()))
+                raise TypeError('b must be an element of ' + str(parent.vector_space()))
             parent._element_constructor_check(A, b)
-        super(AffineGroupElement, self).__init__(parent)
+        super().__init__(parent)
         self._A = A
         self._b = b
 
@@ -271,6 +272,56 @@ class AffineGroupElement(MultiplicativeGroupElement):
         """
         return r'\vec{x}\mapsto '+self.A()._latex_()+r'\vec{x} + '+self.b().column()._latex_()
 
+    def _ascii_art_(self):
+        r"""
+        Return an ascii art representation of ``self``.
+
+        EXAMPLES::
+
+            sage: G2 = AffineGroup(2, QQ)
+            sage: g2 = G2([[1, 1], [0, 1]], [3,4])
+            sage: ascii_art(g2)
+            x |-> [1 1] x + [3]
+                  [0 1]     [4]
+
+            sage: G3 = AffineGroup(3, QQ)
+            sage: g3 = G3([[1,1,-1], [0,1,2], [0,10,2]], [3,4,5/2])
+            sage: ascii_art(g3)
+                  [ 1  1 -1]     [  3]
+            x |-> [ 0  1  2] x + [  4]
+                  [ 0 10  2]     [5/2]
+        """
+        from sage.typeset.ascii_art import ascii_art
+        deg = self.parent().degree()
+        A = ascii_art(self._A, baseline=deg//2)
+        b = ascii_art(self._b.column(), baseline=deg//2)
+        return ascii_art("x |-> ") + A + ascii_art(" x + ") + b
+
+    def _unicode_art_(self):
+        r"""
+        Return a unicode art representation of ``self``.
+
+        EXAMPLES::
+
+            sage: G2 = AffineGroup(2, QQ)
+            sage: g2 = G2([[1, 1], [0, 1]], [3,4])
+            sage: unicode_art(g2)
+            x ↦ ⎛1 1⎞ x + ⎛3⎞
+                ⎝0 1⎠     ⎝4⎠
+
+            sage: G3 = AffineGroup(3, QQ)
+            sage: g3 = G3([[1,1,-1], [0,1,2], [0,10,2]], [3,4,5/2])
+            sage: unicode_art(g3)
+                ⎛ 1  1 -1⎞     ⎛  3⎞
+            x ↦ ⎜ 0  1  2⎟ x + ⎜  4⎟
+                ⎝ 0 10  2⎠     ⎝5/2⎠
+        """
+        from sage.typeset.unicode_art import unicode_art
+        deg = self.parent().degree()
+        A = unicode_art(self._A, baseline=deg//2)
+        b = unicode_art(self._b.column(), baseline=deg//2)
+        return unicode_art("x ↦ ") + A + unicode_art(" x + ") + b
+
     def _mul_(self, other):
         """
         Return the composition of ``self`` and ``other``.
@@ -307,8 +358,8 @@ class AffineGroupElement(MultiplicativeGroupElement):
 
         INPUT:
 
-        - ``v`` -- a multivariate polynomial, a vector, or anything
-          that can be converted into a vector.
+        - ``v`` -- a polynomial, a multivariate polynomial, a polyhedron, a
+          vector, or anything that can be converted into a vector.
 
         OUTPUT:
 
@@ -345,18 +396,41 @@ class AffineGroupElement(MultiplicativeGroupElement):
             sage: R.<z> = QQ[]
             sage: h(z+1)
             3*z + 2
+
+        The action on a polyhedron is defined (see :trac:`30327`)::
+
+            sage: F = AffineGroup(3, QQ)
+            sage: M = matrix(3, [-1, -2, 0, 0, 0, 1, -2, 1, -1])
+            sage: v = vector(QQ,(1,2,3))
+            sage: f = F(M, v)
+            sage: cube = polytopes.cube()
+            sage: f(cube)
+            A 3-dimensional polyhedron in QQ^3 defined as the convex hull of 8 vertices
+
         """
-        from sage.rings.polynomial.polynomial_element import is_Polynomial
-        from sage.rings.polynomial.multi_polynomial import is_MPolynomial
         parent = self.parent()
-        if is_Polynomial(v) and parent.degree() == 1:
+
+        # start with the most probable case, i.e., v is in the vector space
+        if v in parent.vector_space():
+            return self._A*v + self._b
+
+        from sage.rings.polynomial.polynomial_element import Polynomial
+        if isinstance(v, Polynomial) and parent.degree() == 1:
             ring = v.parent()
             return ring([self._A[0,0], self._b[0]])
-        if is_MPolynomial(v) and parent.degree() == v.parent().ngens():
+
+        from sage.rings.polynomial.multi_polynomial import MPolynomial
+        if isinstance(v, MPolynomial) and parent.degree() == v.parent().ngens():
             ring = v.parent()
-            from sage.modules.all import vector
+            from sage.modules.free_module_element import vector
             image_coords = self._A * vector(ring, ring.gens()) + self._b
             return v(*image_coords)
+
+        import sage.geometry.abc
+        if isinstance(v, sage.geometry.abc.Polyhedron):
+            return self._A*v + self._b
+
+        # otherwise, coerce v into the vector space
         v = parent.vector_space()(v)
         return self._A*v + self._b
 
@@ -381,7 +455,7 @@ class AffineGroupElement(MultiplicativeGroupElement):
         if self_on_left:
             return self(x)
 
-    def inverse(self):
+    def __invert__(self):
         """
         Return the inverse group element.
 
@@ -399,18 +473,16 @@ class AffineGroupElement(MultiplicativeGroupElement):
             sage: ~g
                   [1 1]     [1]
             x |-> [0 1] x + [0]
-            sage: g * g.inverse()
+            sage: g * g.inverse()   # indirect doctest
                   [1 0]     [0]
             x |-> [0 1] x + [0]
             sage: g * g.inverse() == g.inverse() * g == G(1)
             True
         """
         parent = self.parent()
-        A = parent.matrix_space()(self._A.inverse())
-        b = -A*self.b()
+        A = parent.matrix_space()(~self._A)
+        b = -A * self.b()
         return parent.element_class(parent, A, b, check=False)
-
-    __invert__ = inverse
 
     def _richcmp_(self, other, op):
         """
@@ -459,4 +531,3 @@ class AffineGroupElement(MultiplicativeGroupElement):
             [[1, 2, 3, 10], [4, 5, 6, 11], [7, 8, 0, 12], [0, 0, 0, 1]]
         """
         return [r.list() for r in self.matrix().rows()]
-

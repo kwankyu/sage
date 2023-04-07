@@ -260,6 +260,17 @@ cdef inline int celement_mul(GF2X_c* res, GF2X_c* a, GF2X_c* b, long parent) exc
     """
     GF2X_mul(res[0], a[0], b[0])
 
+cdef inline int celement_truncate(GF2X_c* res, GF2X_c* a, long len, long parent) except -2:
+    """
+    EXAMPLES::
+
+        sage: P.<x> = GF(2)[]
+        sage: p = x^5 + x^3 + x^2 + x + 1
+        sage: p.truncate(2)   # indirect doctest
+        x + 1
+    """
+    GF2X_trunc(res[0], a[0], len)
+
 cdef inline int celement_div(GF2X_c* res, GF2X_c* a, GF2X_c* b, long parent) except -2:
     """
     EXAMPLES::
@@ -336,16 +347,21 @@ cdef inline int celement_pow(GF2X_c* res, GF2X_c* x, long e, GF2X_c *modulus, lo
                 GF2X_LeftShift(res[0], x[0], e - 1)
         else:
             do_sig = GF2X_deg(x[0]) > 1e5
-            if do_sig: sig_on()
+            if do_sig:
+                sig_on()
             GF2X_power(res[0], x[0], e)
-            if do_sig: sig_off()
+            if do_sig:
+                sig_off()
     else:
         GF2XModulus_build(mod, modulus[0])
 
         do_sig = GF2X_deg(x[0]) > 1e5
-        if do_sig: sig_on()
+        if do_sig:
+            sig_on()
         GF2X_PowerMod_long_pre(res[0], x[0], e, mod)
-        if do_sig: sig_off()
+        if do_sig:
+            sig_off()
+
 
 cdef inline int celement_gcd(GF2X_c* res, GF2X_c* a, GF2X_c *b, long parent) except -2:
     """

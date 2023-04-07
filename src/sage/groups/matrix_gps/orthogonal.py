@@ -84,8 +84,8 @@ AUTHORS:
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 
-from sage.rings.all import ZZ
-from sage.rings.finite_rings.finite_field_base import is_FiniteField
+from sage.rings.integer_ring import ZZ
+from sage.rings.finite_rings.finite_field_base import FiniteField
 from sage.misc.latex import latex
 from sage.misc.cachefunc import cached_method
 from sage.groups.matrix_gps.named_group import (
@@ -127,14 +127,12 @@ def normalize_args_e(degree, ring, e):
         ...
         ValueError: must have e=-1 or e=1 for even degree
     """
-    if is_FiniteField(ring) and degree%2 == 0:
+    if isinstance(ring, FiniteField) and degree%2 == 0:
         if e not in (-1, +1):
             raise ValueError('must have e=-1 or e=1 for even degree')
     else:
         e = 0
     return ZZ(e)
-
-
 
 
 ###############################################################################
@@ -143,8 +141,9 @@ def normalize_args_e(degree, ring, e):
 
 def _OG(n, R, special, e=0, var='a', invariant_form=None):
     r"""
-    This function is commonly used by the functions GO and SO to avoid uneccessarily
-    duplicated code. For documentation and examples see the individual functions.
+    This function is commonly used by the functions GO and SO to avoid
+    unnecessarily duplicated code. For documentation and examples see
+    the individual functions.
 
     TESTS:
 
@@ -172,7 +171,7 @@ def _OG(n, R, special, e=0, var='a', invariant_form=None):
     e = normalize_args_e(degree, ring, e)
 
     if invariant_form is not None:
-        if is_FiniteField(ring):
+        if isinstance(ring, FiniteField):
             raise NotImplementedError("invariant_form for finite groups is fixed by GAP")
 
     if e == 0:
@@ -183,9 +182,9 @@ def _OG(n, R, special, e=0, var='a', invariant_form=None):
 
             try:
                 if invariant_form.is_positive_definite():
-                   inserted_text = "with respect to positive definite symmetric form"
+                    inserted_text = "with respect to positive definite symmetric form"
                 else:
-                   inserted_text = "with respect to non positive definite symmetric form"
+                    inserted_text = "with respect to non positive definite symmetric form"
             except ValueError:
                 inserted_text = "with respect to symmetric form"
 
@@ -203,12 +202,11 @@ def _OG(n, R, special, e=0, var='a', invariant_form=None):
                                                          latex(ring),
                                                          '+' if e == 1 else '-')
 
-    if is_FiniteField(ring):
+    if isinstance(ring, FiniteField):
         cmd  = '{0}O({1}, {2}, {3})'.format(ltx_prefix, e, degree, ring.order())
         return OrthogonalMatrixGroup_gap(degree, ring, False, name, ltx, cmd)
     else:
         return OrthogonalMatrixGroup_generic(degree, ring, False, name, ltx, invariant_form=invariant_form)
-
 
 
 ########################################################################
@@ -321,7 +319,6 @@ def GO(n, R, e=0, var='a', invariant_form=None):
     return _OG(n, R, False, e=e, var=var, invariant_form=invariant_form)
 
 
-
 ########################################################################
 # Special Orthogonal Group
 ########################################################################
@@ -389,7 +386,7 @@ def SO(n, R, e=None, var='a', invariant_form=None):
     Using the ``invariant_form`` option::
 
         sage: CF3 = CyclotomicField(3); e3 = CF3.gen()
-        sage: m=matrix(CF3, 3,3, [[1,e3,0],[e3,2,0],[0,0,1]])
+        sage: m = matrix(CF3, 3,3, [[1,e3,0],[e3,2,0],[0,0,1]])
         sage: SO3  = SO(3, CF3)
         sage: SO3m = SO(3, CF3, invariant_form=m)
         sage: SO3 == SO3m
@@ -432,7 +429,6 @@ def SO(n, R, e=None, var='a', invariant_form=None):
     return _OG(n, R, True, e=e, var=var, invariant_form=invariant_form)
 
 
-
 ########################################################################
 # Orthogonal Group class
 ########################################################################
@@ -454,7 +450,7 @@ class OrthogonalMatrixGroup_generic(NamedMatrixGroup_generic):
         \text{SO}_{3}(\Bold{F}_{5})
 
         sage: CF3 = CyclotomicField(3); e3 = CF3.gen()
-        sage: m=matrix(CF3, 3,3, [[1,e3,0],[e3,2,0],[0,0,1]])
+        sage: m = matrix(CF3, 3,3, [[1,e3,0],[e3,2,0],[0,0,1]])
         sage: G = SO(3, CF3, invariant_form=m)
         sage: latex(G)
         \text{SO}_{3}(\Bold{Q}(\zeta_{3}))\text{ with respect to non positive definite symmetric form }\left(\begin{array}{rrr}
@@ -649,4 +645,3 @@ class OrthogonalMatrixGroup_gap(OrthogonalMatrixGroup_generic, NamedMatrixGroup_
         m = self.gap().InvariantQuadraticForm()['matrix'].matrix()
         m.set_immutable()
         return m
-

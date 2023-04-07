@@ -90,8 +90,6 @@ Classes and Methods
 # (at your option) any later version.
 #                  http://www.gnu.org/licenses/
 #*****************************************************************************
-from __future__ import print_function
-from __future__ import absolute_import
 
 from sage.structure.factory import UniqueFactory
 
@@ -166,6 +164,13 @@ class CartesianProductFactory(UniqueFactory):
         Traceback (most recent call last):
         ...
         TypeError: Cannot create Cartesian product without factors.
+
+        sage: from sage.rings.asymptotic.growth_group import GrowthGroup
+        sage: G1 = GrowthGroup('x^QQ')
+        sage: G2 = GrowthGroup('log(x)^ZZ')
+        sage: G = cartesian_product([G1, G2])
+        sage: cartesian_product([G1, G2], category=G.category()) is G
+        True
     """
     def create_key_and_extra_args(self, growth_groups, category, **kwds):
         r"""
@@ -179,8 +184,16 @@ class CartesianProductFactory(UniqueFactory):
             sage: A = GrowthGroup('x^ZZ')
             sage: CartesianProductFactory('factory').create_key_and_extra_args(
             ....:     [A], category=Sets(), order='blub')
-            (((Growth Group x^ZZ,), Category of sets), {'order': 'blub'})
+            (((Growth Group x^ZZ,), Category of posets), {'order': 'blub'})
         """
+
+        # CartesianProductPosets automatically add Posets() to their categories
+        from sage.categories.category import Category
+        from sage.categories.posets import Posets
+        if not isinstance(category, tuple):
+            category = (category,)
+        category = Category.join(category + (Posets(),))
+
         return (tuple(growth_groups), category), kwds
 
 
@@ -499,7 +512,7 @@ class GenericProduct(CartesianProductPoset, GenericGrowthGroup):
             # room for other parents (e.g. polynomial ring et al.)
 
         try:
-            return super(GenericProduct, self)._element_constructor_(data)
+            return super()._element_constructor_(data)
         except (TypeError, ValueError):
             pass
         if isinstance(data, (tuple, list, CartesianProduct.Element)):
@@ -1428,9 +1441,7 @@ class UnivariateProduct(GenericProduct):
             sage: type(GrowthGroup('x^ZZ * log(x)^ZZ'))  # indirect doctest
             <class 'sage.rings.asymptotic.growth_group_cartesian.UnivariateProduct_with_category'>
         """
-        super(UnivariateProduct, self).__init__(
-            sets, category, order='lex', **kwargs)
-
+        super().__init__(sets, category, order='lex', **kwargs)
 
     CartesianProduct = CartesianProductGrowthGroups
 
@@ -1461,8 +1472,6 @@ class MultivariateProduct(GenericProduct):
             sage: type(GrowthGroup('x^ZZ * y^ZZ'))  # indirect doctest
             <class 'sage.rings.asymptotic.growth_group_cartesian.MultivariateProduct_with_category'>
         """
-        super(MultivariateProduct, self).__init__(
-            sets, category, order='product', **kwargs)
-
+        super().__init__(sets, category, order='product', **kwargs)
 
     CartesianProduct = CartesianProductGrowthGroups

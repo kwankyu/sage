@@ -166,7 +166,7 @@ class LieAlgebras(Category_over_base_ring):
         """
         if gens is None:
             from sage.combinat.symmetric_group_algebra import SymmetricGroupAlgebra
-            from sage.rings.all import QQ
+            from sage.rings.rational_field import QQ
             gens = SymmetricGroupAlgebra(QQ, 3).algebra_generators()
         from sage.categories.examples.lie_algebras import Example
         return Example(gens)
@@ -400,7 +400,7 @@ class LieAlgebras(Category_over_base_ring):
             """
 
         @abstract_method(optional=True)
-        def from_vector(self, v):
+        def from_vector(self, v, order=None, coerce=False):
             """
             Return the element of ``self`` corresponding to the
             vector ``v`` in ``self.module()``.
@@ -683,7 +683,7 @@ class LieAlgebras(Category_over_base_ring):
             EXAMPLES::
 
                 sage: L = lie_algebras.Heisenberg(QQ, 1)
-                sage: G = L.lie_group('G'); G
+                sage: G = L.lie_group('G'); G                                       # optional - sage.symbolic
                 Lie group G of Heisenberg algebra of rank 1 over Rational Field
             """
 
@@ -842,7 +842,7 @@ class LieAlgebras(Category_over_base_ring):
             """
 
         @abstract_method(optional=True)
-        def to_vector(self):
+        def to_vector(self, order=None):
             """
             Return the vector in ``g.module()`` corresponding to the
             element ``self`` of ``g`` (where ``g`` is the parent of
@@ -907,23 +907,23 @@ class LieAlgebras(Category_over_base_ring):
             EXAMPLES::
 
                 sage: L.<X,Y,Z> = LieAlgebra(QQ, 2, step=2)
-                sage: g = (X + Y + Z).exp(); g
+                sage: g = (X + Y + Z).exp(); g                                  # optional - sage.symbolic
                 exp(X + Y + Z)
-                sage: h = X.exp(); h
+                sage: h = X.exp(); h                                            # optional - sage.symbolic
                 exp(X)
-                sage: g.parent()
+                sage: g.parent()                                                # optional - sage.symbolic
                 Lie group G of Free Nilpotent Lie algebra on 3 generators (X, Y, Z) over Rational Field
-                sage: g.parent() is h.parent()
+                sage: g.parent() is h.parent()                                  # optional - sage.symbolic
                 True
 
             The Lie group can be specified explicitly::
 
-                sage: H = L.lie_group('H')
-                sage: k = Z.exp(lie_group=H); k
+                sage: H = L.lie_group('H')                                      # optional - sage.symbolic
+                sage: k = Z.exp(lie_group=H); k                                 # optional - sage.symbolic
                 exp(Z)
-                sage: k.parent()
+                sage: k.parent()                                                # optional - sage.symbolic
                 Lie group H of Free Nilpotent Lie algebra on 3 generators (X, Y, Z) over Rational Field
-                sage: g.parent() == k.parent()
+                sage: g.parent() == k.parent()                                  # optional - sage.symbolic
                 False
             """
             if lie_group is None:
@@ -963,4 +963,3 @@ class LiftMorphism(Morphism):
             3*b0 + b1 - b2
         """
         return x.lift()
-

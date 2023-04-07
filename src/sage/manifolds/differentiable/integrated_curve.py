@@ -23,14 +23,14 @@ Then set the metric to be the hyperbolic one::
     sage: g = M.metric()
     sage: g[0,0], g[1,1] = 1/y^2, 1/y^2
     sage: g.display()
-    g = y^(-2) dx*dx + y^(-2) dy*dy
+    g = y^(-2) dx⊗dx + y^(-2) dy⊗dy
 
 Pick an initial point and an initial tangent vector::
 
     sage: p = M((0,1), name='p')
     sage: v = M.tangent_space(p)((1,3/2), name='v')
     sage: v.display()
-    v = d/dx + 3/2 d/dy
+    v = ∂/∂x + 3/2 ∂/∂y
 
 Declare a geodesic with such initial conditions, denoting by `t` the
 corresponding affine parameter::
@@ -77,7 +77,7 @@ Plot the geodesic after interpolating the solution ``sol``::
     sage: c.codomain()
     2-dimensional Riemannian manifold M
     sage: c.display()
-    c: (0, 10) --> M
+    c: (0, 10) → M
 
 In particular, its value at `t=1` is::
 
@@ -106,7 +106,6 @@ AUTHORS:
 #                  https://www.gnu.org/licenses/
 # **********************************************************************
 
-from __future__ import print_function
 from sage.symbolic.expression import Expression
 from sage.rings.infinity import Infinity
 from sage.calculus.desolvers import desolve_system_rk4
@@ -580,7 +579,6 @@ class IntegratedCurve(DifferentiableCurve):
                                for f in transf]
                 self._fast_changes_of_chart[CoC] = fast_transf
 
-
         self._velocities = list(velocities) # converts to list
         # since might not already be a list (which is later required)
         self._curve_parameter = curve_parameter
@@ -658,9 +656,8 @@ class IntegratedCurve(DifferentiableCurve):
             sage: c.__reduce__()
             (<class 'sage.manifolds.differentiable.manifold_homset.IntegratedCurveSet_with_category.element_class'>,
              (Set of Morphisms from Real interval (0, 5) to
-              3-dimensional differentiable manifold M in Category of
-              homsets of subobjects of sets and topological spaces which
-              actually are integrated curves,
+              3-dimensional differentiable manifold M in Category of homsets of
+              topological spaces which actually are integrated curves,
               [B_0*Dx2*q*t*e^(-(x1^2 + x2^2)/L^2)/(T*m),
                -B_0*Dx1*q*t*e^(-(x1^2 + x2^2)/L^2)/(T*m),
                0],
@@ -1378,12 +1375,10 @@ class IntegratedCurve(DifferentiableCurve):
         # 'tangent_vector_eval_at', and in 'plot' when plotting the
         # tangent vectors.)
 
-
         if isinstance(sol, list):
             coords_sol = [point[0:dim + 1] for point in sol]
         else:
             coords_sol = sol[:, 0:dim + 1].tolist() # far faster in numpy
-
 
         if verbose:
             print("Numerical integration completed.\n\n" +
@@ -1471,17 +1466,13 @@ class IntegratedCurve(DifferentiableCurve):
         maps::
 
             sage: M = Manifold(2, 'M', structure="Riemannian")
-            sage: C.<x,y> = M.chart()
-            sage: P.<r,th> = M.chart()
+            sage: C.<x,y> = M.chart(coord_restrictions=lambda x,y: x**2+y**2 < 3**2)
+            sage: P.<r,th> = M.chart(coord_restrictions=lambda r, th: r > 2)
             sage: P_to_C = P.transition_map(C,(r*cos(th), r*sin(th)))
             sage: C_to_P = C.transition_map(P,(sqrt(x**2+y**2), atan2(y,x)))
 
-        Let us also add restrictions on those charts, to avoid any
-        singularity. We have to make sure that the charts still intersect.
-        Here the intersection is the donut region `2 < r < 3`::
-
-            sage: P.add_restrictions(r > 2)
-            sage: C.add_restrictions(x**2+y**2 < 3**2)
+        Here we added restrictions on those charts, to avoid any
+        singularity.  The intersection is the donut region `2 < r < 3`.
 
         We still have to define the metric. This is done in the Cartesian
         frame. The metric in the polar frame is computed automatically::
@@ -1576,14 +1567,12 @@ class IntegratedCurve(DifferentiableCurve):
         .. PLOT::
 
             M = Manifold(2, 'M', structure="Riemannian")
-            C= M.chart(names = ("x", "y"))
+            C= M.chart(names = ("x", "y"), coord_restrictions=lambda x,y: x**2+y**2 < 3**2)
             x, y = C[:]
-            P = M.chart(names = ("r", "ph"))
+            P = M.chart(names = ("r", "th"), coord_restrictions=lambda r,th: r > 2)
             r, th = P[:]
             P_to_C = P.transition_map(C,(r*cos(th), r*sin(th)))
             C_to_P = C.transition_map(P,(sqrt(x**2+y**2), atan2(y,x)))
-            P.add_restrictions(r > 2)
-            C.add_restrictions(x**2+y**2 < 3**2)
             g = M.metric()
             g[0,0,C] = 1
             g[1,1,C] = 1
@@ -1786,7 +1775,6 @@ class IntegratedCurve(DifferentiableCurve):
 
                             new_vel = self._fast_changes_of_frame[(new_chart.frame().restrict(inter),
                                chart.frame().restrict(inter))](last_pts, last_vel)
-
 
                             ics = new_pts + new_vel
                             chart = new_chart
@@ -2119,7 +2107,7 @@ class IntegratedCurve(DifferentiableCurve):
 
         INPUT:
 
-        - ``t'' -- curve parameter value at which the curve is evaluated
+        - ``t`` -- curve parameter value at which the curve is evaluated
         - ``interpolation_key`` -- (default: ``None``) key which the
           interpolation requested to compute the point is associated to;
           a default value is chosen if none is provided
@@ -2442,7 +2430,6 @@ class IntegratedCurve(DifferentiableCurve):
         thickness = kwds.pop('thickness')
         aspect_ratio = kwds.pop('aspect_ratio')
 
-
         #
         # The mapping, if present, and the chart with respect to which the curve
         # is plotted
@@ -2453,8 +2440,7 @@ class IntegratedCurve(DifferentiableCurve):
                 chart = self._chart
             else:
                 if not isinstance(chart, RealChart):
-                    raise TypeError("{} is not a real " +
-                                    "chart".format(chart))
+                    raise TypeError("{} is not a real chart".format(chart))
                 mapping = self.codomain().identity_map()
         else:
             i0 = mapping.codomain().start_index()
@@ -2952,7 +2938,7 @@ class IntegratedAutoparallelCurve(IntegratedCurve):
     line of latitude.
 
     Now, set an affine connection with respect to such fields that are
-    parallely transported in all directions, that is:
+    parallelly transported in all directions, that is:
     `\nabla \hat{e}_{\theta} = \nabla \hat{e}_{\phi} = 0`.
     This is equivalent to setting all the connection coefficients to
     zero with respect to this frame::
@@ -3434,7 +3420,6 @@ class IntegratedAutoparallelCurve(IntegratedCurve):
 
         velocities = chart.symbolic_velocities()
 
-
         dim = parent.codomain().dim()
         i0 = parent.codomain().start_index()
 
@@ -3479,7 +3464,6 @@ class IntegratedAutoparallelCurve(IntegratedCurve):
                     equations_rhs_chart += [rhs.simplify_full()]
                 equations_rhs[chart] = equations_rhs_chart
 
-
         IntegratedCurve.__init__(self, parent, equations_rhs,
                                  velocities, curve_parameter,
                                  initial_tangent_vector, chart=chart,
@@ -3487,7 +3471,6 @@ class IntegratedAutoparallelCurve(IntegratedCurve):
                                  verbose=verbose, across_charts=across_charts)
 
         self._affine_connection = affine_connection
-
 
     def _repr_(self):
         r"""
@@ -3538,10 +3521,9 @@ class IntegratedAutoparallelCurve(IntegratedCurve):
             sage: c.__reduce__()
             (<class 'sage.manifolds.differentiable.manifold_homset.IntegratedAutoparallelCurveSet_with_category.element_class'>,
              (Set of Morphisms from Real interval (0, 5) to
-              3-dimensional differentiable manifold M in Category of
-              homsets of subobjects of sets and topological spaces which
-              actually are integrated autoparallel curves with respect to
-              a certain affine connection,
+              3-dimensional differentiable manifold M in Category of homsets of
+              topological spaces which actually are integrated autoparallel
+              curves with respect to a certain affine connection,
               Affine connection nabla on the 3-dimensional
               differentiable manifold M,
               t,
@@ -3835,7 +3817,6 @@ class IntegratedGeodesic(IntegratedAutoparallelCurve):
     def __init__(self, parent, metric, curve_parameter,
                  initial_tangent_vector, chart=None, name=None,
                  latex_name=None, verbose=False, across_charts=False):
-
         r"""
         Construct a geodesic curve with respect to the given metric with the
         given initial tangent vector.
@@ -3918,10 +3899,9 @@ class IntegratedGeodesic(IntegratedAutoparallelCurve):
             sage: c.__reduce__()
             (<...IntegratedGeodesicSet_with_category.element_class'>,
              (Set of Morphisms from Real interval (0, pi) to
-              2-dimensional Riemannian manifold S^2 in Category of
-              homsets of subobjects of sets and topological spaces which
-              actually are integrated geodesics with respect to a certain
-              metric,
+              2-dimensional Riemannian manifold S^2 in Category of homsets of
+              topological spaces which actually are integrated geodesics with
+              respect to a certain metric,
               Riemannian metric g on the 2-dimensional Riemannian
               manifold S^2,
               t,

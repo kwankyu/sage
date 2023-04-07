@@ -21,7 +21,7 @@ in the same number alpha of triples of `T`.
 
 This module implements a direct construction of a two-graph from a list of
 triples, construction of descendant graphs, regularity checking, and other
-things such as constructing the complement two-graph, cf. [BH12]_.
+things such as constructing the complement two-graph, cf. [BH2012]_.
 
 AUTHORS:
 
@@ -55,7 +55,6 @@ This module's functions are the following:
 Methods
 ---------
 """
-from __future__ import absolute_import
 
 from sage.combinat.designs.incidence_structures import IncidenceStructure
 from itertools import combinations
@@ -93,7 +92,7 @@ class TwoGraph(IncidenceStructure):
                                     incidence_matrix=incidence_matrix,
                                     name=name, check=False, copy=copy)
         if check:  # it is a very slow, O(|points|^4), test...
-           assert is_twograph(self), "the structure is not a 2-graph!"
+            assert is_twograph(self), "the structure is not a 2-graph!"
 
     def is_regular_twograph(self, alpha=False):
         r"""
@@ -120,7 +119,7 @@ class TwoGraph(IncidenceStructure):
             sage: p.is_regular_twograph()
             False
         """
-        r, (_,_,_,a) = self.is_t_design(t=2, k=3, return_parameters=True)
+        r, (_, _, _, a) = self.is_t_design(t=2, k=3, return_parameters=True)
         if r and alpha:
             return a
         return r
@@ -170,7 +169,8 @@ class TwoGraph(IncidenceStructure):
             sage: is_twograph(pc)
             True
         """
-        return super(TwoGraph, self).complement(uniform=True)
+        return super().complement(uniform=True)
+
 
 def taylor_twograph(q):
     r"""
@@ -247,16 +247,16 @@ def is_twograph(T):
         return bool(v_to_blocks[x] & v_to_blocks[y] & v_to_blocks[z])
 
     # Check that every quadruple contains an even number of triples
-    from six.moves.builtins import sum
     for quad in combinations(range(T.num_points()),4):
         if sum(map(has_triple,combinations(quad,3))) % 2 == 1:
             return False
 
     return True
 
+
 def twograph_descendant(G, v, name=None):
     r"""
-    Returns the descendant graph w.r.t. vertex `v` of the two-graph of `G`
+    Return the descendant graph w.r.t. vertex `v` of the two-graph of `G`
 
     In the :mod:`switching class <sage.combinat.designs.twographs>` of `G`,
     construct a graph `\Delta` with `v` an isolated vertex, and return the subgraph
@@ -284,7 +284,7 @@ def twograph_descendant(G, v, name=None):
     TESTS::
 
         sage: T8 = graphs.CompleteGraph(8).line_graph()
-        sage: v = T8.vertices()[0]
+        sage: v = T8.vertices(sort=True)[0]
         sage: twograph_descendant(T8, v)==T8.twograph().descendant(v)
         True
         sage: twograph_descendant(T8, v).is_strongly_regular(parameters=True)

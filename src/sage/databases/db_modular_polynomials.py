@@ -11,7 +11,6 @@ Database of Modular Polynomials
 #  the License, or (at your option) any later version.
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
-from __future__ import print_function, absolute_import
 import bz2
 import os
 from sage.cpython.string import bytes_to_str
@@ -208,8 +207,8 @@ class DedekindEtaModularPolynomialDatabase(ModularPolynomialDatabase):
 
 class DedekindEtaModularCorrespondenceDatabase(ModularCorrespondenceDatabase):
     r"""
-    The database of modular correspondences in $X_0(p) \times X_0(p)$, where
-    the model of the curves $X_0(p) = \Bold{P}^1$ are specified by quotients of
+    The database of modular correspondences in `X_0(p) \times X_0(p)`, where
+    the model of the curves `X_0(p) = \Bold{P}^1` are specified by quotients of
     Dedekind's eta function.
     """
     model = "EtaCrr"
@@ -217,7 +216,7 @@ class DedekindEtaModularCorrespondenceDatabase(ModularCorrespondenceDatabase):
 
 class AtkinModularPolynomialDatabase(ModularPolynomialDatabase):
     """
-    The database of modular polynomials Phi(x,j) for $X_0(p)$, where
+    The database of modular polynomials Phi(x,j) for `X_0(p)`, where
     x is a function on invariant under the Atkin-Lehner invariant,
     with pole of minimal order at infinity.
     """

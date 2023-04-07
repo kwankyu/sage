@@ -54,7 +54,7 @@ EXAMPLES::
 from sage.matrix.constructor import block_diagonal_matrix, zero_matrix
 from sage.categories.morphism import Morphism
 from sage.categories.homset import Hom
-from sage.categories.category_types import ChainComplexes
+from sage.categories.chain_complexes import ChainComplexes
 
 
 def is_ChainComplexMorphism(x):
@@ -140,7 +140,7 @@ class ChainComplexMorphism(Morphism):
         d = C.degree_of_differential()
         if d != D.degree_of_differential():
             raise ValueError('degree of differential does not match')
-            
+
         degrees = list(C.differential()) + list(D.differential())
         degrees = sorted(set(degrees))
         initial_matrices = dict(matrices)
@@ -348,16 +348,15 @@ class ChainComplexMorphism(Morphism):
             [0 2 0 0]
             [0 0 2 0]
             [0 0 0 2]}
-
         """
-        if not isinstance(x,ChainComplexMorphism) or self.codomain() != x.codomain() or self.domain() != x.domain() or self._matrix_dictionary.keys() != x._matrix_dictionary.keys():
-            raise TypeError("Unsupported operation.")
+        if not isinstance(x, ChainComplexMorphism) or self.codomain() != x.codomain() or self.domain() != x.domain() or self._matrix_dictionary.keys() != x._matrix_dictionary.keys():
+            raise TypeError("unsupported operation")
         f = dict()
         for i in self._matrix_dictionary.keys():
             f[i] = self._matrix_dictionary[i] + x._matrix_dictionary[i]
         return ChainComplexMorphism(f, self.domain(), self.codomain())
 
-    def __mul__(self,x):
+    def __mul__(self, x):
         """
         Return ``self * x`` if ``self`` and ``x`` are composable morphisms
         or if ``x`` is an element of the base ring.

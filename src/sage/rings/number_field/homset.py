@@ -2,7 +2,7 @@
 Sets of homomorphisms between number fields
 """
 
-#*****************************************************************************
+# ****************************************************************************
 #       Copyright (C) 2007 William Stein <wstein@gmail.com>
 #       Copyright (C) 2020 Peter Bruin <P.J.Bruin@math.leidenuniv.nl>
 #
@@ -10,8 +10,8 @@ Sets of homomorphisms between number fields
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 2 of the License, or
 # (at your option) any later version.
-#                  http://www.gnu.org/licenses/
-#*****************************************************************************
+#                  https://www.gnu.org/licenses/
+# ****************************************************************************
 
 from sage.misc.cachefunc import cached_method
 from sage.misc.superseded import deprecation
@@ -51,10 +51,11 @@ class NumberFieldHomset(RingHomset_generic):
             Category of homsets of number fields
         """
         if category is None:
-            from sage.categories.all import Fields, NumberFields
-            if S in NumberFields:
+            from sage.categories.fields import Fields
+            from sage.categories.number_fields import NumberFields
+            if S in NumberFields():
                 category = NumberFields()
-            elif S in Fields:
+            elif S in Fields():
                 category = Fields()
         RingHomset_generic.__init__(self, R, S, category)
 
@@ -102,7 +103,8 @@ class NumberFieldHomset(RingHomset_generic):
         """
         if not isinstance(x, NumberFieldHomomorphism_im_gens):
             return self.element_class(self, x, check=check)
-        from sage.categories.all import NumberFields, Rings
+        from sage.categories.number_fields import NumberFields
+        from sage.categories.rings import Rings
         if (x.parent() == self or
             (x.domain() == self.domain() and x.codomain() == self.codomain() and
              # This would be the better check, however it returns False currently:
@@ -432,8 +434,33 @@ class RelativeNumberFieldHomset(NumberFieldHomset):
               From: Number Field in b with defining polynomial x^2 + 23
               To:   Number Field in c with defining polynomial x^4 + 80*x^2 + 36
               Defn: b |--> 1/12*c^3 + 43/6*c
+
+        TESTS:
+
+        Check that :trac:`30518` is fixed::
+
+            sage: K.<i> = QuadraticField(-1, embedding=QQbar.gen())
+            sage: L.<a> = K.extension(x^2 - 6*x - 4)
+            sage: a0, a1 = a.galois_conjugates(QQbar)
+            sage: f0 = hom(L, QQbar, a0)
+            sage: assert f0(i) == QQbar.gen()
+            sage: f1 = hom(L, QQbar, a1)
+            sage: assert f1(i) == QQbar.gen()
+
+            sage: K.<i> = QuadraticField(-1, embedding=-QQbar.gen())
+            sage: L.<a> = K.extension(x^2 - 6*x - 4)
+            sage: a0, a1 = a.galois_conjugates(QQbar)
+            sage: f0 = hom(L, QQbar, a0)
+            sage: assert f0(i) == -QQbar.gen()
+            sage: f1 = hom(L, QQbar, a1)
+            sage: assert f1(i) == -QQbar.gen()
         """
-        v = self.domain().base_field().embeddings(self.codomain())
+        K = self.domain().base_field()
+        C = self.codomain()
+        f = C.coerce_map_from(K)
+        if f is not None:
+            return f
+        v = K.embeddings(C)
         if len(v) == 0:
             raise ValueError("no way to map base field to codomain.")
         return v[0]

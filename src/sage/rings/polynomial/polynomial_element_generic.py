@@ -21,18 +21,14 @@ We test coercion in a particularly complicated situation::
     x^2 + (-z^2 - 1)*x
 """
 
-#*****************************************************************************
+# ****************************************************************************
 #       Copyright (C) 2007 William Stein <wstein@gmail.com>
 #
 #  Distributed under the terms of the GNU General Public License (GPL)
 #  as published by the Free Software Foundation; either version 2 of
 #  the License, or (at your option) any later version.
-#                  http://www.gnu.org/licenses/
-#*****************************************************************************
-from __future__ import print_function
-import six
-from six.moves import range
-
+#                  https://www.gnu.org/licenses/
+# ****************************************************************************
 from sage.rings.polynomial.polynomial_element import Polynomial, Polynomial_generic_dense, Polynomial_generic_dense_inexact
 from sage.structure.element import IntegralDomainElement, EuclideanDomainElement
 
@@ -40,7 +36,7 @@ from sage.rings.polynomial.polynomial_singular_interface import Polynomial_singu
 
 from sage.libs.pari.all import pari_gen
 from sage.structure.richcmp import richcmp, richcmp_item, rich_to_bool, rich_to_bool_sgn
-from sage.structure.element import coerce_binop
+from sage.structure.element import coerce_binop, parent
 
 from sage.rings.infinity import infinity, Infinity
 from sage.rings.integer_ring import ZZ
@@ -85,6 +81,8 @@ class Polynomial_generic_sparse(Polynomial):
 
             sage: PolynomialRing(RIF, 'z', sparse=True)([RIF(-1, 1), RIF(-1,1)])
             0.?*z + 0.?
+            sage: PolynomialRing(RIF, 'z', sparse=True)((RIF(-1, 1), RIF(-1,1)))
+            0.?*z + 0.?
             sage: PolynomialRing(CIF, 'z', sparse=True)([CIF(RIF(-1,1), RIF(-1,1)), RIF(-1,1)])
             0.?*z + 0.? + 0.?*I
         """
@@ -100,12 +98,12 @@ class Polynomial_generic_sparse(Polynomial):
                 x = {0:x}
             else:
                 w = {}
-                for n, c in six.iteritems(x.dict()):
+                for n, c in x.dict().items():
                     w[n] = R(c)
-                # The following line has been added in trac ticket #9944.
-                # Apparently, the "else" case has never occured before.
+                # The following line has been added in github issue #9944.
+                # Apparently, the "else" case has never occurred before.
                 x = w
-        elif isinstance(x, list):
+        elif isinstance(x, (list, tuple)):
             x = dict((i, c) for (i, c) in enumerate(x) if c)
         elif isinstance(x, pari_gen):
             y = {}
@@ -117,7 +115,7 @@ class Polynomial_generic_sparse(Polynomial):
             x = {0:x}   # constant polynomials
         if check:
             self.__coeffs = {}
-            for i, z in six.iteritems(x):
+            for i, z in x.items():
                 self.__coeffs[i] = R(z)
         else:
             self.__coeffs = x
@@ -184,7 +182,7 @@ class Polynomial_generic_sparse(Polynomial):
         """
         return sorted(self.__coeffs)
 
-    def valuation(self):
+    def valuation(self, p=None):
         """
         Return the valuation of ``self``.
 
@@ -201,6 +199,13 @@ class Polynomial_generic_sparse(Polynomial):
         """
         if not self.__coeffs:
             return infinity
+
+        if p is infinity:
+            return -self.degree()
+
+        if p is not None:
+            raise NotImplementedError("input p is not support for sparse polynomials")
+
         return ZZ(min(self.__coeffs))
 
     def _derivative(self, var=None):
@@ -258,7 +263,7 @@ class Polynomial_generic_sparse(Polynomial):
 
         # compute formal derivative with respect to generator
         d = {}
-        for n, c in six.iteritems(self.__coeffs):
+        for n, c in self.__coeffs.items():
             d[n-1] = n*c
         if -1 in d:
             del d[-1]
@@ -324,9 +329,9 @@ class Polynomial_generic_sparse(Polynomial):
             Q = R.change_ring(F)
 
         if var is not None and var != R.gen():
-            return Q({k:v.integral(var) for k,v in six.iteritems(self.__coeffs)}, check=False)
+            return Q({k:v.integral(var) for k,v in self.__coeffs.items()}, check=False)
 
-        return Q({ k+1:v/(k+1) for k,v in six.iteritems(self.__coeffs)}, check=False)
+        return Q({ k+1:v/(k+1) for k,v in self.__coeffs.items()}, check=False)
 
     def _dict_unsafe(self):
         """
@@ -373,7 +378,7 @@ class Polynomial_generic_sparse(Polynomial):
         if name is None:
             name = self.parent().variable_name()
         atomic_repr = self.parent().base_ring()._repr_option('element_is_atomic')
-        coeffs = sorted(six.iteritems(self.__coeffs))
+        coeffs = sorted(self.__coeffs.items())
         for (n, x) in reversed(coeffs):
             if x:
                 if n != m-1:
@@ -399,11 +404,11 @@ class Polynomial_generic_sparse(Polynomial):
 
     def __normalize(self):
         x = self.__coeffs
-        D = [n for n, z in six.iteritems(x) if not z]
+        D = [n for n, z in x.items() if not z]
         for n in D:
             del x[n]
 
-    def __getitem__(self,n):
+    def __getitem__(self, n):
         """
         Return the `n`-th coefficient of this polynomial.
 
@@ -431,37 +436,36 @@ class Polynomial_generic_sparse(Polynomial):
             sage: f[:2]
             -42.000*x + 8.0000
 
-        Any other kind of slicing is deprecated or an error::
+        Any other kind of slicing is an error, see :trac:`18940`::
 
             sage: f[1:3]
-            doctest:...: DeprecationWarning: polynomial slicing with a start index is deprecated, use list() and slice the resulting list instead
-            See http://trac.sagemath.org/18940 for details.
-            73.500*x^2 - 42.000*x
+            Traceback (most recent call last):
+            ...
+            IndexError: polynomial slicing with a start is not defined
+
             sage: f[1:3:2]
             Traceback (most recent call last):
             ...
-            NotImplementedError: polynomial slicing with a step is not defined
+            IndexError: polynomial slicing with a step is not defined
+
+        TESTS::
+
             sage: f["hello"]
             Traceback (most recent call last):
             ...
             TypeError: list indices must be integers, not str
         """
         if isinstance(n, slice):
-            d = self.degree() + 1
             start, stop, step = n.start, n.stop, n.step
             if step is not None:
-                raise NotImplementedError("polynomial slicing with a step is not defined")
-            if start is None:
-                start = 0
-            else:
-                if start < 0:
-                    start = 0
-                from sage.misc.superseded import deprecation
-                deprecation(18940, "polynomial slicing with a start index is deprecated, use list() and slice the resulting list instead")
+                raise IndexError("polynomial slicing with a step is not defined")
+            if start is not None:
+                raise IndexError("polynomial slicing with a start is not defined")
+            d = self.degree() + 1
             if stop is None or stop > d:
                 stop = d
-            x = self.__coeffs
-            v = {k: x[k] for k in x.keys() if start <= k < stop}
+            v = {key: val for key, val in self.__coeffs.items()
+                 if key < stop}
             return self.parent()(v)
 
         try:
@@ -519,7 +523,7 @@ class Polynomial_generic_sparse(Polynomial):
         """
         zero = self.base_ring().zero()
         v = [zero] * (self.degree()+1)
-        for n, x in six.iteritems(self.__coeffs):
+        for n, x in self.__coeffs.items():
             v[n] = x
         return v
 
@@ -538,6 +542,29 @@ class Polynomial_generic_sparse(Polynomial):
             return -1
         return max(self.__coeffs)
 
+    def __floordiv__(self, right):
+        """
+        Return the quotient upon division (no remainder).
+
+        EXAMPLES::
+
+            sage: R.<x> = PolynomialRing(QQbar, sparse=True)
+            sage: f = (1+2*x)^3 + 3*x; f
+            8*x^3 + 12*x^2 + 9*x + 1
+            sage: g = f // (1+2*x); g
+            4*x^2 + 4*x + 5/2
+            sage: f - g * (1+2*x)
+            -3/2
+            sage: f.quo_rem(1+2*x)
+            (4*x^2 + 4*x + 5/2, -3/2)
+
+        """
+        P = self.parent()
+        if P is parent(right):
+            return self._floordiv_(right)
+        d = P.base_ring()(right)
+        return self.map_coefficients(lambda c: c // d)
+
     def _add_(self, right):
         r"""
         EXAMPLES::
@@ -552,7 +579,7 @@ class Polynomial_generic_sparse(Polynomial):
         """
         output = dict(self.__coeffs)
 
-        for (index, coeff) in six.iteritems(right.__coeffs):
+        for (index, coeff) in right.__coeffs.items():
             if index in output:
                 output[index] += coeff
             else:
@@ -573,7 +600,7 @@ class Polynomial_generic_sparse(Polynomial):
             -x^10000000
         """
         output = { }
-        for (index, coeff) in six.iteritems(self.__coeffs):
+        for (index, coeff) in self.__coeffs.items():
             output[index] = -coeff
         output = self.parent()(output, check=False)
         return output
@@ -593,8 +620,8 @@ class Polynomial_generic_sparse(Polynomial):
         """
         output = {}
 
-        for (index1, coeff1) in six.iteritems(self.__coeffs):
-            for (index2, coeff2) in six.iteritems(right.__coeffs):
+        for (index1, coeff1) in self.__coeffs.items():
+            for (index2, coeff2) in right.__coeffs.items():
                 product = coeff1 * coeff2
                 index = index1 + index2
                 if index in output:
@@ -622,7 +649,7 @@ class Polynomial_generic_sparse(Polynomial):
         """
         output = {}
 
-        for (index, coeff) in six.iteritems(self.__coeffs):
+        for (index, coeff) in self.__coeffs.items():
             output[index] = left * coeff
 
         output = self.parent()(output, check=False)
@@ -645,7 +672,7 @@ class Polynomial_generic_sparse(Polynomial):
         """
         output = {}
 
-        for (index, coeff) in six.iteritems(self.__coeffs):
+        for (index, coeff) in self.__coeffs.items():
             output[index] = coeff * right
 
         output = self.parent()(output, check=False)
@@ -750,10 +777,10 @@ class Polynomial_generic_sparse(Polynomial):
         if n == 0:
             return self
         if n > 0:
-            output = {index+n: coeff for index, coeff in six.iteritems(self.__coeffs)}
+            output = {index+n: coeff for index, coeff in self.__coeffs.items()}
             return self.parent()(output, check=False)
         if n < 0:
-            output = {index+n:coeff for index, coeff in six.iteritems(self.__coeffs) if index + n >= 0}
+            output = {index+n:coeff for index, coeff in self.__coeffs.items() if index + n >= 0}
             return self.parent()(output, check=False)
 
     @coerce_binop
@@ -762,16 +789,20 @@ class Polynomial_generic_sparse(Polynomial):
         Returns the quotient and remainder of the Euclidean division of
         ``self`` and ``other``.
 
-        Raises ZerodivisionError if ``other`` is zero. Raises ArithmeticError
-        if ``other`` has a nonunit leading coefficient.
+        Raises ZerodivisionError if ``other`` is zero.
+
+        Raises ArithmeticError if ``other`` has a nonunit leading coefficient
+        and this causes the Euclidean division to fail.
 
         EXAMPLES::
 
-            sage: P.<x> = PolynomialRing(ZZ,sparse=True)
-            sage: R.<y> = PolynomialRing(P,sparse=True)
+            sage: P.<x> = PolynomialRing(ZZ, sparse=True)
+            sage: R.<y> = PolynomialRing(P, sparse=True)
             sage: f = R.random_element(10)
-            sage: g = y^5+R.random_element(4)
-            sage: q,r = f.quo_rem(g)
+            sage: while x.divides(f.leading_coefficient()):
+            ....:     f = R.random_element(10)
+            sage: g = y^5 + R.random_element(4)
+            sage: q, r = f.quo_rem(g)
             sage: f == q*g + r and r.degree() < g.degree()
             True
             sage: g = x*y^5
@@ -785,25 +816,42 @@ class Polynomial_generic_sparse(Polynomial):
             ...
             ZeroDivisionError: Division by zero polynomial
 
+        If the leading coefficient of ``other`` is not a unit, Euclidean division may still work::
+
+            sage: f = -x*y^10 + 2*x*y^7 + y^3 - 2*x^2*y^2 - y
+            sage: g = x*y^5
+            sage: f.quo_rem(g)
+            (-y^5 + 2*y^2, y^3 - 2*x^2*y^2 - y)
+
+        Polynomials over noncommutative rings are also allowed::
+
+            sage: HH = QuaternionAlgebra(QQ, -1, -1)
+            sage: P.<x> = PolynomialRing(HH, sparse=True)
+            sage: f = P.random_element(5)
+            sage: g = P.random_element((0, 5))
+            sage: q, r = f.quo_rem(g)
+            sage: f == q*g + r
+            True
+
         TESTS::
 
-            sage: P.<x> = PolynomialRing(ZZ,sparse=True)
-            sage: f = x^10-4*x^6-5
-            sage: g = 17*x^22+x^15-3*x^5+1
-            sage: q,r = g.quo_rem(f)
+            sage: P.<x> = PolynomialRing(ZZ, sparse=True)
+            sage: f = x^10 - 4*x^6 - 5
+            sage: g = 17*x^22 + x^15 - 3*x^5 + 1
+            sage: q, r = g.quo_rem(f)
             sage: g == f*q + r and r.degree() < f.degree()
             True
             sage: zero = P(0)
             sage: zero.quo_rem(f)
             (0, 0)
             sage: Q.<y> = IntegerModRing(14)[]
-            sage: f = y^10-4*y^6-5
-            sage: g = 17*y^22+y^15-3*y^5+1
-            sage: q,r = g.quo_rem(f)
+            sage: f = y^10 - 4*y^6 - 5
+            sage: g = 17*y^22 + y^15 - 3*y^5 + 1
+            sage: q, r = g.quo_rem(f)
             sage: g == f*q + r and r.degree() < f.degree()
             True
-            sage: f += 2*y^10 # 3 is invertible mod 14
-            sage: q,r = g.quo_rem(f)
+            sage: f += 2*y^10  # 3 is invertible mod 14
+            sage: q, r = g.quo_rem(f)
             sage: g == f*q + r and r.degree() < f.degree()
             True
 
@@ -941,7 +989,7 @@ class Polynomial_generic_sparse(Polynomial):
             degree = self.degree()
         if not isinstance(degree, (int,Integer)):
             raise ValueError("degree argument must be a nonnegative integer, got %s"%degree)
-        d = {degree-k: v for k,v in six.iteritems(self.__coeffs) if degree >= k}
+        d = {degree-k: v for k,v in self.__coeffs.items() if degree >= k}
         return self.parent()(d, check=False)
 
     def truncate(self, n):
@@ -1161,7 +1209,7 @@ class Polynomial_generic_cdv(Polynomial_generic_domain):
             else:
                 for (x, y) in vertices:
                     if polygon_prec(x) <= y:
-                         raise PrecisionError("The coefficient of %s^%s has not enough precision" % (self.parent().variable_name(), x))
+                        raise PrecisionError("The coefficient of %s^%s has not enough precision" % (self.parent().variable_name(), x))
         return polygon
 
     def hensel_lift(self, a):
@@ -1203,7 +1251,8 @@ class Polynomial_generic_cdv(Polynomial_generic_domain):
         b = ~dera
         while(True):
             na = a - selfa * b
-            if na == a: return a
+            if na == a:
+                return a
             a = na
             selfa = self(a)
             dera = der(a)
@@ -1262,14 +1311,13 @@ class Polynomial_generic_cdv(Polynomial_generic_domain):
 
         parent = self.parent()
         a = parent(a)
-        b = v = parent(1)
+        v = parent.one()
         x = self % a
-        while(not x.is_zero()):
+        while not x.is_zero():
             a += (v * x) % a
             b, x = self.quo_rem(a)
             b %= a
-            v = (v * (2 - b*v)) % a
-
+            v = (v * (2 - b * v)) % a
         return a
 
     def factor_of_slope(self, slope=None):
@@ -1482,7 +1530,8 @@ class Polynomial_generic_cdv(Polynomial_generic_domain):
                 continue
             if hint is not None and slope == minval:
                 rootsbar = hint
-                if not rootsbar: continue
+                if not rootsbar:
+                    continue
             if i < len(vertices) - 1:
                 F = P._factor_of_degree(deg_right - deg)
                 P = P // F
@@ -1496,7 +1545,8 @@ class Polynomial_generic_cdv(Polynomial_generic_domain):
             if hint is None or slope != minval:
                 Fbar = Pk([ F[j] >> (val - j*slope) for j in range(F.degree()+1) ])
                 rootsbar = [ r for (r, _) in Fbar.roots() ]
-                if not rootsbar: continue
+                if not rootsbar:
+                    continue
             rbar = rootsbar.pop()
             shift = K(rbar).lift_to_precision() << slope  # probably we should choose a better lift
             roots += [(r+shift, m) for (r, m) in F(x+shift)._roots(secure, slope, [r-rbar for r in rootsbar])]  # recursive call
@@ -1531,7 +1581,7 @@ class Polynomial_generic_sparse_cdvf(Polynomial_generic_sparse_cdv, Polynomial_g
     pass
 
 ############################################################################
-# XXX:  Ensures that the generic polynomials implemented in SAGE via PARI  #
+# XXX:  Ensures that the generic polynomials implemented in Sage via PARI  #
 # until at least until 4.5.0 unpickle correctly as polynomials implemented #
 # via FLINT.                                                               #
 from sage.misc.persist import register_unpickle_override

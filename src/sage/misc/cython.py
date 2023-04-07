@@ -1,3 +1,4 @@
+# sage.doctest: optional - sage.misc.cython
 """
 Cython support functions
 
@@ -17,38 +18,47 @@ AUTHORS:
 # (at your option) any later version.
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
-from __future__ import print_function, absolute_import
-from six.moves import builtins
-from six import iteritems, PY2
 
+import builtins
 import os
 import sys
 import shutil
-import pkgconfig
 
 from sage.env import (SAGE_LOCAL, cython_aliases,
                       sage_include_directories)
-from sage.misc.misc import SPYX_TMP, sage_makedirs
-from .temporary_file import tmp_filename
+from .temporary_file import spyx_tmp, tmp_filename
 from sage.repl.user_globals import get_globals
 from sage.misc.sage_ostools import restore_cwd, redirection
 from sage.cpython.string import str_to_bytes
+from sage.misc.cachefunc import cached_function
 
 
-# CBLAS can be one of multiple implementations
-cblas_pc = pkgconfig.parse('cblas')
-cblas_libs = list(cblas_pc['libraries'])
-cblas_library_dirs = list(cblas_pc['library_dirs'])
-cblas_include_dirs = list(cblas_pc['include_dirs'])
+@cached_function
+def _standard_libs_libdirs_incdirs_aliases():
+    r"""
+    Return the list of libraries and library directories.
 
-standard_libs = [
-    'mpfr', 'gmp', 'gmpxx', 'stdc++', 'pari', 'm',
-    'ec', 'gsl',
-] + cblas_libs + [
-    'ntl']
+    EXAMPLES::
 
-standard_libdirs = [os.path.join(SAGE_LOCAL, "lib")] + cblas_library_dirs
-
+        sage: from sage.misc.cython import _standard_libs_libdirs_incdirs_aliases
+        sage: _standard_libs_libdirs_incdirs_aliases()
+        (['mpfr', 'gmp', 'gmpxx', 'pari', ...],
+         [...],
+         [...],
+         {...})
+    """
+    aliases = cython_aliases()
+    standard_libs = [
+        'mpfr', 'gmp', 'gmpxx', 'pari', 'm',
+        'ec', 'gsl',
+    ] + aliases["CBLAS_LIBRARIES"] + [
+        'ntl']
+    standard_libdirs = []
+    if SAGE_LOCAL:
+        standard_libdirs.append(os.path.join(SAGE_LOCAL, "lib"))
+    standard_libdirs.extend(aliases["CBLAS_LIBDIR"] + aliases["NTL_LIBDIR"])
+    standard_incdirs = sage_include_directories() + aliases["CBLAS_INCDIR"] + aliases["NTL_INCDIR"]
+    return standard_libs, standard_libdirs, standard_incdirs, aliases
 
 ################################################################
 # If the user attaches a .spyx file and changes it, we have
@@ -62,6 +72,7 @@ standard_libdirs = [os.path.join(SAGE_LOCAL, "lib")] + cblas_library_dirs
 # these sequence numbers in a dict.
 #
 ################################################################
+
 
 sequence_number = {}
 
@@ -176,7 +187,7 @@ def cython(filename, verbose=0, compile_message=False,
         ....: '''
         sage: cython(code, verbose=-1)
         sage: cython(code, verbose=0)
-        warning: ...:4:4: Unreachable code
+        warning: ...:4:4: Unreachable code...
 
         sage: cython("foo = bar\n")
         Traceback (most recent call last):
@@ -194,6 +205,34 @@ def cython(filename, verbose=0, compile_message=False,
         Traceback (most recent call last):
         ...
         RuntimeError: ...
+
+    As of :trac:`29139` the default is ``cdivision=True``::
+
+        sage: cython('''
+        ....: cdef size_t foo = 3/2
+        ....: ''')
+
+    Check that Cython supports PEP 420 packages::
+
+        sage: cython('''
+        ....: cimport sage.misc.cachefunc
+        ....: ''')
+
+        sage: cython('''
+        ....: from sage.misc.cachefunc cimport cache_key
+        ....: ''')
+
+    In Cython 0.29.33 using `from PACKAGE cimport MODULE` is broken
+    when `PACKAGE` is a namespace package, see :trac:`35322`::
+
+        sage: cython('''
+        ....: from sage.misc cimport cachefunc
+        ....: ''')
+        Traceback (most recent call last):
+        ...
+        RuntimeError: Error compiling Cython file:
+        ...
+        ...: 'sage/misc.pxd' not found
     """
     if not filename.endswith('pyx'):
         print("Warning: file (={}) should have extension .pyx".format(filename), file=sys.stderr)
@@ -212,9 +251,9 @@ def cython(filename, verbose=0, compile_message=False,
     base = sanitize(base)
 
     # This is the *temporary* directory where we store the pyx file.
-    # This is deleted when Sage exits, which means pyx files must be
-    # rebuilt every time Sage is restarted at present.
-    target_dir = os.path.join(SPYX_TMP, base)
+    # spyx_tmp changes when we start Sage, so old (but not stale) pyx
+    # files must be rebuilt at the moment.
+    target_dir = os.path.join(spyx_tmp(), base)
 
     # Build directory for Cython/distutils
     build_dir = os.path.join(target_dir, "build")
@@ -223,13 +262,20 @@ def cython(filename, verbose=0, compile_message=False,
         # There is already a module here. Maybe we do not have to rebuild?
         # Find the name.
         if use_cache:
-            from sage.misc.sageinspect import loadable_module_extension
-            prev_so = [F for F in os.listdir(target_dir) if F.endswith(loadable_module_extension())]
-            if len(prev_so) > 0:
-                prev_so = prev_so[0]     # should have length 1 because of deletes below
-                if os.path.getmtime(filename) <= os.path.getmtime('%s/%s' % (target_dir, prev_so)):
+            from importlib.machinery import EXTENSION_SUFFIXES
+            for f in os.listdir(target_dir):
+                for suffix in EXTENSION_SUFFIXES:
+                    if f.endswith(suffix):
+                        # use the first matching extension
+                        prev_file = os.path.join(target_dir, f)
+                        prev_name = f[:-len(suffix)]
+                        break
+                else:
+                    # no match, try next file
+                    continue
+                if os.path.getmtime(filename) <= os.path.getmtime(prev_file):
                     # We do not have to rebuild.
-                    return prev_so[:-len(loadable_module_extension())], target_dir
+                    return prev_name, target_dir
 
         # Delete all ordinary files in target_dir
         for F in os.listdir(target_dir):
@@ -241,7 +287,7 @@ def cython(filename, verbose=0, compile_message=False,
             except OSError:
                 pass
     else:
-        sage_makedirs(target_dir)
+        os.makedirs(target_dir, exist_ok=True)
 
     if create_local_so_file:
         name = base
@@ -263,15 +309,24 @@ def cython(filename, verbose=0, compile_message=False,
     shutil.copy(filename, pyxfile)
 
     # Add current working directory to includes. This is needed because
-    # we cythonize from a different directory. See Trac #24764.
-    includes = [os.getcwd()] + sage_include_directories()
+    # we cythonize from a different directory. See Issue #24764.
+    standard_libs, standard_libdirs, standard_includes, aliases = _standard_libs_libdirs_incdirs_aliases()
+    includes = [os.getcwd()] + standard_includes
 
     # Now do the actual build, directly calling Cython and distutils
     from Cython.Build import cythonize
     from Cython.Compiler.Errors import CompileError
     import Cython.Compiler.Options
-    from distutils.dist import Distribution
-    from distutils.core import Extension
+
+    try:
+        from setuptools.dist import Distribution
+        from setuptools.extension import Extension
+    except ImportError:
+        # Fall back to distutils (stdlib); note that it is deprecated
+        # in Python 3.10, 3.11; https://www.python.org/dev/peps/pep-0632/
+        from distutils.dist import Distribution
+        from distutils.core import Extension
+
     from distutils.log import set_verbosity
     set_verbosity(verbose)
 
@@ -297,16 +352,14 @@ def cython(filename, verbose=0, compile_message=False,
         # standard DLLs, while giving ~2GB (should be more than enough) for
         # Sage to grow, we base these DLLs from 0x5:8000000, leaving again ~2GB
         # for temp DLLs which in normal use should be more than enough.
-        # See https://trac.sagemath.org/ticket/28258
+        # See https://github.com/sagemath/sage/issues/28258
         # It should be noted, this is not a bulletproof solution; there is
         # still a potential for DLL overlaps with this.  But this reduces the
         # probability thereof, especially in normal practice.
         dll_filename = os.path.splitext(pyxfile)[0] + '.dll'
         image_base = _compute_dll_image_base(dll_filename)
-        extra_link_args.extend([
-                '-Wl,--disable-auto-image-base',
-                '-Wl,--image-base=0x{:x}'.format(image_base)
-        ])
+        extra_link_args.extend(['-Wl,--disable-auto-image-base',
+                                '-Wl,--image-base=0x{:x}'.format(image_base)])
 
     ext = Extension(name,
                     sources=[pyxfile],
@@ -315,20 +368,22 @@ def cython(filename, verbose=0, compile_message=False,
                     libraries=standard_libs,
                     library_dirs=standard_libdirs)
 
-    directives = dict(language_level=sys.version_info[0])
+    directives = dict(language_level=3, cdivision=True)
 
     try:
         # Change directories to target_dir so that Cython produces the correct
-        # relative path; https://trac.sagemath.org/ticket/24097
+        # relative path; https://github.com/sagemath/sage/issues/24097
         with restore_cwd(target_dir):
             try:
-                ext, = cythonize([ext],
-                                 aliases=cython_aliases(),
-                                 include_path=includes,
-                                 compiler_directives=directives,
-                                 quiet=(verbose <= 0),
-                                 errors_to_stderr=False,
-                                 use_listing_file=True)
+                from sage.misc.package_dir import cython_namespace_package_support
+                with cython_namespace_package_support():
+                    ext, = cythonize([ext],
+                                     aliases=aliases,
+                                     include_path=includes,
+                                     compiler_directives=directives,
+                                     quiet=(verbose <= 0),
+                                     errors_to_stderr=False,
+                                     use_listing_file=True)
             finally:
                 # Read the "listing file" which is the file containing
                 # warning and error messages generated by Cython.
@@ -383,9 +438,11 @@ def cython(filename, verbose=0, compile_message=False,
 
     if create_local_so_file:
         # Copy module to current directory
-        from sage.misc.sageinspect import loadable_module_extension
-        shutil.copy(os.path.join(target_dir, name + loadable_module_extension()),
-                    os.curdir)
+        from importlib.machinery import EXTENSION_SUFFIXES
+        for ext in EXTENSION_SUFFIXES:
+            path = os.path.join(target_dir, name + ext)
+            if os.path.exists(path):
+                shutil.copy(path, os.curdir)
 
     return name, target_dir
 
@@ -502,6 +559,10 @@ def cython_import(filename, **kwds):
     try:
         sys.path.append(build_dir)
         return builtins.__import__(name)
+    except ModuleNotFoundError:
+        import importlib
+        importlib.invalidate_caches()
+        return builtins.__import__(name)
     finally:
         sys.path = oldpath
 
@@ -522,7 +583,7 @@ def cython_import_all(filename, globals, **kwds):
       code
     """
     m = cython_import(filename, **kwds)
-    for k, x in iteritems(m.__dict__):
+    for k, x in m.__dict__.items():
         if k[0] != '_':
             globals[k] = x
 
@@ -635,7 +696,7 @@ def cython_compile(code, **kwds):
 
 
 # THe following utility functions are used on Cygwin only to work around a
-# shortcoming in ld/binutils; see https://trac.sagemath.org/ticket/28258
+# shortcoming in ld/binutils; see https://github.com/sagemath/sage/issues/28258
 def _strhash(s):
     """
     Implementation of the strhash function from binutils
@@ -659,9 +720,6 @@ def _strhash(s):
     l = len(s)
 
     for c in s:
-        if PY2:
-            c = ord(c)
-
         h += c + (c << 17)
         h ^= h >> 2
 

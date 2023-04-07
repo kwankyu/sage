@@ -47,7 +47,6 @@ libc = None
 libprofiler = None
 
 
-
 class Profiler(SageObject):
 
     def __init__(self, filename=None):
@@ -207,12 +206,11 @@ class Profiler(SageObject):
 
         EXAMPLES::
 
-            sage: import six
             sage: from sage.misc.gperftools import Profiler
             sage: prof = Profiler()
             sage: try:
             ....:     pp = prof._pprof()
-            ....:     assert isinstance(pp, six.string_types)
+            ....:     assert isinstance(pp, str)
             ....: except OSError:
             ....:     pass    # not installed
         """

@@ -1,6 +1,3 @@
-#
-# Upstream does not have a setup.py file, so we supply one with Sage
-#
+cd src
 
-mv setup.py src
-cd src && sdh_pip_install .
+sdh_pip_install .

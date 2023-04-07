@@ -1,3 +1,6 @@
+# distutils: language = c++
+# sage_setup: distribution = sagemath-tdlib
+
 r"""
 Interface with TdLib (algorithms for tree decompositions)
 
@@ -33,7 +36,7 @@ of `G`.
 Computing the treewidth or a tree decomposition of a given graph is NP-hard in
 general.
 
-**This module containes the following functions** :
+**This module contains the following functions** :
 
 .. csv-table::
     :class: contentstable
@@ -64,11 +67,12 @@ from cysignals.signals cimport sig_on, sig_off
 from sage.sets.set import Set
 from sage.graphs.graph import Graph
 
-cdef extern from "tdlib/sage_tdlib.cpp":
-     int sage_exact_decomposition(vector[unsigned int] &V_G, vector[unsigned int] &E_G, vector[vector[int]] &V_T, vector[unsigned int] &E_T, int lb)
+cdef extern from "sage_tdlib.cpp":
+    int sage_exact_decomposition(vector[unsigned int] &V_G, vector[unsigned int] &E_G, vector[vector[int]] &V_T, vector[unsigned int] &E_T, int lb)
+
 
 ##############################################################
-############ GRAPH/DECOMPOSITION ENCODING/DECODING ###########
+# ########## GRAPH/DECOMPOSITION ENCODING/DECODING ###########
 # the following will be used implicitly to do the translation
 # between Sage graph encoding and BGL graph encoding.
 
@@ -76,20 +80,22 @@ cdef make_tdlib_graph(G, vertex_to_int, vector[unsigned int] &V, vector[unsigned
     for i in range(G.order()):
         V.push_back(i)
 
-    for u,v in G.edge_iterator(labels=False):
+    for u, v in G.edge_iterator(labels=False):
         E.push_back(vertex_to_int[u])
         E.push_back(vertex_to_int[v])
 
+
 cdef make_sage_decomp(G, vector[vector[int]] &V, vector[unsigned int] &E, int_to_vertex):
     cdef int i, j
-    for i in range(0, len(V)):
+    for i in range(len(V)):
         G.add_vertex(Set([int_to_vertex[j] for j in V[i]]))
 
     for i in range(0, len(E), 2):
         G.add_edge(Set([int_to_vertex[j] for j in V[E[i]]]), Set([int_to_vertex[j] for j in V[E[i+1]]]))
 
+
 ##############################################################
-############ EXACT ALGORITHMS ################################
+# ########## EXACT ALGORITHMS ################################
 
 def treedecomposition_exact(G, lb=-1):
     r"""
@@ -152,6 +158,7 @@ def treedecomposition_exact(G, lb=-1):
 
     return T
 
+
 def get_width(T):
     """
     Return the width of a given tree decomposition.
@@ -167,6 +174,7 @@ def get_width(T):
     - The width of ``T``
 
     EXAMPLES::
+
         sage: import sage.graphs.graph_decompositions.tdlib as tdlib # optional - tdlib
         sage: G = graphs.PetersenGraph()                             # optional - tdlib
         sage: T = tdlib.treedecomposition_exact(G)                   # optional - tdlib

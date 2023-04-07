@@ -46,7 +46,7 @@ This file contains the following elements:
 # (at your option) any later version.
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
-from six.moves import range
+from copy import copy
 
 from sage.structure.sage_object import SageObject
 from sage.rings.integer import Integer
@@ -56,8 +56,7 @@ from sage.modules.free_module_element import vector
 from sage.misc.abstract_method import abstract_method
 from sage.categories.cartesian_product import cartesian_product
 from sage.modules.free_module import VectorSpace
-from sage.functions.other import binomial
-from copy import copy
+from sage.arith.misc import binomial
 
 
 def random_error_vector(n, F, error_positions):
@@ -174,7 +173,7 @@ class Channel(SageObject):
             sage: from sage.coding.channel import Channel
             sage: class ChannelExample(Channel):
             ....:   def __init__(self, input_space, output_space):
-            ....:       super(ChannelExample, self).__init__(input_space, output_space)
+            ....:       super().__init__(input_space, output_space)
 
         We now create a member of our newly made class::
 
@@ -345,7 +344,7 @@ class StaticErrorRateChannel(Channel):
             number_errors = (number_errors, number_errors)
         if not isinstance(number_errors, (tuple, list)):
             raise ValueError("number_errors must be a tuple, a list, an Integer or a Python int")
-        super(StaticErrorRateChannel, self).__init__(space, space)
+        super().__init__(space, space)
         if number_errors[1] > space.dimension():
             raise ValueError("There might be more errors than the dimension of the input space")
         self._number_errors = number_errors
@@ -502,7 +501,7 @@ class ErrorErasureChannel(Channel):
             sage: Chan = channels.ErrorErasureChannel(GF(59)^40, n_err, n_era)
             Traceback (most recent call last):
             ...
-            ValueError: The total number of errors and erasures can not exceed the dimension of the input space
+            ValueError: The total number of errors and erasures cannot exceed the dimension of the input space
         """
         if isinstance(number_errors, (Integer, int)):
             number_errors = (number_errors, number_errors)
@@ -515,9 +514,9 @@ class ErrorErasureChannel(Channel):
             raise ValueError("number_erasures must be a tuple, a list, an Integer or a Python int")
 
         output_space = cartesian_product([space, VectorSpace(GF(2), space.dimension())])
-        super(ErrorErasureChannel, self).__init__(space, output_space)
+        super().__init__(space, output_space)
         if number_errors[1] + number_erasures[1] > space.dimension():
-            raise ValueError("The total number of errors and erasures can not exceed the dimension of the input space")
+            raise ValueError("The total number of errors and erasures cannot exceed the dimension of the input space")
         self._number_errors = number_errors
         self._number_erasures = number_erasures
 
@@ -604,7 +603,7 @@ class ErrorErasureChannel(Channel):
         zero = V.base_ring().zero()
 
         errors = sample(range(n), number_errors + number_erasures)
-        error_positions   = errors[:number_errors]
+        error_positions = errors[:number_errors]
         erasure_positions = errors[number_errors:]
 
         error_vector = random_error_vector(n, V.base_ring(), error_positions)
@@ -705,7 +704,7 @@ class QarySymmetricChannel(Channel):
         if epsilon >= 1 or epsilon <= 0:
             raise ValueError("Error probability must be between 0 and 1")
 
-        super(QarySymmetricChannel, self).__init__(space, space)
+        super().__init__(space, space)
         self._epsilon = epsilon
         try:
             self.transmit_unsafe(space.random_element())

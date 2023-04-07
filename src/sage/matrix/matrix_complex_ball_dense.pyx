@@ -1,3 +1,4 @@
+# distutils: libraries = ARB_LIBRARY
 r"""
 Arbitrary precision complex ball matrices using Arb
 
@@ -17,6 +18,10 @@ TESTS::
     sage: pol(mat)
     [8.000000000000000 11.00000000000000]
     [22.00000000000000 41.00000000000000]
+
+    sage: mat = matrix(ComplexBallField(20), 2, 2, list(range(4)))*i/3
+    sage: loads(dumps(mat)).identical(mat)
+    True
 """
 
 #*****************************************************************************
@@ -49,7 +54,9 @@ from sage.rings.integer cimport Integer
 from sage.rings.polynomial.polynomial_complex_arb cimport Polynomial_complex_arb
 from sage.structure.element cimport Element, RingElement, Matrix
 from sage.structure.parent cimport Parent
+from sage.structure.sequence import Sequence
 
+from sage.misc.superseded import experimental
 from sage.rings.integer_ring import ZZ
 from sage.rings.polynomial import polynomial_ring_constructor
 
@@ -140,7 +147,7 @@ cdef class Matrix_complex_ball_dense(Matrix_dense):
             sage: a = Matrix_complex_ball_dense.__new__( # indirect doctest
             ....:     Matrix_complex_ball_dense, Mat(CBF, 2), 0, 0, 0)
             sage: type(a)
-            <type 'sage.matrix.matrix_complex_ball_dense.Matrix_complex_ball_dense'>
+            <class 'sage.matrix.matrix_complex_ball_dense.Matrix_complex_ball_dense'>
         """
         sig_str("Arb exception")
         acb_mat_init(self.value, self._nrows, self._ncols)
@@ -544,6 +551,26 @@ cdef class Matrix_complex_ball_dense(Matrix_dense):
         else:
             raise ZeroDivisionError("unable to compute the inverse, is the matrix singular?")
 
+    def transpose(self):
+        r"""
+        Return the transpose of ``self``.
+
+        EXAMPLES::
+
+            sage: m = matrix(CBF, 2, 3, [1, 2, 3, 4, 5, 6])
+            sage: m.transpose()
+            [1.000000000000000 4.000000000000000]
+            [2.000000000000000 5.000000000000000]
+            [3.000000000000000 6.000000000000000]
+            sage: m.transpose().parent()
+            Full MatrixSpace of 3 by 2 dense matrices over Complex ball field with 53 bits of precision
+        """
+        cdef Py_ssize_t nc = self._ncols
+        cdef Py_ssize_t nr = self._nrows
+        cdef Matrix_complex_ball_dense trans = self._new(nc, nr)
+        acb_mat_transpose(trans.value, self.value)
+        return trans
+
     def _solve_right_nonsingular_square(self, Matrix_complex_ball_dense rhs, check_rank=None):
         r"""
         TESTS::
@@ -647,6 +674,277 @@ cdef class Matrix_complex_ball_dense(Matrix_dense):
         sig_off()
         return res
 
+    @experimental(issue_number=30393)
+    def eigenvalues(self, other=None, *, extend=None):
+        r"""
+        (Experimental.) Compute rigorous enclosures of the eigenvalues of this matrix.
+
+        INPUT:
+
+        - ``self`` -- an `n \times n` matrix
+        - ``other`` -- unsupported (generalized eigenvalue problem), should be ``None``
+        - ``extend`` -- ignored
+
+        OUTPUT:
+
+        A :class:`~sage.structure.sequence.Sequence` of complex balls of
+        length equal to the size of the matrix.
+
+        Each element represents one eigenvalue with the correct multiplicities
+        in case of overlap. The output intervals are either disjoint or
+        identical, and identical intervals are guaranteed to be grouped
+        consecutively. Each complete run of `k` identical balls thus represents
+        a cluster of exactly `k` eigenvalues which could not be separated from
+        each other at the current precision, but which could be isolated from
+        the other eigenvalues.
+
+        There is currently no guarantee that the algorithm converges as the
+        working precision is increased.
+
+        See the `Arb documentation <http://arblib.org/acb_mat.html#c.acb_mat_eig_multiple>`__
+        for more information.
+
+        EXAMPLES::
+
+            sage: from sage.matrix.benchmark import hilbert_matrix
+            sage: mat = hilbert_matrix(5).change_ring(CBF)
+            sage: mat.eigenvalues()
+            doctest:...: FutureWarning: This class/method/function is marked as experimental.
+            ...
+            [[1.567050691098...] + [+/- ...]*I, [0.208534218611...] + [+/- ...]*I,
+            [3.287928...e-6...] + [+/- ...]*I, [0.000305898040...] + [+/- ...]*I,
+            [0.011407491623...] + [+/- ...]*I]
+
+            sage: mat = Permutation([2, 1, 4, 5, 3]).to_matrix().dense_matrix().change_ring(CBF)
+            sage: mat.eigenvalues()
+            Traceback (most recent call last):
+            ...
+            ValueError: unable to certify the eigenvalues
+            sage: precond = matrix(ZZ, [[-1, -2, 2, 2, -2], [2, -2, -2, -2, 2],
+            ....:     [-2, 2, -1, 2, 1], [2, 1, -1, 0, 2], [-2, 0, 1, -1, 1]])
+            sage: (~precond*mat*precond).eigenvalues()
+            [[-0.5000000000000...] + [-0.8660254037844...]*I, [-1.000000000000...] + [+/- ...]*I,
+             [-0.5000000000000...] + [0.8660254037844...]*I,
+             [1.000000000000...] + [+/- ...]*I, [1.000000000000...] + [+/- ...]*I]
+
+        .. SEEALSO:: :meth:`eigenvectors_right`
+        """
+        if self._nrows != self._ncols:
+            raise ValueError("self must be a square matrix")
+        cdef long n = self._ncols
+        cdef acb_ptr eigval_approx, eigval
+        cdef acb_mat_t eigvec_approx
+        if other is not None:
+            raise NotImplementedError
+        try:
+            eigval_approx = _acb_vec_init(n)
+            acb_mat_init(eigvec_approx, n, n)
+            acb_mat_approx_eig_qr(eigval_approx, NULL, eigvec_approx, self.value, NULL, 0, prec(self))
+            eigval = _acb_vec_init(n)
+            if not acb_mat_eig_multiple(eigval, self.value, eigval_approx, eigvec_approx, prec(self)):
+                raise ValueError("unable to certify the eigenvalues")
+            res = _acb_vec_to_list(eigval, n, self._parent._base)
+        finally:
+            acb_mat_clear(eigvec_approx)
+            _acb_vec_clear(eigval, n)
+            _acb_vec_clear(eigval_approx, n)
+        return Sequence(res)
+
+    @experimental(issue_number=30393)
+    def eigenvectors_right_approx(self, other=None, *, extend=None):
+        r"""
+        (Experimental.) Compute *non-rigorous* approximations of the
+        eigenvalues and eigenvectors of this matrix.
+
+        INPUT:
+
+        - ``self`` -- an `n \times n` matrix
+        - ``other`` -- unsupported (generalized eigenvalue problem), should be ``None``
+        - ``extend`` -- ignored
+
+        OUTPUT:
+
+        A list of triples of the form ``(eigenvalue, [eigenvector], 1)``. The
+        eigenvalue and the entries of the eigenvector are complex balls with
+        zero radius.
+
+        No guarantees are made about the accuracy of the output.
+
+        See the `Arb documentation <http://arblib.org/acb_mat.html#c.acb_mat_approx_eig_qr>`__
+        for more information.
+
+        EXAMPLES::
+
+            sage: from sage.matrix.benchmark import hilbert_matrix
+            sage: mat = hilbert_matrix(3).change_ring(CBF)
+            sage: eigval, eigvec, _ = mat.eigenvectors_right_approx()[0]
+            doctest:...: FutureWarning: This class/method/function is marked as experimental.
+            ...
+            sage: eigval
+            [1.40831892712...]
+            sage: eigval.rad()
+            0.00000000
+            sage: eigvec
+            [([0.8270449269720...], [0.4598639043655...], [0.3232984352444...])]
+            sage: (mat - eigval)*eigvec[0]
+            ([1e-15 +/- ...], [2e-15 +/- ...], [+/- ...])
+
+        .. SEEALSO:: :meth:`eigenvectors_right`
+        """
+        if self._nrows != self._ncols:
+            raise ValueError("self must be a square matrix")
+        cdef long n = self._ncols
+        cdef Matrix_complex_ball_dense eigvec = self._new(n, n)
+        cdef acb_ptr _eigval
+        if other is not None:
+            raise NotImplementedError
+        try:
+            _eigval = _acb_vec_init(n)
+            acb_mat_approx_eig_qr(_eigval, NULL, eigvec.value, self.value, NULL, 0, prec(self))
+            eigval = _acb_vec_to_list(_eigval, n, self._parent._base)
+        finally:
+            _acb_vec_clear(_eigval, n)
+        return [(l, [v], 1) for l, v in zip(eigval, eigvec.columns())]
+
+    @experimental(issue_number=30393)
+    def eigenvectors_right(self, other=None, *, extend=None):
+        r"""
+        (Experimental.) Compute rigorous enclosures of the eigenvalues and
+        eigenvectors of this matrix.
+
+        INPUT:
+
+        - ``self`` -- an `n \times n` matrix
+        - ``other`` -- unsupported (generalized eigenvalue problem), should be ``None``
+        - ``extend`` -- ignored
+
+        OUTPUT:
+
+        A list of triples of the form ``(eigenvalue, [eigenvector], 1)``.
+
+        Unlike :meth:`eigenvalues` and :meth:`eigenvectors_right_approx`, this
+        method currently fails in the presence of multiple eigenvalues.
+
+        Additionally, there is currently no guarantee that the algorithm
+        converges as the working precision is increased.
+
+        See the `Arb documentation <http://arblib.org/acb_mat.html#c.acb_mat_eig_simple>`__
+        for more information.
+
+        EXAMPLES::
+
+            sage: from sage.matrix.benchmark import hilbert_matrix
+            sage: mat = hilbert_matrix(3).change_ring(CBF)
+            sage: eigval, eigvec, _ = mat.eigenvectors_right()[0]
+            doctest:...: FutureWarning: This class/method/function is marked as experimental.
+            ...
+            sage: eigval
+            [1.40831892712...] + [+/- ...]*I
+            sage: eigvec
+            [([0.82704492697...] + [+/- ...]*I, [0.45986390436...] + [+/- ...]*I, [0.32329843524...] + [+/- ...]*I)]
+            sage: (mat - eigval)*eigvec[0]
+            ([+/- ...] + [+/- ...]*I, [+/- ...] + [+/- ...]*I, [+/- ...] + [+/- ...]*I)
+
+        .. SEEALSO:: :meth:`eigenvectors_right_approx`, :meth:`eigenvalues`
+        """
+        if self._nrows != self._ncols:
+            raise ValueError("self must be a square matrix")
+        cdef long n = self._ncols
+        cdef acb_ptr eigval_approx, _eigval
+        cdef acb_mat_t eigvec_approx
+        cdef Matrix_complex_ball_dense eigvec = self._new(n, n)
+        if other is not None:
+            raise NotImplementedError
+        try:
+            _eigval = _acb_vec_init(n)
+            eigval_approx = _acb_vec_init(n)
+            acb_mat_init(eigvec_approx, n, n)
+            acb_mat_approx_eig_qr(eigval_approx, NULL, eigvec_approx, self.value, NULL, 0, prec(self))
+            if not acb_mat_eig_simple(_eigval, NULL, eigvec.value, self.value, eigval_approx, eigvec_approx, prec(self)):
+                raise ValueError("unable to isolate the eigenvalues (multiple eigenvalues?)")
+            eigval = _acb_vec_to_list(_eigval, n, self._parent._base)
+        finally:
+            acb_mat_clear(eigvec_approx)
+            _acb_vec_clear(_eigval, n)
+            _acb_vec_clear(eigval_approx, n)
+        return [(l, [v], 1) for l, v in zip(eigval, eigvec.columns())]
+
+    def eigenvectors_left_approx(self, other=None, *, extend=None):
+        r"""
+        (Experimental.) Compute *non-rigorous* approximations of the
+        left eigenvalues and eigenvectors of this matrix.
+
+        INPUT:
+
+        - ``self`` -- an `n \times n` matrix
+        - ``other`` -- unsupported (generalized eigenvalue problem), should be ``None``
+        - ``extend`` -- ignored
+
+        OUTPUT:
+
+        A list of triples of the form ``(eigenvalue, [eigenvector], 1)``. The
+        eigenvalue and the entries of the eigenvector are complex balls with
+        zero radius.
+
+        No guarantees are made about the accuracy of the output.
+
+        See the `Arb documentation <http://arblib.org/acb_mat.html#c.acb_mat_approx_eig_qr>`__
+        for more information.
+
+        EXAMPLES::
+
+            sage: mat = matrix(CBF, 3, [2, 3, 5, 7, 11, 13, 17, 19, 23])
+            sage: eigval, eigvec, _ = mat.eigenvectors_left_approx()[0]
+            sage: eigval
+            [1.1052996349... +/- ...]
+            sage: eigvec[0]
+            ([0.69817246751...], [-0.67419514369...], [0.240865343781...])
+            sage: eigvec[0] * (mat - eigval)
+            ([+/- ...], [+/- ...], [+/- ...])
+
+        .. SEEALSO:: :meth:`eigenvectors_left`
+        """
+        return self.transpose().eigenvectors_right_approx(other=None, extend=extend)
+
+    def eigenvectors_left(self, other=None, *, extend=True):
+        r"""
+        (Experimental.) Compute rigorous enclosures of the eigenvalues and
+        left eigenvectors of this matrix.
+
+        INPUT:
+
+        - ``self`` -- an `n \times n` matrix
+        - ``other`` -- unsupported (generalized eigenvalue problem), should be ``None``
+        - ``extend`` -- ignored
+
+        OUTPUT:
+
+        A list of triples of the form ``(eigenvalue, [eigenvector], 1)``.
+
+        Unlike :meth:`eigenvalues` and :meth:`eigenvectors_left_approx`, this
+        method currently fails in the presence of multiple eigenvalues.
+
+        Additionally, there is currently no guarantee that the algorithm
+        converges as the working precision is increased.
+
+        See the `Arb documentation <http://arblib.org/acb_mat.html#c.acb_mat_eig_simple>`__
+        for more information.
+
+        EXAMPLES::
+
+            sage: mat = matrix(CBF, 3, [2, 3, 5, 7, 11, 13, 17, 19, 23])
+            sage: eigval, eigvec, _ = mat.eigenvectors_left()[0]
+            sage: eigval
+            [1.1052996349...] + [+/- ...]*I
+            sage: eigvec[0]
+            ([0.69817246751...] + [+/- ...]*I, [-0.67419514369...] + [+/- ...]*I, [0.240865343781...] + [+/- ...]*I)
+            sage: eigvec[0] * (mat - eigval)
+            ([+/- ...] + [+/- ...]*I, [+/- ...] + [+/- ...]*I, [+/- ...] + [+/- ...]*I)
+
+        .. SEEALSO:: :meth:`eigenvectors_right`, :meth:`eigenvalues`, :meth:`eigenvectors_left_approx`
+        """
+        return self.transpose().eigenvectors_right(other=other, extend=extend)
+
     def exp(self):
         r"""
         Compute the exponential of this matrix.
@@ -668,3 +966,13 @@ cdef class Matrix_complex_ball_dense(Matrix_dense):
         acb_mat_exp(res.value, self.value, prec(self))
         sig_off()
         return res
+
+cdef _acb_vec_to_list(acb_ptr vec, long n, Parent parent):
+    cdef ComplexBall b
+    res = []
+    for i in range(n):
+        b = ComplexBall.__new__(ComplexBall)
+        b._parent = parent
+        acb_set(b.value, &vec[i])
+        res.append(b)
+    return res

@@ -6,7 +6,6 @@ Thematic tutorial document tree
    :maxdepth: 2
 
    algebraic_combinatorics
-   tutorial-notebook-and-help-long
    sandpile
    group_theory
    lie
@@ -16,6 +15,7 @@ Thematic tutorial document tree
    coding_theory
    structures_in_coding_theory
    geometry
+   steenrod_algebra_modules
    tutorial-programming-python
    tutorial-comprehensions
    tutorial-objects-and-classes
@@ -25,5 +25,5 @@ Thematic tutorial document tree
    cython_interface
    numerical_sage/index
    explicit_methods_in_number_theory/index
-   sws2rst
    profiling
+   sws2rst

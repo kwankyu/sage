@@ -13,7 +13,6 @@ from sage.categories.category_singleton import Category_singleton
 from sage.categories.crystals import (Crystals, CrystalHomset,
                                       CrystalMorphismByGenerators)
 from sage.categories.tensor import TensorProductsCategory
-from sage.graphs.dot2tex_utils import have_dot2tex
 
 class HighestWeightCrystals(Category_singleton):
     """
@@ -41,6 +40,7 @@ class HighestWeightCrystals(Category_singleton):
         running ._test_an_element() . . . pass
         running ._test_cardinality() . . . pass
         running ._test_category() . . . pass
+        running ._test_construction() . . . pass
         running ._test_elements() . . .
           Running the test suite of self.an_element()
           running ._test_category() . . . pass
@@ -148,7 +148,7 @@ class HighestWeightCrystals(Category_singleton):
                 sage: C.highest_weight_vector()
                 1
             """
-            hw = self.highest_weight_vectors();
+            hw = self.highest_weight_vectors()
             if len(hw) == 1:
                 return hw[0]
             else:
@@ -180,9 +180,9 @@ class HighestWeightCrystals(Category_singleton):
             """
             return tuple(g for g in self if g.is_lowest_weight())
 
-        def __iter__(self, index_set=None, max_depth = float("inf")):
+        def __iter__(self, index_set=None, max_depth=float("inf")):
             """
-            Returns the iterator of ``self``.
+            Return the iterator of ``self``.
 
             INPUT:
 
@@ -322,16 +322,11 @@ class HighestWeightCrystals(Category_singleton):
                 1 + q + 2*q^2 + 2*q^3 + 4*q^4 + 5*q^5 + 7*q^6
                  + 9*q^7 + 13*q^8 + 16*q^9 + O(q^10)
                 sage: qdim = C.q_dimension(); qdim
-                1 + q + 2*q^2 + 2*q^3 + 4*q^4 + 5*q^5 + 7*q^6
-                 + 9*q^7 + 13*q^8 + 16*q^9 + 22*q^10 + O(x^11)
-                sage: qdim.compute_coefficients(15)
-                sage: qdim
-                1 + q + 2*q^2 + 2*q^3 + 4*q^4 + 5*q^5 + 7*q^6
-                 + 9*q^7 + 13*q^8 + 16*q^9 + 22*q^10 + 27*q^11
-                 + 36*q^12 + 44*q^13 + 57*q^14 + 70*q^15 + O(x^16)
-
+                1 + q + 2*q^2 + 2*q^3 + 4*q^4 + 5*q^5 + 7*q^6 + O(q^7)
+                sage: qdim[:16]
+                [1, 1, 2, 2, 4, 5, 7, 9, 13, 16, 22, 27, 36, 44, 57, 70]
             """
-            from sage.rings.all import ZZ
+            from sage.rings.integer_ring import ZZ
             WLR = self.weight_lattice_realization()
             I = self.index_set()
             mg = self.highest_weight_vectors()
@@ -375,7 +370,7 @@ class HighestWeightCrystals(Category_singleton):
             elif prec is None:
                 # If we're here, we may not be a finite crystal.
                 # In fact, we're probably infinite.
-                from sage.combinat.species.series import LazyPowerSeriesRing
+                from sage.rings.lazy_series_ring import LazyPowerSeriesRing
                 if q is None:
                     P = LazyPowerSeriesRing(ZZ, names='q')
                 else:
@@ -383,14 +378,13 @@ class HighestWeightCrystals(Category_singleton):
                 if not isinstance(P, LazyPowerSeriesRing):
                     raise TypeError("the parent of q must be a lazy power series ring")
                 ret = P(iter_by_deg(mg))
-                ret.compute_coefficients(10)
                 return ret
 
             from sage.rings.power_series_ring import PowerSeriesRing, PowerSeriesRing_generic
             if q is None:
                 q = PowerSeriesRing(ZZ, 'q', default_prec=prec).gen(0)
             P = q.parent()
-            ret = P.sum(c * q**deg for deg,c in enumerate(iter_by_deg(mg)))
+            ret = P.sum(c * q**deg for deg, c in enumerate(iter_by_deg(mg)))
             if ret.degree() == max_deg and isinstance(P, PowerSeriesRing_generic):
                 ret = P(ret, prec)
             return ret
@@ -497,7 +491,7 @@ class HighestWeightCrystals(Category_singleton):
                 raise NotImplementedError("crystals not known to be finite must"
                                           " specify either the subset or depth")
 
-            from sage.graphs.all import DiGraph
+            from sage.graphs.digraph import DiGraph
             if index_set is None:
                 index_set = self.index_set()
 
@@ -520,6 +514,7 @@ class HighestWeightCrystals(Category_singleton):
                 visited = recently_visited
 
             G = DiGraph(d)
+            from sage.graphs.dot2tex_utils import have_dot2tex
             if have_dot2tex():
                 G.set_latex_options(format="dot2tex",
                                     edge_labels=True,
@@ -763,7 +758,21 @@ class HighestWeightCrystals(Category_singleton):
                     Traceback (most recent call last):
                     ...
                     NotImplementedError: not implemented for infinite crystals
+
+                Check that :trac:`30493` is fixed::
+
+                    sage: CW = CartanType("G", 2)
+                    sage: C = crystals.Letters(CW)
+                    sage: C.highest_weight_vectors()
+                    (1,)
+                    sage: T = crystals.TensorProduct(C)
+                    sage: T.highest_weight_vectors()
+                    ([1],)
                 """
+                if len(self.crystals) == 1:
+                    for b in self.crystals[0].highest_weight_vectors():
+                        yield self.element_class(self, [b])
+                    return
                 I = self.index_set()
                 try:
                     T_elts = [C.list() for C in self.crystals[:-1]]

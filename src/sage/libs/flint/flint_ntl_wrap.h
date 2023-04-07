@@ -8,14 +8,14 @@
 
 #include <gmp.h>
 
-/* Save previous definition of ulong if any, as zn_poly and pari also use it */
+/* Save previous definition of ulong if any, as pari also uses it */
 #pragma push_macro("ulong")
 #undef ulong
 
 #include <flint/flint.h>
 
 /* If flint was already previously included via another header (e.g.
- * arb_wrap.h) then it may be neessary to redefine ulong and slong again */
+ * arb_wrap.h) then it may be necessary to redefine ulong and slong again */
 
 #ifndef ulong
 #define ulong mp_limb_t
