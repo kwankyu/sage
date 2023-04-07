@@ -715,10 +715,10 @@ cdef class CyclotomicFieldConversion(Map):
     EXAMPLES::
 
         sage: from sage.rings.number_field.number_field_morphisms import CyclotomicFieldConversion
-        sage: K1.<z1> = CyclotomicField(12)           
+        sage: K1.<z1> = CyclotomicField(12)
         sage: K2.<z2> = CyclotomicField(18)
-        sage: f = CyclotomicFieldConversion(K1, K2)                                                   
-        sage: f(z1^2)                                                                                 
+        sage: f = CyclotomicFieldConversion(K1, K2)
+        sage: f(z1^2)
         z2^3
         sage: f(z1)
         Traceback (most recent call last):
@@ -775,4 +775,3 @@ cdef class CyclotomicFieldConversion(Map):
             return self.phi.preimage(M(x))
         except ValueError:
             raise ValueError('Element {} has no image in the codomain'.format(x))
-

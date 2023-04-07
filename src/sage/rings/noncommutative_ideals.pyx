@@ -385,7 +385,7 @@ class Ideal_nc(Ideal_generic):
              of Full MatrixSpace of 2 by 2 dense matrices over Rational Field
 
             sage: IL * IR
-            Twosided Ideal 
+            Twosided Ideal
             (
               [0 3]
               [0 0]
@@ -418,4 +418,3 @@ class Ideal_nc(Ideal_generic):
                 return other.ring().ideal(other.gens(), side='twosided')
 
         raise NotImplementedError("cannot multiply non-commutative ideals")
-

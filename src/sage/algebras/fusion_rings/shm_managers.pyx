@@ -22,7 +22,7 @@ from multiprocessing import shared_memory
 from sage.algebras.fusion_rings.poly_tup_engine cimport poly_to_tup, tup_fixes_sq, _flatten_coeffs
 from sage.rings.integer cimport Integer
 from sage.rings.rational cimport Rational
-from sage.rings.polynomial.multi_polynomial_libsingular cimport MPolynomial_libsingular
+from sage.rings.polynomial.multi_polynomial cimport MPolynomial_libsingular
 from sage.rings.polynomial.polydict cimport ETuple
 
 import numpy as np
@@ -559,7 +559,7 @@ cdef class FvarsHandler:
             cache, so each process must update its cache before retrieving a
             modified entry, tagged via its ``modified`` property.
         """
-        if not sextuple in self.sext_to_idx:
+        if sextuple not in self.sext_to_idx:
             raise KeyError('invalid sextuple {}'.format(sextuple))
         cdef Py_ssize_t idx = self.sext_to_idx[sextuple]
         # Each process builds its own cache, so each process must know
@@ -773,4 +773,3 @@ def make_FvarsHandler(n, field, idx_map, init_data):
         sage: f.shutdown_worker_pool()
     """
     return FvarsHandler(n, field, idx_map, init_data=init_data)
-

@@ -63,7 +63,7 @@ def RIFtol(*args):
     if _RIFtol is None:
         try:
             # We need to import from sage.all to avoid circular imports.
-            from sage.all import RealIntervalField
+            from sage.rings.real_mpfi import RealIntervalField
         except ImportError:
             from warnings import warn
             warn("RealIntervalField not available, ignoring all tolerance specifications in doctests")
@@ -1020,6 +1020,13 @@ class SageOutputChecker(doctest.OutputChecker):
             # :trac:`34533` -- suppress warning on OS X 12.6 about chained fixups
             chained_fixup_warning_regex = re.compile(r'ld: warning: -undefined dynamic_lookup may not work with chained fixups')
             got = chained_fixup_warning_regex.sub('', got)
+            did_fixup = True
+
+        if "newer macOS version" in got:
+            # :trac:`34741` -- suppress warning arising after
+            # upgrading from macOS 12.X to 13.X.
+            newer_macOS_version_regex = re.compile(r'.*dylib \(.*\) was built for newer macOS version \(.*\) than being linked \(.*\)')
+            got = newer_macOS_version_regex.sub('', got)
             did_fixup = True
 
         if "insufficient permissions" in got:

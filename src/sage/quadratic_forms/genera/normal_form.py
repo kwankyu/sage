@@ -1,5 +1,5 @@
 r"""
-Normal forms for `p`-adic quadratic and bilinear forms.
+Normal forms for `p`-adic quadratic and bilinear forms
 
 We represent a quadratic or bilinear form by its `n \times n` Gram matrix `G`.
 Then two `p`-adic forms `G` and `G'` are integrally equivalent if and only if
@@ -87,7 +87,9 @@ AUTHORS:
 #                  https://www.gnu.org/licenses/
 # ****************************************************************************
 
-from sage.rings.all import Zp, ZZ, GF
+from sage.rings.padics.factory import Zp
+from sage.rings.integer_ring import ZZ
+from sage.rings.finite_rings.finite_field_constructor import FiniteField as GF
 from sage.matrix.constructor import Matrix
 from copy import copy
 from sage.rings.finite_rings.integer_mod import mod

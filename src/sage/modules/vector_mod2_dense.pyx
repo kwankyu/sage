@@ -135,7 +135,7 @@ cdef class Vector_mod2_dense(free_module_element.FreeModuleElement):
         """
         self._entries = NULL
         self._is_immutable = 0
-        if not parent is None:
+        if parent is not None:
             self._init(parent.degree(), parent)
 
     def __init__(self, parent, x, coerce=True, copy=True):
@@ -156,7 +156,7 @@ cdef class Vector_mod2_dense(free_module_element.FreeModuleElement):
 
         TESTS:
 
-        Check that ticket :trac:`8601` is fixed::
+        Check that issue :trac:`8601` is fixed::
 
             sage: VS = VectorSpace(GF(2), 3)
             sage: VS((-1,-2,-3))
