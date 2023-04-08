@@ -1,245 +1,134 @@
 .. highlight:: shell-session
 
-.. _chapter-git_trac:
+.. _chapter-github-cli:
 
-====================================
-Optional: Using the Git-Trac Command
-====================================
+==============================
+Optional: Using the GitHub CLI
+==============================
 
-.. WARNING::
+GitHub provides a command line interface, the GitHub CLI, that can be used
+instead of the web interface.  The central component of the GitHub CLI is the
+`gh` command that you can use in your terminal.
 
-    **Sage development is scheduled to move to GitHub in February 2023.** The exact
-    date will be announced in `<https://groups.google.com/g/sage-devel>`_. After
-    the transition, some parts of this guide (especially those related with `the
-    Sage Trac server <https://trac.sagemath.org>`_) will become obsolete and be
-    updated according to the new workflow on GitHub. See our `transition guide from Trac to
-    GitHub
-    <https://github.com/sagemath/trac-to-github/blob/master/docs/Migration-Trac-to-Github.md>`_
-    for the preliminary version of the workflow.
+.. _section-gh-install:
 
-Git is a separate project from trac, and the two do not know how to
-talk to each other. To simplify the development, we have a special
-``git trac`` subcommand for the git suite. Note that this really is
-only to simplify interaction with our trac issue management, you can
-perform every development task with just git and a web browser.
 
-.. _section-git_trac-install:
+Look at :ref:`spkg_github_cli` to find the way to install the gh command for your platform.
 
-Installing the Git-Trac Command
-===============================
-
-::
-
-    [user@localhost]$ git clone https://github.com/sagemath/git-trac-command.git
-    Cloning into 'git-trac-command'...
-    [...]
-    Checking connectivity... done.
-    [user@localhost]$ source git-trac-command/enable.sh
-    Prepending the git-trac command to your search PATH
-
-This creates a directory ``git-trac-command``.
-
-Sourcing the ``enable.sh`` script in there is just a quick and dirty
-way to enable it temporarily. For a more permanent installation on
-your system later, make sure to put the ``git-trac`` command in your
-``PATH``. Assuming that ``~/bin`` is already in your ``PATH``, you can
-do this by symlinking::
-
-    [user@localhost]$ echo $PATH
-    /home/user/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin
-    [user@localhost]$ cd git-trac-command
-    [user@localhost git-trac-command]$ ln -s `pwd`/git-trac ~/bin/
-
-See the `git-trac README <https://github.com/sagemath/git-trac-command>`_ for
-more details. At this point you leave ``git-trac-command`` subdirectory, and only go
-there whenever you need to update the ``git-trac`` command.
-
+Or see `GitHub CLI <https://cli.github.com>`_.
 
 
 .. _section-git_trac-setup:
 
-Git and Trac Configuration
-==========================
+Configuration
+=============
 
-.. NOTE::
+Run ``gh auth login`` to authenticate with your GitHub account. Typically the authorization proceeds as follows::
 
-    * `trac <https://trac.sagemath.org>`_ uses username/password for
-      authentication.
+    [user@localhost sage]$ gh auth login
+    ? What is your preferred protocol for Git operations? HTTPS
+    ? Authenticate Git with your GitHub credentials? Yes
+    ? How would you like to authenticate GitHub CLI? Login with a web browser
 
-    * Our `git repository server <https://git.sagemath.org>`_ uses SSH
-      public key authentication for write access.
+    ! First copy your one-time code: 3DA8-5ADA
+    Press Enter to open github.com in your browser...
+    ✓ Authentication complete.
+    - gh config set -h github.com git_protocol https
+    ✓ Configured git protocol
+    ✓ Logged in as sage
 
-You need to set up both authentication mechanisms to be able to upload
-your changes with "git trac". For read-only access neither
-authentication mechanism is needed. To set up ``git trac``, first go
-to the Sage directory and tell ``git trac`` about your trac account::
+where a web browser is used to enter credentials. You can also use an
+authentication token instead, in which case you must first generate `a Personal
+Access Token here <https://github.com/settings/tokens>`_.
 
-    [user@localhost sage]$ git trac config --user USERNAME --pass 'PASSWORD'
-    Trac xmlrpc URL:
-        https://trac.sagemath.org/xmlrpc (anonymous)
-        https://trac.sagemath.org/login/xmlrpc (authenticated)
-        realm sage.math.washington.edu
-    Username: USERNAME
-    Password: PASSWORD
-    Retrieving SSH keys...
-        1024 ab:1b:7c:c9:9b:48:fe:dd:59:56:1e:9d:a4:a6:51:9d  My SSH Key
+::
 
-where you have to replace USERNAME with your trac user name and
-PASSWORD with your trac password. If you don't have a trac account,
-use ``git trac config`` without any arguments. The single quotes in
-``'PASSWORD'`` escape special characters that you might have in your
-password. The password is stored in plain-text in ``.git/config``, so
-make sure that it is not readable by other users on your system. For
-example, by running ``chmod 0600 .git/config`` if your home directory
-is not already private.
+    [user@localhost sage]$ gh repo view
+    sagemath/sage
+    ...
 
-Instead of a username and password you may also configure authentication via
-a generated token by passing ``--token=<token>`` instead of ``--pass``::
+which will show the default repo along with its readme, which is quite long. You
+can change the default repo by::
 
-    [user@localhost sage]$ git trac config --user=<username> --token=<token>
-
-This is required if you authenticate to Trac with your GitHub account, as
-you do not have a Trac password.  Logged in users can find their token
-under :trac:`the token tab in preferences on the trac site <prefs/token>`.
-
-.. NOTE::
-
-   The username to be entered here is NOT the GitHub username, but rather the trac username which is gh-<GitHub-username>
-   as given on the top right corner of the trac server.
-
-If both a token and a username/password are configured, the token-based
-authentication takes precedence.
-
-If you do not want to store your trac username/password/token on disk you
-can temporarily override it with the environment variables
-``TRAC_USERNAME``,  ``TRAC_PASSWORD``, and ``TRAC_TOKEN`` respectively.
-These take precedence over any other configuration.
-
-If there is no SSH key listed then you haven't uploaded your SSH
-public key to the trac server. You should do that now following the
-instructions to :ref:`section-trac-ssh-key`, if you want to upload
-any changes. You may have to add your private key to your authentication agent::
-
-    [user@localhost sage]$ ssh-add
-
-.. NOTE::
-
-   The ``git trac config`` command will automatically add a ``trac``
-   remote git repository to your list of remotes if necessary.
-
-If you followed the above instructions then you will have two remote
-repositories set up::
-
-    [user@localhost sage]$ git remote -v
-    origin      https://github.com/sagemath/sage.git (fetch)
-    origin      https://github.com/sagemath/sage.git (push)
-    trac        git@trac.sagemath.org:sage.git (fetch)
-    trac        git@trac.sagemath.org:sage.git (push)
-
-The ``git@...`` part of the push url means that write access is
-secured with SSH keys, which you must have set up as in
-:ref:`section-trac-ssh-key`. Read-only access happens through the
-fetch url and does not require SSH.
+     [user@localhost sage]$ gh repo set-default sagemath/sage
 
 
-Trac Tickets and Git Branches
+PR and Git Branches
 =============================
 
 Now let's start adding code to Sage!
 
-.. _section-git_trac-create:
+.. _section-gh-pr-create:
 
-Create a Ticket
+Create a PR
 ---------------
 
 Suppose you have written an algorithm for calculating the last twin prime, and
-want to add it to Sage. You would first open a ticket for that::
+want to add it to Sage. You would first open a PR for that::
 
-    [user@localhost sage]$ git trac create 'Last Twin Prime'
-    Remote branch: u/user/last_twin_prime
-    Newly-created ticket number: 12345
-    Ticket URL: https://trac.sagemath.org/12345
-    Local branch: t/12345/last_twin_prime
+    [user@localhost sage]$ gh pr create
+    ? Where should we push the 'last-twin-prime' branch? user/sage
 
-This will create a new trac ticket titled "Last Twin Prime" with a
-*remote branch* ``u/user/last_twin_prime`` attached to it. The remote
-branch name is automatically derived from the ticket title; If you
-don't like this then you can use the ``-b`` switch to specify it
-explicitly. See ``git trac create -h`` for details. This new branch is
-automatically checked out for you with the *local branch* name
-``t/12345/last_twin_prime``.
+    Creating pull request for user:last-twin-prime into develop in sagemath/sage
+
+    ? Title Last twin prime
+    ? Choose a template PULL_REQUEST_TEMPLATE.md
+    ? Body <Received>
+    ? What's next? Submit as draft
+    https://github.com/sagemath/sage/pull/12345
+
+This will create a new PR titled "Last Twin Prime" in ``sagemath/sage`` repo for the branch pushed to your forked repo. The title is automatically derived from the latest commit title; If you
+don't like this then you can use the ``-t`` switch to specify it
+explicitly. See the manual page of `gh pr create <https://cli.github.com/manual/gh_pr_create>`_ for details.
 
 .. NOTE::
 
-    Only some trac fields are filled in automatically. See
+    You may want to update the PR description comment, eit. See
     :ref:`section-trac-fields` for what trac fields are available and
     how we use them.
 
 
 
-.. _section-git_trac-checkout:
+.. _section-gh-pr-checkout:
 
 Check out an Existing Ticket
 ----------------------------
 
-Alternatively, you can use the `web interface to the Sage trac
-development server <https://trac.sagemath.org>`_ to open a new ticket.
-Just log in and click on "Create Ticket".
-
-Or maybe somebody else already opened a ticket. Then, to get a suitable
+If somebody else already opened a PR. Then, to get a suitable
 local branch to make your edits, you would just run::
 
-    [user@localhost sage]$ git trac checkout 12345
-    Loading ticket #12345...
-    Checking out Trac #13744 remote branch u/user/last_twin_prime -> local branch t/12345/last_twin_prime...
+    [user@localhost sage]$ gh pr checkout 12345
+    gh pr checkout 12345
+    remote: Enumerating objects: 7, done.
+    remote: Counting objects: 100% (7/7), done.
+    remote: Compressing objects: 100% (7/7), done.
+    remote: Total 7 (delta 0), reused 0 (delta 0), pack-reused 0
+    Unpacking objects: 100% (7/7), 25.50 KiB | 2.83 MiB/s, done.
+    From https://github.com/sagemath/sage
+     * [new ref]               refs/pull/12345/head -> last-twin-prime
+    Switched to branch 'last-twin-prime'
 
-The ``git trac checkout`` command downloads an existing branch (as
-specified in the "Branch:" field on the trac ticket) or creates a new
-one if there is none yet. Just like the create command, you can
-specify the remote branch name explicitly using the ``-b`` switch if
+The ``gh pr checkout`` command downloads the branch attached to the PR. Just like the create command, you can
+specify the local branch name explicitly using the ``-b`` switch if
 you want.
 
-.. _section-git_trac-branch-names:
 
-Note on Branch Names
---------------------
-
-The "Branch:" field of a trac ticket (see :ref:`section-trac-fields`) indicates
-the git branch containing its code. Our git server implements the following
-access restrictions for **remote branch names**:
-
-* You can read/write/create a branch named
-  ``u/your_username/whatever_you_like``. Everybody else can read.
-
-* Everybody can read/write/create a branch named ``public/whatever_you_like``.
-
-Depending on your style of collaboration, you can use one or the
-other. The ``git trac`` subcommands defaults to the former.
-
-As a convention, the ``git trac`` subcommand uses **local branch
-names** of the form ``t/12345/description``, where the number is the
-trac ticket number. The script uses this number to figure out the
-ticket from the local branch name. You can rename the local branches
-if you want, but if they don't contain the ticket number then you will
-have to specify the ticket number manually when you are uploading your
-changes.
-
-.. _section-git_trac-editing:
+.. _section-gh-editing:
 
 Making Changes
 --------------
 
-Once you have checked out a ticket, edit the appropriate files and
-commit your changes to the branch as described in
+Once you have created a PR, edit the appropriate files and
+commit your changes to your local branch as described in
 :ref:`section-walkthrough-add-edit` and
 :ref:`section-walkthrough-commit`.
 
-.. _section-git_trac-push:
+.. _section-gh-push:
 
-Uploading Changes to Trac
+Uploading Changes to GitHub
 =========================
 
-.. _section-git_trac-push-auto:
+.. _section-gh-push-auto:
 
 Automatic Push
 --------------
@@ -249,7 +138,7 @@ maybe it is ready for review, or maybe you are collaborating with
 someone and want to share your changes "up until now". This is simply
 done by::
 
-    [user@localhost sage]$ git trac push
+    [user@localhost sage]$ git push origin
     Pushing to Trac #12345...
     Guessed remote branch: u/user/last_twin_prime
 
