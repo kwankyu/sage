@@ -72,7 +72,7 @@ jobs:
           header: preview-comment
           recreate: true
           message: |
-            [Documentation preview for this PR](${{ steps.deploy-netlify.outputs.NETLIFY_URL }}){:target="_blank"} (built with commit ${{ steps.source-run-info.outputs.sourceHeadSha }}) is ready! :tada:
+            <a href="${{ steps.deploy-netlify.outputs.NETLIFY_URL }}" target="_blank">Documentation preview for this PR</a> (built with commit ${{ steps.source-run-info.outputs.sourceHeadSha }}) is ready! :tada:
 
       - name: Update deployment status PR check
         uses: myrotvorets/set-commit-status-action@1.1.6
