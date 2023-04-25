@@ -72,9 +72,7 @@ jobs:
           header: preview-comment
           recreate: true
           message: |
-            [Documentation preview for this PR](https://sagemath-tobias.netlify.app/reference/index.html){:target="_blank" rel="noopener"} (built with commit ${{ steps.source-run-info.outputs.sourceHeadSha }}) is ready! :tada:
-            #[Documentation preview for this PR](${{ steps.deploy-netlify.outputs.NETLIFY_URL }}) is ready! :tada:
-            #Built with commit: ${{ steps.source-run-info.outputs.sourceHeadSha }}
+            [Documentation preview for this PR](${{ steps.deploy-netlify.outputs.NETLIFY_URL }}) (built with commit ${{ steps.source-run-info.outputs.sourceHeadSha }}) is ready! :tada:
 
       - name: Update deployment status PR check
         uses: myrotvorets/set-commit-status-action@1.1.6
