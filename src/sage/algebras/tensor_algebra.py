@@ -1,5 +1,5 @@
 r"""
-Tensor Algebras
+Tensor algebras
 
 AUTHORS:
 

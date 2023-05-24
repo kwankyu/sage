@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Classical Lie Algebras
+Classical Lie algebras
 
 These are the Lie algebras corresponding to types `A_n`, `B_n`, `C_n`,
 and `D_n`. We also include support for the exceptional types

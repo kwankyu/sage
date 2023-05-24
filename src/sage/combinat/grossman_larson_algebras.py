@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-Grossman-Larson Hopf Algebras
+Grossman-Larson Hopf algebras
 
 AUTHORS:
 

@@ -1,5 +1,5 @@
 """
-Morphisms Between Finite Algebras
+Morphisms between finite-dimensional algebras
 """
 
 # ****************************************************************************

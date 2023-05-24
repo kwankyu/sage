@@ -1,5 +1,5 @@
 r"""
-Catalog of Algebras
+Catalog of algebras
 
 The ``algebras`` object may be used to access examples of various algebras
 currently implemented in Sage. Using tab-completion on this object is an

@@ -1,5 +1,5 @@
 r"""
-Quantum Matrix Coordinate Algebras
+Quantum matrix coordinate algebras
 
 AUTHORS:
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-Incidence Algebras
+Incidence algebras
 """
 # ****************************************************************************
 #       Copyright (C) 2014 Travis Scrimshaw <tscrim at ucdavis.edu>

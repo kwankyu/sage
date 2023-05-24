@@ -1,5 +1,5 @@
 r"""
-Commutative Differential Graded Algebras
+Commutative differential graded algebras
 
 An algebra is said to be *graded commutative* if it is endowed with a
 grading and its multiplication satisfies the Koszul sign convention:

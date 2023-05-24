@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-Q-Systems
+Q-systems
 
 AUTHORS:
 

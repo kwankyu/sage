@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 """
-Free Lie Algebras
-
-AUTHORS:
-
-- Travis Scrimshaw (2013-05-03): Initial version
+Free Lie algebras
 
 REFERENCES:
 
 - [Bou1989]_
 - [Reu2003]_
+
+AUTHORS:
+
+- Travis Scrimshaw (2013-05-03): Initial version
+
 """
 
 # ****************************************************************************

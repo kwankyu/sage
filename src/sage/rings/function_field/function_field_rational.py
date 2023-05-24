@@ -1,5 +1,5 @@
 r"""
-Function Fields: rational
+Function fields: rational
 """
 
 #*****************************************************************************

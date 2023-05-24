@@ -1,5 +1,5 @@
 r"""
-Cellular Basis
+Cellular basis
 ==============
 
 Cellular algebras are a class of algebras introduced by Graham and Lehrer
@@ -84,10 +84,6 @@ We compute a cellular basis and do some basic computations::
 
     :class:`~sage.modules.with_basis.cell_module.CellModule`
 
-AUTHOR:
-
-- Travis Scrimshaw (2015-11-5): Initial version
-
 REFERENCES:
 
 - [GrLe1996]_
@@ -95,6 +91,11 @@ REFERENCES:
 - [Mat1999]_
 - :wikipedia:`Cellular_algebra`
 - http://webusers.imj-prg.fr/~bernhard.keller/ictp2006/lecturenotes/xi.pdf
+
+AUTHOR:
+
+- Travis Scrimshaw (2015-11-5): Initial version
+
 """
 
 #*****************************************************************************

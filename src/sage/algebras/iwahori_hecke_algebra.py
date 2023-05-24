@@ -1,5 +1,5 @@
 r"""
-Iwahori-Hecke Algebras
+Iwahori-Hecke algebras
 
 AUTHORS:
 

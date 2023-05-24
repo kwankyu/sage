@@ -1,5 +1,5 @@
 """
-Lie Conformal Algebras With Basis
+Lie conformal algebras with basis
 
 AUTHORS:
 

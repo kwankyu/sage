@@ -1,13 +1,14 @@
 """
-Quantum Groups Using GAP's QuaGroup Package
-
-AUTHORS:
-
-- Travis Scrimshaw (03-2017): initial version
+Quantum groups using GAP's QuaGroup package
 
 The documentation for GAP's QuaGroup package, originally authored by
 Willem Adriaan de Graaf, can be found at
 https://www.gap-system.org/Packages/quagroup.html.
+
+AUTHORS:
+
+- Travis Scrimshaw (2017-03): initial version
+
 """
 
 # ****************************************************************************

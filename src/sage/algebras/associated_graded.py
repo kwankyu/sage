@@ -1,5 +1,5 @@
 r"""
-Associated Graded Algebras To Filtered Algebras
+Associated graded algebras to filtered algebras
 
 AUTHORS:
 

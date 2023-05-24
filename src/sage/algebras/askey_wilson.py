@@ -1,5 +1,5 @@
 """
-Askey-Wilson Algebras
+Askey-Wilson algebras
 
 AUTHORS:
 

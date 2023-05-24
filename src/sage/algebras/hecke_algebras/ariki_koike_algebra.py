@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-Ariki-Koike Algebras
+Ariki-Koike algebras
 
 The *Ariki-Koike algebras* were introduced by Ariki and Koike [AK1994]_ as
 a natural generalization of the Iwahori-Hecke algebras of types `A` and `B`
@@ -25,16 +25,17 @@ the Ariki-Koike algebra `H_n(q, u_1, \ldots, u_r)` is the unital associative
         T_i T_{i+1} T_i & = T_{i+1} T_i T_{i+1} && \text{for } 1 \leq i < n.
     \end{aligned}
 
-AUTHORS:
-
-- Travis Scrimshaw (2016-04): initial version
-- Andrew Mathas (2016-07): improved multiplication code
-
 REFERENCES:
 
 - [AK1994]_
 - [BM1993]_
 - [MM1998]_
+
+AUTHORS:
+
+- Travis Scrimshaw (2016-04): initial version
+- Andrew Mathas (2016-07): improved multiplication code
+
 """
 
 #*****************************************************************************

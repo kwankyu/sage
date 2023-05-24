@@ -1,5 +1,5 @@
 r"""
-Function Fields
+Function fields
 
 A function field (of one variable) is a finitely generated field extension of
 transcendence degree one. In Sage, a function field can be a rational function

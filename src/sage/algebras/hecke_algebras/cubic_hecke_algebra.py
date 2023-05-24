@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-Cubic Hecke Algebras
+Cubic Hecke algebras
 
 We consider the factors of the group algebra of the Artin braid groups
 such that the images `s_i` of the braid generators satisfy a cubic equation:

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-Free Pre-Lie Algebras
+Free pre-Lie algebras
 
 AUTHORS:
 

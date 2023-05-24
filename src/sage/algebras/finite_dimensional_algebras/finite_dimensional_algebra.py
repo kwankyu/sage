@@ -1,5 +1,5 @@
 """
-Finite-Dimensional Algebras
+Finite-dimensional algebras
 """
 #*****************************************************************************
 #  Copyright (C) 2011 Johan Bosman <johan.g.bosman@gmail.com>

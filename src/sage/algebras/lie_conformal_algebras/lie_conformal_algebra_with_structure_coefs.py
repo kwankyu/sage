@@ -1,5 +1,5 @@
 """
-Lie Conformal Algebras With Structure Coefficients
+Lie conformal algebras with structure coefficients
 
 AUTHORS:
 

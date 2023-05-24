@@ -1,6 +1,6 @@
 # sage.doctest: optional - sage.rings.function_field
 r"""
-Function Fields: extension
+Function fields: extension
 """
 
 #*****************************************************************************

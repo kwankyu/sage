@@ -1,5 +1,5 @@
 r"""
-Down-Up Algebras
+Down-up algebras
 
 AUTHORS:
 

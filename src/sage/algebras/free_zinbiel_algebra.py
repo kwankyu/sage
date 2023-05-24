@@ -1,5 +1,5 @@
 """
-Free Zinbiel Algebras
+Free Zinbiel algebras
 
 AUTHORS:
 

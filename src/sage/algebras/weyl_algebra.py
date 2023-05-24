@@ -1,5 +1,5 @@
 r"""
-Weyl Algebras
+Weyl algebras
 
 AUTHORS:
 

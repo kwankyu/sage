@@ -1,5 +1,5 @@
 r"""
-Quantum Clifford Algebras
+Quantum Clifford algebras
 
 AUTHORS:
 

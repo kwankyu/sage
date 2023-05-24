@@ -1,5 +1,5 @@
 """
-Lie Conformal Algebra Element
+Lie conformal algebra element
 
 AUTHORS:
 

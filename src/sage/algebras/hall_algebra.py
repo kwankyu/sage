@@ -1,5 +1,5 @@
 r"""
-Hall Algebras
+Hall algebras
 
 AUTHORS:
 

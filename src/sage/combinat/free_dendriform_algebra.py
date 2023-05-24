@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-Free Dendriform Algebras
+Free Dendriform algebras
 
 AUTHORS:
 

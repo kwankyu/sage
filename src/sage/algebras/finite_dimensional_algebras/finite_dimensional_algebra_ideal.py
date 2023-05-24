@@ -1,5 +1,5 @@
 """
-Ideals of Finite Algebras
+Ideals of finite-dimensional algebras
 """
 
 # ****************************************************************************

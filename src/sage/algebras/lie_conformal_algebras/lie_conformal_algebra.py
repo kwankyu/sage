@@ -1,5 +1,5 @@
 r"""
-Lie Conformal Algebra
+Lie conformal algebra
 
 Let `R` be a commutative ring, a *super Lie conformal algebra*
 [Kac1997]_ over `R`

@@ -1,5 +1,5 @@
 """
-Rational Cherednik Algebras
+Rational Cherednik algebras
 """
 # ****************************************************************************
 #  Copyright (C) 2015 Travis Scrimshaw <tscrim at ucdavis.edu>

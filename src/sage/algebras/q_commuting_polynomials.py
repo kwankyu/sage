@@ -1,5 +1,5 @@
 r"""
-`q`-Commuting Polynomials
+`q`-commuting polynomials
 
 AUTHORS:
 

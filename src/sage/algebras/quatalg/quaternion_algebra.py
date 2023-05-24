@@ -1,5 +1,15 @@
 """
-Quaternion Algebras
+Quaternion algebras
+
+This code is partly based on Sage code by David Kohel from 2005.
+
+TESTS:
+
+Pickling test::
+
+    sage: Q.<i,j,k> = QuaternionAlgebra(QQ,-5,-2)
+    sage: Q == loads(dumps(Q))
+    True
 
 AUTHORS:
 
@@ -11,15 +21,6 @@ AUTHORS:
 
 - Peter Bruin (2021): do not require the base ring to be a field
 
-This code is partly based on Sage code by David Kohel from 2005.
-
-TESTS:
-
-Pickling test::
-
-    sage: Q.<i,j,k> = QuaternionAlgebra(QQ,-5,-2)
-    sage: Q == loads(dumps(Q))
-    True
 """
 
 # ****************************************************************************

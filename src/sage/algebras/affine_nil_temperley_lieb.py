@@ -1,5 +1,5 @@
 """
-Affine nilTemperley Lieb Algebra of type A
+Affine nilTemperley Lieb algebra of type A
 """
 # ****************************************************************************
 #  Copyright (C) 2010 Anne Schilling <anne at math.ucdavis.edu>

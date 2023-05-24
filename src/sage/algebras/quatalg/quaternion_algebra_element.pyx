@@ -5,7 +5,7 @@
 # distutils: library_dirs = NTL_LIBDIR
 # distutils: extra_link_args = NTL_LIBEXTRA
 """
-Elements of Quaternion Algebras
+Elements of quaternion algebras
 
 Sage allows for computation with elements of quaternion algebras over
 a nearly arbitrary base field of characteristic not 2.  Sage also has

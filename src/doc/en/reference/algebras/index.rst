@@ -83,6 +83,66 @@ Hecke algebras
    sage/algebras/yokonuma_hecke_algebra
    cubic_hecke_algebra
 
+Lie Algebras
+------------
+
+.. toctree::
+   :maxdepth: 1
+
+   sage/algebras/lie_algebras/abelian
+   sage/algebras/lie_algebras/affine_lie_algebra
+   sage/algebras/lie_algebras/bch
+   sage/algebras/lie_algebras/classical_lie_algebra
+   sage/algebras/lie_algebras/examples
+   sage/algebras/lie_algebras/free_lie_algebra
+   sage/algebras/lie_algebras/heisenberg
+   sage/algebras/lie_algebras/lie_algebra
+   sage/algebras/lie_algebras/lie_algebra_element
+   sage/algebras/lie_algebras/morphism
+   sage/algebras/lie_algebras/nilpotent_lie_algebra
+   sage/algebras/lie_algebras/onsager
+   sage/algebras/lie_algebras/poincare_birkhoff_witt
+   sage/algebras/lie_algebras/quotient
+   sage/algebras/lie_algebras/rank_two_heisenberg_virasoro
+   sage/algebras/lie_algebras/structure_coefficients
+   sage/algebras/lie_algebras/subalgebra
+   sage/algebras/lie_algebras/symplectic_derivation
+   sage/algebras/lie_algebras/verma_module
+   sage/algebras/lie_algebras/virasoro
+
+Lie Conformal Algebras
+----------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   sage/algebras/lie_conformal_algebras/lie_conformal_algebra
+   sage/algebras/lie_conformal_algebras/examples
+   sage/algebras/lie_conformal_algebras/lie_conformal_algebra_element
+
+   sage/algebras/lie_conformal_algebras/abelian_lie_conformal_algebra
+   sage/algebras/lie_conformal_algebras/affine_lie_conformal_algebra
+   sage/algebras/lie_conformal_algebras/bosonic_ghosts_lie_conformal_algebra
+   sage/algebras/lie_conformal_algebras/fermionic_ghosts_lie_conformal_algebra
+   sage/algebras/lie_conformal_algebras/free_bosons_lie_conformal_algebra
+   sage/algebras/lie_conformal_algebras/free_fermions_lie_conformal_algebra
+   sage/algebras/lie_conformal_algebras/n2_lie_conformal_algebra
+   sage/algebras/lie_conformal_algebras/neveu_schwarz_lie_conformal_algebra
+   sage/algebras/lie_conformal_algebras/virasoro_lie_conformal_algebra
+   sage/algebras/lie_conformal_algebras/weyl_lie_conformal_algebra
+
+   sage/algebras/lie_conformal_algebras/finitely_freely_generated_lca
+   sage/algebras/lie_conformal_algebras/freely_generated_lie_conformal_algebra
+   sage/algebras/lie_conformal_algebras/graded_lie_conformal_algebra
+   sage/algebras/lie_conformal_algebras/lie_conformal_algebra_with_basis
+   sage/algebras/lie_conformal_algebras/lie_conformal_algebra_with_structure_coefs
+
+.. SEEALSO::
+
+    :mod:`The Category of Lie Conformal Algebras<sage.categories.lie_conformal_algebras>`
+
+
+
 Graded algebras
 ---------------
 

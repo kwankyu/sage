@@ -1,5 +1,5 @@
 """
-Nil-Coxeter Algebra
+Nil-Coxeter algebra
 """
 #*****************************************************************************
 #  Copyright (C) 2011 Chris Berg <cberg at fields.utoronto.ca>

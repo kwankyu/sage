@@ -1,5 +1,5 @@
 """
-Descent Algebras
+Descent algebras
 
 AUTHORS:
 

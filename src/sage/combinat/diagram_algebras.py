@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-Diagram and Partition Algebras
+Diagram and partition algebras
 
 AUTHORS:
 

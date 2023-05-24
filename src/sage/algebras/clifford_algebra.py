@@ -1,5 +1,5 @@
 r"""
-Clifford Algebras
+Clifford algebras
 
 AUTHORS:
 

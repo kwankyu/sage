@@ -1,5 +1,5 @@
 """
-Yokonuma-Hecke Algebras
+Yokonuma-Hecke algebras
 
 AUTHORS:
 

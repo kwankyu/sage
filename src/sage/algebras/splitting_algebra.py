@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-Splitting Algebras
+Splitting algebras
 
 *Splitting algebras* have been considered by Dan Laksov, Anders Thorup,
 Torsten Ekedahl and others (see references below) in order to study

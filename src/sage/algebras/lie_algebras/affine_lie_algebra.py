@@ -1,5 +1,5 @@
 """
-Affine Lie Algebras
+Affine Lie algebras
 
 AUTHORS:
 

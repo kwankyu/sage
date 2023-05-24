@@ -1,5 +1,5 @@
 r"""
-N=2 Super Lie Conformal Algebra
+N=2 super Lie conformal algebra
 
 The `N=2` super Lie conformal algebra is an extension of the Virasoro
 Lie conformal algebra (with generators `L,C`) by an even generator `J`

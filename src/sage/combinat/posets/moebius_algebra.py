@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-Möbius Algebras
+Möbius algebras
 """
 # ****************************************************************************
 #       Copyright (C) 2014 Travis Scrimshaw <tscrim at ucdavis.edu>,
