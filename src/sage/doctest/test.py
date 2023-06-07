@@ -256,8 +256,8 @@ after the `die_timeout` given above (10 seconds)::
     sage: pid = int(open(F).read())    # long time
     sage: time.sleep(2)                # long time
     sage: os.kill(pid, signal.SIGQUIT) # long time; 2 seconds passed => still alive
-    sage: time.sleep(8)                # long time
-    sage: os.kill(pid, signal.SIGQUIT) # long time; 10 seconds passed => dead
+    sage: time.sleep(9)                # long time
+    sage: os.kill(pid, signal.SIGQUIT) # long time; 11 seconds passed => dead
     Traceback (most recent call last):
     ...
     ProcessLookupError: ...
