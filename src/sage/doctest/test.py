@@ -256,11 +256,18 @@ after the `die_timeout` given above (10 seconds)::
     sage: pid = int(open(F).read())    # long time
     sage: time.sleep(2)                # long time
     sage: os.kill(pid, signal.SIGQUIT) # long time; 2 seconds passed => still alive
-    sage: time.sleep(31)               # long time
-    sage: os.kill(pid, signal.SIGQUIT) # long time; 33 seconds passed => dead
+    sage: time.sleep(8)                # long time
+    sage: os.kill(pid, signal.SIGQUIT) # long time; 10 seconds passed => dead # random
     Traceback (most recent call last):
     ...
     ProcessLookupError: ...
+
+If the child process is dead and gone, the last output should be a
+`ProcessLookupError`. However, the child process interrupted its parent process
+(see `interrupt_diehard.rst`), and became an orphaned process. Depending on the
+system, an orphaned process eventually may become a zombie process instead of
+being gone.  Then the last output could be blank.
+
 
 Test a doctest failing with ``abort()``::
 
