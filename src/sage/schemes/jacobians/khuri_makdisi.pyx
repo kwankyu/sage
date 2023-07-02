@@ -244,7 +244,7 @@ cdef class KhuriMakdisi_base(object):
         return self.wL
 
 cdef class KhuriMakdisi_large(KhuriMakdisi_base):
-    """
+    r"""
     Khuri-Makdisi's *large* model
 
     Let `C` be a geometrically smooth projective curve of genus `g`.
