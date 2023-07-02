@@ -65,7 +65,8 @@ from sage.categories.map import Map
 from sage.categories.commutative_additive_groups import CommutativeAdditiveGroups
 from sage.categories.homset import Hom
 
-from sage.arith.all import integer_ceil, lcm
+from sage.arith.misc import integer_ceil
+from sage.arith.functions import lcm
 
 from sage.rings.integer import Integer
 from sage.matrix.constructor import matrix
