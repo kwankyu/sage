@@ -1306,4 +1306,3 @@ class FunctionField(Field):
             return Jacobian(self, base_div)
 
         raise ValueError("unknown model")
-
