@@ -34,7 +34,7 @@ EXAMPLES::
     True
     sage: T.is_geometric()
     True
-    sage: T.pthpowers(7, 10**30)                                                        # optional - sage.symbolic
+    sage: T.pthpowers(7, 10**30)                                                        # needs sage.symbolic
     Traceback (most recent call last):
     ...
     ValueError: the degenerate binary recurrence sequence is geometric or quasigeometric
@@ -545,7 +545,7 @@ class BinaryRecurrenceSequence(SageObject):
             True
             sage: T.is_geometric()
             True
-            sage: T.pthpowers(7, 10**30)                                                # optional - sage.symbolic
+            sage: T.pthpowers(7, 10**30)                                                # needs sage.symbolic
             Traceback (most recent call last):
             ...
             ValueError: the degenerate binary recurrence sequence is geometric or
@@ -556,7 +556,7 @@ class BinaryRecurrenceSequence(SageObject):
             [2, 2, 2^3, 2^5, 2^7, 2^9, 2^11, 2^13, 2^15, 2^17]
             sage: L.is_quasigeometric()
             True
-            sage: L.pthpowers(2, 10**30)                                                # optional - sage.symbolic
+            sage: L.pthpowers(2, 10**30)                                                # needs sage.symbolic
             []
 
         .. NOTE::
@@ -1054,7 +1054,7 @@ def _estimated_time(M2, M1, length, p):
     EXAMPLES::
 
         sage: from sage.combinat.binary_recurrence_sequences import _estimated_time
-        sage: _estimated_time(2**4*3**2*5*7*11*13*17, 2**4*3**2*5*7*11*13, 20, 7)       # optional - sage.symbolic
+        sage: _estimated_time(2**4*3**2*5*7*11*13*17, 2**4*3**2*5*7*11*13, 20, 7)       # needs sage.symbolic
         106.211159309421
 
     """
@@ -1090,7 +1090,7 @@ def _find_cong1(p, R, ell):
     EXAMPLES::
 
         sage: R = BinaryRecurrenceSequence(1,1)
-        sage: sage.combinat.binary_recurrence_sequences._find_cong1(7, R, 29)           # optional - sage.rings.finite_rings
+        sage: sage.combinat.binary_recurrence_sequences._find_cong1(7, R, 29)           # needs sage.rings.finite_rings
         ([0, 1, 2, 12, 13], 14)
     """
     F = GF(ell)
@@ -1140,9 +1140,9 @@ def _is_p_power(a, p):
 
     EXAMPLES::
 
-        sage: sage.combinat.binary_recurrence_sequences._is_p_power(2**7, 7)            # optional - sage.symbolic
+        sage: sage.combinat.binary_recurrence_sequences._is_p_power(2**7, 7)            # needs sage.symbolic
         True
-        sage: sage.combinat.binary_recurrence_sequences._is_p_power(2**7*3**2, 7)       # optional - sage.symbolic
+        sage: sage.combinat.binary_recurrence_sequences._is_p_power(2**7*3**2, 7)       # needs sage.symbolic
         False
     """
     return int(a**(1/p))**p == a

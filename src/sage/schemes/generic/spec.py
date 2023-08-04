@@ -42,10 +42,10 @@ def Spec(R, S=None):
         Spectrum of Univariate Polynomial Ring in x over Rational Field
         sage: Spec(PolynomialRing(QQ, 'x', 3))
         Spectrum of Multivariate Polynomial Ring in x0, x1, x2 over Rational Field
-        sage: X = Spec(PolynomialRing(GF(49,'a'), 3, 'x')); X                           # optional - sage.rings.finite_rings
+        sage: X = Spec(PolynomialRing(GF(49,'a'), 3, 'x')); X                           # needs sage.rings.finite_rings
         Spectrum of Multivariate Polynomial Ring in x0, x1, x2
          over Finite Field in a of size 7^2
-        sage: TestSuite(X).run()                                                        # optional - sage.rings.finite_rings
+        sage: TestSuite(X).run()                                                        # needs sage.rings.finite_rings
 
     Applying ``Spec`` twice to the same ring gives identical output
     (see :trac:`17008`)::
@@ -170,11 +170,11 @@ class SpecFunctor(Functor, UniqueRepresentation):
         EXAMPLES::
 
             sage: from sage.schemes.generic.spec import SpecFunctor
-            sage: F = SpecFunctor(GF(7))                                                # optional - sage.rings.finite_rings
-            sage: A.<x, y> = GF(7)[]                                                    # optional - sage.rings.finite_rings
-            sage: B.<t> = GF(7)[]                                                       # optional - sage.rings.finite_rings
-            sage: f = A.hom((t^2, t^3))                                                 # optional - sage.rings.finite_rings
-            sage: Spec(f) # indirect doctest                                            # optional - sage.rings.finite_rings
+            sage: F = SpecFunctor(GF(7))                                                # needs sage.rings.finite_rings
+            sage: A.<x, y> = GF(7)[]                                                    # needs sage.rings.finite_rings
+            sage: B.<t> = GF(7)[]                                                       # needs sage.rings.finite_rings
+            sage: f = A.hom((t^2, t^3))                                                 # needs sage.rings.finite_rings
+            sage: Spec(f) # indirect doctest                                            # needs sage.rings.finite_rings
             Affine Scheme morphism:
               From: Spectrum of Univariate Polynomial Ring in t over Finite Field of size 7
               To:   Spectrum of Multivariate Polynomial Ring in x, y over Finite Field of size 7

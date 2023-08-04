@@ -659,13 +659,13 @@ cdef class MixedIntegerLinearProgram(SageObject):
             sage: p = MixedIntegerLinearProgram(solver='ppl')
             sage: p.base_ring()
             Rational Field
-            sage: from sage.rings.qqbar import AA                                      # optional - sage.rings.number_field
-            sage: p = MixedIntegerLinearProgram(solver='InteractiveLP', base_ring=AA)  # optional - sage.rings.number_field
-            sage: p.base_ring()                                                        # optional - sage.rings.number_field
+            sage: from sage.rings.qqbar import AA                                       # needs sage.rings.number_field
+            sage: p = MixedIntegerLinearProgram(solver='InteractiveLP', base_ring=AA)   # needs sage.rings.number_field
+            sage: p.base_ring()                                                         # needs sage.rings.number_field
             Algebraic Real Field
-            sage: d = polytopes.dodecahedron()                                         # optional - sage.rings.number_field
-            sage: p = MixedIntegerLinearProgram(base_ring=d.base_ring())               # optional - sage.rings.number_field
-            sage: p.base_ring()                                                        # optional - sage.rings.number_field
+            sage: d = polytopes.dodecahedron()                                          # needs sage.rings.number_field
+            sage: p = MixedIntegerLinearProgram(base_ring=d.base_ring())                # needs sage.rings.number_field
+            sage: p.base_ring()                                                         # needs sage.rings.number_field
             Number Field in sqrt5 with defining polynomial x^2 - 5 with sqrt5 = 2.236067977499790?
         """
         return self._backend.base_ring()
@@ -2823,14 +2823,15 @@ cdef class MixedIntegerLinearProgram(SageObject):
         are not recorded, and we can disable this feature providing an empty
         filename. This is currently working with CPLEX and Gurobi::
 
-            sage: p = MixedIntegerLinearProgram(solver="CPLEX")   # optional - CPLEX
-            sage: p.solver_parameter("logfile")                   # optional - CPLEX
+            sage: # optional - cplex
+            sage: p = MixedIntegerLinearProgram(solver="CPLEX")
+            sage: p.solver_parameter("logfile")
             ''
-            sage: p.solver_parameter("logfile", "/dev/null")      # optional - CPLEX
-            sage: p.solver_parameter("logfile")                   # optional - CPLEX
+            sage: p.solver_parameter("logfile", "/dev/null")
+            sage: p.solver_parameter("logfile")
             '/dev/null'
-            sage: p.solver_parameter("logfile", '')               # optional - CPLEX
-            sage: p.solver_parameter("logfile")                   # optional - CPLEX
+            sage: p.solver_parameter("logfile", '')
+            sage: p.solver_parameter("logfile")
             ''
 
         Solver-specific parameters:

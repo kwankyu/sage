@@ -223,16 +223,17 @@ class Parser():
 
         Here is another game::
 
-            sage: g = gambit.Game.new_table([2,2])  # optional - gambit
-            sage: g[int(0), int(0)][int(0)] = int(4)  # optional - gambit
-            sage: g[int(0), int(0)][int(1)] = int(8)  # optional - gambit
-            sage: g[int(0), int(1)][int(0)] = int(0)  # optional - gambit
-            sage: g[int(0), int(1)][int(1)] = int(1)  # optional - gambit
-            sage: g[int(1), int(0)][int(0)] = int(1)  # optional - gambit
-            sage: g[int(1), int(0)][int(1)] = int(3)  # optional - gambit
-            sage: g[int(1), int(1)][int(0)] = int(1)  # optional - gambit
-            sage: g[int(1), int(1)][int(1)] = int(0)  # optional - gambit
-            sage: solver = gambit.nash.ExternalLCPSolver()  # optional - gambit
+            sage: # optional - gambit
+            sage: g = gambit.Game.new_table([2,2])
+            sage: g[int(0), int(0)][int(0)] = int(4)
+            sage: g[int(0), int(0)][int(1)] = int(8)
+            sage: g[int(0), int(1)][int(0)] = int(0)
+            sage: g[int(0), int(1)][int(1)] = int(1)
+            sage: g[int(1), int(0)][int(0)] = int(1)
+            sage: g[int(1), int(0)][int(1)] = int(3)
+            sage: g[int(1), int(1)][int(0)] = int(1)
+            sage: g[int(1), int(1)][int(1)] = int(0)
+            sage: solver = gambit.nash.ExternalLCPSolver()
 
         Here is the LCP output::
 
@@ -248,26 +249,27 @@ class Parser():
 
         Here is a larger degenerate game::
 
-            sage: g = gambit.Game.new_table([3,3])  # optional - gambit
-            sage: g[int(0), int(0)][int(0)] = int(-7)  # optional - gambit
-            sage: g[int(0), int(0)][int(1)] = int(-9)  # optional - gambit
-            sage: g[int(0), int(1)][int(0)] = int(-5)  # optional - gambit
-            sage: g[int(0), int(1)][int(1)] = int(7)  # optional - gambit
-            sage: g[int(0), int(2)][int(0)] = int(5)  # optional - gambit
-            sage: g[int(0), int(2)][int(1)] = int(9)  # optional - gambit
-            sage: g[int(1), int(0)][int(0)] = int(5)  # optional - gambit
-            sage: g[int(1), int(0)][int(1)] = int(6)  # optional - gambit
-            sage: g[int(1), int(1)][int(0)] = int(5)  # optional - gambit
-            sage: g[int(1), int(1)][int(1)] = int(-2)  # optional - gambit
-            sage: g[int(1), int(2)][int(0)] = int(3)  # optional - gambit
-            sage: g[int(1), int(2)][int(1)] = int(-3)  # optional - gambit
-            sage: g[int(2), int(0)][int(0)] = int(1)  # optional - gambit
-            sage: g[int(2), int(0)][int(1)] = int(-4)  # optional - gambit
-            sage: g[int(2), int(1)][int(0)] = int(-6)  # optional - gambit
-            sage: g[int(2), int(1)][int(1)] = int(6)  # optional - gambit
-            sage: g[int(2), int(2)][int(0)] = int(1)  # optional - gambit
-            sage: g[int(2), int(2)][int(1)] = int(-10)  # optional - gambit
-            sage: solver = gambit.nash.ExternalLCPSolver()  # optional - gambit
+            sage: # optional - gambit
+            sage: g = gambit.Game.new_table([3,3])
+            sage: g[int(0), int(0)][int(0)] = int(-7)
+            sage: g[int(0), int(0)][int(1)] = int(-9)
+            sage: g[int(0), int(1)][int(0)] = int(-5)
+            sage: g[int(0), int(1)][int(1)] = int(7)
+            sage: g[int(0), int(2)][int(0)] = int(5)
+            sage: g[int(0), int(2)][int(1)] = int(9)
+            sage: g[int(1), int(0)][int(0)] = int(5)
+            sage: g[int(1), int(0)][int(1)] = int(6)
+            sage: g[int(1), int(1)][int(0)] = int(5)
+            sage: g[int(1), int(1)][int(1)] = int(-2)
+            sage: g[int(1), int(2)][int(0)] = int(3)
+            sage: g[int(1), int(2)][int(1)] = int(-3)
+            sage: g[int(2), int(0)][int(0)] = int(1)
+            sage: g[int(2), int(0)][int(1)] = int(-4)
+            sage: g[int(2), int(1)][int(0)] = int(-6)
+            sage: g[int(2), int(1)][int(1)] = int(6)
+            sage: g[int(2), int(2)][int(0)] = int(1)
+            sage: g[int(2), int(2)][int(1)] = int(-10)
+            sage: solver = gambit.nash.ExternalLCPSolver()
 
         Here is the LCP output::
 

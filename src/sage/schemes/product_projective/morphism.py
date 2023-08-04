@@ -449,12 +449,12 @@ class ProductProjectiveSpaces_morphism_ring(SchemeMorphism_polynomial):
         ::
 
             sage: u = QQ['u'].0
-            sage: R = NumberField(u^2 - 2, 'v')                                         # optional - sage.rings.number_field
-            sage: PP.<x,y,a,b> = ProductProjectiveSpaces([1, 1], R)                     # optional - sage.rings.number_field
-            sage: H = End(PP)                                                           # optional - sage.rings.number_field
-            sage: O = R.maximal_order()                                                 # optional - sage.rings.number_field
-            sage: g = H([3*O(u)*x^2, 13*x*y, 7*a*y, 5*b*x + O(u)*a*y])                  # optional - sage.rings.number_field
-            sage: g.global_height()                                                     # optional - sage.rings.number_field
+            sage: R = NumberField(u^2 - 2, 'v')                                         # needs sage.rings.number_field
+            sage: PP.<x,y,a,b> = ProductProjectiveSpaces([1, 1], R)                     # needs sage.rings.number_field
+            sage: H = End(PP)                                                           # needs sage.rings.number_field
+            sage: O = R.maximal_order()                                                 # needs sage.rings.number_field
+            sage: g = H([3*O(u)*x^2, 13*x*y, 7*a*y, 5*b*x + O(u)*a*y])                  # needs sage.rings.number_field
+            sage: g.global_height()                                                     # needs sage.rings.number_field
             2.56494935746154
         """
         K = self.domain().base_ring()
@@ -495,11 +495,11 @@ class ProductProjectiveSpaces_morphism_ring(SchemeMorphism_polynomial):
         ::
 
             sage: R.<z> = PolynomialRing(QQ)
-            sage: K.<w> = NumberField(z^2 - 5)                                          # optional - sage.rings.number_field
-            sage: P.<x,y,a,b> = ProductProjectiveSpaces([1, 1], K)                      # optional - sage.rings.number_field
-            sage: H = Hom(P, P)                                                         # optional - sage.rings.number_field
-            sage: f = H([2*x^2 + w/3*y^2, 1/w*y^2, a^2, 6*b^2 + 1/9*a*b])               # optional - sage.rings.number_field
-            sage: f.local_height(K.ideal(3))                                            # optional - sage.rings.number_field
+            sage: K.<w> = NumberField(z^2 - 5)                                          # needs sage.rings.number_field
+            sage: P.<x,y,a,b> = ProductProjectiveSpaces([1, 1], K)                      # needs sage.rings.number_field
+            sage: H = Hom(P, P)                                                         # needs sage.rings.number_field
+            sage: f = H([2*x^2 + w/3*y^2, 1/w*y^2, a^2, 6*b^2 + 1/9*a*b])               # needs sage.rings.number_field
+            sage: f.local_height(K.ideal(3))                                            # needs sage.rings.number_field
             2.19722457733622
         """
         K = FractionField(self.domain().base_ring())

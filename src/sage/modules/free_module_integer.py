@@ -260,10 +260,10 @@ class FreeModule_submodule_with_basis_integer(FreeModule_submodule_with_basis_pi
             True
 
             sage: x = polygen(ZZ, 'x')
-            sage: K.<a> = NumberField(x^8 + 1)                                          # optional - sage.rings.number_field
-            sage: O = K.ring_of_integers()                                              # optional - sage.rings.number_field
-            sage: f = O(a^7 - a^6 + 4*a^5 - a^4 + a^3 + 1)                              # optional - sage.rings.number_field
-            sage: IntegerLattice(f)                                                     # optional - sage.rings.number_field
+            sage: K.<a> = NumberField(x^8 + 1)                                          # needs sage.rings.number_field
+            sage: O = K.ring_of_integers()                                              # needs sage.rings.number_field
+            sage: f = O(a^7 - a^6 + 4*a^5 - a^4 + a^3 + 1)                              # needs sage.rings.number_field
+            sage: IntegerLattice(f)                                                     # needs sage.rings.number_field
             Free module of degree 8 and rank 8 over Integer Ring
             User basis matrix:
             [ 0  1  0  1  0  3  3  0]

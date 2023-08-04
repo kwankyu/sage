@@ -354,7 +354,7 @@ def is_Element(x):
         sage: from sage.structure.element import is_Element
         sage: is_Element(2/3)
         True
-        sage: is_Element(QQ^3)                                                          # optional - sage.modules
+        sage: is_Element(QQ^3)                                                          # needs sage.modules
         False
     """
     return isinstance(x, Element)
@@ -648,7 +648,7 @@ cdef class Element(SageObject):
 
             sage: QQ.base_ring()
             Rational Field
-            sage: identity_matrix(3).base_ring()                                        # optional - sage.modules
+            sage: identity_matrix(3).base_ring()                                        # needs sage.modules
             Integer Ring
         """
         return self._parent.base_ring()
@@ -893,13 +893,13 @@ cdef class Element(SageObject):
             sage: mp.dps = 30
             sage: 25._mpmath_(53)
             mpf('25.0')
-            sage: mpmathify(3 + 4*I)                                                    # optional - mpmath
+            sage: mpmathify(3 + 4*I)                                                    # needs mpmath
             mpc(real='3.0', imag='4.0')
-            sage: mpmathify(1 + pi)                                                     # optional - mpmath
+            sage: mpmathify(1 + pi)                                                     # needs mpmath
             mpf('4.14159265358979323846264338327933')
-            sage: (1 + pi)._mpmath_(10)                                                 # optional - mpmath
+            sage: (1 + pi)._mpmath_(10)                                                 # needs mpmath
             mpf('4.140625')
-            sage: (1 + pi)._mpmath_(mp.prec)                                            # optional - mpmath
+            sage: (1 + pi)._mpmath_(mp.prec)                                            # needs mpmath
             mpf('4.14159265358979323846264338327933')
         """
         return self.n(prec)._mpmath_(prec=prec)
@@ -1024,13 +1024,14 @@ cdef class Element(SageObject):
 
         Verify that :trac:`5185` is fixed::
 
-            sage: v = vector({1: 1, 3: -1})                                             # optional - sage.modules
-            sage: w = vector({1: -1, 3: 1})                                             # optional - sage.modules
-            sage: v + w                                                                 # optional - sage.modules
+            sage: # needs sage.modules
+            sage: v = vector({1: 1, 3: -1})
+            sage: w = vector({1: -1, 3: 1})
+            sage: v + w
             (0, 0, 0, 0)
-            sage: (v + w).is_zero()                                                     # optional - sage.modules
+            sage: (v + w).is_zero()
             True
-            sage: bool(v + w)                                                           # optional - sage.modules
+            sage: bool(v + w)
             False
 
         """
@@ -1130,7 +1131,8 @@ cdef class Element(SageObject):
         We now create an ``Element`` class where we define ``_richcmp_``
         and check that comparison works::
 
-            sage: cython(                                                               # optional - sage.misc.cython
+            sage: # needs sage.misc.cython
+            sage: cython(
             ....: '''
             ....: from sage.structure.richcmp cimport rich_to_bool
             ....: from sage.structure.element cimport Element
@@ -1143,9 +1145,9 @@ cdef class Element(SageObject):
             ....:         cdef float x2 = (<FloatCmp>other).x
             ....:         return rich_to_bool(op, (x1 > x2) - (x1 < x2))
             ....: ''')
-            sage: a = FloatCmp(1)                                                       # optional - sage.misc.cython
-            sage: b = FloatCmp(2)                                                       # optional - sage.misc.cython
-            sage: a <= b, b <= a                                                        # optional - sage.misc.cython
+            sage: a = FloatCmp(1)
+            sage: b = FloatCmp(2)
+            sage: a <= b, b <= a
             (True, False)
         """
         # Obvious case
@@ -1280,16 +1282,17 @@ cdef class Element(SageObject):
 
         EXAMPLES::
 
-            sage: cython(  # long time                                                  # optional - sage.misc.cython
+            sage: # needs sage.misc.cython
+            sage: cython(                       # long time
             ....: '''
             ....: from sage.structure.element cimport Element
             ....: cdef class MyElement(Element):
             ....:     cdef _add_long(self, long n):
             ....:         return n
             ....: ''')
-            sage: e = MyElement(Parent())  # long time                                  # optional - sage.misc.cython
-            sage: i = int(42)                                                           # optional - sage.misc.cython
-            sage: i + e, e + i  # long time                                             # optional - sage.misc.cython
+            sage: e = MyElement(Parent())       # long time
+            sage: i = int(42)
+            sage: i + e, e + i                  # long time
             (42, 42)
         """
         return coercion_model.bin_op(self, n, add)
@@ -1490,13 +1493,14 @@ cdef class Element(SageObject):
 
         ::
 
-            sage: A = AlgebrasWithBasis(QQ).example(); A                                # optional - sage.combinat sage.modules
+            sage: # needs sage.combinat sage.modules
+            sage: A = AlgebrasWithBasis(QQ).example(); A
             An example of an algebra with basis: the free algebra
             on the generators ('a', 'b', 'c') over Rational Field
-            sage: x = A.an_element()                                                    # optional - sage.combinat sage.modules
-            sage: x                                                                     # optional - sage.combinat sage.modules
+            sage: x = A.an_element()
+            sage: x
             B[word: ] + 2*B[word: a] + 3*B[word: b] + B[word: bab]
-            sage: x.__mul__(x)                                                          # optional - sage.combinat sage.modules
+            sage: x.__mul__(x)
             B[word: ] + 4*B[word: a] + 4*B[word: aa] + 6*B[word: ab]
             + 2*B[word: abab] + 6*B[word: b] + 6*B[word: ba]
             + 2*B[word: bab] + 2*B[word: baba] + 3*B[word: babb]
@@ -1558,16 +1562,17 @@ cdef class Element(SageObject):
 
         EXAMPLES::
 
-            sage: cython(  # long time                                                  # optional - sage.misc.cython
+            sage: # needs sage.misc.cython
+            sage: cython(                       # long time
             ....: '''
             ....: from sage.structure.element cimport Element
             ....: cdef class MyElement(Element):
             ....:     cdef _mul_long(self, long n):
             ....:         return n
             ....: ''')
-            sage: e = MyElement(Parent())  # long time                                  # optional - sage.misc.cython
-            sage: i = int(42)                                                           # optional - sage.misc.cython
-            sage: i * e, e * i  # long time                                             # optional - sage.misc.cython
+            sage: e = MyElement(Parent())       # long time
+            sage: i = int(42)
+            sage: i * e, e * i                  # long time
             (42, 42)
         """
         return coercion_model.bin_op(self, n, mul)
@@ -1675,11 +1680,11 @@ cdef class Element(SageObject):
 
             sage: operator.truediv(2, 3)
             2/3
-            sage: operator.truediv(pi, 3)                                               # optional - sage.symbolic
+            sage: operator.truediv(pi, 3)                                               # needs sage.symbolic
             1/3*pi
             sage: x = polygen(QQ, 'x')
-            sage: K.<i> = NumberField(x^2 + 1)                                          # optional - sage.rings.number_field
-            sage: operator.truediv(2, K.ideal(i + 1))                                   # optional - sage.rings.number_field
+            sage: K.<i> = NumberField(x^2 + 1)                                          # needs sage.rings.number_field
+            sage: operator.truediv(2, K.ideal(i + 1))                                   # needs sage.rings.number_field
             Fractional ideal (-i + 1)
 
         ::
@@ -1994,15 +1999,15 @@ cdef class Element(SageObject):
 
         ::
 
-            sage: (2/3)^I                                                               # optional - sage.symbolic
+            sage: (2/3)^I                                                               # needs sage.symbolic
             (2/3)^I
-            sage: (2/3)^sqrt(2)                                                         # optional - sage.symbolic
+            sage: (2/3)^sqrt(2)                                                         # needs sage.symbolic
             (2/3)^sqrt(2)
-            sage: var('x,y,z,n')                                                        # optional - sage.symbolic
+            sage: var('x,y,z,n')                                                        # needs sage.symbolic
             (x, y, z, n)
-            sage: (2/3)^(x^n + y^n + z^n)                                               # optional - sage.symbolic
+            sage: (2/3)^(x^n + y^n + z^n)                                               # needs sage.symbolic
             (2/3)^(x^n + y^n + z^n)
-            sage: (-7/11)^(tan(x)+exp(x))                                               # optional - sage.symbolic
+            sage: (-7/11)^(tan(x)+exp(x))                                               # needs sage.symbolic
             (-7/11)^(e^x + tan(x))
             sage: float(1.2)**(1/2)
             1.0954451150103321
@@ -2140,7 +2145,7 @@ def is_ModuleElement(x):
         sage: from sage.structure.element import is_ModuleElement
         sage: is_ModuleElement(2/3)
         True
-        sage: is_ModuleElement((QQ^3).0)                                                # optional - sage.modules
+        sage: is_ModuleElement((QQ^3).0)                                                # needs sage.modules
         True
         sage: is_ModuleElement('a')
         False
@@ -2219,7 +2224,7 @@ cdef class ElementWithCachedMethod(Element):
         ....:     "from sage.structure.parent cimport Parent",
         ....:     "cdef class MyParent(Parent):",
         ....:     "    Element = MyElement"]
-        sage: cython('\n'.join(cython_code))                                            # optional - sage.misc.cython
+        sage: cython('\n'.join(cython_code))                                            # needs sage.misc.cython
         sage: cython_code = ["from sage.misc.cachefunc import cached_method",
         ....:     "from sage.misc.cachefunc import cached_in_parent_method",
         ....:     "from sage.categories.category import Category",
@@ -2242,21 +2247,22 @@ cdef class ElementWithCachedMethod(Element):
         ....:     "        @cached_method",
         ....:     "        def invert(self, x):",
         ....:     "            return -x"]
-        sage: cython('\n'.join(cython_code))                                            # optional - sage.misc.cython
-        sage: C = MyCategory()                                                          # optional - sage.misc.cython
-        sage: P = MyParent(category=C)                                                  # optional - sage.misc.cython
-        sage: ebroken = MyBrokenElement(P, 5)                                           # optional - sage.misc.cython
-        sage: e = MyElement(P, 5)                                                       # optional - sage.misc.cython
+        sage: cython('\n'.join(cython_code))                                            # needs sage.misc.cython
+        sage: C = MyCategory()                                                          # needs sage.misc.cython
+        sage: P = MyParent(category=C)                                                  # needs sage.misc.cython
+        sage: ebroken = MyBrokenElement(P, 5)                                           # needs sage.misc.cython
+        sage: e = MyElement(P, 5)                                                       # needs sage.misc.cython
 
     The cached methods inherited by ``MyElement`` works::
 
-        sage: e.element_cache_test()                                                    # optional - sage.misc.cython
+        sage: # needs sage.misc.cython
+        sage: e.element_cache_test()
         <-5>
-        sage: e.element_cache_test() is e.element_cache_test()                          # optional - sage.misc.cython
+        sage: e.element_cache_test() is e.element_cache_test()
         True
-        sage: e.element_via_parent_test()                                               # optional - sage.misc.cython
+        sage: e.element_via_parent_test()
         <-5>
-        sage: e.element_via_parent_test() is e.element_via_parent_test()                # optional - sage.misc.cython
+        sage: e.element_via_parent_test() is e.element_via_parent_test()
         True
 
     The other element class can only inherit a
@@ -2264,36 +2270,36 @@ cdef class ElementWithCachedMethod(Element):
     parent. In fact, equal elements share the cache, even if they are
     of different types::
 
-        sage: e == ebroken                                                              # optional - sage.misc.cython
+        sage: e == ebroken                                                              # needs sage.misc.cython
         True
-        sage: type(e) == type(ebroken)                                                  # optional - sage.misc.cython
+        sage: type(e) == type(ebroken)                                                  # needs sage.misc.cython
         False
-        sage: ebroken.element_via_parent_test() is e.element_via_parent_test()          # optional - sage.misc.cython
+        sage: ebroken.element_via_parent_test() is e.element_via_parent_test()          # needs sage.misc.cython
         True
 
     However, the cache of the other inherited method breaks, although the method
     as such works::
 
-        sage: ebroken.element_cache_test()                                              # optional - sage.misc.cython
+        sage: ebroken.element_cache_test()                                              # needs sage.misc.cython
         <-5>
-        sage: ebroken.element_cache_test() is ebroken.element_cache_test()              # optional - sage.misc.cython
+        sage: ebroken.element_cache_test() is ebroken.element_cache_test()              # needs sage.misc.cython
         False
 
     Since ``e`` and ``ebroken`` share the cache, when we empty it for one element
     it is empty for the other as well::
 
-        sage: b = ebroken.element_via_parent_test()                                     # optional - sage.misc.cython
-        sage: e.element_via_parent_test.clear_cache()                                   # optional - sage.misc.cython
-        sage: b is ebroken.element_via_parent_test()                                    # optional - sage.misc.cython
+        sage: b = ebroken.element_via_parent_test()                                     # needs sage.misc.cython
+        sage: e.element_via_parent_test.clear_cache()                                   # needs sage.misc.cython
+        sage: b is ebroken.element_via_parent_test()                                    # needs sage.misc.cython
         False
 
     Note that the cache only breaks for elements that do no allow attribute assignment.
     A Python version of ``MyBrokenElement`` therefore allows for cached methods::
 
-        sage: epython = MyPythonElement(P, 5)                                           # optional - sage.misc.cython
-        sage: epython.element_cache_test()                                              # optional - sage.misc.cython
+        sage: epython = MyPythonElement(P, 5)                                           # needs sage.misc.cython
+        sage: epython.element_cache_test()                                              # needs sage.misc.cython
         <-5>
-        sage: epython.element_cache_test() is epython.element_cache_test()              # optional - sage.misc.cython
+        sage: epython.element_cache_test() is epython.element_cache_test()              # needs sage.misc.cython
         True
 
     """
@@ -2310,7 +2316,8 @@ cdef class ElementWithCachedMethod(Element):
 
         EXAMPLES::
 
-            sage: cython(                                                               # optional - sage.misc.cython
+            sage: # needs sage.misc.cython
+            sage: cython(
             ....: '''
             ....: from sage.structure.element cimport ElementWithCachedMethod
             ....: cdef class MyElement(ElementWithCachedMethod):
@@ -2336,12 +2343,12 @@ cdef class ElementWithCachedMethod(Element):
             ....:         def my_lazy_attr(self):
             ....:             return 'lazy attribute of <%s>'%self.x
             ....: ''')
-            sage: C = MyCategory()                                                      # optional - sage.misc.cython
-            sage: P = MyParent(category=C)                                              # optional - sage.misc.cython
-            sage: e = MyElement(P, 5)                                                   # optional - sage.misc.cython
-            sage: e.my_lazy_attr                                                        # optional - sage.misc.cython
+            sage: C = MyCategory()
+            sage: P = MyParent(category=C)
+            sage: e = MyElement(P, 5)
+            sage: e.my_lazy_attr
             'lazy attribute of <5>'
-            sage: e.my_lazy_attr is e.my_lazy_attr                                      # optional - sage.misc.cython
+            sage: e.my_lazy_attr is e.my_lazy_attr
             True
         """
         try:
@@ -2453,8 +2460,8 @@ cdef class ModuleElementWithMutability(ModuleElement):
         """
         EXAMPLES::
 
-            sage: v = sage.modules.free_module_element.FreeModuleElement(QQ^3)          # optional - sage.modules
-            sage: type(v)                                                               # optional - sage.modules
+            sage: v = sage.modules.free_module_element.FreeModuleElement(QQ^3)          # needs sage.modules
+            sage: type(v)                                                               # needs sage.modules
             <class 'sage.modules.free_module_element.FreeModuleElement'>
         """
         self._parent = parent
@@ -2466,11 +2473,12 @@ cdef class ModuleElementWithMutability(ModuleElement):
 
         EXAMPLES::
 
-            sage: v = vector([1..5]); v                                                 # optional - sage.modules
+            sage: # needs sage.modules
+            sage: v = vector([1..5]); v
             (1, 2, 3, 4, 5)
-            sage: v[1] = 10                                                             # optional - sage.modules
-            sage: v.set_immutable()                                                     # optional - sage.modules
-            sage: v[1] = 10                                                             # optional - sage.modules
+            sage: v[1] = 10
+            sage: v.set_immutable()
+            sage: v[1] = 10
             Traceback (most recent call last):
             ...
             ValueError: vector is immutable; please change a copy instead (use copy())
@@ -2484,10 +2492,10 @@ cdef class ModuleElementWithMutability(ModuleElement):
 
         EXAMPLES::
 
-            sage: v = vector(QQ['x,y'], [1..5]); v.is_mutable()                         # optional - sage.modules
+            sage: v = vector(QQ['x,y'], [1..5]); v.is_mutable()                         # needs sage.modules
             True
-            sage: v.set_immutable()                                                     # optional - sage.modules
-            sage: v.is_mutable()                                                        # optional - sage.modules
+            sage: v.set_immutable()                                                     # needs sage.modules
+            sage: v.is_mutable()                                                        # needs sage.modules
             False
         """
         return not self._is_immutable
@@ -2499,10 +2507,10 @@ cdef class ModuleElementWithMutability(ModuleElement):
 
         EXAMPLES::
 
-            sage: v = vector(QQ['x,y'], [1..5]); v.is_immutable()                       # optional - sage.modules
+            sage: v = vector(QQ['x,y'], [1..5]); v.is_immutable()                       # needs sage.modules
             False
-            sage: v.set_immutable()                                                     # optional - sage.modules
-            sage: v.is_immutable()                                                      # optional - sage.modules
+            sage: v.set_immutable()                                                     # needs sage.modules
+            sage: v.is_immutable()                                                      # needs sage.modules
             True
         """
         return self._is_immutable
@@ -2550,9 +2558,9 @@ cdef class MonoidElement(Element):
 
         EXAMPLES::
 
-            sage: G = SymmetricGroup(4)                                                 # optional - sage.groups
-            sage: g = G([2, 3, 4, 1])                                                   # optional - sage.groups
-            sage: g.powers(4)                                                           # optional - sage.groups
+            sage: G = SymmetricGroup(4)                                                 # needs sage.groups
+            sage: g = G([2, 3, 4, 1])                                                   # needs sage.groups
+            sage: g.powers(4)                                                           # needs sage.groups
             [(), (1,2,3,4), (1,3)(2,4), (1,4,3,2)]
         """
         if n < 0:
@@ -2681,22 +2689,22 @@ cdef class RingElement(ModuleElement):
             True
             sage: p(a,200) * p(a,-64) == p(a,136)
             True
-            sage: p(2, 1/2)                                                             # optional - sage.symbolic
+            sage: p(2, 1/2)                                                             # needs sage.symbolic
             sqrt(2)
 
         TESTS:
 
         These are not testing this code, but they are probably good to have around::
 
-            sage: 2r**(SR(2)-1-1r)                                                      # optional - sage.symbolic
+            sage: 2r**(SR(2)-1-1r)                                                      # needs sage.symbolic
             1
-            sage: 2r^(1/2)                                                              # optional - sage.symbolic
+            sage: 2r^(1/2)                                                              # needs sage.symbolic
             sqrt(2)
 
         Exponent overflow should throw an OverflowError (:trac:`2956`)::
 
-            sage: K.<x,y> = AA[]                                                        # optional - sage.rings.number_field
-            sage: x^(2^64 + 12345)                                                      # optional - sage.rings.number_field
+            sage: K.<x,y> = AA[]                                                        # needs sage.rings.number_field
+            sage: x^(2^64 + 12345)                                                      # needs sage.rings.number_field
             Traceback (most recent call last):
             ...
             OverflowError: exponent overflow (2147483648)
@@ -2793,8 +2801,8 @@ cdef class RingElement(ModuleElement):
 
         ::
 
-            sage: R.<x> = GF(7)[]                                                       # optional - sage.rings.finite_rings
-            sage: divmod(x^2, x - 1)                                                    # optional - sage.rings.finite_rings
+            sage: R.<x> = GF(7)[]                                                       # needs sage.rings.finite_rings
+            sage: divmod(x^2, x - 1)                                                    # needs sage.rings.finite_rings
             (x + 1, 1)
 
         ::
@@ -2839,8 +2847,8 @@ cdef class RingElement(ModuleElement):
             sage: a = QQ(0)
             sage: a.is_nilpotent()
             True
-            sage: m = matrix(QQ, 3, [[3,2,3], [9,0,3], [-9,0,-3]])                      # optional - sage.modules
-            sage: m.is_nilpotent()                                                      # optional - sage.modules
+            sage: m = matrix(QQ, 3, [[3,2,3], [9,0,3], [-9,0,-3]])                      # needs sage.modules
+            sage: m.is_nilpotent()                                                      # needs sage.modules
             Traceback (most recent call last):
             ...
             AttributeError: ... object has no attribute 'is_nilpotent'
@@ -2884,30 +2892,31 @@ cdef class RingElement(ModuleElement):
         For polynomial rings, prime is the same as irreducible::
 
             sage: R.<x,y> = QQ[]
-            sage: x.is_prime()                                                          # optional - sage.libs.singular
+            sage: x.is_prime()                                                          # needs sage.libs.singular
             True
-            sage: (x^2 + y^3).is_prime()                                                # optional - sage.libs.singular
+            sage: (x^2 + y^3).is_prime()                                                # needs sage.libs.singular
             True
-            sage: (x^2 - y^2).is_prime()                                                # optional - sage.libs.singular
+            sage: (x^2 - y^2).is_prime()                                                # needs sage.libs.singular
             False
-            sage: R(0).is_prime()                                                       # optional - sage.libs.singular
+            sage: R(0).is_prime()                                                       # needs sage.libs.singular
             False
-            sage: R(2).is_prime()                                                       # optional - sage.libs.singular
+            sage: R(2).is_prime()                                                       # needs sage.libs.singular
             False
 
         For the Gaussian integers::
 
-            sage: K.<i> = QuadraticField(-1)                                            # optional - sage.rings.number_field
-            sage: ZI = K.ring_of_integers()                                             # optional - sage.rings.number_field
-            sage: ZI(3).is_prime()                                                      # optional - sage.rings.number_field
+            sage: # needs sage.rings.number_field
+            sage: K.<i> = QuadraticField(-1)
+            sage: ZI = K.ring_of_integers()
+            sage: ZI(3).is_prime()
             True
-            sage: ZI(5).is_prime()                                                      # optional - sage.rings.number_field
+            sage: ZI(5).is_prime()
             False
-            sage: ZI(2 + i).is_prime()                                                  # optional - sage.rings.number_field
+            sage: ZI(2 + i).is_prime()
             True
-            sage: ZI(0).is_prime()                                                      # optional - sage.rings.number_field
+            sage: ZI(0).is_prime()
             False
-            sage: ZI(1).is_prime()                                                      # optional - sage.rings.number_field
+            sage: ZI(1).is_prime()
             False
 
         In fields, an element is never prime::
@@ -2930,13 +2939,14 @@ cdef class RingElement(ModuleElement):
         redefines :meth:`is_prime` to determine primality in the ring
         of integers::
 
-            sage: (1 + i).is_prime()                                                    # optional - sage.rings.number_field
+            sage: # needs sage.rings.number_field
+            sage: (1 + i).is_prime()
             True
-            sage: K(5).is_prime()                                                       # optional - sage.rings.number_field
+            sage: K(5).is_prime()
             False
-            sage: K(7).is_prime()                                                       # optional - sage.rings.number_field
+            sage: K(7).is_prime()
             True
-            sage: K(7/13).is_prime()                                                    # optional - sage.rings.number_field
+            sage: K(7/13).is_prime()
             False
 
         However, for rationals, :meth:`is_prime` *does* follow the
@@ -2980,16 +2990,17 @@ cdef class CommutativeRingElement(RingElement):
 
         EXAMPLES::
 
-            sage: F = GF(25)                                                            # optional - sage.rings.finite_rings
-            sage: x = F.gen()                                                           # optional - sage.rings.finite_rings
-            sage: z = F.zero()                                                          # optional - sage.rings.finite_rings
-            sage: x.inverse_mod(F.ideal(z))                                             # optional - sage.rings.finite_rings
+            sage: # needs sage.rings.finite_rings
+            sage: F = GF(25)
+            sage: x = F.gen()
+            sage: z = F.zero()
+            sage: x.inverse_mod(F.ideal(z))
             2*z2 + 3
-            sage: x.inverse_mod(F.ideal(1))                                             # optional - sage.rings.finite_rings
+            sage: x.inverse_mod(F.ideal(1))
             1
-            sage: z.inverse_mod(F.ideal(1))                                             # optional - sage.rings.finite_rings
+            sage: z.inverse_mod(F.ideal(1))
             1
-            sage: z.inverse_mod(F.ideal(z))                                             # optional - sage.rings.finite_rings
+            sage: z.inverse_mod(F.ideal(z))
             Traceback (most recent call last):
             ...
             ValueError: an element of a proper ideal does not have an inverse modulo that ideal
@@ -3026,10 +3037,10 @@ cdef class CommutativeRingElement(RingElement):
 
         :trac:`5347` has been fixed::
 
-            sage: K = GF(7)                                                             # optional - sage.rings.finite_rings
-            sage: K(3).divides(1)                                                       # optional - sage.rings.finite_rings
+            sage: K = GF(7)                                                             # needs sage.rings.finite_rings
+            sage: K(3).divides(1)                                                       # needs sage.rings.finite_rings
             True
-            sage: K(3).divides(K(1))                                                    # optional - sage.rings.finite_rings
+            sage: K(3).divides(K(1))                                                    # needs sage.rings.finite_rings
             True
 
         ::
@@ -3361,7 +3372,7 @@ cdef class Expression(CommutativeRingElement):
 
     EXAMPLES::
 
-        sage: isinstance(SR.var('y'), sage.structure.element.Expression)                # optional - sage.symbolic
+        sage: isinstance(SR.var('y'), sage.structure.element.Expression)                # needs sage.symbolic
         True
 
     By design, there is a unique direct subclass::
@@ -3607,14 +3618,15 @@ cdef class Vector(ModuleElementWithMutability):
 
         TESTS::
 
-            sage: A = matrix([[1, 2], [0, 3]])                                          # optional - sage.modules
-            sage: b = vector([0, 1])                                                    # optional - sage.modules
-            sage: x = b / A; x                                                          # optional - sage.modules
+            sage: # needs sage.modules
+            sage: A = matrix([[1, 2], [0, 3]])
+            sage: b = vector([0, 1])
+            sage: x = b / A; x
             (0, 1/3)
-            sage: x == b * ~A                                                           # optional - sage.modules
+            sage: x == b * ~A
             True
-            sage: A = matrix([[1, 2], [0, 3], [1, 5]])                                  # optional - sage.modules
-            sage: (b / A) * A == b                                                      # optional - sage.modules
+            sage: A = matrix([[1, 2], [0, 3], [1, 5]])
+            sage: (b / A) * A == b
             True
         """
         right = py_scalar_to_element(right)
@@ -3641,31 +3653,33 @@ cdef class Vector(ModuleElementWithMutability):
 
         EXAMPLES::
 
-            sage: v = vector([1,2,3])                                                   # optional - sage.modules
-            sage: v._magma_init_(magma)                 # optional - magma              # optional - sage.modules
+            sage: # needs sage.modules
+            sage: v = vector([1,2,3])
+            sage: v._magma_init_(magma)                 # optional - magma
             '_sage_[...]![1,2,3]'
-            sage: mv = magma(v); mv                     # optional - magma              # optional - sage.modules
+            sage: mv = magma(v); mv                     # optional - magma
             (1 2 3)
-            sage: mv.Type()                             # optional - magma              # optional - sage.modules
+            sage: mv.Type()                             # optional - magma
             ModTupRngElt
-            sage: mv.Parent()                           # optional - magma              # optional - sage.modules
+            sage: mv.Parent()                           # optional - magma
             Full RSpace of degree 3 over Integer Ring
 
-            sage: v = vector(QQ, [1/2, 3/4, 5/6])                                       # optional - sage.modules
-            sage: mv = magma(v); mv                     # optional - magma              # optional - sage.modules
+            sage: # needs sage.modules
+            sage: v = vector(QQ, [1/2, 3/4, 5/6])
+            sage: mv = magma(v); mv                     # optional - magma
             (1/2 3/4 5/6)
-            sage: mv.Type()                             # optional - magma              # optional - sage.modules
+            sage: mv.Type()                             # optional - magma
             ModTupFldElt
-            sage: mv.Parent()                           # optional - magma              # optional - sage.modules
+            sage: mv.Parent()                           # optional - magma
             Full Vector space of degree 3 over Rational Field
 
         A more demanding example::
 
             sage: R.<x,y,z> = QQ[]
-            sage: v = vector([x^3, y, 2/3*z + x/y])                                     # optional - sage.modules
-            sage: magma(v)                              # optional - magma              # optional - sage.modules
+            sage: v = vector([x^3, y, 2/3*z + x/y])                                     # needs sage.modules
+            sage: magma(v)                              # optional - magma              # needs sage.modules
             (            x^3               y (2/3*y*z + x)/y)
-            sage: magma(v).Parent()                     # optional - magma              # optional - sage.modules
+            sage: magma(v).Parent()                     # optional - magma              # needs sage.modules
             Full Vector space of degree 3
              over Multivariate rational function field of rank 3 over Rational Field
         """
@@ -3959,32 +3973,34 @@ cdef class Matrix(ModuleElement):
 
         EXAMPLES::
 
-            sage: a = matrix(ZZ, 2, range(4))                                           # optional - sage.modules
-            sage: operator.truediv(a, 5)                                                # optional - sage.modules
+            sage: # needs sage.modules
+            sage: a = matrix(ZZ, 2, range(4))
+            sage: operator.truediv(a, 5)
             [ 0 1/5]
             [2/5 3/5]
-            sage: a = matrix(ZZ, 2, range(4))                                           # optional - sage.modules
-            sage: b = matrix(ZZ, 2, [1,1,0,5])                                          # optional - sage.modules
-            sage: operator.truediv(a, b)                                                # optional - sage.modules
+            sage: a = matrix(ZZ, 2, range(4))
+            sage: b = matrix(ZZ, 2, [1,1,0,5])
+            sage: operator.truediv(a, b)
             [  0 1/5]
             [  2 1/5]
-            sage: c = matrix(QQ, 2, [3,2,5,7])                                          # optional - sage.modules
-            sage: operator.truediv(c, a)                                                # optional - sage.modules
+            sage: c = matrix(QQ, 2, [3,2,5,7])
+            sage: operator.truediv(c, a)
             [-5/2  3/2]
             [-1/2  5/2]
 
         TESTS::
 
-            sage: a = matrix(ZZ, [[1, 2], [0, 3]])                                      # optional - sage.modules
-            sage: b = matrix(ZZ, 3, 2, range(6))                                        # optional - sage.modules
-            sage: x = b / a; x                                                          # optional - sage.modules
+            sage: # needs sage.modules
+            sage: a = matrix(ZZ, [[1, 2], [0, 3]])
+            sage: b = matrix(ZZ, 3, 2, range(6))
+            sage: x = b / a; x
             [   0  1/3]
             [   2 -1/3]
             [   4   -1]
-            sage: x == b * ~a                                                           # optional - sage.modules
+            sage: x == b * ~a
             True
-            sage: a = matrix(ZZ, [[1, 2], [0, 3], [1, 5]])                              # optional - sage.modules
-            sage: (b / a) * a == b                                                      # optional - sage.modules
+            sage: a = matrix(ZZ, [[1, 2], [0, 3], [1, 5]])
+            sage: (b / a) * a == b
             True
         """
         if is_Matrix(right):
@@ -4040,14 +4056,14 @@ cdef class PrincipalIdealDomainElement(DedekindDomainElement):
 
         :trac:`30849`::
 
-            sage: 2.gcd(pari(3))                                                        # optional - sage.libs.pari
+            sage: 2.gcd(pari(3))                                                        # needs sage.libs.pari
             1
-            sage: type(2.gcd(pari(3)))                                                  # optional - sage.libs.pari
+            sage: type(2.gcd(pari(3)))                                                  # needs sage.libs.pari
             <class 'sage.rings.integer.Integer'>
 
-            sage: 2.gcd(pari('1/3'))                                                    # optional - sage.libs.pari
+            sage: 2.gcd(pari('1/3'))                                                    # needs sage.libs.pari
             1/3
-            sage: type(2.gcd(pari('1/3')))                                              # optional - sage.libs.pari
+            sage: type(2.gcd(pari('1/3')))                                              # needs sage.libs.pari
             <class 'sage.rings.rational.Rational'>
 
             sage: import gmpy2
@@ -4058,7 +4074,7 @@ cdef class PrincipalIdealDomainElement(DedekindDomainElement):
 
             sage: 2.gcd(gmpy2.mpq(1,3))
             1/3
-            sage: type(2.gcd(pari('1/3')))                                              # optional - sage.libs.pari
+            sage: type(2.gcd(pari('1/3')))                                              # needs sage.libs.pari
             <class 'sage.rings.rational.Rational'>
         """
         # NOTE: in order to handle nicely pari or gmpy2 integers we do not rely only on coercion
@@ -4079,14 +4095,14 @@ cdef class PrincipalIdealDomainElement(DedekindDomainElement):
 
         :trac:`30849`::
 
-            sage: 2.lcm(pari(3))                                                        # optional - sage.libs.pari
+            sage: 2.lcm(pari(3))                                                        # needs sage.libs.pari
             6
-            sage: type(2.lcm(pari(3)))                                                  # optional - sage.libs.pari
+            sage: type(2.lcm(pari(3)))                                                  # needs sage.libs.pari
             <class 'sage.rings.integer.Integer'>
 
-            sage: 2.lcm(pari('1/3'))                                                    # optional - sage.libs.pari
+            sage: 2.lcm(pari('1/3'))                                                    # needs sage.libs.pari
             2
-            sage: type(2.lcm(pari('1/3')))                                              # optional - sage.libs.pari
+            sage: type(2.lcm(pari('1/3')))                                              # needs sage.libs.pari
             <class 'sage.rings.rational.Rational'>
 
             sage: import gmpy2
@@ -4136,15 +4152,15 @@ cdef class EuclideanDomainElement(PrincipalIdealDomainElement):
 
         EXAMPLES::
 
-            sage: cython(                                                               # optional - sage.misc.cython
+            sage: cython(                                                               # needs sage.misc.cython
             ....: '''
             ....: from sage.structure.element cimport EuclideanDomainElement
             ....: cdef class MyElt(EuclideanDomainElement):
             ....:     def quo_rem(self, other):
             ....:         return self._parent.var('quo,rem')
             ....: ''')
-            sage: e = MyElt(SR)                                                         # optional - sage.misc.cython
-            sage: e // e                                                                # optional - sage.misc.cython
+            sage: e = MyElt(SR)                                                         # needs sage.misc.cython
+            sage: e // e                                                                # needs sage.misc.cython
             quo
         """
         Q, _ = self.quo_rem(right)
@@ -4167,15 +4183,15 @@ cdef class EuclideanDomainElement(PrincipalIdealDomainElement):
 
         ::
 
-            sage: cython(                                                               # optional - sage.misc.cython
+            sage: cython(                                                               # needs sage.misc.cython
             ....: '''
             ....: from sage.structure.element cimport EuclideanDomainElement
             ....: cdef class MyElt(EuclideanDomainElement):
             ....:     def quo_rem(self, other):
             ....:         return self._parent.var('quo,rem')
             ....: ''')
-            sage: e = MyElt(SR)                                                         # optional - sage.misc.cython
-            sage: e % e                                                                 # optional - sage.misc.cython
+            sage: e = MyElt(SR)                                                         # needs sage.misc.cython
+            sage: e % e                                                                 # needs sage.misc.cython
             rem
         """
         _, R = self.quo_rem(other)
@@ -4197,12 +4213,12 @@ cdef class FieldElement(CommutativeRingElement):
         EXAMPLES::
 
             sage: x = polygen(ZZ, 'x')
-            sage: K.<b> = NumberField(x^4 + x^2 + 2/3)                                  # optional - sage.rings.number_field
-            sage: c = (1+b) // (1-b); c                                                 # optional - sage.rings.number_field
+            sage: K.<b> = NumberField(x^4 + x^2 + 2/3)                                  # needs sage.rings.number_field
+            sage: c = (1+b) // (1-b); c                                                 # needs sage.rings.number_field
             3/4*b^3 + 3/4*b^2 + 3/2*b + 1/2
-            sage: (1+b) / (1-b) == c                                                    # optional - sage.rings.number_field
+            sage: (1+b) / (1-b) == c                                                    # needs sage.rings.number_field
             True
-            sage: c * (1-b)                                                             # optional - sage.rings.number_field
+            sage: c * (1-b)                                                             # needs sage.rings.number_field
             b + 1
         """
         return self._div_(right)
@@ -4271,14 +4287,15 @@ cdef class FieldElement(CommutativeRingElement):
 
         EXAMPLES::
 
-            sage: K.<rt3> = QQ[sqrt(3)]                                                 # optional - sage.rings.number_field sage.symbolic
-            sage: K(0).divides(rt3)                                                     # optional - sage.rings.number_field sage.symbolic
+            sage: # needs sage.rings.number_field sage.symbolic
+            sage: K.<rt3> = QQ[sqrt(3)]
+            sage: K(0).divides(rt3)
             False
-            sage: rt3.divides(K(17))                                                    # optional - sage.rings.number_field sage.symbolic
+            sage: rt3.divides(K(17))
             True
-            sage: K(0).divides(K(0))                                                    # optional - sage.rings.number_field sage.symbolic
+            sage: K(0).divides(K(0))
             True
-            sage: rt3.divides(K(0))                                                     # optional - sage.rings.number_field sage.symbolic
+            sage: rt3.divides(K(0))
             True
         """
         if not (other._parent is self._parent):
@@ -4293,8 +4310,8 @@ def is_AlgebraElement(x):
     TESTS::
 
         sage: from sage.structure.element import is_AlgebraElement
-        sage: R.<x,y> = FreeAlgebra(QQ, 2)                                              # optional - sage.combinat sage.modules
-        sage: is_AlgebraElement(x * y)                                                  # optional - sage.combinat sage.modules
+        sage: R.<x,y> = FreeAlgebra(QQ, 2)                                              # needs sage.combinat sage.modules
+        sage: is_AlgebraElement(x * y)                                                  # needs sage.combinat sage.modules
         True
 
         sage: is_AlgebraElement(1)
@@ -4352,8 +4369,8 @@ cpdef canonical_coercion(x, y):
 
     EXAMPLES::
 
-        sage: A = Matrix([[0, 1], [1, 0]])                                              # optional - sage.modules
-        sage: canonical_coercion(A, 1)                                                  # optional - sage.modules
+        sage: A = Matrix([[0, 1], [1, 0]])                                              # needs sage.modules
+        sage: canonical_coercion(A, 1)                                                  # needs sage.modules
         (
         [0 1]  [1 0]
         [1 0], [0 1]
@@ -4403,12 +4420,12 @@ def coercion_traceback(dump=True):
         sage: 1 + 1/5
         6/5
         sage: coercion_traceback()  # Should be empty, as all went well.
-        sage: 1/5 + GF(5).gen()                                                         # optional - sage.rings.finite_rings
+        sage: 1/5 + GF(5).gen()                                                         # needs sage.rings.finite_rings
         Traceback (most recent call last):
         ...
         TypeError: unsupported operand parent(s) for +:
         'Rational Field' and 'Finite Field of size 5'
-        sage: coercion_traceback()                                                      # optional - sage.rings.finite_rings
+        sage: coercion_traceback()                                                      # needs sage.rings.finite_rings
         Traceback (most recent call last):
         ...
         TypeError: no common canonical parent for objects with parents:

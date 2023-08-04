@@ -3914,10 +3914,11 @@ class Link(SageObject):
             sage: l.get_knotinfo(unique=False)        # optional - database_knotinfo
             [(<KnotInfo.K10_25: '10_25'>, False), (<KnotInfo.K10_56: '10_56'>, False)]
 
-            sage: k11  = KnotInfo.K11n_82.link()      # optional - database_knotinfo
-            sage: k11m = k11.mirror_image()           # optional - database_knotinfo
-            sage: k11mr = k11m.reverse()              # optional - database_knotinfo
-            sage: k11mr.get_knotinfo()                # optional - database_knotinfo
+            sage: # optional - database_knotinfo
+            sage: k11  = KnotInfo.K11n_82.link()
+            sage: k11m = k11.mirror_image()
+            sage: k11mr = k11m.reverse()
+            sage: k11mr.get_knotinfo()
             Traceback (most recent call last):
             ...
             NotImplementedError: mirror type of this link cannot be uniquely determined
@@ -4016,11 +4017,12 @@ class Link(SageObject):
         Another pair of confusion (see the corresponding `Warning
         <http://katlas.math.toronto.edu/wiki/10_86>`__)::
 
-           sage: Ks10_86 = snappy.Link('10_86')     # optional - snappy
-           sage: Ks10_83 = snappy.Link('10_83')     # optional - snappy
-           sage: Ks10_86.sage_link().get_knotinfo() # optional - snappy
+           sage: # optional - snappy
+           sage: Ks10_86 = snappy.Link('10_86')
+           sage: Ks10_83 = snappy.Link('10_83')
+           sage: Ks10_86.sage_link().get_knotinfo()
            (<KnotInfo.K10_83: '10_83'>, True)
-           sage: Ks10_83.sage_link().get_knotinfo() # optional - snappy
+           sage: Ks10_83.sage_link().get_knotinfo()
            (<KnotInfo.K10_86: '10_86'>, False)
 
         TESTS::

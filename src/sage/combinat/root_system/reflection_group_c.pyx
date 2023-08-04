@@ -157,11 +157,12 @@ cdef class Iterator():
             sage: len(list(I)) == W.cardinality()          # optional - gap3
             True
 
-            sage: I = Iterator(W, N, "breadth", False)     # optional - gap3
-            sage: len(list(I)) == W.cardinality()          # optional - gap3
+            sage: # optional - gap3
+            sage: I = Iterator(W, N, "breadth", False)
+            sage: len(list(I)) == W.cardinality()
             True
-            sage: I = Iterator(W, N, "parabolic")          # optional - gap3
-            sage: len(list(I)) == W.cardinality()          # optional - gap3
+            sage: I = Iterator(W, N, "parabolic")
+            sage: len(list(I)) == W.cardinality()
             True
         """
         # the breadth search iterator is ~2x slower as it

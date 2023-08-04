@@ -934,6 +934,7 @@ def WittDesign(n):
 
     EXAMPLES::
 
+        sage: # optional - gap_packages
         sage: BD = designs.WittDesign(9)             # optional - gap_packages (design package)
         sage: BD.is_t_design(return_parameters=True) # optional - gap_packages (design package)
         (True, (2, 9, 3, 1))

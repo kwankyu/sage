@@ -318,7 +318,7 @@ class sage__libs__ecl(PythonModule):
     EXAMPLES::
 
         sage: from sage.features.sagemath import sage__libs__ecl
-        sage: sage__libs__ecl().is_present()                        # optional - sage.libs.ecl
+        sage: sage__libs__ecl().is_present()                                            # needs sage.libs.ecl
         FeatureTestResult('sage.libs.ecl', True)
     """
 

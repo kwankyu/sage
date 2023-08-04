@@ -592,9 +592,9 @@ def entropy(x, q=2):
 
         sage: codes.bounds.entropy(0, 2)
         0
-        sage: codes.bounds.entropy(1/5,4).factor()    # optional - sage.symbolic
+        sage: codes.bounds.entropy(1/5,4).factor()                                      # needs sage.symbolic
         1/10*(log(3) - 4*log(4/5) - log(1/5))/log(2)
-        sage: codes.bounds.entropy(1, 3)              # optional - sage.symbolic
+        sage: codes.bounds.entropy(1, 3)                                                # needs sage.symbolic
         log(2)/log(3)
 
     Check that values not within the limits are properly handled::

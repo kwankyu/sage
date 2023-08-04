@@ -1726,27 +1726,29 @@ class CubicBraidGroup(FinitelyPresentedGroup):
 
         EXAMPLES::
 
-           sage: C3.<c1,c2> = CubicBraidGroup(3)           # optional - gap3
-           sage: R3 = C3.as_reflection_group(); R3         # optional - gap3
+           sage: # optional - gap3
+           sage: C3.<c1,c2> = CubicBraidGroup(3)
+           sage: R3 = C3.as_reflection_group(); R3
            Irreducible complex reflection group of rank 2 and type ST4
-           sage: R3.cartan_matrix()                        # optional - gap3
+           sage: R3.cartan_matrix()
            [-2*E(3) - E(3)^2           E(3)^2]
            [        -E(3)^2 -2*E(3) - E(3)^2]
-           sage: R3.simple_roots()                         # optional - gap3
+           sage: R3.simple_roots()
            Finite family {1: (0, -2*E(3) - E(3)^2), 2: (2*E(3)^2, E(3)^2)}
-           sage: R3.simple_coroots()                       # optional - gap3
+           sage: R3.simple_coroots()
            Finite family {1: (0, 1), 2: (1/3*E(3) - 1/3*E(3)^2, 1/3*E(3) - 1/3*E(3)^2)}
 
        Conversion maps::
 
-           sage: r = R3.an_element()                       # optional - gap3
-           sage: cr = C3(r); cr                            # optional - gap3
+           sage: # optional - gap3
+           sage: r = R3.an_element()
+           sage: cr = C3(r); cr
            c1*c2
-           sage: mr = r.matrix(); mr                       # optional - gap3
+           sage: mr = r.matrix(); mr
            [ 1/3*E(3) - 1/3*E(3)^2  2/3*E(3) + 1/3*E(3)^2]
            [-2/3*E(3) + 2/3*E(3)^2  2/3*E(3) + 1/3*E(3)^2]
-           sage: C3Cl = C3.as_classical_group()            # optional - gap3
-           sage: C3Cl(cr)                                  # optional - gap3
+           sage: C3Cl = C3.as_classical_group()
+           sage: C3Cl(cr)
            [ E(3)^2    -E(4)]
            [-E(12)^7        0]
 
@@ -1756,13 +1758,14 @@ class CubicBraidGroup(FinitelyPresentedGroup):
         the classical group due to different hermitian forms for the unitary
         groups they live in::
 
-           sage: C4 = CubicBraidGroup(4)                   # optional - gap3
-           sage: R4 = C4.as_reflection_group()             # optional - gap3
-           sage: R4.invariant_form()                       # optional - gap3
+           sage: # optional - gap3
+           sage: C4 = CubicBraidGroup(4)
+           sage: R4 = C4.as_reflection_group()
+           sage: R4.invariant_form()
            [1 0 0]
            [0 1 0]
            [0 0 1]
-           sage: _ == C4.classical_invariant_form()        # optional - gap3
+           sage: _ == C4.classical_invariant_form()
            False
         """
         # -------------------------------------------------------------------------------

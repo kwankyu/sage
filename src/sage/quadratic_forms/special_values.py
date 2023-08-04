@@ -38,22 +38,24 @@ def gamma__exact(n):
         sage: gamma__exact(1)
         1
 
-        sage: gamma__exact(1/2)                                                         # optional - sage.symbolic
+        sage: # needs sage.symbolic
+        sage: gamma__exact(1/2)
         sqrt(pi)
-        sage: gamma__exact(3/2)                                                         # optional - sage.symbolic
+        sage: gamma__exact(3/2)
         1/2*sqrt(pi)
-        sage: gamma__exact(5/2)                                                         # optional - sage.symbolic
+        sage: gamma__exact(5/2)
         3/4*sqrt(pi)
-        sage: gamma__exact(7/2)                                                         # optional - sage.symbolic
+        sage: gamma__exact(7/2)
         15/8*sqrt(pi)
 
-        sage: gamma__exact(-1/2)                                                        # optional - sage.symbolic
+        sage: # needs sage.symbolic
+        sage: gamma__exact(-1/2)
         -2*sqrt(pi)
-        sage: gamma__exact(-3/2)                                                        # optional - sage.symbolic
+        sage: gamma__exact(-3/2)
         4/3*sqrt(pi)
-        sage: gamma__exact(-5/2)                                                        # optional - sage.symbolic
+        sage: gamma__exact(-5/2)
         -8/15*sqrt(pi)
-        sage: gamma__exact(-7/2)                                                        # optional - sage.symbolic
+        sage: gamma__exact(-7/2)
         16/105*sqrt(pi)
 
     TESTS::
@@ -124,7 +126,7 @@ def zeta__exact(n):
 
     TESTS::
 
-        sage: zeta__exact(4)                                                            # optional - sage.symbolic
+        sage: zeta__exact(4)                                                            # needs sage.symbolic
         1/90*pi^4
         sage: zeta__exact(-3)
         1/120
@@ -166,13 +168,13 @@ def QuadraticBernoulliNumber(k, d):
 
     Let us create a list of some odd negative fundamental discriminants::
 
-        sage: test_set = [d for d in srange(-163, -3, 4)                                # optional - sage.libs.pari
+        sage: test_set = [d for d in srange(-163, -3, 4)                                # needs sage.libs.pari
         ....:             if d.is_fundamental_discriminant()]
 
     In general, we have `B_{1, \chi_d} = -2 h/w` for odd negative fundamental
     discriminants::
 
-        sage: all(QuadraticBernoulliNumber(1, d)                                        # optional - sage.libs.pari
+        sage: all(QuadraticBernoulliNumber(1, d)                                        # needs sage.libs.pari
         ....:       == -len(BinaryQF_reduced_representatives(d))
         ....:     for d in test_set)
         True
@@ -207,16 +209,16 @@ def quadratic_L_function__exact(n, d):
 
     EXAMPLES::
 
-        sage: quadratic_L_function__exact(1, -4)                                        # optional - sage.libs.pari sage.symbolic
+        sage: quadratic_L_function__exact(1, -4)                                        # needs sage.libs.pari sage.symbolic
         1/4*pi
-        sage: quadratic_L_function__exact(-4, -4)                                       # optional - sage.libs.pari
+        sage: quadratic_L_function__exact(-4, -4)                                       # needs sage.libs.pari
         5/2
-        sage: quadratic_L_function__exact(2, 1)                                         # optional - sage.libs.pari sage.symbolic
+        sage: quadratic_L_function__exact(2, 1)                                         # needs sage.libs.pari sage.symbolic
         1/6*pi^2
 
     TESTS::
 
-        sage: quadratic_L_function__exact(2, -4)                                        # optional - sage.libs.pari
+        sage: quadratic_L_function__exact(2, -4)                                        # needs sage.libs.pari
         Traceback (most recent call last):
         ...
         TypeError: n must be a critical value (i.e. odd > 0 or even <= 0)

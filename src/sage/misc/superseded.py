@@ -107,7 +107,7 @@ def deprecation_cython(issue_number, message, stacklevel=3):
     with the same callsite reference as `deprecation` in a python function, whereas
     `deprecation` in a cython function does not::
 
-        sage: cython(                                                                       # optional - sage.misc.cython
+        sage: cython(                                                                   # needs sage.misc.cython
         ....: '''
         ....: from sage.misc.superseded import deprecation_cython, deprecation
         ....: def foo1():
@@ -117,7 +117,7 @@ def deprecation_cython(issue_number, message, stacklevel=3):
         ....: ''')
         sage: def foo3():
         ....:     deprecation(100, "boo")
-        sage: if True:  # Execute the three "with" blocks as one doctest                    # optional - sage.misc.cython
+        sage: if True:  # Execute the three "with" blocks as one doctest                # needs sage.misc.cython
         ....:     with warnings.catch_warnings(record=True) as w1:
         ....:        warnings.simplefilter("always")
         ....:        foo1()
@@ -127,9 +127,9 @@ def deprecation_cython(issue_number, message, stacklevel=3):
         ....:     with warnings.catch_warnings(record=True) as w3:
         ....:        warnings.simplefilter("always")
         ....:        foo3()
-        sage: w1[0].filename == w3[0].filename                                              # optional - sage.misc.cython
+        sage: w1[0].filename == w3[0].filename                                          # needs sage.misc.cython
         True
-        sage: w2[0].filename == w3[0].filename                                              # optional - sage.misc.cython
+        sage: w2[0].filename == w3[0].filename                                          # needs sage.misc.cython
         False
      """
     warning(issue_number, message, DeprecationWarning, stacklevel)
@@ -396,14 +396,14 @@ class DeprecatedFunctionAlias():
             sage: cls().old_meth.__name__
             'old_meth'
 
-            sage: cython('\n'.join([                                                            # optional - sage.misc.cython
+            sage: cython('\n'.join([                                                    # needs sage.misc.cython
             ....:     r"from sage.misc.superseded import deprecated_function_alias",
             ....:     r"cdef class cython_cls():",
             ....:     r"    def new_cython_meth(self):",
             ....:     r"        return 1",
             ....:     r"    old_cython_meth = deprecated_function_alias(13109, new_cython_meth)"
             ....: ]))
-            sage: cython_cls().old_cython_meth.__name__                                         # optional - sage.misc.cython
+            sage: cython_cls().old_cython_meth.__name__                                 # needs sage.misc.cython
             'old_cython_meth'
         """
         # first look through variables in stack frames

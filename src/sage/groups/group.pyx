@@ -139,7 +139,7 @@ cdef class Group(Parent):
 
         EXAMPLES::
 
-            sage: SL(2, 7).is_commutative()                                             # optional - sage.rings.finite_rings
+            sage: SL(2, 7).is_commutative()                                             # needs sage.rings.finite_rings
             False
         """
         return self.is_abelian()
@@ -211,8 +211,8 @@ cdef class Group(Parent):
 
         EXAMPLES::
 
-            sage: G = AbelianGroup([2,3,4,5])                                           # optional - sage.groups
-            sage: G.an_element()                                                        # optional - sage.groups
+            sage: G = AbelianGroup([2,3,4,5])                                           # needs sage.groups
+            sage: G.an_element()                                                        # needs sage.groups
             f0*f1*f2*f3
         """
         return self.prod(self.gens())

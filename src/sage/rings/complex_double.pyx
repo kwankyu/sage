@@ -890,13 +890,14 @@ cdef class ComplexDoubleElement(FieldElement):
 
         EXAMPLES::
 
-            sage: CDF((1.2, 0.3))._magma_init_(magma) # optional - magma
+            sage: # optional - magma
+            sage: CDF((1.2, 0.3))._magma_init_(magma)
             'ComplexField(53 : Bits := true)![1.2, 0.3]'
-            sage: magma(CDF(1.2, 0.3)) # optional - magma # indirect doctest
+            sage: magma(CDF(1.2, 0.3))
             1.20000000000000 + 0.300000000000000*$.1
-            sage: s = magma(CDF(1.2, 0.3)).sage(); s # optional - magma # indirect doctest
+            sage: s = magma(CDF(1.2, 0.3)).sage(); s
             1.20000000000000 + 0.300000000000000*I
-            sage: s.parent() # optional - magma
+            sage: s.parent()
             Complex Field with 53 bits of precision
         """
         return "%s![%s, %s]" % (self.parent()._magma_init_(magma), self.real(), self.imag())
@@ -2569,11 +2570,12 @@ cdef class ComplexToCDF(Morphism):
 
     EXAMPLES::
 
-        sage: import numpy                                                              # optional - numpy
-        sage: f = CDF.coerce_map_from(numpy.complex_)                                   # optional - numpy
-        sage: f(numpy.complex_(I))                                                      # optional - numpy
+        sage: # needs numpy
+        sage: import numpy
+        sage: f = CDF.coerce_map_from(numpy.complex_)
+        sage: f(numpy.complex_(I))
         1.0*I
-        sage: f(numpy.complex_(I)).parent()                                             # optional - numpy
+        sage: f(numpy.complex_(I)).parent()
         Complex Double Field
     """
     def __init__(self, R):
@@ -2589,8 +2591,8 @@ cdef class ComplexToCDF(Morphism):
 
         EXAMPLES::
 
-            sage: import numpy                                                          # optional - numpy
-            sage: CDF(numpy.complex_(I))    # indirect doctest                          # optional - numpy
+            sage: import numpy                                                          # needs numpy
+            sage: CDF(numpy.complex_(I))    # indirect doctest                          # needs numpy
             1.0*I
         """
         cdef ComplexDoubleElement z = <ComplexDoubleElement>ComplexDoubleElement.__new__(ComplexDoubleElement)
@@ -2603,9 +2605,9 @@ cdef class ComplexToCDF(Morphism):
 
         EXAMPLES::
 
-            sage: import numpy                                                          # optional - numpy
-            sage: f = sage.rings.complex_double.ComplexToCDF(numpy.complex_)            # optional - numpy
-            sage: f._repr_type()                                                        # optional - numpy
+            sage: import numpy                                                          # needs numpy
+            sage: f = sage.rings.complex_double.ComplexToCDF(numpy.complex_)            # needs numpy
+            sage: f._repr_type()                                                        # needs numpy
             'Native'
         """
         return "Native"

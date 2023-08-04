@@ -5,21 +5,21 @@ EXAMPLES:
 
 We create the real double vector space of dimension `3`::
 
-    sage: V = RDF^3; V                                                                  # optional - sage.modules
+    sage: V = RDF^3; V                                                                  # needs sage.modules
     Vector space of dimension 3 over Real Double Field
 
 Notice that this space is unique::
 
-    sage: V is RDF^3                                                                    # optional - sage.modules
+    sage: V is RDF^3                                                                    # needs sage.modules
     True
-    sage: V is FreeModule(RDF, 3)                                                       # optional - sage.modules
+    sage: V is FreeModule(RDF, 3)                                                       # needs sage.modules
     True
-    sage: V is VectorSpace(RDF, 3)                                                      # optional - sage.modules
+    sage: V is VectorSpace(RDF, 3)                                                      # needs sage.modules
     True
 
 Also, you can instantly create a space of large dimension::
 
-    sage: V = RDF^10000                                                                 # optional - sage.modules
+    sage: V = RDF^10000                                                                 # needs sage.modules
 
 TESTS:
 
@@ -27,8 +27,8 @@ Test NumPy conversions::
 
     sage: RDF(1).__array_interface__
     {'typestr': '=f8'}
-    sage: import numpy                                                                  # optional - numpy
-    sage: numpy.array([RDF.pi()]).dtype                                                 # optional - numpy
+    sage: import numpy                                                                  # needs numpy
+    sage: numpy.array([RDF.pi()]).dtype                                                 # needs numpy
     dtype('float64')
 """
 
@@ -329,10 +329,10 @@ cdef class RealDoubleField_class(sage.rings.abc.RealDoubleField):
             sage: RLF(2/3) + RDF(1)
             1.6666666666666665
 
-            sage: import numpy                                                          # optional - numpy
-            sage: RDF.coerce(numpy.int8('1'))                                           # optional - numpy
+            sage: import numpy                                                          # needs numpy
+            sage: RDF.coerce(numpy.int8('1'))                                           # needs numpy
             1.0
-            sage: RDF.coerce(numpy.float64('1'))                                        # optional - numpy
+            sage: RDF.coerce(numpy.float64('1'))                                        # needs numpy
             1.0
 
             sage: RDF.coerce(pi)
@@ -342,7 +342,7 @@ cdef class RealDoubleField_class(sage.rings.abc.RealDoubleField):
 
         Test that :trac:`15695` is fixed (see also :trac:`18076`)::
 
-            sage: 1j + numpy.float64(2)
+            sage: 1j + numpy.float64(2)                                                 # needs numpy
             2.00000000000000 + 1.00000000000000*I
             sage: parent(_)
             Complex Field with 53 bits of precision
@@ -790,20 +790,21 @@ cdef class RealDoubleElement(FieldElement):
 
         EXAMPLES::
 
-            sage: a = RDF(pi)                                                           # optional - sage.symbolic
-            sage: a.ulp()                                                               # optional - sage.symbolic
+            sage: a = RDF(pi)                                                           # needs sage.symbolic
+            sage: a.ulp()                                                               # needs sage.symbolic
             4.440892098500626e-16
-            sage: b = a + a.ulp()                                                       # optional - sage.symbolic
+            sage: b = a + a.ulp()                                                       # needs sage.symbolic
 
         Adding or subtracting an ulp always gives a different number::
 
-            sage: a + a.ulp() == a                                                      # optional - sage.symbolic
+            sage: # needs sage.symbolic
+            sage: a + a.ulp() == a
             False
-            sage: a - a.ulp() == a                                                      # optional - sage.symbolic
+            sage: a - a.ulp() == a
             False
-            sage: b + b.ulp() == b                                                      # optional - sage.symbolic
+            sage: b + b.ulp() == b
             False
-            sage: b - b.ulp() == b                                                      # optional - sage.symbolic
+            sage: b - b.ulp() == b
             False
 
         Since the default rounding mode is round-to-nearest, adding or
@@ -812,13 +813,13 @@ cdef class RealDoubleElement(FieldElement):
         can only happen if the input number is (up to sign) exactly a
         power of 2::
 
-            sage: a - a.ulp()/3 == a                                                    # optional - sage.symbolic
+            sage: a - a.ulp()/3 == a                                                    # needs sage.symbolic
             True
-            sage: a + a.ulp()/3 == a                                                    # optional - sage.symbolic
+            sage: a + a.ulp()/3 == a                                                    # needs sage.symbolic
             True
-            sage: b - b.ulp()/3 == b                                                    # optional - sage.symbolic
+            sage: b - b.ulp()/3 == b                                                    # needs sage.symbolic
             True
-            sage: b + b.ulp()/3 == b                                                    # optional - sage.symbolic
+            sage: b + b.ulp()/3 == b                                                    # needs sage.symbolic
             True
             sage: c = RDF(1)
             sage: c - c.ulp()/3 == c
@@ -977,11 +978,11 @@ cdef class RealDoubleElement(FieldElement):
 
         EXAMPLES::
 
-            sage: s1 = RDF(sin(1)); s1                                                  # optional - sage.symbolic
+            sage: s1 = RDF(sin(1)); s1                                                  # needs sage.symbolic
             0.8414709848078965
-            sage: s1._interface_init_()                                                 # optional - sage.symbolic
+            sage: s1._interface_init_()                                                 # needs sage.symbolic
             '0.8414709848078965'
-            sage: s1 == RDF(gp(s1))                                                     # optional - sage.libs.pari sage.symbolic
+            sage: s1 == RDF(gp(s1))                                                     # needs sage.libs.pari sage.symbolic
             True
         """
         return repr(self._value)
@@ -1006,7 +1007,7 @@ cdef class RealDoubleElement(FieldElement):
 
         EXAMPLES::
 
-            sage: sage_input(RDF(NaN))                                                  # optional - sage.symbolic
+            sage: sage_input(RDF(NaN))                                                  # needs sage.symbolic
             RDF(NaN)
             sage: sage_input(RDF(-infinity), verify=True)
             # Verified
@@ -1020,7 +1021,7 @@ cdef class RealDoubleElement(FieldElement):
             sage: sage_input(RDF(-e), verify=True, preparse=False)
             # Verified
             -RDF(2.718281828459045...)
-            sage: sage_input(RDF(pi)*polygen(RDF), verify=True, preparse=None)          # optional - sage.symbolic
+            sage: sage_input(RDF(pi)*polygen(RDF), verify=True, preparse=None)          # needs sage.symbolic
             # Verified
             R = RDF['x']
             x = R.gen()
@@ -1265,12 +1266,13 @@ cdef class RealDoubleElement(FieldElement):
 
         EXAMPLES::
 
-            sage: a = RDF(exp(1.0)); a                                                  # optional - sage.symbolic
+            sage: # needs sage.symbolic
+            sage: a = RDF(exp(1.0)); a
             2.718281828459045
-            sage: sign,mantissa,exponent = RDF(exp(1.0)).sign_mantissa_exponent()       # optional - sage.symbolic
-            sage: sign,mantissa,exponent                                                # optional - sage.symbolic
+            sage: sign,mantissa,exponent = RDF(exp(1.0)).sign_mantissa_exponent()
+            sage: sign,mantissa,exponent
             (1, 6121026514868073, -51)
-            sage: sign*mantissa*(2**exponent) == a                                      # optional - sage.symbolic
+            sage: sign*mantissa*(2**exponent) == a
             True
 
         The mantissa is always a nonnegative number::
@@ -1684,7 +1686,7 @@ cdef class RealDoubleElement(FieldElement):
 
         EXAMPLES::
 
-            sage: RDF(1.5).__pari__()                                                   # optional - sage.libs.pari
+            sage: RDF(1.5).__pari__()                                                   # needs sage.libs.pari
             1.50000000000000
         """
         global new_gen_from_real_double_element
@@ -1972,7 +1974,7 @@ cdef class RealDoubleElement(FieldElement):
 
             sage: r = sqrt(RDF(2)); r
             1.4142135623730951
-            sage: r.algebraic_dependency(5)                                             # optional - sage.libs.pari
+            sage: r.algebraic_dependency(5)                                             # needs sage.libs.pari
             x^2 - 2
         """
         return sage.arith.all.algdep(self,n)

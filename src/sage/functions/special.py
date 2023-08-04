@@ -504,10 +504,11 @@ class EllipticE(BuiltinFunction):
 
         Numerically::
 
-            sage: f = lambda x, y: elliptic_e(arcsin(x), y).subs(x=x, y=y)      # optional - fricas
-            sage: g = lambda x, y: fricas.ellipticE(x, y).sage()                # optional - fricas
-            sage: d = lambda x, y: f(x, y) - g(x, y)                            # optional - fricas
-            sage: [d(N(-pi/2+x), y) for x in range(1, 3) for y in range(-2,2)]  # optional - fricas tol 1e-8
+            sage: # optional - fricas
+            sage: f = lambda x, y: elliptic_e(arcsin(x), y).subs(x=x, y=y)
+            sage: g = lambda x, y: fricas.ellipticE(x, y).sage()
+            sage: d = lambda x, y: f(x, y) - g(x, y)
+            sage: [d(N(-pi/2+x), y) for x in range(1, 3) for y in range(-2,2)]  # optional - 1e tol
             [0.000000000000000,
              0.000000000000000,
              0.000000000000000,
@@ -873,10 +874,11 @@ class EllipticF(BuiltinFunction):
 
         Numerically::
 
-            sage: f = lambda x, y: elliptic_f(arcsin(x), y).subs(x=x, y=y)      # optional - fricas
-            sage: g = lambda x, y: fricas.ellipticF(x, y).sage()                # optional - fricas
-            sage: d = lambda x, y: f(x, y) - g(x, y)                            # optional - fricas
-            sage: [d(N(-pi/2+x), y) for x in range(1, 3) for y in range(-2,2)]  # optional - fricas tol 1e-8
+            sage: # optional - fricas
+            sage: f = lambda x, y: elliptic_f(arcsin(x), y).subs(x=x, y=y)
+            sage: g = lambda x, y: fricas.ellipticF(x, y).sage()
+            sage: d = lambda x, y: f(x, y) - g(x, y)
+            sage: [d(N(-pi/2+x), y) for x in range(1, 3) for y in range(-2,2)]  # optional - 1e tol
             [0.000000000000000,
              0.000000000000000,
              0.000000000000000,

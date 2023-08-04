@@ -12,21 +12,23 @@ TESTS::
 Computation of a modular cohomology ring of a prime power group in
 characteristic 2, and comparison with stored result in a database::
 
-    sage: CohomologyRing.set_workspace(tmp_dir())       # optional - p_group_cohomology
-    sage: H = CohomologyRing(64,14,from_scratch=True)   # optional - p_group_cohomology
-    sage: H.make()                                      # optional - p_group_cohomology
-    sage: CohomologyRing.set_workspace(tmp_dir())       # optional - p_group_cohomology
-    sage: H0 = CohomologyRing(64,14)                    # optional - p_group_cohomology
-    sage: H.is_isomorphic(H0)                           # optional - p_group_cohomology
+    sage: # optional - p_group_cohomology
+    sage: CohomologyRing.set_workspace(tmp_dir())
+    sage: H = CohomologyRing(64,14,from_scratch=True)
+    sage: H.make()
+    sage: CohomologyRing.set_workspace(tmp_dir())
+    sage: H0 = CohomologyRing(64,14)
+    sage: H.is_isomorphic(H0)
     ('1*a_2_1', '1*c_2_2', '1*c_4_4', '1*a_1_0', '1*a_1_1', '1*a_3_3')
 
 Computation of a modular cohomology ring of a prime power group in odd
 characteristic, and some algebraic constructions in the cohomology
 ring::
 
-    sage: H = CohomologyRing(27,4)                      # optional - p_group_cohomology
-    sage: H.make()                                      # optional - p_group_cohomology
-    sage: print(H)                                      # optional - p_group_cohomology
+    sage: # optional - p_group_cohomology
+    sage: H = CohomologyRing(27,4)
+    sage: H.make()
+    sage: print(H)
     <BLANKLINE>
     Cohomology ring of Extraspecial 3-group of order 27
     and exponent 9 with coefficients in GF(3)
@@ -45,14 +47,14 @@ ring::
      b_2_1*a_3_1,
      a_1_0*a_5_1,
      a_3_1*a_5_1]
-    sage: H.5.massey_power()                            # optional - p_group_cohomology
+    sage: H.5.massey_power()
     <a_3_1; 1>: 8-Cocycle in H^*(M27; GF(3))
-    sage: H.5.massey_power().as_polynomial()            # optional - p_group_cohomology
+    sage: H.5.massey_power().as_polynomial()
     '-c_6_2*a_1_0*a_1_1'
-    sage: H.essential_ideal()                           # optional - p_group_cohomology
+    sage: H.essential_ideal()
     a_1_0*a_1_1,
     a_1_1*a_3_1
-    sage: ascii_art(H.bar_code('LowerCentralSeries')[2]) # known bug (possibly, the output might be correct) # optional - p_group_cohomology
+    sage: ascii_art(H.bar_code('LowerCentralSeries')[2])        # known bug
         *
       *-*
       *-*

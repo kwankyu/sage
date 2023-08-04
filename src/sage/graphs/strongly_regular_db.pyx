@@ -1201,11 +1201,12 @@ def SRG_from_RSHCD(v, k, l, mu, existence=False, check=True):
     an example with vertex-transitive automorphism group, found during the
     implementation of the case `v=324` ::
 
-        sage: G=SRG_from_RSHCD(324,152,70,72)  # long time
-        sage: a=G.automorphism_group()         # long time
-        sage: a.order()                        # long time
+        sage: # long time
+        sage: G=SRG_from_RSHCD(324,152,70,72)
+        sage: a=G.automorphism_group()
+        sage: a.order()
         2592
-        sage: len(a.orbits())                  # long time
+        sage: len(a.orbits())
         1
 
     TESTS::

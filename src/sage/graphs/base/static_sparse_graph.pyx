@@ -731,8 +731,8 @@ def tarjan_strongly_connected_components(G):
 
     Checking against NetworkX::
 
-        sage: import networkx                                                                       # optional - networkx
-        sage: for i in range(10):                          # long time                              # optional - networkx
+        sage: import networkx                                                                       # needs networkx
+        sage: for i in range(10):               # long time                             # needs networkx
         ....:      g = digraphs.RandomDirectedGNP(100,.05)
         ....:      h = g.networkx_graph()
         ....:      scc1 = g.strongly_connected_components()

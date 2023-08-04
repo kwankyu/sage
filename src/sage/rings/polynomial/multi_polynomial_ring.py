@@ -27,13 +27,14 @@ EXAMPLES:
 We construct the Frobenius morphism on `\GF{5}[x,y,z]` over
 `\GF{5}`::
 
-    sage: R.<x,y,z> = GF(5)[]                                                           # optional - sage.rings.finite_rings
-    sage: frob = R.hom([x^5, y^5, z^5])                                                 # optional - sage.rings.finite_rings
-    sage: frob(x^2 + 2*y - z^4)                                                         # optional - sage.rings.finite_rings
+    sage: # needs sage.rings.finite_rings
+    sage: R.<x,y,z> = GF(5)[]
+    sage: frob = R.hom([x^5, y^5, z^5])
+    sage: frob(x^2 + 2*y - z^4)
     -z^20 + x^10 + 2*y^5
-    sage: frob((x + 2*y)^3)                                                             # optional - sage.rings.finite_rings
+    sage: frob((x + 2*y)^3)
     x^15 + x^10*y^5 + 2*x^5*y^10 - 2*y^15
-    sage: (x^5 + 2*y^5)^3                                                               # optional - sage.rings.finite_rings
+    sage: (x^5 + 2*y^5)^3
     x^15 + x^10*y^5 + 2*x^5*y^10 - 2*y^15
 
 We make a polynomial ring in one variable over a polynomial ring in
@@ -46,7 +47,7 @@ two variables::
 
 TESTS::
 
-    sage: PolynomialRing(GF(5), 3, 'xyz').objgens()                                     # optional - sage.rings.finite_rings
+    sage: PolynomialRing(GF(5), 3, 'xyz').objgens()                                     # needs sage.rings.finite_rings
     (Multivariate Polynomial Ring in x, y, z over Finite Field of size 5,
     (x, y, z))
 """
@@ -203,7 +204,7 @@ class MPolynomialRing_polydict(MPolynomialRing_macaulay2_repr, PolynomialRing_si
 
             sage: R.<x,y> = QQ[]
             sage: S.<x,y> = ZZ[]
-            sage: T.<x,y> = GF(7)[]                                                     # optional - sage.rings.finite_rings
+            sage: T.<x,y> = GF(7)[]                                                     # needs sage.rings.finite_rings
 
         We convert from integer polynomials to rational polynomials,
         and back::
@@ -219,9 +220,9 @@ class MPolynomialRing_polydict(MPolynomialRing_macaulay2_repr, PolynomialRing_si
 
         ::
 
-            sage: f = R(T.0^2 - 4*T.1^3); f                                             # optional - sage.rings.finite_rings
+            sage: f = R(T.0^2 - 4*T.1^3); f                                             # needs sage.rings.finite_rings
             3*y^3 + x^2
-            sage: parent(f)                                                             # optional - sage.rings.finite_rings
+            sage: parent(f)                                                             # needs sage.rings.finite_rings
             Multivariate Polynomial Ring in x, y over Rational Field
 
         We dump and load the polynomial ring S::
@@ -241,24 +242,25 @@ class MPolynomialRing_polydict(MPolynomialRing_macaulay2_repr, PolynomialRing_si
         variable names::
 
             sage: R.<x,y> = PolynomialRing(QQ,2)
-            sage: S.<a,b> = PolynomialRing(GF(7),2)                                     # optional - sage.rings.finite_rings
+            sage: S.<a,b> = PolynomialRing(GF(7),2)                                     # needs sage.rings.finite_rings
             sage: f = x^2 + 2/3*y^3
-            sage: S(f)                                                                  # optional - sage.rings.finite_rings
+            sage: S(f)                                                                  # needs sage.rings.finite_rings
             3*b^3 + a^2
 
         Conversion from symbolic variables::
 
-            sage: x,y,z = var('x,y,z')                                                  # optional - sage.symbolic
-            sage: R = QQ['x,y,z']                                                       # optional - sage.symbolic
-            sage: type(x)                                                               # optional - sage.symbolic
+            sage: # needs sage.symbolic
+            sage: x,y,z = var('x,y,z')
+            sage: R = QQ['x,y,z']
+            sage: type(x)
             <class 'sage.symbolic.expression.Expression'>
-            sage: type(R(x))                                                            # optional - sage.symbolic
+            sage: type(R(x))
             <class 'sage.rings.polynomial.multi_polynomial_libsingular.MPolynomial_libsingular'>
-            sage: f = R(x^3 + y^3 - z^3); f                                             # optional - sage.symbolic
+            sage: f = R(x^3 + y^3 - z^3); f
             x^3 + y^3 - z^3
-            sage: type(f)                                                               # optional - sage.symbolic
+            sage: type(f)
             <class 'sage.rings.polynomial.multi_polynomial_libsingular.MPolynomial_libsingular'>
-            sage: parent(f)                                                             # optional - sage.symbolic
+            sage: parent(f)
             Multivariate Polynomial Ring in x, y, z over Rational Field
 
         A more complicated symbolic and computational mix. Behind the
@@ -267,11 +269,11 @@ class MPolynomialRing_polydict(MPolynomialRing_macaulay2_repr, PolynomialRing_si
         ::
 
             sage: R = QQ['x,y,z']
-            sage: f = (x^3 + y^3 - z^3)^10; f                                           # optional - sage.symbolic
+            sage: f = (x^3 + y^3 - z^3)^10; f                                           # needs sage.symbolic
             (x^3 + y^3 - z^3)^10
-            sage: g = R(f); parent(g)                                                   # optional - sage.symbolic
+            sage: g = R(f); parent(g)                                                   # needs sage.symbolic
             Multivariate Polynomial Ring in x, y, z over Rational Field
-            sage: (f - g).expand()                                                      # optional - sage.symbolic
+            sage: (f - g).expand()                                                      # needs sage.symbolic
             0
 
         It intelligently handles conversions from polynomial rings in a subset
@@ -279,12 +281,12 @@ class MPolynomialRing_polydict(MPolynomialRing_macaulay2_repr, PolynomialRing_si
 
         ::
 
-            sage: R = GF(5)['x,y,z']                                                    # optional - sage.rings.finite_rings
+            sage: R = GF(5)['x,y,z']                                                    # needs sage.rings.finite_rings
             sage: S = ZZ['y']
-            sage: R(7*S.0)                                                              # optional - sage.rings.finite_rings
+            sage: R(7*S.0)                                                              # needs sage.rings.finite_rings
             2*y
             sage: T = ZZ['x,z']
-            sage: R(2*T.0 + 6*T.1 + T.0*T.1^2)                                          # optional - sage.rings.finite_rings
+            sage: R(2*T.0 + 6*T.1 + T.0*T.1^2)                                          # needs sage.rings.finite_rings
             x*z^2 + 2*x + z
 
         ::

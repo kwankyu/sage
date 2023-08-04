@@ -766,12 +766,12 @@ def vertex_separation(G, algorithm="BAB", cut_off=None, upper_bound=None, verbos
     Comparison of methods::
 
         sage: from sage.graphs.graph_decompositions.vertex_separation import vertex_separation
-        sage: G = digraphs.DeBruijn(2,3)                                                # optional - sage.combinat
-        sage: vs,L = vertex_separation(G, algorithm="BAB"); vs                          # optional - sage.combinat
+        sage: G = digraphs.DeBruijn(2,3)                                                # needs sage.combinat
+        sage: vs,L = vertex_separation(G, algorithm="BAB"); vs                          # needs sage.combinat
         2
-        sage: vs,L = vertex_separation(G, algorithm="exponential"); vs                  # optional - sage.combinat
+        sage: vs,L = vertex_separation(G, algorithm="exponential"); vs                  # needs sage.combinat
         2
-        sage: vs,L = vertex_separation(G, algorithm="MILP"); vs                         # optional - sage.combinat
+        sage: vs,L = vertex_separation(G, algorithm="MILP"); vs                         # needs sage.combinat
         2
         sage: G = graphs.Grid2dGraph(3,3)
         sage: vs,L = vertex_separation(G, algorithm="BAB"); vs
@@ -954,8 +954,8 @@ def vertex_separation_exp(G, verbose=False):
     Graphs with non-integer vertices::
 
         sage: from sage.graphs.graph_decompositions.vertex_separation import vertex_separation_exp
-        sage: D = digraphs.DeBruijn(2,3)                                                # optional - sage.combinat
-        sage: vertex_separation_exp(D)                                                  # optional - sage.combinat
+        sage: D = digraphs.DeBruijn(2,3)                                                # needs sage.combinat
+        sage: vertex_separation_exp(D)                                                  # needs sage.combinat
         (2, ['000', '001', '100', '010', '101', '011', '110', '111'])
 
     Given a too large graph::
@@ -1211,12 +1211,12 @@ def width_of_path_decomposition(G, L):
     Path decomposition of a BalancedTree::
 
         sage: from sage.graphs.graph_decompositions import vertex_separation
-        sage: G = graphs.BalancedTree(3,2)                                              # optional - networkx
-        sage: pw, L = vertex_separation.path_decomposition(G)                           # optional - networkx
-        sage: pw == vertex_separation.width_of_path_decomposition(G, L)                 # optional - networkx
+        sage: G = graphs.BalancedTree(3,2)                                              # needs networkx
+        sage: pw, L = vertex_separation.path_decomposition(G)                           # needs networkx
+        sage: pw == vertex_separation.width_of_path_decomposition(G, L)                 # needs networkx
         True
-        sage: L.reverse()                                                               # optional - networkx
-        sage: pw == vertex_separation.width_of_path_decomposition(G, L)                 # optional - networkx
+        sage: L.reverse()                                                               # needs networkx
+        sage: pw == vertex_separation.width_of_path_decomposition(G, L)                 # needs networkx
         False
 
     Directed path decomposition of a circuit::
@@ -1305,9 +1305,9 @@ def _vertex_separation_MILP_formulation(G, integrality=False, solver=None):
     EXAMPLES::
 
         sage: from sage.graphs.graph_decompositions.vertex_separation import _vertex_separation_MILP_formulation
-        sage: G = digraphs.DeBruijn(2,3)                                                # optional - sage.combinat
-        sage: p, x, u, y, z = _vertex_separation_MILP_formulation(G)                    # optional - sage.combinat
-        sage: p                                                                         # optional - sage.combinat
+        sage: G = digraphs.DeBruijn(2,3)                                                # needs sage.combinat
+        sage: p, x, u, y, z = _vertex_separation_MILP_formulation(G)                    # needs sage.combinat
+        sage: p                                                                         # needs sage.combinat
         Mixed Integer Program (minimization, 193 variables, 449 constraints)
     """
     from sage.graphs.graph import Graph
@@ -1420,12 +1420,12 @@ def vertex_separation_MILP(G, integrality=False, solver=None, verbose=0,
     Vertex separation of a De Bruijn digraph::
 
         sage: from sage.graphs.graph_decompositions import vertex_separation
-        sage: G = digraphs.DeBruijn(2,3)                                                # optional - sage.combinat
-        sage: vs, L = vertex_separation.vertex_separation_MILP(G); vs                   # optional - sage.combinat
+        sage: G = digraphs.DeBruijn(2,3)                                                # needs sage.combinat
+        sage: vs, L = vertex_separation.vertex_separation_MILP(G); vs                   # needs sage.combinat
         2
-        sage: vs == vertex_separation.width_of_path_decomposition(G, L)                 # optional - sage.combinat
+        sage: vs == vertex_separation.width_of_path_decomposition(G, L)                 # needs sage.combinat
         True
-        sage: vse, Le = vertex_separation.vertex_separation(G); vse                     # optional - sage.combinat
+        sage: vse, Le = vertex_separation.vertex_separation(G); vse                     # needs sage.combinat
         2
 
     The vertex separation of a circuit is 1::

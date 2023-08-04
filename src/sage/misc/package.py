@@ -309,11 +309,12 @@ def list_packages(*pkg_types: str, pkg_sources: List[str] = ['normal', 'pip', 's
         sage: sage_conf_info.source            # optional - sage_spkg
         'script'
 
-        sage: L = list_packages(pkg_sources=['pip'], local=True)  # optional - sage_spkg internet
-        sage: bp_info = L['biopython']         # optional - sage_spkg internet
-        sage: bp_info.type                     # optional - sage_spkg internet
+        sage: # optional - internet sage_spkg
+        sage: L = list_packages(pkg_sources=['pip'], local=True)
+        sage: bp_info = L['biopython']
+        sage: bp_info.type
         'optional'
-        sage: bp_info.source                   # optional - sage_spkg internet
+        sage: bp_info.source
         'pip'
 
     Check the option ``exclude_pip``::

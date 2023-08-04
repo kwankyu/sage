@@ -79,7 +79,7 @@ class Polyhedron_ZZ(Polyhedron_QQ):
 
             sage: polytopes.cross_polytope(3).is_lattice_polytope()
             True
-            sage: polytopes.regular_polygon(5).is_lattice_polytope()  # optional - sage.rings.number_field
+            sage: polytopes.regular_polygon(5).is_lattice_polytope()                    # needs sage.rings.number_field
             False
 
         TESTS:
@@ -626,8 +626,8 @@ class Polyhedron_ZZ(Polyhedron_QQ):
 
         EXAMPLES::
 
-            sage: P = Polyhedron(toric_varieties.P4_11169().fan().rays(), base_ring=ZZ)     # optional - palp
-            sage: list(P.fibration_generator(2))                                            # optional - palp
+            sage: P = Polyhedron(toric_varieties.P4_11169().fan().rays(), base_ring=ZZ)             # needs palp
+            sage: list(P.fibration_generator(2))                                        # needs palp
             [A 2-dimensional polyhedron in ZZ^4 defined as the convex hull of 3 vertices]
         """
         from sage.combinat.combination import Combinations

@@ -266,8 +266,8 @@ class PoorManMap(sage.structure.sage_object.SageObject):
         EXAMPLES::
 
             sage: from sage.categories.poor_man_map import PoorManMap
-            sage: h = PoorManMap(sin, domain=RR, codomain=RR)                           # optional - sage.symbolic
-            sage: h._sympy_()                                                           # optional - sage.symbolic
+            sage: h = PoorManMap(sin, domain=RR, codomain=RR)                           # needs sage.symbolic
+            sage: h._sympy_()                                                           # needs sage.symbolic
             sin
         """
         from sympy import Lambda, sympify

@@ -363,15 +363,15 @@ class AlgebraicScheme_subscheme_affine(AlgebraicScheme_subscheme):
         ::
 
             sage: R.<a> = QQ[]
-            sage: K.<b> = NumberField(a^6 - 3*a^5 + 5*a^4 - 5*a^3 + 5*a^2 - 3*a + 1)                # optional - sage.rings.number_field
-            sage: A.<x,y,z,w> = AffineSpace(K, 4)                                                   # optional - sage.rings.number_field
-            sage: X = A.subscheme([x*y, y*z + 7, w^3 - x^3])                                        # optional - sage.rings.number_field
-            sage: Y = A.subscheme([x - z^3 + z + 1])                                                # optional - sage.rings.number_field
-            sage: Q = A([0,                                                                         # optional - sage.rings.number_field
+            sage: K.<b> = NumberField(a^6 - 3*a^5 + 5*a^4 - 5*a^3 + 5*a^2 - 3*a + 1)                # needs sage.rings.number_field
+            sage: A.<x,y,z,w> = AffineSpace(K, 4)                                                   # needs sage.rings.number_field
+            sage: X = A.subscheme([x*y, y*z + 7, w^3 - x^3])                                        # needs sage.rings.number_field
+            sage: Y = A.subscheme([x - z^3 + z + 1])                                                # needs sage.rings.number_field
+            sage: Q = A([0,                                                                         # needs sage.rings.number_field
             ....:        -7*b^5 + 21*b^4 - 28*b^3 + 21*b^2 - 21*b + 14,
             ....:        -b^5 + 2*b^4 - 3*b^3 + 2*b^2 - 2*b,
             ....:        0])
-            sage: X.intersection_multiplicity(Y, Q)                                                 # optional - sage.rings.number_field
+            sage: X.intersection_multiplicity(Y, Q)                                                 # needs sage.rings.number_field
             3
 
         ::
@@ -454,22 +454,24 @@ class AlgebraicScheme_subscheme_affine(AlgebraicScheme_subscheme):
 
         ::
 
-            sage: A.<x,y,z,w,v> = AffineSpace(GF(23), 5)                                            # optional - sage.rings.finite_rings
-            sage: C = A.curve([x^8 - y, y^7 - z, z^3 - 1, w^5 - v^3])                               # optional - sage.rings.finite_rings
-            sage: Q = A([22,1,1,0,0])                                                               # optional - sage.rings.finite_rings
-            sage: C.multiplicity(Q)                                                                 # optional - sage.rings.finite_rings
+            sage: # needs sage.rings.finite_rings
+            sage: A.<x,y,z,w,v> = AffineSpace(GF(23), 5)
+            sage: C = A.curve([x^8 - y, y^7 - z, z^3 - 1, w^5 - v^3])
+            sage: Q = A([22,1,1,0,0])
+            sage: C.multiplicity(Q)
             3
 
         ::
 
-            sage: K.<a> = QuadraticField(-1)                                                        # optional - sage.rings.number_field
-            sage: A.<x,y,z,w,t> = AffineSpace(K, 5)                                                 # optional - sage.rings.number_field
-            sage: X = A.subscheme([y^7 - x^2*z^5 + z^3*t^8 - x^2*y^4*z - t^8])                      # optional - sage.rings.number_field
-            sage: Q1 = A([1,1,0,1,-1])                                                              # optional - sage.rings.number_field
-            sage: X.multiplicity(Q1)                                                                # optional - sage.rings.number_field
+            sage: # needs sage.rings.number_field
+            sage: K.<a> = QuadraticField(-1)
+            sage: A.<x,y,z,w,t> = AffineSpace(K, 5)
+            sage: X = A.subscheme([y^7 - x^2*z^5 + z^3*t^8 - x^2*y^4*z - t^8])
+            sage: Q1 = A([1,1,0,1,-1])
+            sage: X.multiplicity(Q1)
             1
-            sage: Q2 = A([0,0,0,-a,0])                                                              # optional - sage.rings.number_field
-            sage: X.multiplicity(Q2)                                                                # optional - sage.rings.number_field
+            sage: Q2 = A([0,0,0,-a,0])
+            sage: X.multiplicity(Q2)
             7
 
         Check that :trac:`27479` is fixed::

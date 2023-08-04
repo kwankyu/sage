@@ -875,7 +875,7 @@ class PolynomialRing_general(ring.Algebra):
 
             sage: k.<a> = GF(9)                                                         # needs sage.rings.finite_rings
             sage: R.<x> = k[]                                                           # needs sage.rings.finite_rings
-            sage: magma(a^2*x^3 + (a+1)*x + a)  # optional - magma, needs sage.rings.finite_rings
+            sage: magma(a^2*x^3 + (a+1)*x + a)  # optional - magma                      # needs sage.rings.finite_rings
             a^2*x^3 + a^2*x + a
         """
         B = magma(self.base_ring())

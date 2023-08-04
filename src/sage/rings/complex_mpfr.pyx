@@ -1039,10 +1039,10 @@ cdef class ComplexNumber(sage.structure.element.FieldElement):
 
         EXAMPLES::
 
-            sage: import numpy                                                          # optional - numpy
-            sage: numpy.array([1.0, 2.5j]).dtype                                        # optional - numpy
+            sage: import numpy                                                          # needs numpy
+            sage: numpy.array([1.0, 2.5j]).dtype                                        # needs numpy
             dtype('complex128')
-            sage: numpy.array([1.000000000000000000000000000000000000j]).dtype          # optional - numpy
+            sage: numpy.array([1.000000000000000000000000000000000000j]).dtype          # needs numpy
             dtype('O')
         """
         if self._prec <= 53:
@@ -1266,19 +1266,19 @@ cdef class ComplexNumber(sage.structure.element.FieldElement):
 
         EXAMPLES::
 
-            sage: a = CC(pi + I*e); a                                                   # optional - sage.symbolic
+            sage: a = CC(pi + I*e); a                                                   # needs sage.symbolic
             3.14159265358979 + 2.71828182845905*I
-            sage: a.str(truncate=True)                                                  # optional - sage.symbolic
+            sage: a.str(truncate=True)                                                  # needs sage.symbolic
             '3.14159265358979 + 2.71828182845905*I'
-            sage: a.str()                                                               # optional - sage.symbolic
+            sage: a.str()                                                               # needs sage.symbolic
             '3.1415926535897931 + 2.7182818284590451*I'
-            sage: a.str(base=2)                                                         # optional - sage.symbolic
+            sage: a.str(base=2)                                                         # needs sage.symbolic
             '11.001001000011111101101010100010001000010110100011000 + 10.101101111110000101010001011000101000101011101101001*I'
-            sage: CC(0.5 + 0.625*I).str(base=2)                                         # optional - sage.symbolic
+            sage: CC(0.5 + 0.625*I).str(base=2)                                         # needs sage.symbolic
             '0.10000000000000000000000000000000000000000000000000000 + 0.10100000000000000000000000000000000000000000000000000*I'
-            sage: a.str(base=16)                                                        # optional - sage.symbolic
+            sage: a.str(base=16)                                                        # needs sage.symbolic
             '3.243f6a8885a30 + 2.b7e151628aed2*I'
-            sage: a.str(base=36)                                                        # optional - sage.symbolic
+            sage: a.str(base=36)                                                        # needs sage.symbolic
             '3.53i5ab8p5fc + 2.puw5nggjf8f*I'
             sage: CC(0)
             0.000000000000000
@@ -1391,23 +1391,23 @@ cdef class ComplexNumber(sage.structure.element.FieldElement):
         Coerce the object using the ``pari`` function::
 
             sage: a = ComplexNumber(2,1)
-            sage: pari(a)                                                               # optional - sage.libs.pari
+            sage: pari(a)                                                               # needs sage.libs.pari
             2.00000000000000 + 1.00000000000000*I
-            sage: pari(a).type()                                                        # optional - sage.libs.pari
+            sage: pari(a).type()                                                        # needs sage.libs.pari
             't_COMPLEX'
-            sage: type(pari(a))                                                         # optional - sage.libs.pari
+            sage: type(pari(a))                                                         # needs sage.libs.pari
             <class 'cypari2.gen.Gen'>
-            sage: a.__pari__()                                                          # optional - sage.libs.pari
+            sage: a.__pari__()                                                          # needs sage.libs.pari
             2.00000000000000 + 1.00000000000000*I
-            sage: type(a.__pari__())                                                    # optional - sage.libs.pari
+            sage: type(a.__pari__())                                                    # needs sage.libs.pari
             <class 'cypari2.gen.Gen'>
-            sage: a = CC(pi)                                                            # optional - sage.symbolic
-            sage: pari(a)                                                               # optional - sage.libs.pari sage.symbolic
+            sage: a = CC(pi)                                                            # needs sage.symbolic
+            sage: pari(a)                                                               # needs sage.libs.pari sage.symbolic
             3.14159265358979
-            sage: pari(a).type()                                                        # optional - sage.libs.pari sage.symbolic
+            sage: pari(a).type()                                                        # needs sage.libs.pari sage.symbolic
             't_REAL'
             sage: a = CC(-2).sqrt()
-            sage: pari(a)                                                               # optional - sage.libs.pari
+            sage: pari(a)                                                               # needs sage.libs.pari
             1.41421356237310*I
         """
         if self.is_real():
@@ -1474,11 +1474,11 @@ cdef class ComplexNumber(sage.structure.element.FieldElement):
 
         EXAMPLES::
 
-            sage: CC(1, 0)._sympy_()                                                    # optional - sympy
+            sage: CC(1, 0)._sympy_()                                                    # needs sympy
             1.00000000000000
-            sage: CC(1/3, 1)._sympy_()                                                  # optional - sympy
+            sage: CC(1/3, 1)._sympy_()                                                  # needs sympy
             0.333333333333333 + 1.0*I
-            sage: type(_)                                                               # optional - sympy
+            sage: type(_)                                                               # needs sympy
             <class 'sympy.core.add.Add'>
         """
         import sympy
@@ -2091,13 +2091,13 @@ cdef class ComplexNumber(sage.structure.element.FieldElement):
         You can either use the indirect::
 
             sage: z = CC(0,1)
-            sage: plot(z)                                                               # optional - sage.plot
+            sage: plot(z)                                                               # needs sage.plot
             Graphics object consisting of 1 graphics primitive
 
         or the more direct::
 
             sage: z = CC(0,1)
-            sage: z.plot()                                                              # optional - sage.plot
+            sage: z.plot()                                                              # needs sage.plot
             Graphics object consisting of 1 graphics primitive
         """
         return sage.plot.point.point2d((self.real(), self.imag()), **kargs)
@@ -2825,7 +2825,7 @@ cdef class ComplexNumber(sage.structure.element.FieldElement):
             sage: a = ComplexNumber(1,0)
             sage: a.dilog()
             1.64493406684823
-            sage: float(pi^2/6)                                                         # optional - sage.symbolic
+            sage: float(pi^2/6)                                                         # needs sage.symbolic
             1.6449340668482262
 
         ::

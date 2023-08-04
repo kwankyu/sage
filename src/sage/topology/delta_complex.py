@@ -944,22 +944,22 @@ class DeltaComplex(GenericCellComplex):
 
             sage: K = delta_complexes.KleinBottle()
             sage: X = K.product(K)
-            sage: X.homology(1)                                                         # optional - sage.modules
+            sage: X.homology(1)                                                         # needs sage.modules
             Z x Z x C2 x C2
-            sage: X.homology(2)                                                         # optional - sage.modules
+            sage: X.homology(2)                                                         # needs sage.modules
             Z x C2 x C2 x C2
-            sage: X.homology(3)                                                         # optional - sage.modules
+            sage: X.homology(3)                                                         # needs sage.modules
             C2
-            sage: X.homology(4)                                                         # optional - sage.modules
+            sage: X.homology(4)                                                         # needs sage.modules
             0
-            sage: X.homology(base_ring=GF(2))                                           # optional - sage.modules sage.rings.finite_rings
+            sage: X.homology(base_ring=GF(2))                                           # needs sage.modules sage.rings.finite_rings
             {0: Vector space of dimension 0 over Finite Field of size 2,
              1: Vector space of dimension 4 over Finite Field of size 2,
              2: Vector space of dimension 6 over Finite Field of size 2,
              3: Vector space of dimension 4 over Finite Field of size 2,
              4: Vector space of dimension 1 over Finite Field of size 2}
             sage: S1 = delta_complexes.Sphere(1)
-            sage: K.product(S1).homology() == S1.product(K).homology()                  # optional - sage.modules
+            sage: K.product(S1).homology() == S1.product(K).homology()                  # needs sage.modules
             True
             sage: S1.product(S1) == delta_complexes.Torus()
             True
@@ -1063,7 +1063,7 @@ class DeltaComplex(GenericCellComplex):
 
             sage: S1 = delta_complexes.Sphere(1)
             sage: S2 = delta_complexes.Sphere(2)
-            sage: S1.disjoint_union(S2).homology()                                      # optional - sage.modules
+            sage: S1.disjoint_union(S2).homology()                                      # needs sage.modules
             {0: Z, 1: Z, 2: Z}
         """
         dim = max(self.dimension(), right.dimension())
@@ -1095,7 +1095,7 @@ class DeltaComplex(GenericCellComplex):
 
             sage: S1 = delta_complexes.Sphere(1)
             sage: S2 = delta_complexes.Sphere(2)
-            sage: S1.wedge(S2).homology()                                               # optional - sage.modules
+            sage: S1.wedge(S2).homology()                                               # needs sage.modules
             {0: 0, 1: Z, 2: Z}
         """
         data = self.disjoint_union(right).cells()
@@ -1146,14 +1146,14 @@ class DeltaComplex(GenericCellComplex):
 
             sage: T = delta_complexes.Torus()
             sage: S2 = delta_complexes.Sphere(2)
-            sage: T.connected_sum(S2).cohomology() == T.cohomology()                    # optional - sage.modules
+            sage: T.connected_sum(S2).cohomology() == T.cohomology()                    # needs sage.modules
             True
             sage: RP2 = delta_complexes.RealProjectivePlane()
-            sage: T.connected_sum(RP2).homology(1)                                      # optional - sage.modules
+            sage: T.connected_sum(RP2).homology(1)                                      # needs sage.modules
             Z x Z x C2
-            sage: T.connected_sum(RP2).homology(2)                                      # optional - sage.modules
+            sage: T.connected_sum(RP2).homology(2)                                      # needs sage.modules
             0
-            sage: RP2.connected_sum(RP2).connected_sum(RP2).homology(1)                 # optional - sage.modules
+            sage: RP2.connected_sum(RP2).connected_sum(RP2).homology(1)                 # needs sage.modules
             Z x Z x C2
         """
         if not self.dimension() == other.dimension():
@@ -1272,7 +1272,7 @@ class DeltaComplex(GenericCellComplex):
             Delta complex with 2 vertices and 13 simplices
             sage: X.elementary_subdivision()
             Delta complex with 3 vertices and 19 simplices
-            sage: X.homology() == T.homology()                                          # optional - sage.modules
+            sage: X.homology() == T.homology()                                          # needs sage.modules
             True
         """
         pi = self._epi_from_standard_simplex(idx=idx)
@@ -1453,7 +1453,7 @@ class DeltaComplex(GenericCellComplex):
         EXAMPLES::
 
             sage: T = delta_complexes.Torus()
-            sage: T.face_poset()                                                        # optional - sage.combinat sage.graphs
+            sage: T.face_poset()                                                        # needs sage.combinat sage.graphs
             Finite poset containing 6 elements
         """
         from sage.combinat.posets.posets import Poset
@@ -1581,14 +1581,14 @@ class DeltaComplex(GenericCellComplex):
         EXAMPLES::
 
             sage: RP2 = delta_complexes.RealProjectivePlane()
-            sage: phi, M = RP2.algebraic_topological_model(GF(2))                       # optional - sage.rings.finite_rings
-            sage: M.homology()                                                          # optional - sage.modules sage.rings.finite_rings
+            sage: phi, M = RP2.algebraic_topological_model(GF(2))                       # needs sage.rings.finite_rings
+            sage: M.homology()                                                          # needs sage.modules sage.rings.finite_rings
             {0: Vector space of dimension 1 over Finite Field of size 2,
              1: Vector space of dimension 1 over Finite Field of size 2,
              2: Vector space of dimension 1 over Finite Field of size 2}
             sage: T = delta_complexes.Torus()
             sage: phi, M = T.algebraic_topological_model(QQ)
-            sage: M.homology()                                                          # optional - sage.modules
+            sage: M.homology()                                                          # needs sage.modules
             {0: Vector space of dimension 1 over Rational Field,
              1: Vector space of dimension 2 over Rational Field,
              2: Vector space of dimension 1 over Rational Field}
@@ -1649,7 +1649,7 @@ class DeltaComplexExamples():
 
         EXAMPLES::
 
-            sage: delta_complexes.Sphere(4).cohomology(4, base_ring=GF(3))              # optional - sage.modules sage.rings.finite_rings
+            sage: delta_complexes.Sphere(4).cohomology(4, base_ring=GF(3))              # needs sage.modules sage.rings.finite_rings
             Vector space of dimension 1 over Finite Field of size 3
         """
         if n == 1:
@@ -1681,13 +1681,13 @@ class DeltaComplexExamples():
         EXAMPLES::
 
             sage: P = delta_complexes.RealProjectivePlane()
-            sage: P.cohomology(1)                                                       # optional - sage.modules
+            sage: P.cohomology(1)                                                       # needs sage.modules
             0
-            sage: P.cohomology(2)                                                       # optional - sage.modules
+            sage: P.cohomology(2)                                                       # needs sage.modules
             C2
-            sage: P.cohomology(dim=1, base_ring=GF(2))                                  # optional - sage.modules sage.rings.finite_rings
+            sage: P.cohomology(dim=1, base_ring=GF(2))                                  # needs sage.modules sage.rings.finite_rings
             Vector space of dimension 1 over Finite Field of size 2
-            sage: P.cohomology(dim=2, base_ring=GF(2))                                  # optional - sage.modules sage.rings.finite_rings
+            sage: P.cohomology(dim=2, base_ring=GF(2))                                  # needs sage.modules sage.rings.finite_rings
             Vector space of dimension 1 over Finite Field of size 2
         """
         return DeltaComplex((((), ()), ((1, 0), (1, 0), (0, 0)),
@@ -1743,9 +1743,9 @@ class DeltaComplexExamples():
 
             sage: delta_complexes.SurfaceOfGenus(1, orientable=False)
             Delta complex with 2 vertices and 8 simplices
-            sage: delta_complexes.SurfaceOfGenus(3, orientable=False).homology(1)       # optional - sage.modules
+            sage: delta_complexes.SurfaceOfGenus(3, orientable=False).homology(1)       # needs sage.modules
             Z x Z x C2
-            sage: delta_complexes.SurfaceOfGenus(3, orientable=False).homology(2)       # optional - sage.modules
+            sage: delta_complexes.SurfaceOfGenus(3, orientable=False).homology(2)       # needs sage.modules
             0
 
         Compare to simplicial complexes::
@@ -1756,7 +1756,7 @@ class DeltaComplexExamples():
             sage: simpl_g4 = simplicial_complexes.SurfaceOfGenus(4)
             sage: simpl_g4.f_vector()
             [1, 19, 75, 50]
-            sage: delta_g4.homology() == simpl_g4.homology()                            # optional - sage.modules
+            sage: delta_g4.homology() == simpl_g4.homology()                            # needs sage.modules
             True
         """
         try:

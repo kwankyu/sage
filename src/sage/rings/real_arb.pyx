@@ -175,11 +175,11 @@ TESTS::
 
 ::
 
-    sage: SR.coerce(RBF(0.42))                                                          # optional - sage.symbolic
+    sage: SR.coerce(RBF(0.42))                                                          # needs sage.symbolic
     [0.4200000000000000 +/- ...e-17]
-    sage: RBF(0.42) + SR(1)                                                             # optional - sage.symbolic
+    sage: RBF(0.42) + SR(1)                                                             # needs sage.symbolic
     [1.420000000000000 +/- ...e-16]
-    sage: _.parent()                                                                    # optional - sage.symbolic
+    sage: _.parent()                                                                    # needs sage.symbolic
     Symbolic Ring
 
 Classes and Methods
@@ -338,7 +338,7 @@ class RealBallField(UniqueRepresentation, sage.rings.abc.RealBallField):
 
     ::
 
-        sage: (1/2*RBF(1)) + AA(sqrt(2)) - 1 + polygen(QQ, 'x')                         # optional - sage.symbolic
+        sage: (1/2*RBF(1)) + AA(sqrt(2)) - 1 + polygen(QQ, 'x')                         # needs sage.symbolic
         x + [0.914213562373095 +/- ...e-16]
 
     TESTS::
@@ -456,7 +456,7 @@ class RealBallField(UniqueRepresentation, sage.rings.abc.RealBallField):
             False
             sage: RealBallField().has_coerce_map_from(RIF)
             False
-            sage: RealBallField().has_coerce_map_from(SR)                               # optional - sage.symbolic
+            sage: RealBallField().has_coerce_map_from(SR)                               # needs sage.symbolic
             False
             sage: RealBallField().has_coerce_map_from(RR)
             False

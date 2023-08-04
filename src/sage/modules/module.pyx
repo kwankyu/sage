@@ -186,8 +186,8 @@ cdef class Module(Parent):
 
         EXAMPLES::
 
-            sage: from sage.modular.modform.space import ModularFormsSpace              # optional - sage.modular
-            sage: ModularFormsSpace(Gamma0(11), 2,                                      # optional - sage.modular sage.rings.finite_rings
+            sage: from sage.modular.modform.space import ModularFormsSpace              # needs sage.modular
+            sage: ModularFormsSpace(Gamma0(11), 2,                                      # needs sage.modular sage.rings.finite_rings
             ....:                   DirichletGroup(1)[0], QQ).change_ring(GF(7))
             Traceback (most recent call last):
             ...
@@ -218,27 +218,28 @@ cdef class Module(Parent):
 
         TESTS::
 
-            sage: N = ModularForms(6, 4)                                                # optional - sage.modular
-            sage: N.base_extend(CyclotomicField(7))                                     # optional - sage.modular sage.rings.number_field
+            sage: N = ModularForms(6, 4)                                                # needs sage.modular
+            sage: N.base_extend(CyclotomicField(7))                                     # needs sage.modular sage.rings.number_field
             Modular Forms space of dimension 5 for Congruence Subgroup Gamma0(6)
              of weight 4 over Cyclotomic Field of order 7 and degree 6
 
-            sage: m = ModularForms(DirichletGroup(13).0^2,2); m                         # optional - sage.modular sage.rings.number_field
+            sage: m = ModularForms(DirichletGroup(13).0^2,2); m                         # needs sage.modular sage.rings.number_field
             Modular Forms space of dimension 3, character [zeta6] and weight 2
              over Cyclotomic Field of order 6 and degree 2
-            sage: m.base_extend(CyclotomicField(12))                                    # optional - sage.modular sage.rings.number_field
+            sage: m.base_extend(CyclotomicField(12))                                    # needs sage.modular sage.rings.number_field
             Modular Forms space of dimension 3, character [zeta6] and weight 2
              over Cyclotomic Field of order 12 and degree 4
 
-            sage: chi = DirichletGroup(109, CyclotomicField(3)).0                       # optional - sage.modular sage.rings.number_field
-            sage: S3 = CuspForms(chi, 2)                                                # optional - sage.modular sage.rings.number_field
-            sage: S9 = S3.base_extend(CyclotomicField(9)); S9                           # optional - sage.modular sage.rings.number_field
+            sage: # needs sage.modular sage.rings.number_field
+            sage: chi = DirichletGroup(109, CyclotomicField(3)).0
+            sage: S3 = CuspForms(chi, 2)
+            sage: S9 = S3.base_extend(CyclotomicField(9)); S9
             Cuspidal subspace of dimension 8 of
              Modular Forms space of dimension 10, character [zeta3 + 1] and weight 2
               over Cyclotomic Field of order 9 and degree 6
-            sage: S9.has_coerce_map_from(S3)  # not implemented                         # optional - sage.modular sage.rings.number_field
+            sage: S9.has_coerce_map_from(S3)    # not implemented
             True
-            sage: S9.base_extend(CyclotomicField(3))                                    # optional - sage.modular sage.rings.number_field
+            sage: S9.base_extend(CyclotomicField(3))
             Traceback (most recent call last):
             ...
             TypeError: Base extension of self (over 'Cyclotomic Field of order 9 and degree 6')

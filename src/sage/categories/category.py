@@ -22,49 +22,49 @@ We create a couple of categories::
 
     sage: Sets()
     Category of sets
-    sage: GSets(AbelianGroup([2, 4, 9]))                                                # optional - sage.groups
+    sage: GSets(AbelianGroup([2, 4, 9]))                                                # needs sage.groups
     Category of G-sets for Multiplicative Abelian group isomorphic to C2 x C4 x C9
     sage: Semigroups()
     Category of semigroups
-    sage: VectorSpaces(FiniteField(11))                                                 # optional - sage.rings.finite_rings
+    sage: VectorSpaces(FiniteField(11))                                                 # needs sage.rings.finite_rings
     Category of vector spaces over Finite Field of size 11
     sage: Ideals(IntegerRing())
     Category of ring ideals in Integer Ring
 
 Let's request the category of some objects::
 
-    sage: V = VectorSpace(RationalField(), 3)                                           # optional - sage.modules
-    sage: V.category()                                                                  # optional - sage.modules
+    sage: V = VectorSpace(RationalField(), 3)                                           # needs sage.modules
+    sage: V.category()                                                                  # needs sage.modules
     Category of finite dimensional vector spaces with basis
      over (number fields and quotient fields and metric spaces)
 
-    sage: G = SymmetricGroup(9)                                                         # optional - sage.groups
-    sage: G.category()                                                                  # optional - sage.groups
+    sage: G = SymmetricGroup(9)                                                         # needs sage.groups
+    sage: G.category()                                                                  # needs sage.groups
     Join of
      Category of finite enumerated permutation groups and
      Category of finite weyl groups and
      Category of well generated finite irreducible complex reflection groups
 
-    sage: P = PerfectMatchings(3)                                                       # optional - sage.combinat sage.graphs
-    sage: P.category()                                                                  # optional - sage.combinat sage.graphs
+    sage: P = PerfectMatchings(3)                                                       # needs sage.combinat sage.graphs
+    sage: P.category()                                                                  # needs sage.combinat sage.graphs
     Category of finite enumerated sets
 
 Let's check some memberships::
 
-    sage: V in VectorSpaces(QQ)                                                         # optional - sage.modules
+    sage: V in VectorSpaces(QQ)                                                         # needs sage.modules
     True
-    sage: V in VectorSpaces(FiniteField(11))                                            # optional - sage.modules sage.rings.finite_rings
+    sage: V in VectorSpaces(FiniteField(11))                                            # needs sage.modules sage.rings.finite_rings
     False
-    sage: G in Monoids()                                                                # optional - sage.groups
+    sage: G in Monoids()                                                                # needs sage.groups
     True
-    sage: P in Rings()                                                                  # optional - sage.combinat sage.graphs
+    sage: P in Rings()                                                                  # needs sage.combinat sage.graphs
     False
 
 For parametrized categories one can use the following shorthand::
 
-    sage: V in VectorSpaces                                                             # optional - sage.modules
+    sage: V in VectorSpaces                                                             # needs sage.modules
     True
-    sage: G in VectorSpaces                                                             # optional - sage.groups
+    sage: G in VectorSpaces                                                             # needs sage.groups
     False
 
 A parent ``P`` is in a category ``C`` if ``P.category()`` is a subcategory of
@@ -86,9 +86,9 @@ A parent ``P`` is in a category ``C`` if ``P.category()`` is a subcategory of
     By default, the category of an element `x` of a parent `P` is the category
     of all objects of `P` (this is dubious and may be deprecated)::
 
-        sage: V = VectorSpace(RationalField(), 3)                                       # optional - sage.modules
-        sage: v = V.gen(1)                                                              # optional - sage.modules
-        sage: v.category()                                                              # optional - sage.modules
+        sage: V = VectorSpace(RationalField(), 3)                                       # needs sage.modules
+        sage: v = V.gen(1)                                                              # needs sage.modules
+        sage: v.category()                                                              # needs sage.modules
         Category of elements of Vector space of dimension 3 over Rational Field
 """
 
@@ -327,7 +327,7 @@ class Category(UniqueRepresentation, SageObject):
     On the other hand, identical hierarchies of classes are,
     preferably, built only once (e.g. for categories over a base ring)::
 
-        sage: Algebras(GF(5)).parent_class is Algebras(GF(7)).parent_class              # optional - sage.rings.finite_rings
+        sage: Algebras(GF(5)).parent_class is Algebras(GF(7)).parent_class              # needs sage.rings.finite_rings
         True
         sage: F = FractionField(ZZ['t'])
         sage: Coalgebras(F).parent_class is Coalgebras(FractionField(F['x'])).parent_class
@@ -728,15 +728,15 @@ class Category(UniqueRepresentation, SageObject):
         This method makes it easy to test if an object is, say, a
         vector space, without having to specify the base ring::
 
-            sage: F = FreeModule(QQ, 3)                                                 # optional - sage.modules
-            sage: F in VectorSpaces                                                     # optional - sage.modules
+            sage: F = FreeModule(QQ, 3)                                                 # needs sage.modules
+            sage: F in VectorSpaces                                                     # needs sage.modules
             True
 
-            sage: F = FreeModule(ZZ, 3)                                                 # optional - sage.modules
-            sage: F in VectorSpaces                                                     # optional - sage.modules
+            sage: F = FreeModule(ZZ, 3)                                                 # needs sage.modules
+            sage: F in VectorSpaces                                                     # needs sage.modules
             False
 
-            sage: F in Algebras                                                         # optional - sage.modules
+            sage: F in Algebras                                                         # needs sage.modules
             False
 
         TESTS:
@@ -802,14 +802,14 @@ class Category(UniqueRepresentation, SageObject):
         EXAMPLES::
 
             sage: C = Algebras(QQ)
-            sage: G = C.category_graph()                                                # optional - sage.graphs
-            sage: G.is_directed_acyclic()                                               # optional - sage.graphs
+            sage: G = C.category_graph()                                                # needs sage.graphs
+            sage: G.is_directed_acyclic()                                               # needs sage.graphs
             True
 
         The girth of a directed acyclic graph is infinite, however,
         the girth of the underlying undirected graph is 4 in this case::
 
-            sage: Graph(G).girth()                                                      # optional - sage.graphs
+            sage: Graph(G).girth()                                                      # needs sage.graphs
             4
         """
         return category_graph([self])
@@ -932,8 +932,8 @@ class Category(UniqueRepresentation, SageObject):
 
         TESTS::
 
-            sage: C = HopfAlgebrasWithBasis(GF(7))                                      # optional - sage.rings.finite_rings
-            sage: C._set_of_super_categories == set(C._all_super_categories_proper)     # optional - sage.rings.finite_rings
+            sage: C = HopfAlgebrasWithBasis(GF(7))                                      # needs sage.rings.finite_rings
+            sage: C._set_of_super_categories == set(C._all_super_categories_proper)     # needs sage.rings.finite_rings
             True
         """
         return frozenset(self._all_super_categories_proper)
@@ -1673,7 +1673,7 @@ class Category(UniqueRepresentation, SageObject):
         the category of algebras over a finite field versus algebras
         over a non-field::
 
-            sage: Algebras(GF(7)).parent_class is Algebras(GF(5)).parent_class          # optional - sage.rings.finite_rings
+            sage: Algebras(GF(7)).parent_class is Algebras(GF(5)).parent_class          # needs sage.rings.finite_rings
             True
             sage: Algebras(QQ).parent_class is Algebras(ZZ).parent_class
             False
@@ -1718,7 +1718,7 @@ class Category(UniqueRepresentation, SageObject):
         category of algebras over a field versus algebras over a
         non-field::
 
-            sage: Algebras(GF(5)).element_class is Algebras(GF(3)).element_class        # optional - sage.rings.finite_rings
+            sage: Algebras(GF(5)).element_class is Algebras(GF(3)).element_class        # needs sage.rings.finite_rings
             True
             sage: Algebras(QQ).element_class is Algebras(ZZ).element_class
             False
@@ -1792,9 +1792,9 @@ class Category(UniqueRepresentation, SageObject):
 
         ::
 
-            sage: M3 = VectorSpaces(FiniteField(3))                                     # optional - sage.rings.finite_rings sage.modules
-            sage: M9 = VectorSpaces(FiniteField(9, 'a'))                                # optional - sage.rings.finite_rings sage.modules
-            sage: M3.is_subcategory(M9)                                                 # optional - sage.rings.finite_rings sage.modules
+            sage: M3 = VectorSpaces(FiniteField(3))                                     # needs sage.modules sage.rings.finite_rings
+            sage: M9 = VectorSpaces(FiniteField(9, 'a'))                                # needs sage.modules sage.rings.finite_rings
+            sage: M3.is_subcategory(M9)                                                 # needs sage.modules sage.rings.finite_rings
             False
 
         Join categories are properly handled::
@@ -1805,16 +1805,16 @@ class Category(UniqueRepresentation, SageObject):
 
         ::
 
-            sage: V3 = VectorSpaces(FiniteField(3))                                     # optional - sage.rings.finite_rings
+            sage: V3 = VectorSpaces(FiniteField(3))                                     # needs sage.rings.finite_rings
             sage: POSet = PartiallyOrderedSets()
-            sage: PoV3 = Category.join((V3, POSet))                                     # optional - sage.rings.finite_rings
-            sage: A3 = AlgebrasWithBasis(FiniteField(3))                                # optional - sage.rings.finite_rings
-            sage: PoA3 = Category.join((A3, POSet))                                     # optional - sage.rings.finite_rings
-            sage: PoA3.is_subcategory(PoV3)                                             # optional - sage.rings.finite_rings
+            sage: PoV3 = Category.join((V3, POSet))                                     # needs sage.rings.finite_rings
+            sage: A3 = AlgebrasWithBasis(FiniteField(3))                                # needs sage.rings.finite_rings
+            sage: PoA3 = Category.join((A3, POSet))                                     # needs sage.rings.finite_rings
+            sage: PoA3.is_subcategory(PoV3)                                             # needs sage.rings.finite_rings
             True
-            sage: PoV3.is_subcategory(PoV3)                                             # optional - sage.rings.finite_rings
+            sage: PoV3.is_subcategory(PoV3)                                             # needs sage.rings.finite_rings
             True
-            sage: PoV3.is_subcategory(PoA3)                                             # optional - sage.rings.finite_rings
+            sage: PoV3.is_subcategory(PoA3)                                             # needs sage.rings.finite_rings
             False
         """
         if c is self:
@@ -2605,7 +2605,7 @@ def category_sample():
     EXAMPLES::
 
         sage: from sage.categories.category import category_sample
-        sage: sorted(category_sample(), key=str)                                        # optional - sage.groups
+        sage: sorted(category_sample(), key=str)                                        # needs sage.groups
         [Category of G-sets for Symmetric group of order 8! as a permutation group,
          Category of Hecke modules over Rational Field,
          Category of Lie algebras over Rational Field,
@@ -2644,14 +2644,14 @@ def category_graph(categories=None):
 
     EXAMPLES::
 
-        sage: G = sage.categories.category.category_graph(categories=[Groups()])        # optional - sage.graphs
-        sage: G.vertices(sort=True)                                                     # optional - sage.graphs
+        sage: G = sage.categories.category.category_graph(categories=[Groups()])        # needs sage.graphs
+        sage: G.vertices(sort=True)                                                     # needs sage.graphs
         ['groups', 'inverse unital magmas', 'magmas', 'monoids', 'objects',
          'semigroups', 'sets', 'sets with partial maps', 'unital magmas']
-        sage: G.plot()                                                                  # optional - sage.graphs sage.plot
+        sage: G.plot()                                                                  # needs sage.graphs sage.plot
         Graphics object consisting of 20 graphics primitives
 
-        sage: sage.categories.category.category_graph().plot()                          # optional - sage.graphs sage.plot
+        sage: sage.categories.category.category_graph().plot()                          # needs sage.graphs sage.plot
         Graphics object consisting of ... graphics primitives
     """
     from sage import graphs
@@ -2699,15 +2699,15 @@ class CategoryWithParameters(Category):
 
     EXAMPLES::
 
-        sage: C1 = Algebras(GF(5))                                                      # optional - sage.rings.finite_rings
-        sage: C2 = Algebras(GF(3))                                                      # optional - sage.rings.finite_rings
+        sage: C1 = Algebras(GF(5))                                                      # needs sage.rings.finite_rings
+        sage: C2 = Algebras(GF(3))                                                      # needs sage.rings.finite_rings
         sage: C3 = Algebras(ZZ)
         sage: from sage.categories.category import CategoryWithParameters
-        sage: isinstance(C1, CategoryWithParameters)                                    # optional - sage.rings.finite_rings
+        sage: isinstance(C1, CategoryWithParameters)                                    # needs sage.rings.finite_rings
         True
-        sage: C1.parent_class is C2.parent_class                                        # optional - sage.rings.finite_rings
+        sage: C1.parent_class is C2.parent_class                                        # needs sage.rings.finite_rings
         True
-        sage: C1.parent_class is C3.parent_class                                        # optional - sage.rings.finite_rings
+        sage: C1.parent_class is C3.parent_class                                        # needs sage.rings.finite_rings
         False
 
     .. automethod:: Category._make_named_class
@@ -2926,12 +2926,13 @@ class JoinCategory(CategoryWithParameters):
     the underlying implementation is the same for all finite fields,
     we have::
 
-        sage: G = SymmetricGroup(10)                                                    # optional - sage.groups sage.rings.finite_rings
-        sage: A3 = G.algebra(GF(3))                                                     # optional - sage.groups sage.rings.finite_rings
-        sage: A5 = G.algebra(GF(5))                                                     # optional - sage.groups sage.rings.finite_rings
-        sage: type(A3.category())                                                       # optional - sage.groups sage.rings.finite_rings
+        sage: # needs sage.groups sage.rings.finite_rings
+        sage: G = SymmetricGroup(10)
+        sage: A3 = G.algebra(GF(3))
+        sage: A5 = G.algebra(GF(5))
+        sage: type(A3.category())
         <class 'sage.categories.category.JoinCategory_with_category'>
-        sage: type(A3) is type(A5)                                                      # optional - sage.groups sage.rings.finite_rings
+        sage: type(A3) is type(A5)
         True
 
     .. automethod:: Category._repr_object_names

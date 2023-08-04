@@ -122,16 +122,16 @@ class SchemeHomset_points_projective_field(SchemeHomset_points):
         ::
 
             sage: u = QQ['u'].0
-            sage: K.<v> = NumberField(u^2 + 3)                                                      # optional - sage.rings.number_field
-            sage: P.<x,y,z> = ProjectiveSpace(K, 2)                                                 # optional - sage.rings.number_field
-            sage: len(P(K).points(bound=1.8))                                                       # optional - sage.rings.number_field
+            sage: K.<v> = NumberField(u^2 + 3)                                                      # needs sage.rings.number_field
+            sage: P.<x,y,z> = ProjectiveSpace(K, 2)                                                 # needs sage.rings.number_field
+            sage: len(P(K).points(bound=1.8))                                                       # needs sage.rings.number_field
             309
 
         ::
 
-            sage: P1 = ProjectiveSpace(GF(2), 1)                                                    # optional - sage.rings.finite_rings
-            sage: F.<a> = GF(4, 'a')                                                                # optional - sage.rings.finite_rings
-            sage: P1(F).points()                                                                    # optional - sage.rings.finite_rings
+            sage: P1 = ProjectiveSpace(GF(2), 1)                                                    # needs sage.rings.finite_rings
+            sage: F.<a> = GF(4, 'a')                                                                # needs sage.rings.finite_rings
+            sage: P1(F).points()                                                                    # needs sage.rings.finite_rings
             [(0 : 1), (1 : 0), (1 : 1), (a : 1), (a + 1 : 1)]
 
         ::
@@ -335,10 +335,10 @@ class SchemeHomset_points_projective_field(SchemeHomset_points):
         ::
 
             sage: S.<a> = QQ[]
-            sage: K.<v> = NumberField(a^5 - 7, embedding=CC((7)**(1/5)))                            # optional - sage.rings.number_field
-            sage: P.<x,y,z> = ProjectiveSpace(K, 2)                                                 # optional - sage.rings.number_field
-            sage: X = P.subscheme([x^2 - v^2*z^2, y - v*z])                                         # optional - sage.rings.number_field
-            sage: len(X(K).numerical_points(F=CDF))                                                 # optional - sage.rings.number_field
+            sage: K.<v> = NumberField(a^5 - 7, embedding=CC((7)**(1/5)))                            # needs sage.rings.number_field
+            sage: P.<x,y,z> = ProjectiveSpace(K, 2)                                                 # needs sage.rings.number_field
+            sage: X = P.subscheme([x^2 - v^2*z^2, y - v*z])                                         # needs sage.rings.number_field
+            sage: len(X(K).numerical_points(F=CDF))                                                 # needs sage.rings.number_field
             2
 
         ::
@@ -580,23 +580,23 @@ class SchemeHomset_points_abelian_variety_field(SchemeHomset_points_projective_f
     The bug reported at :trac:`1785` is fixed::
 
         sage: x = polygen(ZZ, 'x')
-        sage: K.<a> = NumberField(x^2 + x - (3^3-3))                                    # optional - sage.rings.number_field
-        sage: E = EllipticCurve('37a')                                                  # optional - sage.rings.number_field
-        sage: X = E(K)                                                                  # optional - sage.rings.number_field
-        sage: X                                                                         # optional - sage.rings.number_field
+        sage: K.<a> = NumberField(x^2 + x - (3^3-3))                                    # needs sage.rings.number_field
+        sage: E = EllipticCurve('37a')                                                  # needs sage.rings.number_field
+        sage: X = E(K)                                                                  # needs sage.rings.number_field
+        sage: X                                                                         # needs sage.rings.number_field
         Abelian group of points on
          Elliptic Curve defined by y^2 + y = x^3 + (-1)*x
           over Number Field in a with defining polynomial x^2 + x - 24
-        sage: P = X([3,a])                                                                          # optional - sage.rings.number_field
-        sage: P                                                                                     # optional - sage.rings.number_field
+        sage: P = X([3,a])                                                                          # needs sage.rings.number_field
+        sage: P                                                                                     # needs sage.rings.number_field
         (3 : a : 1)
-        sage: P in E                                                                                # optional - sage.rings.number_field
+        sage: P in E                                                                                # needs sage.rings.number_field
         False
-        sage: P in E.base_extend(K)                                                                 # optional - sage.rings.number_field
+        sage: P in E.base_extend(K)                                                                 # needs sage.rings.number_field
         True
-        sage: P in X.codomain()                                                                     # optional - sage.rings.number_field
+        sage: P in X.codomain()                                                                     # needs sage.rings.number_field
         False
-        sage: P in X.extended_codomain()                                                            # optional - sage.rings.number_field
+        sage: P in X.extended_codomain()                                                            # needs sage.rings.number_field
         True
 
     Check for :trac:`11982`::

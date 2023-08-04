@@ -106,16 +106,17 @@ covered here.
              5: [7, 8], 6: [8,9], 7: [9]}
        sage: G = Graph(d); G
        Graph on 10 vertices
-       sage: G.plot().show()    # or G.show()                                           # optional - sage.plot
+       sage: G.plot().show()    # or G.show()                                           # needs sage.plot
 
 - A NetworkX graph:
 
    ::
 
-       sage: import networkx                                                            # optional - networkx
-       sage: K = networkx.complete_bipartite_graph(12,7)                                # optional - networkx
-       sage: G = Graph(K)                                                               # optional - networkx
-       sage: G.degree()                                                                 # optional - networkx
+       sage: # needs networkx
+       sage: import networkx
+       sage: K = networkx.complete_bipartite_graph(12,7)
+       sage: G = Graph(K)
+       sage: G.degree()
        [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 12, 12, 12, 12, 12, 12, 12]
 
 - graph6 or sparse6 format:
@@ -125,7 +126,7 @@ covered here.
        sage: s = ':I`AKGsaOs`cI]Gb~'
        sage: G = Graph(s, sparse=True); G
        Looped multi-graph on 10 vertices
-       sage: G.plot().show()    # or G.show()                                           # optional - sage.plot
+       sage: G.plot().show()    # or G.show()                                           # needs sage.plot
 
    Note that the ``\`` character is an escape character in Python, and also a
    character used by graph6 strings:
@@ -142,7 +143,7 @@ covered here.
    ::
 
        sage: G = Graph('Ihe\\n@GUA')
-       sage: G.plot().show()    # or G.show()                                           # optional - sage.plot
+       sage: G.plot().show()    # or G.show()                                           # needs sage.plot
 
 - adjacency matrix: In an adjacency matrix, each column and each row represent a
    vertex. If a 1 shows up in row `i`, column `j`, there is an edge `(i,j)`.
@@ -166,7 +167,7 @@ covered here.
        [0 0 0 0 1 0 1 1 0 0]
        sage: G = Graph(M); G
        Graph on 10 vertices
-       sage: G.plot().show()    # or G.show()                                           # optional - sage.plot
+       sage: G.plot().show()    # or G.show()                                           # needs sage.plot
 
 - incidence matrix: In an incidence matrix, each row represents a vertex and
    each column represents an edge.
@@ -196,7 +197,7 @@ covered here.
        [ 0  0  0  0  0  0  1 -1  0  0  0  0  0  0  1]
        sage: G = Graph(M); G
        Graph on 10 vertices
-       sage: G.plot().show()    # or G.show()                                           # optional - sage.plot
+       sage: G.plot().show()    # or G.show()                                           # needs sage.plot
        sage: DiGraph(matrix(2,[0,0,-1,1]), format="incidence_matrix")
        Traceback (most recent call last):
        ...
@@ -254,7 +255,7 @@ see how people usually visualize these graphs.
 ::
 
     sage: G = graphs.PetersenGraph()
-    sage: G.plot().show()    # or G.show()                                              # optional - sage.plot
+    sage: G.plot().show()    # or G.show()                                              # needs sage.plot
     sage: G.degree_histogram()
     [0, 0, 0, 10]
     sage: G.adjacency_matrix()
@@ -272,7 +273,7 @@ see how people usually visualize these graphs.
 ::
 
     sage: S = G.subgraph([0,1,2,3])
-    sage: S.plot().show()    # or S.show()                                              # optional - sage.plot
+    sage: S.plot().show()    # or S.show()                                              # needs sage.plot
     sage: S.density()
     1/2
 
@@ -280,7 +281,7 @@ see how people usually visualize these graphs.
 
     sage: G = GraphQuery(display_cols=['graph6'], num_vertices=7, diameter=5)
     sage: L = G.get_graphs_list()
-    sage: graphs_list.show_graphs(L)                                                    # optional - sage.plot
+    sage: graphs_list.show_graphs(L)                                                    # needs sage.plot
 
 .. _Graph:labels:
 
@@ -349,7 +350,7 @@ individually by iterating through the results ::
 
 Show each graph as you iterate through the results::
 
-    sage: for g in Q:                                                                   # optional - sage.plot
+    sage: for g in Q:                                                                   # needs sage.plot
     ....:     show(g)
 
 Visualization
@@ -359,11 +360,11 @@ To see a graph `G` you are working with, there are three main options. You can
 view the graph in two dimensions via matplotlib with ``show()``. ::
 
     sage: G = graphs.RandomGNP(15,.3)
-    sage: G.show()                                                                      # optional - sage.plot
+    sage: G.show()                                                                      # needs sage.plot
 
 And you can view it in three dimensions via jmol with ``show3d()``. ::
 
-    sage: G.show3d()                                                                    # optional - sage.plot
+    sage: G.show3d()                                                                    # needs sage.plot
 
 Or it can be rendered with `\LaTeX`.  This requires the right additions to a
 standard `\mbox{\rm\TeX}` installation.  Then standard Sage commands, such as
@@ -608,8 +609,8 @@ class Graph(GenericGraph):
        'out' is the label for the edge on 2 and 5. Labels can be used as
        weights, if all the labels share some common parent.::
 
-        sage: a, b, c, d, e, f = sorted(SymmetricGroup(3))              # optional - sage.groups
-        sage: Graph({b: {d: 'c', e: 'p'}, c: {d: 'p', e: 'c'}})         # optional - sage.groups
+        sage: a, b, c, d, e, f = sorted(SymmetricGroup(3))                              # needs sage.groups
+        sage: Graph({b: {d: 'c', e: 'p'}, c: {d: 'p', e: 'c'}})                         # needs sage.groups
         Graph on 4 vertices
 
     #. A dictionary of lists::
@@ -801,16 +802,16 @@ class Graph(GenericGraph):
 
     #. A NetworkX MultiGraph::
 
-          sage: import networkx                                                         # optional - networkx
-          sage: g = networkx.MultiGraph({0:[1,2,3], 2:[4]})                             # optional - networkx
-          sage: Graph(g)                                                                # optional - networkx
+          sage: import networkx                                                         # needs networkx
+          sage: g = networkx.MultiGraph({0:[1,2,3], 2:[4]})                             # needs networkx
+          sage: Graph(g)                                                                # needs networkx
           Multi-graph on 5 vertices
 
     #. A NetworkX graph::
 
-           sage: import networkx                                                        # optional - networkx
-           sage: g = networkx.Graph({0:[1,2,3], 2:[4]})                                 # optional - networkx
-           sage: DiGraph(g)                                                             # optional - networkx
+           sage: import networkx                                                        # needs networkx
+           sage: g = networkx.Graph({0:[1,2,3], 2:[4]})                                 # needs networkx
+           sage: DiGraph(g)                                                             # needs networkx
            Digraph on 5 vertices
 
     #. An igraph Graph (see also
@@ -824,11 +825,12 @@ class Graph(GenericGraph):
        If ``vertex_labels`` is ``True``, the names of the vertices are given by
        the vertex attribute ``'name'``, if available::
 
-           sage: g = igraph.Graph([(0,1),(0,2)], vertex_attrs={'name':['a','b','c']})  # optional - python_igraph
-           sage: Graph(g).vertices(sort=True)                                          # optional - python_igraph
+           sage: # optional - python_igraph
+           sage: g = igraph.Graph([(0,1),(0,2)], vertex_attrs={'name':['a','b','c']})
+           sage: Graph(g).vertices(sort=True)
            ['a', 'b', 'c']
-           sage: g = igraph.Graph([(0,1),(0,2)], vertex_attrs={'label':['a','b','c']}) # optional - python_igraph
-           sage: Graph(g).vertices(sort=True)                                          # optional - python_igraph
+           sage: g = igraph.Graph([(0,1),(0,2)], vertex_attrs={'label':['a','b','c']})
+           sage: Graph(g).vertices(sort=True)
            [0, 1, 2]
 
        If the igraph Graph has edge attributes, they are used as edge labels::
@@ -3855,14 +3857,14 @@ class Graph(GenericGraph):
             True
             sage: are_equal_colorings(P, Q)
             True
-            sage: G.plot(partition=P)                                                   # optional - sage.plot
+            sage: G.plot(partition=P)                                                   # needs sage.plot
             Graphics object consisting of 16 graphics primitives
             sage: G.coloring(hex_colors=True, algorithm="MILP")
             {'#0000ff': [4], '#00ff00': [0, 6, 5], '#ff0000': [2, 1, 3]}
             sage: H = G.coloring(hex_colors=True, algorithm="DLX")
             sage: H
             {'#0000ff': [4], '#00ff00': [1, 2, 3], '#ff0000': [0, 5, 6]}
-            sage: G.plot(vertex_colors=H)                                               # optional - sage.plot
+            sage: G.plot(vertex_colors=H)                                               # needs sage.plot
             Graphics object consisting of 16 graphics primitives
 
         .. PLOT::
@@ -5812,11 +5814,12 @@ class Graph(GenericGraph):
         The graph of eight-bit strings, adjacent if different in an odd number
         of bits::
 
-            sage: G = graphs.CubeGraph(8)  # long time
-            sage: H = G.distance_graph([1,3,5,7])  # long time
-            sage: degrees = [0]*sum([binomial(8,j) for j in [1,3,5,7]])  # long time
-            sage: degrees.append(2^8)  # long time
-            sage: degrees == H.degree_histogram()  # long time
+            sage: # long time
+            sage: G = graphs.CubeGraph(8)
+            sage: H = G.distance_graph([1,3,5,7])
+            sage: degrees = [0]*sum([binomial(8,j) for j in [1,3,5,7]])
+            sage: degrees.append(2^8)
+            sage: degrees == H.degree_histogram()
             True
 
         An example of using ``Infinity`` as the distance in a graph that is not
@@ -5950,12 +5953,12 @@ class Graph(GenericGraph):
         :trac:`22424`::
 
             sage: G1 = graphs.RandomGNP(5,0.5)
-            sage: gp1 = G1.graphplot(save_pos=True)                                     # optional - sage.plot
+            sage: gp1 = G1.graphplot(save_pos=True)                                     # needs sage.plot
             sage: G2 = G1.to_directed()
             sage: G2.delete_vertex(0)
             sage: G2.add_vertex(5)
-            sage: gp2 = G2.graphplot()                                                  # optional - sage.plot
-            sage: gp1 = G1.graphplot()                                                  # optional - sage.plot
+            sage: gp2 = G2.graphplot()                                                  # needs sage.plot
+            sage: gp1 = G1.graphplot()                                                  # needs sage.plot
 
         Vertex labels will be retained (:trac:`14708`)::
 
@@ -6545,7 +6548,7 @@ class Graph(GenericGraph):
              [2, 6], [2, 8], [3, 4], [3, 7], [3, 9], [4, 5], [4, 8], [5, 10],
              [5, 11], [6, 10], [6, 11], [7, 8], [7, 11], [8, 10], [9, 10], [9, 11]]
             sage: G = Graph({0:[1,2,3], 1:[2], 3:[0,1]})
-            sage: G.show(figsize=[2, 2])                                                # optional - sage.plot
+            sage: G.show(figsize=[2, 2])                                                # needs sage.plot
             sage: G.cliques_maximal()
             [[0, 1, 2], [0, 1, 3]]
             sage: C = graphs.PetersenGraph()
@@ -6720,7 +6723,7 @@ class Graph(GenericGraph):
             sage: C.clique_number()
             4
             sage: G = Graph({0:[1,2,3], 1:[2], 3:[0,1]})
-            sage: G.show(figsize=[2,2])                                                 # optional - sage.plot
+            sage: G.show(figsize=[2,2])                                                 # needs sage.plot
             sage: G.clique_number()
             3
 
@@ -6804,7 +6807,7 @@ class Graph(GenericGraph):
             sage: F.cliques_number_of(vertices=(0, 1))
             3
             sage: G = Graph({0:[1,2,3], 1:[2], 3:[0,1]})
-            sage: G.show(figsize=[2,2])                                                 # optional - sage.plot
+            sage: G.show(figsize=[2,2])                                                 # needs sage.plot
             sage: G.cliques_number_of()
             {0: 2, 1: 2, 2: 1, 3: 1}
         """
@@ -6842,12 +6845,12 @@ class Graph(GenericGraph):
 
             sage: MCG = graphs.ChvatalGraph().cliques_get_max_clique_graph(); MCG
             Graph on 24 vertices
-            sage: MCG.show(figsize=[2,2], vertex_size=20, vertex_labels=False)          # optional - sage.plot
+            sage: MCG.show(figsize=[2,2], vertex_size=20, vertex_labels=False)          # needs sage.plot
             sage: G = Graph({0:[1,2,3], 1:[2], 3:[0,1]})
-            sage: G.show(figsize=[2,2])                                                 # optional - sage.plot
+            sage: G.show(figsize=[2,2])                                                 # needs sage.plot
             sage: G.cliques_get_max_clique_graph()
             Graph on 2 vertices
-            sage: G.cliques_get_max_clique_graph().show(figsize=[2,2])                  # optional - sage.plot
+            sage: G.cliques_get_max_clique_graph().show(figsize=[2,2])                  # needs sage.plot
         """
         import networkx
         return Graph(networkx.make_max_clique_graph(self.networkx_graph(), create_using=networkx.MultiGraph()),
@@ -6870,12 +6873,12 @@ class Graph(GenericGraph):
 
             sage: CBG = graphs.ChvatalGraph().cliques_get_clique_bipartite(); CBG
             Bipartite graph on 36 vertices
-            sage: CBG.show(figsize=[2,2], vertex_size=20, vertex_labels=False)          # optional - sage.plot
+            sage: CBG.show(figsize=[2,2], vertex_size=20, vertex_labels=False)          # needs sage.plot
             sage: G = Graph({0:[1,2,3], 1:[2], 3:[0,1]})
-            sage: G.show(figsize=[2,2])                                                 # optional - sage.plot
+            sage: G.show(figsize=[2,2])                                                 # needs sage.plot
             sage: G.cliques_get_clique_bipartite()
             Bipartite graph on 6 vertices
-            sage: G.cliques_get_clique_bipartite().show(figsize=[2,2])                  # optional - sage.plot
+            sage: G.cliques_get_clique_bipartite().show(figsize=[2,2])                  # needs sage.plot
         """
         from .bipartite_graph import BipartiteGraph
         import networkx
@@ -7466,20 +7469,20 @@ class Graph(GenericGraph):
         EXAMPLES::
 
             sage: C = Graph('DJ{')
-            sage: C.cliques_vertex_clique_number()                                      # optional - sage.plot
+            sage: C.cliques_vertex_clique_number()                                      # needs sage.plot
             {0: 2, 1: 4, 2: 4, 3: 4, 4: 4}
             sage: E = C.cliques_maximal(); E
             [[0, 4], [1, 2, 3, 4]]
-            sage: C.cliques_vertex_clique_number(cliques=E, algorithm="networkx")       # optional - sage.plot
+            sage: C.cliques_vertex_clique_number(cliques=E, algorithm="networkx")       # needs sage.plot
             {0: 2, 1: 4, 2: 4, 3: 4, 4: 4}
             sage: F = graphs.Grid2dGraph(2,3)
-            sage: F.cliques_vertex_clique_number(algorithm="networkx")                  # optional - sage.plot
+            sage: F.cliques_vertex_clique_number(algorithm="networkx")                  # needs sage.plot
             {(0, 0): 2, (0, 1): 2, (0, 2): 2, (1, 0): 2, (1, 1): 2, (1, 2): 2}
-            sage: F.cliques_vertex_clique_number(vertices=[(0, 1), (1, 2)])             # optional - sage.plot
+            sage: F.cliques_vertex_clique_number(vertices=[(0, 1), (1, 2)])             # needs sage.plot
             {(0, 1): 2, (1, 2): 2}
             sage: G = Graph({0:[1,2,3], 1:[2], 3:[0,1]})
-            sage: G.show(figsize=[2,2])                                                 # optional - sage.plot
-            sage: G.cliques_vertex_clique_number()                                      # optional - sage.plot
+            sage: G.show(figsize=[2,2])                                                 # needs sage.plot
+            sage: G.cliques_vertex_clique_number()                                      # needs sage.plot
             {0: 3, 1: 3, 2: 3, 3: 3}
         """
         if algorithm == "cliquer":
@@ -7540,7 +7543,7 @@ class Graph(GenericGraph):
              4: [[0, 4], [1, 2, 3, 4]]}
 
             sage: G = Graph({0:[1,2,3], 1:[2], 3:[0,1]})
-            sage: G.show(figsize=[2,2])                                                 # optional - sage.plot
+            sage: G.show(figsize=[2,2])                                                 # needs sage.plot
             sage: G.cliques_containing_vertex()
             {0: [[0, 1, 2], [0, 1, 3]],
              1: [[0, 1, 2], [0, 1, 3]],
@@ -8569,7 +8572,7 @@ class Graph(GenericGraph):
 
             sage: g = graphs.CirculantGraph(24, [7, 11])
             sage: cl = g.two_factor_petersen()
-            sage: g.plot(edge_colors={'black':cl[0], 'red':cl[1]})                      # optional - sage.plot
+            sage: g.plot(edge_colors={'black':cl[0], 'red':cl[1]})                      # needs sage.plot
             Graphics object consisting of 73 graphics primitives
 
         """
@@ -8736,8 +8739,8 @@ class Graph(GenericGraph):
 
             sage: g = graphs.CycleGraph(6)
             sage: m = g.magnitude_function()
-            sage: t = var('t')                                                  # optional - sage.symbolic
-            sage: m(exp(-t))                                                    # optional - sage.symbolic
+            sage: t = var('t')                                                          # needs sage.symbolic
+            sage: m(exp(-t))                                                            # needs sage.symbolic
             6/(2*e^(-t) + 2*e^(-2*t) + e^(-3*t) + 1)
 
         TESTS::

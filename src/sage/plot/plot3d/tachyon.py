@@ -123,13 +123,14 @@ used to tile the plane::
     sage: T.save(fname_png)
     sage: r2 = os.system('convert '+fname_png+' '+fname_ppm)  # optional -- ImageMagick
 
-    sage: T = Tachyon(xres=800, yres=600, camera_position=(-2.0,-.1,.3), projection='fisheye', frustum=(-1.0, 1.0, -1.0, 1.0))  # optional -- ImageMagick
-    sage: T.texture('t1', color=(1,0,0), specular=.9)  # optional -- ImageMagick
-    sage: T.texture('p1', color=(1,1,1), opacity=.1, imagefile=fname_ppm, texfunc=9)  # optional -- ImageMagick
-    sage: T.sphere((0,0,0), .5, 't1')  # optional -- ImageMagick
-    sage: T.plane((0,0,-1), (0,0,1), 'p1')  # optional -- ImageMagick
-    sage: T.light((-4,-4,4), .1, (1,1,1))  # optional -- ImageMagick
-    sage: T.show()  # optional -- ImageMagick
+    sage: # optional - imagemagick
+    sage: T = Tachyon(xres=800, yres=600, camera_position=(-2.0,-.1,.3), projection='fisheye', frustum=(-1.0, 1.0, -1.0, 1.0))
+    sage: T.texture('t1', color=(1,0,0), specular=.9)
+    sage: T.texture('p1', color=(1,1,1), opacity=.1, imagefile=fname_ppm, texfunc=9)
+    sage: T.sphere((0,0,0), .5, 't1')
+    sage: T.plane((0,0,-1), (0,0,1), 'p1')
+    sage: T.light((-4,-4,4), .1, (1,1,1))
+    sage: T.show()
 
 AUTHOR:
 

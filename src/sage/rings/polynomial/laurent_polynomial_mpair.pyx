@@ -234,12 +234,13 @@ cdef class LaurentPolynomial_mpair(LaurentPolynomial):
 
         check compatibility with  :trac:`26105`::
 
-            sage: F.<t> = GF(4)                                                         # optional - sage.rings.finite_rings
-            sage: LF.<a,b> = LaurentPolynomialRing(F)                                   # optional - sage.rings.finite_rings
-            sage: rho = LF.hom([b,a], base_map=F.frobenius_endomorphism())              # optional - sage.rings.finite_rings
-            sage: s = t*~a + b +~t*(b**-3)*a**2; rs = rho(s); rs                        # optional - sage.rings.finite_rings
+            sage: # needs sage.rings.finite_rings
+            sage: F.<t> = GF(4)
+            sage: LF.<a,b> = LaurentPolynomialRing(F)
+            sage: rho = LF.hom([b,a], base_map=F.frobenius_endomorphism())
+            sage: s = t*~a + b +~t*(b**-3)*a**2; rs = rho(s); rs
             a + (t + 1)*b^-1 + t*a^-3*b^2
-            sage: s == rho(rs)                                                          # optional - sage.rings.finite_rings
+            sage: s == rho(rs)
             True
         """
         p = self._poly
@@ -1349,13 +1350,13 @@ cdef class LaurentPolynomial_mpair(LaurentPolynomial):
 
             sage: R.<x,y> = LaurentPolynomialRing(QQ)
             sage: f = x^3 + y/x
-            sage: g = f._symbolic_(SR); g                                               # optional - sage.symbolic
+            sage: g = f._symbolic_(SR); g                                               # needs sage.symbolic
             (x^4 + y)/x
-            sage: g(x=2, y=2)                                                           # optional - sage.symbolic
+            sage: g(x=2, y=2)                                                           # needs sage.symbolic
             9
 
-            sage: g = SR(f)                                                             # optional - sage.symbolic
-            sage: g(x=2, y=2)                                                           # optional - sage.symbolic
+            sage: g = SR(f)                                                             # needs sage.symbolic
+            sage: g(x=2, y=2)                                                           # needs sage.symbolic
             9
         """
         d = {repr(g): R.var(g) for g in self._parent.gens()}
@@ -1633,14 +1634,14 @@ cdef class LaurentPolynomial_mpair(LaurentPolynomial):
             sage: p = x^-2*y + x*y^-2
             sage: p.rescale_vars({0: 2, 1: 3})
             2/9*x*y^-2 + 3/4*x^-2*y
-            sage: F = GF(2)                                                             # optional - sage.rings.finite_rings
-            sage: p.rescale_vars({0: 3, 1: 7}, new_ring=L.change_ring(F))               # optional - sage.rings.finite_rings
+            sage: F = GF(2)                                                             # needs sage.rings.finite_rings
+            sage: p.rescale_vars({0: 3, 1: 7}, new_ring=L.change_ring(F))               # needs sage.rings.finite_rings
             x*y^-2 + x^-2*y
 
         Test for :trac:`30331`::
 
-            sage: F.<z> = CyclotomicField(3)                                            # optional - sage.rings.number_field
-            sage: p.rescale_vars({0: 2, 1: z}, new_ring=L.change_ring(F))               # optional - sage.rings.number_field
+            sage: F.<z> = CyclotomicField(3)                                            # needs sage.rings.number_field
+            sage: p.rescale_vars({0: 2, 1: z}, new_ring=L.change_ring(F))               # needs sage.rings.number_field
             2*z*x*y^-2 + 1/4*z*x^-2*y
         """
         cdef int i
@@ -1695,8 +1696,8 @@ cdef class LaurentPolynomial_mpair(LaurentPolynomial):
             sage: p = 2*x^2 + y - x*y
             sage: p.toric_coordinate_change(Matrix([[1,-3], [1,1]]))
             2*x^2*y^2 - x^-2*y^2 + x^-3*y
-            sage: F = GF(2)                                                             # optional - sage.rings.finite_rings
-            sage: p.toric_coordinate_change(Matrix([[1,-3], [1,1]]),                    # optional - sage.rings.finite_rings
+            sage: F = GF(2)                                                             # needs sage.rings.finite_rings
+            sage: p.toric_coordinate_change(Matrix([[1,-3], [1,1]]),                    # needs sage.rings.finite_rings
             ....:                           new_ring=L.change_ring(F))
             x^-2*y^2 + x^-3*y
 

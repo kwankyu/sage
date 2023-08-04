@@ -569,11 +569,11 @@ def filter_kruskal_iterator(G, threshold=10000, by_weight=True, weight_function=
     :func:`filter_kruskal_iterator` are the same::
 
         sage: from sage.graphs.spanning_tree import kruskal_iterator
-        sage: G = graphs.RandomBarabasiAlbert(50, 2)                                    # optional - networkx
-        sage: for u, v in G.edge_iterator(labels=False):                                # optional - networkx
+        sage: G = graphs.RandomBarabasiAlbert(50, 2)                                    # needs networkx
+        sage: for u, v in G.edge_iterator(labels=False):                                # needs networkx
         ....:     G.set_edge_label(u, v, randint(1, 10))
-        sage: G.weighted(True)                                                          # optional - networkx
-        sage: sum(e[2] for e in kruskal_iterator(G)) == sum(e[2]                        # optional - networkx
+        sage: G.weighted(True)                                                          # needs networkx
+        sage: sum(e[2] for e in kruskal_iterator(G)) == sum(e[2]                        # needs networkx
         ....:     for e in filter_kruskal_iterator(G, threshold=20))
         True
 
@@ -976,7 +976,7 @@ def random_spanning_tree(G, output_as_graph=False, by_weight=False, weight_funct
         sage: pos = G.get_pos()
         sage: T = G.random_spanning_tree(True)
         sage: T.set_pos(pos)
-        sage: T.show(vertex_labels=False)                                               # optional - sage.plot
+        sage: T.show(vertex_labels=False)                                               # needs sage.plot
 
     We can also use edge weights to change the probability of returning a
     spanning tree::
@@ -1000,11 +1000,12 @@ def random_spanning_tree(G, output_as_graph=False, by_weight=False, weight_funct
 
     Check that the spanning tree returned when using weights is a tree::
 
-        sage: G = graphs.RandomBarabasiAlbert(50, 2)                                    # optional - networkx
-        sage: for u, v in G.edge_iterator(labels=False):                                # optional - networkx
+        sage: # needs networkx
+        sage: G = graphs.RandomBarabasiAlbert(50, 2)
+        sage: for u, v in G.edge_iterator(labels=False):
         ....:     G.set_edge_label(u, v, randint(1, 10))
-        sage: T = G.random_spanning_tree(by_weight=True, output_as_graph=True)          # optional - networkx
-        sage: T.is_tree()                                                               # optional - networkx
+        sage: T = G.random_spanning_tree(by_weight=True, output_as_graph=True)
+        sage: T.is_tree()
         True
 
     TESTS::
@@ -1088,12 +1089,12 @@ def spanning_trees(g, labels=False):
         sage: G = Graph([(1,2),(1,2),(1,3),(1,3),(2,3),(1,4)], multiedges=True)
         sage: len(list(G.spanning_trees()))
         8
-        sage: G.spanning_trees_count()                                                  # optional - sage.modules
+        sage: G.spanning_trees_count()                                                  # needs sage.modules
         8
         sage: G = Graph([(1,2),(2,3),(3,1),(3,4),(4,5),(4,5),(4,6)], multiedges=True)
         sage: len(list(G.spanning_trees()))
         6
-        sage: G.spanning_trees_count()                                                  # optional - sage.modules
+        sage: G.spanning_trees_count()                                                  # needs sage.modules
         6
 
     .. SEEALSO::

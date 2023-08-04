@@ -1084,7 +1084,7 @@ class FGP_Module_class(Module):
         EXAMPLES::
 
             sage: L2 = IntegralLattice(3 * matrix([[-2,0,0], [0,1,0], [0,0,-4]]))
-            sage: D = L2.discriminant_group().normal_form(); D                          # optional - sage.libs.pari sage.rings.padics
+            sage: D = L2.discriminant_group().normal_form(); D                          # needs sage.libs.pari sage.rings.padics
             Finite quadratic module over Integer Ring with invariants (3, 6, 12)
             Gram matrix of the quadratic form with values in Q/Z:
             [1/2   0   0   0   0]
@@ -1092,13 +1092,13 @@ class FGP_Module_class(Module):
             [  0   0 1/3   0   0]
             [  0   0   0 1/3   0]
             [  0   0   0   0 2/3]
-            sage: D.gens_to_smith()                                                     # optional - sage.libs.pari sage.rings.padics
+            sage: D.gens_to_smith()                                                     # needs sage.libs.pari sage.rings.padics
             [0 3 0]
             [0 0 3]
             [0 4 0]
             [1 2 0]
             [0 0 4]
-            sage: T = D.gens_to_smith() * D.smith_to_gens(); T                          # optional - sage.libs.pari sage.rings.padics
+            sage: T = D.gens_to_smith() * D.smith_to_gens(); T                          # needs sage.libs.pari sage.rings.padics
             [ 3  0  3  0  0]
             [ 0 33  0  0  3]
             [ 4  0  4  0  0]
@@ -1107,9 +1107,9 @@ class FGP_Module_class(Module):
 
         The matrix `T` now satisfies a certain congruence::
 
-            sage: for i in range(T.nrows()):                                            # optional - sage.libs.pari sage.rings.padics
+            sage: for i in range(T.nrows()):                                            # needs sage.libs.pari sage.rings.padics
             ....:     T[:,i] = T[:,i] % D.gens()[i].order()
-            sage: T                                                                     # optional - sage.libs.pari sage.rings.padics
+            sage: T                                                                     # needs sage.libs.pari sage.rings.padics
             [1 0 0 0 0]
             [0 1 0 0 0]
             [0 0 1 0 0]
@@ -1135,7 +1135,7 @@ class FGP_Module_class(Module):
         EXAMPLES::
 
             sage: L2 = IntegralLattice(3 * matrix([[-2,0,0], [0,1,0], [0,0,-4]]))
-            sage: D = L2.discriminant_group().normal_form(); D                          # optional - sage.libs.pari sage.rings.padics
+            sage: D = L2.discriminant_group().normal_form(); D                          # needs sage.libs.pari sage.rings.padics
             Finite quadratic module over Integer Ring with invariants (3, 6, 12)
             Gram matrix of the quadratic form with values in Q/Z:
             [1/2   0   0   0   0]
@@ -1143,33 +1143,33 @@ class FGP_Module_class(Module):
             [  0   0 1/3   0   0]
             [  0   0   0 1/3   0]
             [  0   0   0   0 2/3]
-            sage: D.smith_to_gens()                                                     # optional - sage.libs.pari sage.rings.padics
+            sage: D.smith_to_gens()                                                     # needs sage.libs.pari sage.rings.padics
             [ 0  0  1  1  0]
             [ 1  0  1  0  0]
             [ 0 11  0  0  1]
-            sage: T = D.smith_to_gens() * D.gens_to_smith(); T                          # optional - sage.libs.pari sage.rings.padics
+            sage: T = D.smith_to_gens() * D.gens_to_smith(); T                          # needs sage.libs.pari sage.rings.padics
             [ 1  6  0]
             [ 0  7  0]
             [ 0  0 37]
 
         This matrix satisfies the congruence::
 
-            sage: for i in range(T.ncols()):                                            # optional - sage.libs.pari sage.rings.padics
+            sage: for i in range(T.ncols()):                                            # needs sage.libs.pari sage.rings.padics
             ....:     T[:, i] = T[:, i] % D.smith_form_gens()[i].order()
-            sage: T                                                                     # optional - sage.libs.pari sage.rings.padics
+            sage: T                                                                     # needs sage.libs.pari sage.rings.padics
             [1 0 0]
             [0 1 0]
             [0 0 1]
 
         We create some element of our FGP module::
 
-            sage: x = D.linear_combination_of_smith_form_gens((1,2,3)); x               # optional - sage.libs.pari sage.rings.padics
+            sage: x = D.linear_combination_of_smith_form_gens((1,2,3)); x               # needs sage.libs.pari sage.rings.padics
             (1, 2, 3)
 
         and want to know some (it is not unique) linear combination
         of the user defined generators that is ``x``::
 
-            sage: x.vector() * D.smith_to_gens()                                        # optional - sage.libs.pari sage.rings.padics
+            sage: x.vector() * D.smith_to_gens()                                        # needs sage.libs.pari sage.rings.padics
             (2, 33, 3, 1, 3)
         """
         if self.base_ring() != ZZ:

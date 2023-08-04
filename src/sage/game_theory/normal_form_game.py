@@ -424,18 +424,19 @@ equilibrium values::
 
 It is also possible to generate a Normal form game from a gambit Game::
 
-    sage: from gambit import Game  # optional - gambit
-    sage: gambitgame= Game.new_table([2, 2])  # optional - gambit
-    sage: gambitgame[int(0), int(0)][int(0)] = int(8)  # optional - gambit
-    sage: gambitgame[int(0), int(0)][int(1)] = int(8)  # optional - gambit
-    sage: gambitgame[int(0), int(1)][int(0)] = int(2)  # optional - gambit
-    sage: gambitgame[int(0), int(1)][int(1)] = int(10)  # optional - gambit
-    sage: gambitgame[int(1), int(0)][int(0)] = int(10)  # optional - gambit
-    sage: gambitgame[int(1), int(0)][int(1)] = int(2)  # optional - gambit
-    sage: gambitgame[int(1), int(1)][int(0)] = int(5)  # optional - gambit
-    sage: gambitgame[int(1), int(1)][int(1)] = int(5)  # optional - gambit
-    sage: g = NormalFormGame(gambitgame)  # optional - gambit
-    sage: g  # optional - gambit
+    sage: # optional - gambit
+    sage: from gambit import Game
+    sage: gambitgame= Game.new_table([2, 2])
+    sage: gambitgame[int(0), int(0)][int(0)] = int(8)
+    sage: gambitgame[int(0), int(0)][int(1)] = int(8)
+    sage: gambitgame[int(0), int(1)][int(0)] = int(2)
+    sage: gambitgame[int(0), int(1)][int(1)] = int(10)
+    sage: gambitgame[int(1), int(0)][int(0)] = int(10)
+    sage: gambitgame[int(1), int(0)][int(1)] = int(2)
+    sage: gambitgame[int(1), int(1)][int(0)] = int(5)
+    sage: gambitgame[int(1), int(1)][int(1)] = int(5)
+    sage: g = NormalFormGame(gambitgame)
+    sage: g
     Normal Form Game with the following utilities: {(0, 0): [8.0, 8.0],
      (0, 1): [2.0, 10.0],
      (1, 0): [10.0, 2.0],
@@ -709,18 +710,19 @@ class NormalFormGame(SageObject, MutableMapping):
 
         Can initialise a game from a gambit game object::
 
-            sage: from gambit import Game  # optional - gambit
-            sage: gambitgame= Game.new_table([2, 2])  # optional - gambit
-            sage: gambitgame[int(0), int(0)][int(0)] = int(5)  # optional - gambit
-            sage: gambitgame[int(0), int(0)][int(1)] = int(8)  # optional - gambit
-            sage: gambitgame[int(0), int(1)][int(0)] = int(2)  # optional - gambit
-            sage: gambitgame[int(0), int(1)][int(1)] = int(11)  # optional - gambit
-            sage: gambitgame[int(1), int(0)][int(0)] = int(10)  # optional - gambit
-            sage: gambitgame[int(1), int(0)][int(1)] = int(7)  # optional - gambit
-            sage: gambitgame[int(1), int(1)][int(0)] = int(5)  # optional - gambit
-            sage: gambitgame[int(1), int(1)][int(1)] = int(5)  # optional - gambit
-            sage: g = NormalFormGame(gambitgame)  # optional - gambit
-            sage: g  # optional - gambit
+            sage: # optional - gambit
+            sage: from gambit import Game
+            sage: gambitgame= Game.new_table([2, 2])
+            sage: gambitgame[int(0), int(0)][int(0)] = int(5)
+            sage: gambitgame[int(0), int(0)][int(1)] = int(8)
+            sage: gambitgame[int(0), int(1)][int(0)] = int(2)
+            sage: gambitgame[int(0), int(1)][int(1)] = int(11)
+            sage: gambitgame[int(1), int(0)][int(0)] = int(10)
+            sage: gambitgame[int(1), int(0)][int(1)] = int(7)
+            sage: gambitgame[int(1), int(1)][int(0)] = int(5)
+            sage: gambitgame[int(1), int(1)][int(1)] = int(5)
+            sage: g = NormalFormGame(gambitgame)
+            sage: g
             Normal Form Game with the following utilities: {(0, 0): [5.0, 8.0],
              (0, 1): [2.0, 11.0],
              (1, 0): [10.0, 7.0],
@@ -967,19 +969,20 @@ class NormalFormGame(SageObject, MutableMapping):
 
         TESTS::
 
-            sage: from gambit import Game  # optional - gambit
-            sage: testgame = Game.new_table([2, 2])  # optional - gambit
-            sage: testgame[int(0), int(0)][int(0)] = int(8)  # optional - gambit
-            sage: testgame[int(0), int(0)][int(1)] = int(8)  # optional - gambit
-            sage: testgame[int(0), int(1)][int(0)] = int(2)  # optional - gambit
-            sage: testgame[int(0), int(1)][int(1)] = int(10)  # optional - gambit
-            sage: testgame[int(1), int(0)][int(0)] = int(10)  # optional - gambit
-            sage: testgame[int(1), int(0)][int(1)] = int(2)  # optional - gambit
-            sage: testgame[int(1), int(1)][int(0)] = int(5)  # optional - gambit
-            sage: testgame[int(1), int(1)][int(1)] = int(5)  # optional - gambit
-            sage: g = NormalFormGame()  # optional - gambit
-            sage: g._gambit_game(testgame)  # optional - gambit
-            sage: g  # optional - gambit
+            sage: # optional - gambit
+            sage: from gambit import Game
+            sage: testgame = Game.new_table([2, 2])
+            sage: testgame[int(0), int(0)][int(0)] = int(8)
+            sage: testgame[int(0), int(0)][int(1)] = int(8)
+            sage: testgame[int(0), int(1)][int(0)] = int(2)
+            sage: testgame[int(0), int(1)][int(1)] = int(10)
+            sage: testgame[int(1), int(0)][int(0)] = int(10)
+            sage: testgame[int(1), int(0)][int(1)] = int(2)
+            sage: testgame[int(1), int(1)][int(0)] = int(5)
+            sage: testgame[int(1), int(1)][int(1)] = int(5)
+            sage: g = NormalFormGame()
+            sage: g._gambit_game(testgame)
+            sage: g
             Normal Form Game with the following utilities: {(0, 0): [8.0, 8.0],
             (0, 1): [2.0, 10.0],
             (1, 0): [10.0, 2.0],
@@ -1090,35 +1093,36 @@ class NormalFormGame(SageObject, MutableMapping):
 
         ::
 
-            sage: threegame = NormalFormGame() # optional - gambit
-            sage: threegame.add_player(2) # optional - gambit
-            sage: threegame.add_player(2) # optional - gambit
-            sage: threegame.add_player(2) # optional - gambit
-            sage: threegame[0, 0, 0][0] = 3 # optional - gambit
-            sage: threegame[0, 0, 0][1] = 1 # optional - gambit
-            sage: threegame[0, 0, 0][2] = 4 # optional - gambit
-            sage: threegame[0, 0, 1][0] = 1 # optional - gambit
-            sage: threegame[0, 0, 1][1] = 5 # optional - gambit
-            sage: threegame[0, 0, 1][2] = 9 # optional - gambit
-            sage: threegame[0, 1, 0][0] = 2 # optional - gambit
-            sage: threegame[0, 1, 0][1] = 6 # optional - gambit
-            sage: threegame[0, 1, 0][2] = 5 # optional - gambit
-            sage: threegame[0, 1, 1][0] = 3 # optional - gambit
-            sage: threegame[0, 1, 1][1] = 5 # optional - gambit
-            sage: threegame[0, 1, 1][2] = 8 # optional - gambit
-            sage: threegame[1, 0, 0][0] = 9 # optional - gambit
-            sage: threegame[1, 0, 0][1] = 7 # optional - gambit
-            sage: threegame[1, 0, 0][2] = 9 # optional - gambit
-            sage: threegame[1, 0, 1][0] = 3 # optional - gambit
-            sage: threegame[1, 0, 1][1] = 2 # optional - gambit
-            sage: threegame[1, 0, 1][2] = 3 # optional - gambit
-            sage: threegame[1, 1, 0][0] = 8 # optional - gambit
-            sage: threegame[1, 1, 0][1] = 4 # optional - gambit
-            sage: threegame[1, 1, 0][2] = 6 # optional - gambit
-            sage: threegame[1, 1, 1][0] = 2 # optional - gambit
-            sage: threegame[1, 1, 1][1] = 6 # optional - gambit
-            sage: threegame[1, 1, 1][2] = 4 # optional - gambit
-            sage: threegame._gambit_(as_integer = True) # optional - gambit
+            sage: # optional - gambit
+            sage: threegame = NormalFormGame()
+            sage: threegame.add_player(2)
+            sage: threegame.add_player(2)
+            sage: threegame.add_player(2)
+            sage: threegame[0, 0, 0][0] = 3
+            sage: threegame[0, 0, 0][1] = 1
+            sage: threegame[0, 0, 0][2] = 4
+            sage: threegame[0, 0, 1][0] = 1
+            sage: threegame[0, 0, 1][1] = 5
+            sage: threegame[0, 0, 1][2] = 9
+            sage: threegame[0, 1, 0][0] = 2
+            sage: threegame[0, 1, 0][1] = 6
+            sage: threegame[0, 1, 0][2] = 5
+            sage: threegame[0, 1, 1][0] = 3
+            sage: threegame[0, 1, 1][1] = 5
+            sage: threegame[0, 1, 1][2] = 8
+            sage: threegame[1, 0, 0][0] = 9
+            sage: threegame[1, 0, 0][1] = 7
+            sage: threegame[1, 0, 0][2] = 9
+            sage: threegame[1, 0, 1][0] = 3
+            sage: threegame[1, 0, 1][1] = 2
+            sage: threegame[1, 0, 1][2] = 3
+            sage: threegame[1, 1, 0][0] = 8
+            sage: threegame[1, 1, 0][1] = 4
+            sage: threegame[1, 1, 0][2] = 6
+            sage: threegame[1, 1, 1][0] = 2
+            sage: threegame[1, 1, 1][1] = 6
+            sage: threegame[1, 1, 1][2] = 4
+            sage: threegame._gambit_(as_integer = True)
             NFG 1 R "" { "1" "2" "3" }
             <BLANKLINE>
             { { "1" "2" }

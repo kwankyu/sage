@@ -16,8 +16,8 @@ Here we define this species using the default structures::
     sage: bar = species.EmptySetSpecies()
     sage: BB = CombinatorialSpecies()
     sage: BB.define(ball + ball*BB + ball*bar*BB)
-    sage: o = var('o')                                                                  # optional - sage.symbolic
-    sage: BB.isotypes([o]*3).list()                                                     # optional - sage.symbolic
+    sage: o = var('o')                                                                  # needs sage.symbolic
+    sage: BB.isotypes([o]*3).list()                                                     # needs sage.symbolic
     [o*(o*o), o*((o*{})*o), (o*{})*(o*o), (o*{})*((o*{})*o)]
 
 If we ignore the parentheses, we can read off that the integer

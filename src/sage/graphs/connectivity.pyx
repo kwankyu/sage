@@ -258,12 +258,12 @@ def connected_components_subgraphs(G):
         sage: from sage.graphs.connectivity import connected_components_subgraphs
         sage: G = Graph({0: [1, 3], 1: [2], 2: [3], 4: [5, 6], 5: [6]})
         sage: L = connected_components_subgraphs(G)
-        sage: graphs_list.show_graphs(L)                                                # optional - sage.plot
+        sage: graphs_list.show_graphs(L)                                                # needs sage.plot
         sage: D = DiGraph({0: [1, 3], 1: [2], 2: [3], 4: [5, 6], 5: [6]})
         sage: L = connected_components_subgraphs(D)
-        sage: graphs_list.show_graphs(L)                                                # optional - sage.plot
+        sage: graphs_list.show_graphs(L)                                                # needs sage.plot
         sage: L = D.connected_components_subgraphs()
-        sage: graphs_list.show_graphs(L)                                                # optional - sage.plot
+        sage: graphs_list.show_graphs(L)                                                # needs sage.plot
 
     TESTS:
 
@@ -2814,7 +2814,7 @@ cdef class _Component:
             ....: 'comp.add_edge(3)',
             ....: 'comp.finish_tric_or_poly(4)',
             ....: 'print(comp)']
-            sage: cython(os.linesep.join(cython_code))                          # optional - sage.misc.cython
+            sage: cython(os.linesep.join(cython_code))                                  # needs sage.misc.cython
             Polygon: 2 3 4
         """
         self.mem = MemoryAllocator()
@@ -2861,7 +2861,7 @@ cdef class _Component:
             ....: 'comp.add_edge(3)',
             ....: 'comp.finish_tric_or_poly(4)',
             ....: 'print(comp)']
-            sage: cython(os.linesep.join(cython_code))                          # optional - sage.misc.cython
+            sage: cython(os.linesep.join(cython_code))                                  # needs sage.misc.cython
             Polygon: 2 3 4
         """
         if self.component_type == 0:
@@ -4344,8 +4344,8 @@ def is_triconnected(G):
     Comparing different methods on random graphs that are not always
     triconnected::
 
-        sage: G = graphs.RandomBarabasiAlbert(50, 3)                                    # optional - networkx
-        sage: G.is_triconnected() == G.vertex_connectivity(k=3)                         # optional - networkx
+        sage: G = graphs.RandomBarabasiAlbert(50, 3)                                    # needs networkx
+        sage: G.is_triconnected() == G.vertex_connectivity(k=3)                         # needs networkx
         True
 
     .. SEEALSO::

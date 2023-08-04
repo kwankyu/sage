@@ -14,13 +14,13 @@ class NumberField_quadratic(Field):
     EXAMPLES::
 
         sage: import sage.rings.abc
-        sage: K.<sqrt2> = QuadraticField(2)                                             # optional - sage.rings.number_field
-        sage: isinstance(K, sage.rings.abc.NumberField_quadratic)                       # optional - sage.rings.number_field
+        sage: K.<sqrt2> = QuadraticField(2)                                             # needs sage.rings.number_field
+        sage: isinstance(K, sage.rings.abc.NumberField_quadratic)                       # needs sage.rings.number_field
         True
 
     By design, there is a unique direct subclass::
 
-        sage: sage.rings.abc.NumberField_quadratic.__subclasses__()                     # optional - sage.rings.number_field
+        sage: sage.rings.abc.NumberField_quadratic.__subclasses__()                     # needs sage.rings.number_field
         [<class 'sage.rings.number_field.number_field.NumberField_quadratic'>]
 
         sage: len(sage.rings.abc.NumberField_quadratic.__subclasses__()) <= 1
@@ -40,13 +40,13 @@ class NumberField_cyclotomic(Field):
     EXAMPLES::
 
         sage: import sage.rings.abc
-        sage: K.<zeta> = CyclotomicField(15)                                            # optional - sage.rings.number_field
-        sage: isinstance(K, sage.rings.abc.NumberField_cyclotomic)                      # optional - sage.rings.number_field
+        sage: K.<zeta> = CyclotomicField(15)                                            # needs sage.rings.number_field
+        sage: isinstance(K, sage.rings.abc.NumberField_cyclotomic)                      # needs sage.rings.number_field
         True
 
     By design, there is a unique direct subclass::
 
-        sage: sage.rings.abc.NumberField_cyclotomic.__subclasses__()                    # optional - sage.rings.number_field
+        sage: sage.rings.abc.NumberField_cyclotomic.__subclasses__()                    # needs sage.rings.number_field
         [<class 'sage.rings.number_field.number_field.NumberField_cyclotomic'>]
 
         sage: len(sage.rings.abc.NumberField_cyclotomic.__subclasses__()) <= 1
@@ -66,13 +66,13 @@ class UniversalCyclotomicField(Field):
     EXAMPLES::
 
         sage: import sage.rings.abc
-        sage: K = UniversalCyclotomicField()                                            # optional - sage.rings.number_field
-        sage: isinstance(K, sage.rings.abc.UniversalCyclotomicField)                    # optional - sage.rings.number_field
+        sage: K = UniversalCyclotomicField()                                            # needs sage.rings.number_field
+        sage: isinstance(K, sage.rings.abc.UniversalCyclotomicField)                    # needs sage.rings.number_field
         True
 
     By design, there is a unique direct subclass::
 
-        sage: sage.rings.abc.UniversalCyclotomicField.__subclasses__()                  # optional - sage.rings.number_field
+        sage: sage.rings.abc.UniversalCyclotomicField.__subclasses__()                  # needs sage.rings.number_field
         [<class 'sage.rings.universal_cyclotomic_field.UniversalCyclotomicField'>]
 
         sage: len(sage.rings.abc.NumberField_cyclotomic.__subclasses__()) <= 1
@@ -92,16 +92,16 @@ class AlgebraicField_common(Field):
     EXAMPLES::
 
         sage: import sage.rings.abc
-        sage: isinstance(QQbar, sage.rings.abc.AlgebraicField_common)                   # optional - sage.rings.number_field
+        sage: isinstance(QQbar, sage.rings.abc.AlgebraicField_common)                   # needs sage.rings.number_field
         True
-        sage: isinstance(AA, sage.rings.abc.AlgebraicField_common)                      # optional - sage.rings.number_field
+        sage: isinstance(AA, sage.rings.abc.AlgebraicField_common)                      # needs sage.rings.number_field
         True
 
     By design, other than the abstract subclasses :class:`~sage.rings.abc.AlgebraicField`
     and :class:`~sage.rings.abc.AlgebraicRealField`, there is only one direct implementation
     subclass::
 
-        sage: sage.rings.abc.AlgebraicField_common.__subclasses__()                     # optional - sage.rings.number_field
+        sage: sage.rings.abc.AlgebraicField_common.__subclasses__()                     # needs sage.rings.number_field
         [<class 'sage.rings.abc.AlgebraicField'>,
          <class 'sage.rings.abc.AlgebraicRealField'>,
          <class 'sage.rings.qqbar.AlgebraicField_common'>]
@@ -123,14 +123,14 @@ class AlgebraicField(AlgebraicField_common):
     EXAMPLES::
 
         sage: import sage.rings.abc
-        sage: isinstance(QQbar, sage.rings.abc.AlgebraicField)                          # optional - sage.rings.number_field
+        sage: isinstance(QQbar, sage.rings.abc.AlgebraicField)                          # needs sage.rings.number_field
         True
-        sage: isinstance(AA, sage.rings.abc.AlgebraicField)                             # optional - sage.rings.number_field
+        sage: isinstance(AA, sage.rings.abc.AlgebraicField)                             # needs sage.rings.number_field
         False
 
     By design, there is a unique direct subclass::
 
-        sage: sage.rings.abc.AlgebraicField.__subclasses__()                            # optional - sage.rings.number_field
+        sage: sage.rings.abc.AlgebraicField.__subclasses__()                            # needs sage.rings.number_field
         [<class 'sage.rings.qqbar.AlgebraicField'>]
 
         sage: len(sage.rings.abc.AlgebraicField.__subclasses__()) <= 1
@@ -150,14 +150,14 @@ class AlgebraicRealField(AlgebraicField_common):
     EXAMPLES::
 
         sage: import sage.rings.abc
-        sage: isinstance(QQbar, sage.rings.abc.AlgebraicRealField)                      # optional - sage.rings.number_field
+        sage: isinstance(QQbar, sage.rings.abc.AlgebraicRealField)                      # needs sage.rings.number_field
         False
-        sage: isinstance(AA, sage.rings.abc.AlgebraicRealField)                         # optional - sage.rings.number_field
+        sage: isinstance(AA, sage.rings.abc.AlgebraicRealField)                         # needs sage.rings.number_field
         True
 
     By design, there is a unique direct subclass::
 
-        sage: sage.rings.abc.AlgebraicRealField.__subclasses__()                        # optional - sage.rings.number_field
+        sage: sage.rings.abc.AlgebraicRealField.__subclasses__()                        # needs sage.rings.number_field
         [<class 'sage.rings.qqbar.AlgebraicRealField'>]
 
         sage: len(sage.rings.abc.AlgebraicRealField.__subclasses__()) <= 1
@@ -403,13 +403,13 @@ class Order:
 
         sage: import sage.rings.abc
         sage: x = polygen(ZZ, 'x')
-        sage: K.<a> = NumberField(x^2 + 1); O = K.order(2*a)                            # optional - sage.rings.number_field
-        sage: isinstance(O, sage.rings.abc.Order)                                       # optional - sage.rings.number_field
+        sage: K.<a> = NumberField(x^2 + 1); O = K.order(2*a)                            # needs sage.rings.number_field
+        sage: isinstance(O, sage.rings.abc.Order)                                       # needs sage.rings.number_field
         True
 
     By design, there is a unique direct subclass::
 
-        sage: sage.rings.abc.Order.__subclasses__()                                     # optional - sage.rings.number_field
+        sage: sage.rings.abc.Order.__subclasses__()                                     # needs sage.rings.number_field
         [<class 'sage.rings.number_field.order.Order'>]
 
         sage: len(sage.rings.abc.Order.__subclasses__()) <= 1
@@ -429,14 +429,14 @@ class pAdicRing(EuclideanDomain):
     EXAMPLES::
 
         sage: import sage.rings.abc
-        sage: isinstance(Zp(5), sage.rings.abc.pAdicRing)                               # optional - sage.rings.padics
+        sage: isinstance(Zp(5), sage.rings.abc.pAdicRing)                               # needs sage.rings.padics
         True
-        sage: isinstance(Qp(5), sage.rings.abc.pAdicRing)                               # optional - sage.rings.padics
+        sage: isinstance(Qp(5), sage.rings.abc.pAdicRing)                               # needs sage.rings.padics
         False
 
     By design, there is a unique direct subclass::
 
-        sage: sage.rings.abc.pAdicRing.__subclasses__()                                 # optional - sage.rings.padics
+        sage: sage.rings.abc.pAdicRing.__subclasses__()                                 # needs sage.rings.padics
         [<class 'sage.rings.padics.generic_nodes.pAdicRingGeneric'>]
 
         sage: len(sage.rings.abc.pAdicRing.__subclasses__()) <= 1
@@ -456,14 +456,14 @@ class pAdicField(Field):
     EXAMPLES::
 
         sage: import sage.rings.abc
-        sage: isinstance(Zp(5), sage.rings.abc.pAdicField)                              # optional - sage.rings.padics
+        sage: isinstance(Zp(5), sage.rings.abc.pAdicField)                              # needs sage.rings.padics
         False
-        sage: isinstance(Qp(5), sage.rings.abc.pAdicField)                              # optional - sage.rings.padics
+        sage: isinstance(Qp(5), sage.rings.abc.pAdicField)                              # needs sage.rings.padics
         True
 
     By design, there is a unique direct subclass::
 
-        sage: sage.rings.abc.pAdicField.__subclasses__()                                # optional - sage.rings.padics
+        sage: sage.rings.abc.pAdicField.__subclasses__()                                # needs sage.rings.padics
         [<class 'sage.rings.padics.generic_nodes.pAdicFieldGeneric'>]
 
         sage: len(sage.rings.abc.pAdicField.__subclasses__()) <= 1
@@ -483,13 +483,13 @@ cdef class SymbolicRing(CommutativeRing):
     EXAMPLES::
 
         sage: import sage.rings.abc
-        sage: isinstance(SR, sage.rings.abc.SymbolicRing)                               # optional - sage.symbolic
+        sage: isinstance(SR, sage.rings.abc.SymbolicRing)                               # needs sage.symbolic
         True
 
     By design, other than the abstract subclass :class:`~sage.rings.abc.CallableSymbolicExpressionRing`,
     there is only one direct implementation subclass::
 
-        sage: sage.rings.abc.SymbolicRing.__subclasses__()                              # optional - sage.symbolic
+        sage: sage.rings.abc.SymbolicRing.__subclasses__()                              # needs sage.symbolic
         [<class 'sage.rings.abc.CallableSymbolicExpressionRing'>,
          <class 'sage.symbolic.ring.SymbolicRing'>]
 
@@ -510,13 +510,13 @@ class CallableSymbolicExpressionRing(SymbolicRing):
     EXAMPLES::
 
         sage: import sage.rings.abc
-        sage: f = x.function(x).parent()                                                # optional - sage.symbolic
-        sage: isinstance(f, sage.rings.abc.CallableSymbolicExpressionRing)              # optional - sage.symbolic
+        sage: f = x.function(x).parent()                                                # needs sage.symbolic
+        sage: isinstance(f, sage.rings.abc.CallableSymbolicExpressionRing)              # needs sage.symbolic
         True
 
     By design, there is a unique direct subclass::
 
-        sage: sage.rings.abc.CallableSymbolicExpressionRing.__subclasses__()            # optional - sage.symbolic
+        sage: sage.rings.abc.CallableSymbolicExpressionRing.__subclasses__()            # needs sage.symbolic
         [<class 'sage.symbolic.callable.CallableSymbolicExpressionRing_class'>]
 
         sage: len(sage.rings.abc.CallableSymbolicExpressionRing.__subclasses__()) <= 1

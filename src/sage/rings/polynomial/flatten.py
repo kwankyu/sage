@@ -112,36 +112,36 @@ class FlatteningMorphism(Morphism):
         ::
 
             sage: x = polygen(ZZ, 'x')
-            sage: K.<v> = NumberField(x^3 - 2)                                          # optional - sage.rings.number_field
-            sage: R = K['x','y']['a','b']                                               # optional - sage.rings.number_field
+            sage: K.<v> = NumberField(x^3 - 2)                                          # needs sage.rings.number_field
+            sage: R = K['x','y']['a','b']                                               # needs sage.rings.number_field
             sage: from sage.rings.polynomial.flatten import FlatteningMorphism
-            sage: f = FlatteningMorphism(R)                                             # optional - sage.rings.number_field
-            sage: f(R('v*a*x^2 + b^2 + 1/v*y'))                                         # optional - sage.rings.number_field
+            sage: f = FlatteningMorphism(R)                                             # needs sage.rings.number_field
+            sage: f(R('v*a*x^2 + b^2 + 1/v*y'))                                         # needs sage.rings.number_field
             v*x^2*a + b^2 + (1/2*v^2)*y
 
         ::
 
-            sage: R = QQbar['x','y']['a','b']                                           # optional - sage.rings.number_field
+            sage: R = QQbar['x','y']['a','b']                                           # needs sage.rings.number_field
             sage: from sage.rings.polynomial.flatten import FlatteningMorphism
-            sage: f = FlatteningMorphism(R)                                             # optional - sage.rings.number_field
-            sage: f(R('QQbar(sqrt(2))*a*x^2 + b^2 + QQbar(I)*y'))                       # optional - sage.rings.number_field
+            sage: f = FlatteningMorphism(R)                                             # needs sage.rings.number_field
+            sage: f(R('QQbar(sqrt(2))*a*x^2 + b^2 + QQbar(I)*y'))                       # needs sage.rings.number_field
             1.414213562373095?*x^2*a + b^2 + I*y
 
         ::
 
-            sage: R.<z> = PolynomialRing(QQbar, 1)                                      # optional - sage.rings.number_field
+            sage: R.<z> = PolynomialRing(QQbar, 1)                                      # needs sage.rings.number_field
             sage: from sage.rings.polynomial.flatten import FlatteningMorphism
-            sage: f = FlatteningMorphism(R)                                             # optional - sage.rings.number_field
-            sage: f.domain(), f.codomain()                                              # optional - sage.rings.number_field
+            sage: f = FlatteningMorphism(R)                                             # needs sage.rings.number_field
+            sage: f.domain(), f.codomain()                                              # needs sage.rings.number_field
             (Multivariate Polynomial Ring in z over Algebraic Field,
              Multivariate Polynomial Ring in z over Algebraic Field)
 
         ::
 
-            sage: R.<z> = PolynomialRing(QQbar)                                         # optional - sage.rings.number_field
+            sage: R.<z> = PolynomialRing(QQbar)                                         # needs sage.rings.number_field
             sage: from sage.rings.polynomial.flatten import FlatteningMorphism
-            sage: f = FlatteningMorphism(R)                                             # optional - sage.rings.number_field
-            sage: f.domain(), f.codomain()                                              # optional - sage.rings.number_field
+            sage: f = FlatteningMorphism(R)                                             # needs sage.rings.number_field
+            sage: f.domain(), f.codomain()                                              # needs sage.rings.number_field
             (Univariate Polynomial Ring in z over Algebraic Field,
              Univariate Polynomial Ring in z over Algebraic Field)
 
@@ -376,8 +376,8 @@ class UnflatteningMorphism(Morphism):
 
             sage: from sage.rings.polynomial.flatten import FlatteningMorphism
             sage: rings = [ZZ['x']['y']['a,b,c']]
-            sage: rings += [GF(4)['x','y']['a','b']]                                    # optional - sage.rings.finite_rings
-            sage: rings += [AA['x']['a','b']['y'], QQbar['a1','a2']['t']['X','Y']]      # optional - sage.rings.number_field
+            sage: rings += [GF(4)['x','y']['a','b']]                                    # needs sage.rings.finite_rings
+            sage: rings += [AA['x']['a','b']['y'], QQbar['a1','a2']['t']['X','Y']]      # needs sage.rings.number_field
             sage: for R in rings:
             ....:    f = FlatteningMorphism(R)
             ....:    g = f.section()

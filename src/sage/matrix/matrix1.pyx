@@ -120,11 +120,11 @@ cdef class Matrix(Matrix0):
             true
 
             sage: x = polygen(ZZ, 'x')
-            sage: L.<tau> = NumberField(x^3 - 2)                                        # optional - sage.rings.number_field
-            sage: A = MatrixSpace(L, 2, 2)([0, 1+tau, 2*tau, 3])                        # optional - sage.rings.number_field
-            sage: g = gap(A); g                                                         # optional - sage.rings.number_field
+            sage: L.<tau> = NumberField(x^3 - 2)                                        # needs sage.rings.number_field
+            sage: A = MatrixSpace(L, 2, 2)([0, 1+tau, 2*tau, 3])                        # needs sage.rings.number_field
+            sage: g = gap(A); g                                                         # needs sage.rings.number_field
             [ [ !0, tau+1 ], [ 2*tau, !3 ] ]
-            sage: matrix(L, g) == A
+            sage: matrix(L, g) == A                                                     # needs sage.rings.number_field
             True
         """
         cdef Py_ssize_t i, j

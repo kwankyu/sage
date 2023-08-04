@@ -120,9 +120,9 @@ TESTS::
 Check if :trac:`6160` is fixed::
 
     sage: x = polygen(ZZ, 'x')
-    sage: K.<j> = NumberField(x - 1728)                                                 # optional - sage.rings.number_field
-    sage: R.<b,c> = K[]                                                                 # optional - sage.rings.number_field
-    sage: b - j*c                                                                       # optional - sage.rings.number_field
+    sage: K.<j> = NumberField(x - 1728)                                                 # needs sage.rings.number_field
+    sage: R.<b,c> = K[]                                                                 # needs sage.rings.number_field
+    sage: b - j*c                                                                       # needs sage.rings.number_field
     b - 1728*c
 
 .. TODO::
@@ -368,7 +368,7 @@ cdef class MPolynomialRing_libsingular(MPolynomialRing_base):
             Traceback (most recent call last):
             ...
             NotImplementedError: polynomials over Ring of integers modulo 1 are not supported in Singular
-            sage: MPolynomialRing_libsingular(SR, 1, ["x"], "lex")                      # optional - sage.symbolic
+            sage: MPolynomialRing_libsingular(SR, 1, ["x"], "lex")                      # needs sage.symbolic
             Traceback (most recent call last):
             ...
             NotImplementedError: polynomials over Symbolic Ring are not supported in Singular
@@ -590,9 +590,9 @@ cdef class MPolynomialRing_libsingular(MPolynomialRing_base):
         Check if :trac:`6160` is fixed::
 
             sage: x = polygen(ZZ, 'x')
-            sage: K.<j> = NumberField(x - 1728)                                         # optional - sage.rings.number_field
-            sage: R.<b,c> = K[]                                                         # optional - sage.rings.number_field
-            sage: R.coerce(1)                                                           # optional - sage.rings.number_field
+            sage: K.<j> = NumberField(x - 1728)                                         # needs sage.rings.number_field
+            sage: R.<b,c> = K[]                                                         # needs sage.rings.number_field
+            sage: R.coerce(1)                                                           # needs sage.rings.number_field
             1
 
         Check if coercion from zero variable polynomial rings work
@@ -1266,8 +1266,8 @@ cdef class MPolynomialRing_libsingular(MPolynomialRing_base):
             False
 
             sage: w = polygen(ZZ, 'w')
-            sage: R.<x,y> = PolynomialRing(NumberField(w^2 + 1,'s'))                    # optional - sage.rings.number_field
-            sage: singular(R)                                                           # optional - sage.rings.number_field
+            sage: R.<x,y> = PolynomialRing(NumberField(w^2 + 1,'s'))                    # needs sage.rings.number_field
+            sage: singular(R)                                                           # needs sage.rings.number_field
             polynomial ring, over a field, global ordering
             //   coefficients: QQ[s]/(s^2+1)
             //   number of vars : 2
@@ -4192,22 +4192,22 @@ cdef class MPolynomial_libsingular(MPolynomial_libsingular_base):
         Next we factor a polynomial over a number field.::
 
             sage: p = polygen(ZZ, 'p')
-            sage: K.<s> = NumberField(p^3 - 2)                                          # optional - sage.rings.number_field
-            sage: KXY.<x,y> = K[]                                                       # optional - sage.rings.number_field
-            sage: factor(x^3 - 2*y^3)                                                   # optional - sage.rings.number_field
+            sage: K.<s> = NumberField(p^3 - 2)                                          # needs sage.rings.number_field
+            sage: KXY.<x,y> = K[]                                                       # needs sage.rings.number_field
+            sage: factor(x^3 - 2*y^3)                                                   # needs sage.rings.number_field
             (x + (-s)*y) * (x^2 + s*x*y + (s^2)*y^2)
-            sage: k = (x^3-2*y^3)^5*(x+s*y)^2*(2/3 + s^2)
-            sage: k.factor()
+            sage: k = (x^3-2*y^3)^5*(x+s*y)^2*(2/3 + s^2)                               # needs sage.rings.number_field
+            sage: k.factor()                                                            # needs sage.rings.number_field
             ((s^2 + 2/3)) * (x + s*y)^2 * (x + (-s)*y)^5 * (x^2 + s*x*y + (s^2)*y^2)^5
 
         This shows that issue :trac:`2780` is fixed, i.e. that the unit
         part of the factorization is set correctly::
 
             sage: x = polygen(ZZ, 'x')
-            sage: K.<a> = NumberField(x^2 + 1)                                          # optional - sage.rings.number_field
-            sage: R.<y, z> = PolynomialRing(K)                                          # optional - sage.rings.number_field
-            sage: f = 2*y^2 + 2*z^2                                                     # optional - sage.rings.number_field
-            sage: F = f.factor(); F.unit()                                              # optional - sage.rings.number_field
+            sage: K.<a> = NumberField(x^2 + 1)                                          # needs sage.rings.number_field
+            sage: R.<y, z> = PolynomialRing(K)                                          # needs sage.rings.number_field
+            sage: f = 2*y^2 + 2*z^2                                                     # needs sage.rings.number_field
+            sage: F = f.factor(); F.unit()                                              # needs sage.rings.number_field
             2
 
         Another example::
@@ -4851,10 +4851,10 @@ cdef class MPolynomial_libsingular(MPolynomial_libsingular_base):
             (a^2 + a)*x^6*y + (a^4 + a^3 + a)*x^4*y + (a^5)*x^4
 
             sage: w = polygen(ZZ, 'w')
-            sage: r.<x,y> = PolynomialRing(NumberField(w^4 + 1, 'a'), 2)                # optional - sage.rings.number_field
-            sage: a = r.base_ring().0                                                   # optional - sage.rings.number_field
-            sage: f = (a^2+a)*x^2*y + (a^4+a^3+a)*y + a^5                               # optional - sage.rings.number_field
-            sage: f.lcm(x^4)                                                            # optional - sage.rings.number_field
+            sage: r.<x,y> = PolynomialRing(NumberField(w^4 + 1, 'a'), 2)                # needs sage.rings.number_field
+            sage: a = r.base_ring().0                                                   # needs sage.rings.number_field
+            sage: f = (a^2+a)*x^2*y + (a^4+a^3+a)*y + a^5                               # needs sage.rings.number_field
+            sage: f.lcm(x^4)                                                            # needs sage.rings.number_field
             (a^2 + a)*x^6*y + (a^3 + a - 1)*x^4*y + (-a)*x^4
 
         TESTS::
@@ -5067,17 +5067,18 @@ cdef class MPolynomial_libsingular(MPolynomial_libsingular_base):
             sage: f = (x^3 + 2*y^2*x)^7; f          # indirect doctest
             x^21 + 2*x^7*y^14
 
-            sage: h = macaulay2(f); h               # optional - macaulay2
+            sage: # optional - macaulay2
+            sage: h = macaulay2(f); h
              21     7 14
             x   + 2x y
-            sage: k = macaulay2(x+y); k             # optional - macaulay2
+            sage: k = macaulay2(x+y); k
             x + y
-            sage: k + h                             # optional - macaulay2
+            sage: k + h
              21     7 14
             x   + 2x y   + x + y
-            sage: R(h)                              # optional - macaulay2
+            sage: R(h)
             x^21 + 2*x^7*y^14
-            sage: R(h^20) == f^20                   # optional - macaulay2
+            sage: R(h^20) == f^20
             True
 
         TESTS:

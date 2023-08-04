@@ -82,18 +82,19 @@ frequently request it::
 
 Symbolic functional notation::
 
-    sage: a=10; f(theta, beta) = theta + beta; b = x^2 + theta              # optional - sage.symbolic
-    sage: f                                                                 # optional - sage.symbolic
+    sage: # needs sage.symbolic
+    sage: a=10; f(theta, beta) = theta + beta; b = x^2 + theta
+    sage: f
     (theta, beta) |--> beta + theta
-    sage: a                                                                 # optional - sage.symbolic
+    sage: a
     10
-    sage: b                                                                 # optional - sage.symbolic
+    sage: b
     x^2 + theta
-    sage: f(theta,theta)                                                    # optional - sage.symbolic
+    sage: f(theta,theta)
     2*theta
 
-    sage: a = 5; f(x,y) = x*y*sqrt(a)                                       # optional - sage.symbolic
-    sage: f                                                                 # optional - sage.symbolic
+    sage: a = 5; f(x,y) = x*y*sqrt(a)                                                   # needs sage.symbolic
+    sage: f                                                                             # needs sage.symbolic
     (x, y) |--> sqrt(5)*x*y
 
 This involves an =-, but should still be turned into a symbolic
@@ -101,8 +102,8 @@ expression::
 
     sage: preparse('a(x) =- 5')
     '__tmp__=var("x"); a = symbolic_expression(- Integer(5)).function(x)'
-    sage: f(x)=-x                                                           # optional - sage.symbolic
-    sage: f(10)                                                             # optional - sage.symbolic
+    sage: f(x)=-x                                                                       # needs sage.symbolic
+    sage: f(10)                                                                         # needs sage.symbolic
     -10
 
 This involves -=, which should not be turned into a symbolic

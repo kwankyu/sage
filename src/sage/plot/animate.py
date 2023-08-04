@@ -825,18 +825,20 @@ class Animation(WithEqualityById, SageObject):
 
         You can also make use of the HTML5 video element in the Sage Notebook::
 
-            sage: a.show(format="ogg")                  # long time  # optional -- ffmpeg
-            sage: a.show(format="webm")                 # long time  # optional -- ffmpeg
-            sage: a.show(format="mp4")                  # long time  # optional -- ffmpeg
-            sage: a.show(format="webm", iterations=1)   # long time  # optional -- ffmpeg
+            sage: # long time, optional - ffmpeg
+            sage: a.show(format="ogg")
+            sage: a.show(format="webm")
+            sage: a.show(format="mp4")
+            sage: a.show(format="webm", iterations=1)
 
         Other backends may support other file formats as well::
 
-            sage: a.show(format="flash")                # long time  # optional -- ffmpeg
-            sage: a.show(format="matroska")             # long time  # optional -- ffmpeg
-            sage: a.show(format="avi")                  # long time  # optional -- ffmpeg
-            sage: a.show(format="wmv")                  # long time  # optional -- ffmpeg
-            sage: a.show(format="quicktime")            # long time  # optional -- ffmpeg
+            sage: # long time, optional - ffmpeg
+            sage: a.show(format="flash")
+            sage: a.show(format="matroska")
+            sage: a.show(format="avi")
+            sage: a.show(format="wmv")
+            sage: a.show(format="quicktime")
 
         TESTS:
 
@@ -1132,22 +1134,23 @@ class Animation(WithEqualityById, SageObject):
         Ensure that we can pass delay and iteration count to the saved
         GIF image (see :trac:`18176`)::
 
-            sage: a.save(td + 'wave.gif')                   # long time  # optional -- ImageMagick
-            sage: with open(td + 'wave.gif', 'rb') as f:    # long time  # optional -- ImageMagick
+            sage: # long time, optional - imagemagick
+            sage: a.save(td + 'wave.gif')
+            sage: with open(td + 'wave.gif', 'rb') as f:
             ....:     print(b'GIF8' in f.read())
             True
-            sage: with open(td + 'wave.gif', 'rb') as f:    # long time  # optional -- ImageMagick
+            sage: with open(td + 'wave.gif', 'rb') as f:
             ....:     print(b'!\xff\x0bNETSCAPE2.0\x03\x01\x00\x00\x00' in f.read())
             True
-            sage: a.save(td + 'wave.gif', delay=35)         # long time  # optional -- ImageMagick
-            sage: with open(td + 'wave.gif', 'rb') as f:    # long time  # optional -- ImageMagick
+            sage: a.save(td + 'wave.gif', delay=35)
+            sage: with open(td + 'wave.gif', 'rb') as f:
             ....:     print(b'GIF8' in f.read())
             True
-            sage: a.save(td + 'wave.gif', iterations=3)     # long time  # optional -- ImageMagick
-            sage: with open(td + 'wave.gif', 'rb') as f:    # long time  # optional -- ImageMagick
+            sage: a.save(td + 'wave.gif', iterations=3)
+            sage: with open(td + 'wave.gif', 'rb') as f:
             ....:     print(b'!\xff\x0bNETSCAPE2.0\x03\x01\x00\x00\x00' in f.read())
             False
-            sage: with open(td + 'wave.gif', 'rb') as f:    # long time  # optional -- ImageMagick
+            sage: with open(td + 'wave.gif', 'rb') as f:
             ....:      check1 = b'!\xff\x0bNETSCAPE2.0\x03\x01\x02\x00\x00'
             ....:      check2 = b'!\xff\x0bNETSCAPE2.0\x03\x01\x03\x00\x00'
             ....:      data = f.read()

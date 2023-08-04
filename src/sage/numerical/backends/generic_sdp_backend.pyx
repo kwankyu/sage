@@ -495,24 +495,25 @@ cdef class GenericSDPBackend:
 
         EXAMPLES::
 
-            sage: p = SemidefiniteProgram(maximization = False,solver = "Nonexistent_LP_solver")  # optional - Nonexistent_LP_solver
-            sage: x = p.new_variable()              # optional - Nonexistent_LP_solver
-            sage: p.set_objective(x[0] - x[1])      # optional - Nonexistent_LP_solver
-            sage: a1 = matrix([[1, 2.], [2., 3.]])  # optional - Nonexistent_LP_solver
-            sage: a2 = matrix([[3, 4.], [4., 5.]])  # optional - Nonexistent_LP_solver
-            sage: a3 = matrix([[5, 6.], [6., 7.]])  # optional - Nonexistent_LP_solver
-            sage: b1 = matrix([[1, 1.], [1., 1.]])  # optional - Nonexistent_LP_solver
-            sage: b2 = matrix([[2, 2.], [2., 2.]])  # optional - Nonexistent_LP_solver
-            sage: b3 = matrix([[3, 3.], [3., 3.]])  # optional - Nonexistent_LP_solver
-            sage: p.add_constraint(a1*x[0] + a2*x[1] <= a3)  # optional - Nonexistent_LP_solver
-            sage: p.add_constraint(b1*x[0] + b2*x[1] <= b3)  # optional - Nonexistent_LP_solver
-            sage: p.solve()  # optional - Nonexistent_LP_solver # tol ???
+            sage: # optional - nonexistent_lp_solver
+            sage: p = SemidefiniteProgram(maximization = False,solver = "Nonexistent_LP_solver")
+            sage: x = p.new_variable()
+            sage: p.set_objective(x[0] - x[1])
+            sage: a1 = matrix([[1, 2.], [2., 3.]])
+            sage: a2 = matrix([[3, 4.], [4., 5.]])
+            sage: a3 = matrix([[5, 6.], [6., 7.]])
+            sage: b1 = matrix([[1, 1.], [1., 1.]])
+            sage: b2 = matrix([[2, 2.], [2., 2.]])
+            sage: b3 = matrix([[3, 3.], [3., 3.]])
+            sage: p.add_constraint(a1*x[0] + a2*x[1] <= a3)
+            sage: p.add_constraint(b1*x[0] + b2*x[1] <= b3)
+            sage: p.solve()
             -3.0
-            sage: B=p.get_backend()  # optional - Nonexistent_LP_solver
-            sage: x=p.get_values(x).values()  # optional - Nonexistent_LP_solver
-            sage: -(a3*B.dual_variable(0)).trace()-(b3*B.dual_variable(1)).trace()  # optional - Nonexistent_LP_solver # tol ???
+            sage: B=p.get_backend()
+            sage: x=p.get_values(x).values()
+            sage: -(a3*B.dual_variable(0)).trace()-(b3*B.dual_variable(1)).trace()
             -3.0
-            sage: g = sum((B.slack(j)*B.dual_variable(j)).trace() for j in range(2)); g  # optional - Nonexistent_LP_solver # tol ???
+            sage: g = sum((B.slack(j)*B.dual_variable(j)).trace() for j in range(2)); g
             0.0
 
         TESTS::
@@ -541,27 +542,28 @@ cdef class GenericSDPBackend:
 
         EXAMPLES::
 
-            sage: p = SemidefiniteProgram(maximization = False,solver = "Nonexistent_LP_solver")  # optional - Nonexistent_LP_solver
-            sage: x = p.new_variable()              # optional - Nonexistent_LP_solver
-            sage: p.set_objective(x[0] - x[1])      # optional - Nonexistent_LP_solver
-            sage: a1 = matrix([[1, 2.], [2., 3.]])  # optional - Nonexistent_LP_solver
-            sage: a2 = matrix([[3, 4.], [4., 5.]])  # optional - Nonexistent_LP_solver
-            sage: a3 = matrix([[5, 6.], [6., 7.]])  # optional - Nonexistent_LP_solver
-            sage: b1 = matrix([[1, 1.], [1., 1.]])  # optional - Nonexistent_LP_solver
-            sage: b2 = matrix([[2, 2.], [2., 2.]])  # optional - Nonexistent_LP_solver
-            sage: b3 = matrix([[3, 3.], [3., 3.]])  # optional - Nonexistent_LP_solver
-            sage: p.add_constraint(a1*x[0] + a2*x[1] <= a3)  # optional - Nonexistent_LP_solver
-            sage: p.add_constraint(b1*x[0] + b2*x[1] <= b3)  # optional - Nonexistent_LP_solver
-            sage: p.solve()  # optional - Nonexistent_LP_solver # tol ???
+            sage: # optional - nonexistent_lp_solver
+            sage: p = SemidefiniteProgram(maximization = False,solver = "Nonexistent_LP_solver")
+            sage: x = p.new_variable()
+            sage: p.set_objective(x[0] - x[1])
+            sage: a1 = matrix([[1, 2.], [2., 3.]])
+            sage: a2 = matrix([[3, 4.], [4., 5.]])
+            sage: a3 = matrix([[5, 6.], [6., 7.]])
+            sage: b1 = matrix([[1, 1.], [1., 1.]])
+            sage: b2 = matrix([[2, 2.], [2., 2.]])
+            sage: b3 = matrix([[3, 3.], [3., 3.]])
+            sage: p.add_constraint(a1*x[0] + a2*x[1] <= a3)
+            sage: p.add_constraint(b1*x[0] + b2*x[1] <= b3)
+            sage: p.solve()
             -3.0
-            sage: B=p.get_backend()             # optional - Nonexistent_LP_solver
-            sage: B1 = B.slack(1); B1           # optional - Nonexistent_LP_solver # tol ???
+            sage: B=p.get_backend()
+            sage: B1 = B.slack(1); B1
             [0.0 0.0]
             [0.0 0.0]
-            sage: B1.is_positive_definite()     # optional - Nonexistent_LP_solver
+            sage: B1.is_positive_definite()
             True
-            sage: x = p.get_values(x).values()  # optional - Nonexistent_LP_solver
-            sage: x[0]*b1 + x[1]*b2 - b3 + B1   # optional - Nonexistent_LP_solver # tol ???
+            sage: x = p.get_values(x).values()
+            sage: x[0]*b1 + x[1]*b2 - b3 + B1
             [0.0 0.0]
             [0.0 0.0]
 

@@ -138,13 +138,14 @@ cdef class GenericBackend:
 
         Check that arguments are used::
 
-            sage: p.col_bounds(5) # tol 1e-8, optional - Nonexistent_LP_solver
+            sage: # optional - nonexistent_lp_solver
+            sage: p.col_bounds(5)
             (-2.0, None)
-            sage: p.is_variable_integer(5)   # optional - Nonexistent_LP_solver
+            sage: p.is_variable_integer(5)
             True
-            sage: p.col_name(5)              # optional - Nonexistent_LP_solver
+            sage: p.col_name(5)
             'a'
-            sage: p.objective_coefficient(5) # tol 1e-8, optional - Nonexistent_LP_solver
+            sage: p.objective_coefficient(5)
             42.0
         """
         cdef int i
@@ -351,13 +352,14 @@ cdef class GenericBackend:
 
         Constants in the objective function are respected::
 
-            sage: p = MixedIntegerLinearProgram(solver='Nonexistent_LP_solver') # optional - Nonexistent_LP_solver
-            sage: x,y = p[0], p[1]                              # optional - Nonexistent_LP_solver
-            sage: p.add_constraint(2*x + 3*y, max = 6)          # optional - Nonexistent_LP_solver
-            sage: p.add_constraint(3*x + 2*y, max = 6)          # optional - Nonexistent_LP_solver
-            sage: p.set_objective(x + y + 7)                    # optional - Nonexistent_LP_solver
-            sage: p.set_integer(x); p.set_integer(y)            # optional - Nonexistent_LP_solver
-            sage: p.solve()                                     # optional - Nonexistent_LP_solver
+            sage: # optional - nonexistent_lp_solver
+            sage: p = MixedIntegerLinearProgram(solver='Nonexistent_LP_solver')
+            sage: x,y = p[0], p[1]
+            sage: p.add_constraint(2*x + 3*y, max = 6)
+            sage: p.add_constraint(3*x + 2*y, max = 6)
+            sage: p.set_objective(x + y + 7)
+            sage: p.set_integer(x); p.set_integer(y)
+            sage: p.solve()
             9.0
         """
         raise NotImplementedError()
@@ -388,19 +390,20 @@ cdef class GenericBackend:
 
         EXAMPLES::
 
-            sage: p = MixedIntegerLinearProgram(solver="Nonexistent_LP_solver")  # optional - Nonexistent_LP_solver
-            sage: v = p.new_variable(nonnegative=True)         # optional - Nonexistent_LP_solver
-            sage: x,y = v[0], v[1]                             # optional - Nonexistent_LP_solver
-            sage: p.add_constraint(2*x + 3*y, max = 6)         # optional - Nonexistent_LP_solver
-            sage: p.add_constraint(3*x + 2*y, max = 6)         # optional - Nonexistent_LP_solver
-            sage: p.set_objective(x + y + 7)                   # optional - Nonexistent_LP_solver
-            sage: p.set_integer(x); p.set_integer(y)           # optional - Nonexistent_LP_solver
-            sage: p.solve()                                    # optional - Nonexistent_LP_solver
+            sage: # optional - nonexistent_lp_solver
+            sage: p = MixedIntegerLinearProgram(solver="Nonexistent_LP_solver")
+            sage: v = p.new_variable(nonnegative=True)
+            sage: x,y = v[0], v[1]
+            sage: p.add_constraint(2*x + 3*y, max = 6)
+            sage: p.add_constraint(3*x + 2*y, max = 6)
+            sage: p.set_objective(x + y + 7)
+            sage: p.set_integer(x); p.set_integer(y)
+            sage: p.solve()
             9.0
-            sage: p.remove_constraint(0)                       # optional - Nonexistent_LP_solver
-            sage: p.solve()                                    # optional - Nonexistent_LP_solver
+            sage: p.remove_constraint(0)
+            sage: p.solve()
             10.0
-            sage: p.get_values([x,y])                          # optional - Nonexistent_LP_solver
+            sage: p.get_values([x,y])
             [0.0, 3.0]
         """
         raise NotImplementedError()
@@ -774,17 +777,18 @@ cdef class GenericBackend:
 
         EXAMPLES::
 
-            sage: p = MixedIntegerLinearProgram(solver="Nonexistent_LP_solver") # optional - Nonexistent_LP_solver
-            sage: b = p.new_variable(binary=True)                      # optional - Nonexistent_LP_solver
-            sage: for u,v in graphs.CycleGraph(5).edges(labels=False): # optional - Nonexistent_LP_solver
+            sage: # optional - nonexistent_lp_solver
+            sage: p = MixedIntegerLinearProgram(solver="Nonexistent_LP_solver")
+            sage: b = p.new_variable(binary=True)
+            sage: for u,v in graphs.CycleGraph(5).edges(labels=False):
             ....:     p.add_constraint(b[u]+b[v]<=1)
-            sage: p.set_objective(p.sum(b[x] for x in range(5)))       # optional - Nonexistent_LP_solver
-            sage: p.solve()                                            # optional - Nonexistent_LP_solver
+            sage: p.set_objective(p.sum(b[x] for x in range(5)))
+            sage: p.solve()
             2.0
-            sage: pb = p.get_backend()                                 # optional - Nonexistent_LP_solver
-            sage: pb.get_objective_value()                             # optional - Nonexistent_LP_solver
+            sage: pb = p.get_backend()
+            sage: pb.get_objective_value()
             2.0
-            sage: pb.best_known_objective_bound()                      # optional - Nonexistent_LP_solver
+            sage: pb.best_known_objective_bound()
             2.0
         """
         raise NotImplementedError()
@@ -809,17 +813,18 @@ cdef class GenericBackend:
 
         EXAMPLES::
 
-            sage: p = MixedIntegerLinearProgram(solver="Nonexistent_LP_solver") # optional - Nonexistent_LP_solver
-            sage: b = p.new_variable(binary=True)                      # optional - Nonexistent_LP_solver
-            sage: for u,v in graphs.CycleGraph(5).edges(labels=False): # optional - Nonexistent_LP_solver
+            sage: # optional - nonexistent_lp_solver
+            sage: p = MixedIntegerLinearProgram(solver="Nonexistent_LP_solver")
+            sage: b = p.new_variable(binary=True)
+            sage: for u,v in graphs.CycleGraph(5).edges(labels=False):
             ....:     p.add_constraint(b[u]+b[v]<=1)
-            sage: p.set_objective(p.sum(b[x] for x in range(5)))       # optional - Nonexistent_LP_solver
-            sage: p.solve()                                            # optional - Nonexistent_LP_solver
+            sage: p.set_objective(p.sum(b[x] for x in range(5)))
+            sage: p.solve()
             2.0
-            sage: pb = p.get_backend()                                 # optional - Nonexistent_LP_solver
-            sage: pb.get_objective_value()                             # optional - Nonexistent_LP_solver
+            sage: pb = p.get_backend()
+            sage: pb.get_objective_value()
             2.0
-            sage: pb.get_relative_objective_gap()                      # optional - Nonexistent_LP_solver
+            sage: pb.get_relative_objective_gap()
             0.0
         """
         raise NotImplementedError()
@@ -1728,18 +1733,18 @@ cpdef GenericBackend get_solver(constraint_generation = False, solver = None, ba
         <...sage.numerical.backends.ppl_backend.PPLBackend...>
         sage: p.base_ring()
         Rational Field
-        sage: p = get_solver(base_ring=AA); p                                         # optional - sage.rings.number_field
+        sage: p = get_solver(base_ring=AA); p                                           # needs sage.rings.number_field
         <...sage.numerical.backends.interactivelp_backend.InteractiveLPBackend...>
-        sage: p.base_ring()                                                           # optional - sage.rings.number_field
+        sage: p.base_ring()                                                             # needs sage.rings.number_field
         Algebraic Real Field
-        sage: d = polytopes.dodecahedron()                                            # optional - sage.rings.number_field
-        sage: p = get_solver(base_ring=d.base_ring()); p                              # optional - sage.rings.number_field
+        sage: d = polytopes.dodecahedron()                                              # needs sage.rings.number_field
+        sage: p = get_solver(base_ring=d.base_ring()); p                                # needs sage.rings.number_field
         <...sage.numerical.backends.interactivelp_backend.InteractiveLPBackend...>
-        sage: p.base_ring()                                                           # optional - sage.rings.number_field
+        sage: p.base_ring()                                                             # needs sage.rings.number_field
         Number Field in sqrt5 with defining polynomial x^2 - 5 with sqrt5 = 2.236067977499790?
-        sage: p = get_solver(solver='InteractiveLP', base_ring=QQ); p                 # optional - sage.rings.number_field
+        sage: p = get_solver(solver='InteractiveLP', base_ring=QQ); p                   # needs sage.rings.number_field
         <...sage.numerical.backends.interactivelp_backend.InteractiveLPBackend...>
-        sage: p.base_ring()                                                           # optional - sage.rings.number_field
+        sage: p.base_ring()                                                             # needs sage.rings.number_field
         Rational Field
 
     Passing a callable as the 'solver'::

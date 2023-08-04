@@ -834,12 +834,12 @@ class CubicalComplex(GenericCellComplex):
         Cubical complex with 16 vertices and 64 cubes
         sage: T.chain_complex()
         Chain complex with at most 3 nonzero terms over Integer Ring
-        sage: T.homology(base_ring=QQ)                                                  # optional - sage.modules
+        sage: T.homology(base_ring=QQ)                                                  # needs sage.modules
         {0: Vector space of dimension 0 over Rational Field,
          1: Vector space of dimension 2 over Rational Field,
          2: Vector space of dimension 1 over Rational Field}
         sage: RP2 = cubical_complexes.RealProjectivePlane()
-        sage: RP2.cohomology(dim=[1, 2], base_ring=GF(2))                               # optional - sage.modules sage.rings.finite_rings
+        sage: RP2.cohomology(dim=[1, 2], base_ring=GF(2))                               # needs sage.modules sage.rings.finite_rings
         {1: Vector space of dimension 1 over Finite Field of size 2,
          2: Vector space of dimension 1 over Finite Field of size 2}
 
@@ -1332,7 +1332,7 @@ class CubicalComplex(GenericCellComplex):
 
         EXAMPLES::
 
-            sage: cubical_complexes.Sphere(2).graph()                                   # optional - sage.graphs
+            sage: cubical_complexes.Sphere(2).graph()                                   # needs sage.graphs
             Graph on 8 vertices
         """
         from sage.graphs.graph import Graph
@@ -1551,12 +1551,12 @@ class CubicalComplex(GenericCellComplex):
 
             sage: T = cubical_complexes.Torus()
             sage: S2 = cubical_complexes.Sphere(2)
-            sage: T.connected_sum(S2).cohomology() == T.cohomology()                    # optional - sage.modules
+            sage: T.connected_sum(S2).cohomology() == T.cohomology()                    # needs sage.modules
             True
             sage: RP2 = cubical_complexes.RealProjectivePlane()
-            sage: T.connected_sum(RP2).homology(1)                                      # optional - sage.modules
+            sage: T.connected_sum(RP2).homology(1)                                      # needs sage.modules
             Z x Z x C2
-            sage: RP2.connected_sum(RP2).connected_sum(RP2).homology(1)                 # optional - sage.modules
+            sage: RP2.connected_sum(RP2).connected_sum(RP2).homology(1)                 # needs sage.modules
             Z x Z x C2
         """
         # connected_sum: first check whether the complexes are pure
@@ -1672,14 +1672,14 @@ class CubicalComplex(GenericCellComplex):
         EXAMPLES::
 
             sage: RP2 = cubical_complexes.RealProjectivePlane()
-            sage: phi, M = RP2.algebraic_topological_model(GF(2))                       # optional - sage.rings.finite_rings
-            sage: M.homology()                                                          # optional - sage.modules sage.rings.finite_rings
+            sage: phi, M = RP2.algebraic_topological_model(GF(2))                       # needs sage.rings.finite_rings
+            sage: M.homology()                                                          # needs sage.modules sage.rings.finite_rings
             {0: Vector space of dimension 1 over Finite Field of size 2,
              1: Vector space of dimension 1 over Finite Field of size 2,
              2: Vector space of dimension 1 over Finite Field of size 2}
             sage: T = cubical_complexes.Torus()
             sage: phi, M = T.algebraic_topological_model(QQ)
-            sage: M.homology()                                                          # optional - sage.modules
+            sage: M.homology()                                                          # needs sage.modules
             {0: Vector space of dimension 1 over Rational Field,
              1: Vector space of dimension 2 over Rational Field,
              2: Vector space of dimension 1 over Rational Field}

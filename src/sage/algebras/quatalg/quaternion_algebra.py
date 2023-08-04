@@ -2480,12 +2480,13 @@ class QuaternionFractionalIdeal_rational(QuaternionFractionalIdeal):
             sage: [I.norm() for I in C]
             [16, 32, 32]
 
-            sage: (a,b) = M.quaternion_algebra().invariants()                                       # optional - magma
-            sage: magma.eval('A<i,j,k> := QuaternionAlgebra<Rationals() | %s, %s>' % (a,b))         # optional - magma
+            sage: # optional - magma
+            sage: (a,b) = M.quaternion_algebra().invariants()
+            sage: magma.eval('A<i,j,k> := QuaternionAlgebra<Rationals() | %s, %s>' % (a,b))
             ''
-            sage: magma.eval('O := QuaternionOrder(%s)' % str(list(C[0].right_order().basis())))    # optional - magma
+            sage: magma.eval('O := QuaternionOrder(%s)' % str(list(C[0].right_order().basis())))
             ''
-            sage: [ magma('rideal<O | %s>' % str(list(I.basis()))).Norm() for I in C]               # optional - magma
+            sage: [ magma('rideal<O | %s>' % str(list(I.basis()))).Norm() for I in C]
             [16, 32, 32]
 
             sage: A.<i,j,k> = QuaternionAlgebra(-1,-1)

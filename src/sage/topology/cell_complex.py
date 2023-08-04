@@ -508,20 +508,20 @@ class GenericCellComplex(SageObject):
             {0: 0, 1: C2, 2: 0}
             sage: P.homology(reduced=False)
             {0: Z, 1: C2, 2: 0}
-            sage: P.homology(base_ring=GF(2))                                           # optional - sage.modules sage.rings.finite_rings
+            sage: P.homology(base_ring=GF(2))                                           # needs sage.modules sage.rings.finite_rings
             {0: Vector space of dimension 0 over Finite Field of size 2,
              1: Vector space of dimension 1 over Finite Field of size 2,
              2: Vector space of dimension 1 over Finite Field of size 2}
             sage: S7 = delta_complexes.Sphere(7)
-            sage: S7.homology(7)                                                        # optional - sage.modules
+            sage: S7.homology(7)                                                        # needs sage.modules
             Z
-            sage: cubical_complexes.KleinBottle().homology(1, base_ring=GF(2))          # optional - sage.modules sage.rings.finite_rings
+            sage: cubical_complexes.KleinBottle().homology(1, base_ring=GF(2))          # needs sage.modules sage.rings.finite_rings
             Vector space of dimension 2 over Finite Field of size 2
 
         Sage can compute generators of homology groups::
 
             sage: S2 = simplicial_complexes.Sphere(2)
-            sage: S2.homology(dim=2, generators=True, base_ring=GF(2))                  # optional - sage.modules sage.rings.finite_rings
+            sage: S2.homology(dim=2, generators=True, base_ring=GF(2))                  # needs sage.modules sage.rings.finite_rings
             [(Vector space of dimension 1 over Finite Field of size 2,
               (0, 1, 2) + (0, 1, 3) + (0, 2, 3) + (1, 2, 3))]
 
@@ -532,7 +532,7 @@ class GenericCellComplex(SageObject):
         complexes, each generator is a linear combination of cubes::
 
             sage: S2_cub = cubical_complexes.Sphere(2)
-            sage: S2_cub.homology(dim=2, generators=True)                               # optional - sage.modules
+            sage: S2_cub.homology(dim=2, generators=True)                               # needs sage.modules
             [(Z,
              [0,0] x [0,1] x [0,1] - [0,1] x [0,0] x [0,1] + [0,1] x [0,1] x [0,0]
              - [0,1] x [0,1] x [1,1] + [0,1] x [1,1] x [0,1] - [1,1] x [0,1] x [0,1])]
@@ -540,7 +540,7 @@ class GenericCellComplex(SageObject):
         Similarly for simpicial sets::
 
             sage: S = simplicial_sets.Sphere(2)
-            sage: S.homology(generators=True)                                           # optional - sage.modules
+            sage: S.homology(generators=True)                                           # needs sage.modules
             {0: [], 1: 0, 2: [(Z, sigma_2)]}
         """
         from sage.homology.homology_group import HomologyGroup
@@ -626,27 +626,27 @@ class GenericCellComplex(SageObject):
 
             sage: P2 = SimplicialComplex([[0,1,2], [0,2,3], [0,1,5], [0,4,5], [0,3,4],
             ....:                         [1,2,4], [1,3,4], [1,3,5], [2,3,5], [2,4,5]])
-            sage: P2.cohomology(2)                                                      # optional - sage.modules
+            sage: P2.cohomology(2)                                                      # needs sage.modules
             C2
-            sage: P2.cohomology(2, base_ring=GF(2))                                     # optional - sage.modules sage.rings.finite_rings
+            sage: P2.cohomology(2, base_ring=GF(2))                                     # needs sage.modules sage.rings.finite_rings
             Vector space of dimension 1 over Finite Field of size 2
-            sage: P2.cohomology(2, base_ring=GF(3))                                     # optional - sage.modules sage.rings.finite_rings
+            sage: P2.cohomology(2, base_ring=GF(3))                                     # needs sage.modules sage.rings.finite_rings
             Vector space of dimension 0 over Finite Field of size 3
 
-            sage: cubical_complexes.KleinBottle().cohomology(2)                         # optional - sage.modules
+            sage: cubical_complexes.KleinBottle().cohomology(2)                         # needs sage.modules
             C2
 
         Relative cohomology::
 
             sage: T = SimplicialComplex([[0,1]])
             sage: U = SimplicialComplex([[0], [1]])
-            sage: T.cohomology(1, subcomplex=U)                                         # optional - sage.modules
+            sage: T.cohomology(1, subcomplex=U)                                         # needs sage.modules
             Z
 
         A `\Delta`-complex example::
 
             sage: s5 = delta_complexes.Sphere(5)
-            sage: s5.cohomology(base_ring=GF(7))[5]                                     # optional - sage.modules sage.rings.finite_rings
+            sage: s5.cohomology(base_ring=GF(7))[5]                                     # needs sage.modules sage.rings.finite_rings
             Vector space of dimension 1 over Finite Field of size 7
         """
         return self.homology(dim=dim, cohomology=True, base_ring=base_ring,
@@ -840,26 +840,26 @@ class GenericCellComplex(SageObject):
         EXAMPLES::
 
             sage: K = simplicial_complexes.KleinBottle()
-            sage: H = K.homology_with_basis(QQ); H                                      # optional - sage.modules
+            sage: H = K.homology_with_basis(QQ); H                                      # needs sage.modules
             Homology module of Minimal triangulation of the Klein bottle
              over Rational Field
-            sage: sorted(H.basis(), key=str)                                            # optional - sage.modules
+            sage: sorted(H.basis(), key=str)                                            # needs sage.modules
             [h_{0,0}, h_{1,0}]
-            sage: H = K.homology_with_basis(GF(2)); H                                   # optional - sage.modules sage.rings.finite_rings
+            sage: H = K.homology_with_basis(GF(2)); H                                   # needs sage.modules sage.rings.finite_rings
             Homology module of Minimal triangulation of the Klein bottle
              over Finite Field of size 2
-            sage: sorted(H.basis(), key=str)                                            # optional - sage.modules sage.rings.finite_rings
+            sage: sorted(H.basis(), key=str)                                            # needs sage.modules sage.rings.finite_rings
             [h_{0,0}, h_{1,0}, h_{1,1}, h_{2,0}]
 
         The homology is constructed as a graded object, so for
         example, you can ask for the basis in a single degree::
 
-            sage: H.basis(1)                                                            # optional - sage.modules sage.rings.finite_rings
+            sage: H.basis(1)                                                            # needs sage.modules sage.rings.finite_rings
             Finite family {(1, 0): h_{1,0}, (1, 1): h_{1,1}}
 
             sage: S3 = delta_complexes.Sphere(3)
-            sage: H = S3.homology_with_basis(QQ, cohomology=True)                       # optional - sage.modules
-            sage: list(H.basis(3))                                                      # optional - sage.modules
+            sage: H = S3.homology_with_basis(QQ, cohomology=True)                       # needs sage.modules
+            sage: list(H.basis(3))                                                      # needs sage.modules
             [h^{3,0}]
         """
         from sage.homology.homology_vector_space_with_basis import HomologyVectorSpaceWithBasis
@@ -904,10 +904,10 @@ class GenericCellComplex(SageObject):
              over Rational Field
             sage: sorted(H.basis(), key=str)
             [h^{0,0}, h^{1,0}]
-            sage: H = K.cohomology_ring(GF(2)); H                                       # optional - sage.rings.finite_rings
+            sage: H = K.cohomology_ring(GF(2)); H                                       # needs sage.rings.finite_rings
             Cohomology ring of Minimal triangulation of the Klein bottle
              over Finite Field of size 2
-            sage: sorted(H.basis(), key=str)                                            # optional - sage.rings.finite_rings
+            sage: sorted(H.basis(), key=str)                                            # needs sage.rings.finite_rings
             [h^{0,0}, h^{1,0}, h^{1,1}, h^{2,0}]
 
             sage: X = delta_complexes.SurfaceOfGenus(2)
@@ -938,12 +938,13 @@ class GenericCellComplex(SageObject):
 
         Cohomology operations::
 
-            sage: RP2 = simplicial_complexes.RealProjectivePlane()                      # optional - sage.groups
-            sage: K = RP2.suspension()                                                  # optional - sage.graphs sage.groups
-            sage: K.set_immutable()                                                     # optional - sage.graphs sage.groups
-            sage: y = K.cohomology_ring(GF(2)).basis()[2,0]; y                          # optional - sage.graphs sage.groups sage.rings.finite_rings
+            sage: # needs sage.groups
+            sage: RP2 = simplicial_complexes.RealProjectivePlane()
+            sage: K = RP2.suspension()                                                  # needs sage.graphs
+            sage: K.set_immutable()                                                     # needs sage.graphs
+            sage: y = K.cohomology_ring(GF(2)).basis()[2,0]; y                          # needs sage.graphs sage.rings.finite_rings
             h^{2,0}
-            sage: y.Sq(1)                                                               # optional - sage.graphs sage.groups sage.rings.finite_rings
+            sage: y.Sq(1)                                                               # needs sage.graphs sage.rings.finite_rings
             h^{3,0}
 
         To compute the cohomology ring, the complex must be
@@ -1036,13 +1037,13 @@ class GenericCellComplex(SageObject):
 
         EXAMPLES::
 
-            sage: P = SimplicialComplex([[0, 1], [1,2], [2,3]]).face_poset(); P         # optional - sage.combinat sage.graphs
+            sage: P = SimplicialComplex([[0, 1], [1,2], [2,3]]).face_poset(); P         # needs sage.combinat sage.graphs
             Finite poset containing 7 elements
-            sage: sorted(P.list())                                                      # optional - sage.combinat sage.graphs
+            sage: sorted(P.list())                                                      # needs sage.combinat sage.graphs
             [(0,), (0, 1), (1,), (1, 2), (2,), (2, 3), (3,)]
 
             sage: S2 = cubical_complexes.Sphere(2)
-            sage: S2.face_poset()                                                       # optional - sage.combinat sage.graphs
+            sage: S2.face_poset()                                                       # needs sage.combinat sage.graphs
             Finite poset containing 26 elements
         """
         from sage.combinat.posets.posets import Poset
@@ -1086,24 +1087,24 @@ class GenericCellComplex(SageObject):
 
             sage: V = SimplicialComplex([[0,1,2],[3]]); V
             Simplicial complex with vertex set (0, 1, 2, 3) and facets {(3,), (0, 1, 2)}
-            sage: V.is_connected()                                                      # optional - sage.graphs
+            sage: V.is_connected()                                                      # needs sage.graphs
             False
             sage: X = SimplicialComplex([[0,1,2]])
-            sage: X.is_connected()                                                      # optional - sage.graphs
+            sage: X.is_connected()                                                      # needs sage.graphs
             True
             sage: U = simplicial_complexes.ChessboardComplex(3,3)
-            sage: U.is_connected()                                                      # optional - sage.graphs
+            sage: U.is_connected()                                                      # needs sage.graphs
             True
             sage: W = simplicial_complexes.Sphere(3)
-            sage: W.is_connected()                                                      # optional - sage.graphs
+            sage: W.is_connected()                                                      # needs sage.graphs
             True
             sage: S = SimplicialComplex([[0,1],[2,3]])
-            sage: S.is_connected()                                                      # optional - sage.graphs
+            sage: S.is_connected()                                                      # needs sage.graphs
             False
 
-            sage: cubical_complexes.Sphere(0).is_connected()                            # optional - sage.graphs
+            sage: cubical_complexes.Sphere(0).is_connected()                            # needs sage.graphs
             False
-            sage: cubical_complexes.Sphere(2).is_connected()                            # optional - sage.graphs
+            sage: cubical_complexes.Sphere(2).is_connected()                            # needs sage.graphs
             True
         """
         return self.graph().is_connected()

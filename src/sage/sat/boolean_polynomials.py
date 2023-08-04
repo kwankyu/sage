@@ -94,10 +94,11 @@ def solve(F, converter=None, solver=None, n=1, target_variables=None, **kwds):
 
     We construct a very simple system with three solutions and ask for a specific number of solutions::
 
-        sage: B.<a,b> = BooleanPolynomialRing() # optional - pycryptosat
-        sage: f = a*b                           # optional - pycryptosat
-        sage: l = solve_sat([f],n=1)            # optional - pycryptosat
-        sage: len(l) == 1, f.subs(l[0])         # optional - pycryptosat
+        sage: # optional - pycryptosat
+        sage: B.<a,b> = BooleanPolynomialRing()
+        sage: f = a*b
+        sage: l = solve_sat([f],n=1)
+        sage: len(l) == 1, f.subs(l[0])
         (True, 0)
 
         sage: l = solve_sat([a*b],n=2)        # optional - pycryptosat
@@ -129,18 +130,19 @@ def solve(F, converter=None, solver=None, n=1, target_variables=None, **kwds):
 
     Here, we generate and solve the cubic equations of the AES SBox (see :trac:`26676`)::
 
-        sage: from sage.rings.polynomial.multi_polynomial_sequence import PolynomialSequence    # optional - pycryptosat, long time
-        sage: from sage.sat.boolean_polynomials import solve as solve_sat                       # optional - pycryptosat, long time
-        sage: sr = sage.crypto.mq.SR(1, 4, 4, 8, allow_zero_inversions = True)                  # optional - pycryptosat, long time
-        sage: sb = sr.sbox()                                                                    # optional - pycryptosat, long time
-        sage: eqs = sb.polynomials(degree = 3)                                                  # optional - pycryptosat, long time
-        sage: eqs = PolynomialSequence(eqs)                                                     # optional - pycryptosat, long time
-        sage: variables = map(str, eqs.variables())                                             # optional - pycryptosat, long time
-        sage: variables = ",".join(variables)                                                   # optional - pycryptosat, long time
-        sage: R = BooleanPolynomialRing(16, variables)                                          # optional - pycryptosat, long time
-        sage: eqs = [R(eq) for eq in eqs]                                                                 # optional - pycryptosat, long time
-        sage: sls_aes = solve_sat(eqs, n = infinity)                                            # optional - pycryptosat, long time
-        sage: len(sls_aes)                                                                      # optional - pycryptosat, long time
+        sage: # long time, optional - pycryptosat
+        sage: from sage.rings.polynomial.multi_polynomial_sequence import PolynomialSequence
+        sage: from sage.sat.boolean_polynomials import solve as solve_sat
+        sage: sr = sage.crypto.mq.SR(1, 4, 4, 8, allow_zero_inversions = True)
+        sage: sb = sr.sbox()
+        sage: eqs = sb.polynomials(degree = 3)
+        sage: eqs = PolynomialSequence(eqs)
+        sage: variables = map(str, eqs.variables())
+        sage: variables = ",".join(variables)
+        sage: R = BooleanPolynomialRing(16, variables)
+        sage: eqs = [R(eq) for eq in eqs]
+        sage: sls_aes = solve_sat(eqs, n = infinity)
+        sage: len(sls_aes)
         256
 
     TESTS:
@@ -340,11 +342,12 @@ def learn(F, converter=None, solver=None, max_learnt_length=3, interreduction=Fa
 
     We construct a simple system and solve it::
 
-       sage: set_random_seed(2300)                      # optional - pycryptosat
-       sage: sr = mq.SR(1,2,2,4,gf2=True,polybori=True) # optional - pycryptosat
-       sage: F,s = sr.polynomial_system()               # optional - pycryptosat
-       sage: H = learn_sat(F)                           # optional - pycryptosat
-       sage: H[-1]                                      # optional - pycryptosat
+       sage: # optional - pycryptosat
+       sage: set_random_seed(2300)
+       sage: sr = mq.SR(1,2,2,4,gf2=True,polybori=True)
+       sage: F,s = sr.polynomial_system()
+       sage: H = learn_sat(F)
+       sage: H[-1]
        k033 + 1
     """
     try:

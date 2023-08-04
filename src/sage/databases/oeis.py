@@ -1440,14 +1440,15 @@ class OEISSequence(SageObject, UniqueRepresentation):
             sage: w = oeis(7540) ; w                    # optional -- internet
             A007540: Wilson primes: primes p such that (p-1)! == -1 (mod p^2).
 
-            sage: i = w.__iter__()                      # optional -- internet
-            sage: next(i)                               # optional -- internet
+            sage: # optional - internet
+            sage: i = w.__iter__()
+            sage: next(i)
             5
-            sage: next(i)                               # optional -- internet
+            sage: next(i)
             13
-            sage: next(i)                               # optional -- internet
+            sage: next(i)
             563
-            sage: next(i)                               # optional -- internet
+            sage: next(i)
             Traceback (most recent call last):
             ...
             LookupError: future values not provided by OEIS

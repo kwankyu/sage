@@ -466,7 +466,7 @@ class AbstractLinearCode(AbstractLinearCodeNoMetric):
         depends on which packages are loaded, so we must re-seed GAP to ensure
         a consistent result for this example::
 
-            sage: libgap.set_seed(0)                                                    # optional - sage.libs.gap
+            sage: libgap.set_seed(0)                                                    # needs sage.libs.gap
             0
             sage: C = codes.HammingCode(GF(4, 'z'), 3)
             sage: C.automorphism_group_gens()
@@ -1371,9 +1371,9 @@ class AbstractLinearCode(AbstractLinearCodeNoMetric):
         If ``algorithm`` is provided, then the minimum distance will be
         recomputed even if there is a stored value from a previous run.::
 
-            sage: C.minimum_distance(algorithm="gap")                                   # optional - sage.libs.gap
+            sage: C.minimum_distance(algorithm="gap")                                   # needs sage.libs.gap
             3
-            sage: libgap.SetAllInfoLevels(0)         # to suppress extra info messages  # optional - sage.libs.gap
+            sage: libgap.SetAllInfoLevels(0)         # to suppress extra info messages  # needs sage.libs.gap
             sage: C.minimum_distance(algorithm="guava")  # optional - gap_packages (Guava package)
             ...
             3
@@ -1507,7 +1507,7 @@ class AbstractLinearCode(AbstractLinearCodeNoMetric):
             ....:          [0,0,0,0,0,0,0,1], [0,0,0,0,0,1,0,0]])
             sage: C  = LinearCode(G)
             sage: gp = C.permutation_automorphism_group()
-            sage: C.module_composition_factors(gp)                                      # optional - sage.libs.gap
+            sage: C.module_composition_factors(gp)                                      # needs sage.libs.gap
             [ rec(
                   IsIrreducible := true,
                   IsOverFiniteField := true,
@@ -1570,11 +1570,11 @@ class AbstractLinearCode(AbstractLinearCodeNoMetric):
             sage: C  = LinearCode(G)
             sage: C
             [8, 4] linear code over GF(2)
-            sage: G = C.permutation_automorphism_group()                                # optional - sage.groups
-            sage: G.order()                                                             # optional - sage.groups
+            sage: G = C.permutation_automorphism_group()                                # needs sage.groups
+            sage: G.order()                                                             # needs sage.groups
             144
-            sage: GG = C.permutation_automorphism_group("codecan")                      # optional - sage.groups
-            sage: GG == G                                                               # optional - sage.groups
+            sage: GG = C.permutation_automorphism_group("codecan")                      # needs sage.groups
+            sage: GG == G                                                               # needs sage.groups
             True
 
         A less easy example involves showing that the permutation
@@ -1584,41 +1584,41 @@ class AbstractLinearCode(AbstractLinearCodeNoMetric):
         ::
 
             sage: C = codes.GolayCode(GF(3))
-            sage: M11 = MathieuGroup(11)                                                # optional - sage.groups
-            sage: M11.order()                                                           # optional - sage.groups
+            sage: M11 = MathieuGroup(11)                                                # needs sage.groups
+            sage: M11.order()                                                           # needs sage.groups
             7920
-            sage: G = C.permutation_automorphism_group()  # long time (6s on sage.math, 2011)   # optional - sage.groups
-            sage: G.is_isomorphic(M11)                    # long time                   # optional - sage.groups
+            sage: G = C.permutation_automorphism_group()        # long time (6s on sage.math, 2011), needs sage.groups
+            sage: G.is_isomorphic(M11)          # long time                             # needs sage.groups
             True
-            sage: GG = C.permutation_automorphism_group("codecan")  # long time         # optional - sage.groups
-            sage: GG == G # long time                                                   # optional - sage.groups
+            sage: GG = C.permutation_automorphism_group("codecan")      # long time, needs sage.groups
+            sage: GG == G                       # long time                             # needs sage.groups
             True
 
         Other examples::
 
             sage: C = codes.GolayCode(GF(2))
-            sage: G = C.permutation_automorphism_group()                                # optional - sage.groups
-            sage: G.order()                                                             # optional - sage.groups
+            sage: G = C.permutation_automorphism_group()                                # needs sage.groups
+            sage: G.order()                                                             # needs sage.groups
             244823040
             sage: C = codes.HammingCode(GF(2), 5)
-            sage: G = C.permutation_automorphism_group()                                # optional - sage.groups
-            sage: G.order()                                                             # optional - sage.groups
+            sage: G = C.permutation_automorphism_group()                                # needs sage.groups
+            sage: G.order()                                                             # needs sage.groups
             9999360
             sage: C = codes.HammingCode(GF(3), 2); C
             [4, 2] Hamming Code over GF(3)
-            sage: C.permutation_automorphism_group(algorithm="partition")               # optional - sage.groups
+            sage: C.permutation_automorphism_group(algorithm="partition")               # needs sage.groups
             Permutation Group with generators [(1,3,4)]
             sage: C = codes.HammingCode(GF(4,"z"), 2); C
             [5, 3] Hamming Code over GF(4)
-            sage: G = C.permutation_automorphism_group(algorithm="partition"); G        # optional - sage.groups
+            sage: G = C.permutation_automorphism_group(algorithm="partition"); G        # needs sage.groups
             Permutation Group with generators [(1,3)(4,5), (1,4)(3,5)]
-            sage: GG = C.permutation_automorphism_group(algorithm="codecan") # long time, optional - sage.groups
-            sage: GG == G                                                    # long time, optional - sage.groups
+            sage: GG = C.permutation_automorphism_group(algorithm="codecan")    # long time, needs sage.groups
+            sage: GG == G                       # long time                             # needs sage.groups
             True
-            sage: C.permutation_automorphism_group(algorithm="gap")  # optional - gap_packages (Guava package) sage.groups
+            sage: C.permutation_automorphism_group(algorithm="gap")     # optional - gap_packages (Guava package), needs sage.groups
             Permutation Group with generators [(1,3)(4,5), (1,4)(3,5)]
             sage: C = codes.GolayCode(GF(3), True)
-            sage: C.permutation_automorphism_group(algorithm="gap")  # optional - gap_packages (Guava package) sage.groups
+            sage: C.permutation_automorphism_group(algorithm="gap")     # optional - gap_packages (Guava package), needs sage.groups
             Permutation Group with generators
              [(5,7)(6,11)(8,9)(10,12), (4,6,11)(5,8,12)(7,10,9), (3,4)(6,8)(9,11)(10,12),
               (2,3)(6,11)(8,12)(9,10), (1,2)(5,10)(7,12)(8,9)]
@@ -1841,7 +1841,7 @@ class AbstractLinearCode(AbstractLinearCodeNoMetric):
             [7, 4] Hamming Code over GF(2)
             sage: C.weight_distribution(algorithm="leon")   # optional - gap_packages (Guava package)
             [1, 0, 0, 7, 7, 0, 0, 1]
-            sage: C.weight_distribution(algorithm="gap")                                # optional - sage.libs.gap
+            sage: C.weight_distribution(algorithm="gap")                                # needs sage.libs.gap
             [1, 0, 0, 7, 7, 0, 0, 1]
             sage: C.weight_distribution(algorithm="binary")
             [1, 0, 0, 7, 7, 0, 0, 1]

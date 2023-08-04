@@ -364,12 +364,13 @@ class AlgebraicScheme_subscheme_product_projective(AlgebraicScheme_subscheme_pro
 
         ::
 
-            sage: F.<a> = GF(4)                                                         # optional - sage.rings.finite_rings
-            sage: PP.<x,y,z,u,v,w> = ProductProjectiveSpaces(F, [2, 2])                 # optional - sage.rings.finite_rings
-            sage: X = PP.subscheme([z^5 + 3*x*y^4 + 8*y^5, u^2 - v^2])                  # optional - sage.rings.finite_rings
-            sage: Y = PP.subscheme([x^6 + z^6, w*z - v*y])                              # optional - sage.rings.finite_rings
-            sage: Q = PP([a,a+1,1,a,a,1])                                               # optional - sage.rings.finite_rings
-            sage: X.intersection_multiplicity(Y, Q)                                     # optional - sage.rings.finite_rings
+            sage: # needs sage.rings.finite_rings
+            sage: F.<a> = GF(4)
+            sage: PP.<x,y,z,u,v,w> = ProductProjectiveSpaces(F, [2, 2])
+            sage: X = PP.subscheme([z^5 + 3*x*y^4 + 8*y^5, u^2 - v^2])
+            sage: Y = PP.subscheme([x^6 + z^6, w*z - v*y])
+            sage: Q = PP([a,a+1,1,a,a,1])
+            sage: X.intersection_multiplicity(Y, Q)
             16
 
         ::
@@ -432,13 +433,14 @@ class AlgebraicScheme_subscheme_product_projective(AlgebraicScheme_subscheme_pro
 
         ::
 
-            sage: PP.<x,y,z,w,u> = ProductProjectiveSpaces(GF(11), [1,2])               # optional - sage.rings.finite_rings
-            sage: X = PP.subscheme([x^7*u - y^7*z, u^6*x^2 - w^3*z^3*x*y - w^6*y^2])    # optional - sage.rings.finite_rings
-            sage: Q1 = PP([1,0,10,1,0])                                                 # optional - sage.rings.finite_rings
-            sage: X.multiplicity(Q1)                                                    # optional - sage.rings.finite_rings
+            sage: # needs sage.rings.finite_rings
+            sage: PP.<x,y,z,w,u> = ProductProjectiveSpaces(GF(11), [1,2])
+            sage: X = PP.subscheme([x^7*u - y^7*z, u^6*x^2 - w^3*z^3*x*y - w^6*y^2])
+            sage: Q1 = PP([1,0,10,1,0])
+            sage: X.multiplicity(Q1)
             1
-            sage: Q2 = PP([1,0,1,0,0])                                                  # optional - sage.rings.finite_rings
-            sage: X.multiplicity(Q2)                                                    # optional - sage.rings.finite_rings
+            sage: Q2 = PP([1,0,1,0,0])
+            sage: X.multiplicity(Q2)
             4
         """
         PP = self.ambient_space()

@@ -524,9 +524,9 @@ class MatrixMorphism_abstract(sage.categories.morphism.Morphism):
         Composite maps can be formed with matrix morphisms::
 
             sage: x = polygen(ZZ, 'x')
-            sage: K.<a> = NumberField(x^2 + 23)                                         # optional - sage.rings.number_field
-            sage: V, VtoK, KtoV = K.vector_space()                                      # optional - sage.rings.number_field
-            sage: f = V.hom([V.0 - V.1, V.0 + V.1])*KtoV; f                             # optional - sage.rings.number_field
+            sage: K.<a> = NumberField(x^2 + 23)                                         # needs sage.rings.number_field
+            sage: V, VtoK, KtoV = K.vector_space()                                      # needs sage.rings.number_field
+            sage: f = V.hom([V.0 - V.1, V.0 + V.1])*KtoV; f                             # needs sage.rings.number_field
             Composite map:
             From: Number Field in a with defining polynomial x^2 + 23
             To:   Vector space of dimension 2 over Rational Field
@@ -539,9 +539,9 @@ class MatrixMorphism_abstract(sage.categories.morphism.Morphism):
                     [ 1  1]
                     Domain: Vector space of dimension 2 over Rational Field
                     Codomain: Vector space of dimension 2 over Rational Field
-            sage: f(a)
+            sage: f(a)                                                                  # needs sage.rings.number_field
             (1, 1)
-            sage: V.hom([V.0 - V.1, V.0 + V.1], side="right")*KtoV
+            sage: V.hom([V.0 - V.1, V.0 + V.1], side="right")*KtoV                      # needs sage.rings.number_field
             Composite map:
               From: Number Field in a with defining polynomial x^2 + 23
               To:   Vector space of dimension 2 over Rational Field

@@ -554,12 +554,12 @@ def fork(f=None, timeout=0, verbose=False):
 
     We illustrate that segfaulting subprocesses are no trouble at all::
 
-        sage: cython('def f(): print(<char*>0)')                            # optional - sage.misc.cython
+        sage: cython('def f(): print(<char*>0)')                                        # needs sage.misc.cython
         sage: @fork
         ....: def g():
         ....:     os.environ["CYSIGNALS_CRASH_NDEBUG"]="yes" # skip enhanced backtrace (it is slow)
         ....:     f()
-        sage: print("this works"); g()                                      # optional - sage.misc.cython
+        sage: print("this works"); g()                                                  # needs sage.misc.cython
         this works...
         <BLANKLINE>
         ------------------------------------------------------------------------

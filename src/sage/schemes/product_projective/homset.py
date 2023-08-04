@@ -110,18 +110,18 @@ class SchemeHomset_points_product_projective_spaces_field(SchemeHomset_points_pr
         ::
 
             sage: u = QQ['u'].0
-            sage: K = NumberField(u^2 - 2, 'v')                                         # optional - sage.rings.number_field
-            sage: P.<x,y,z,w> = ProductProjectiveSpaces([1, 1], K)                      # optional - sage.rings.number_field
-            sage: X = P.subscheme([x^2 - y^2, z^2 - 2*w^2])                             # optional - sage.rings.number_field
-            sage: sorted(X(P.base_ring()).points())                                     # optional - sage.rings.number_field
+            sage: K = NumberField(u^2 - 2, 'v')                                         # needs sage.rings.number_field
+            sage: P.<x,y,z,w> = ProductProjectiveSpaces([1, 1], K)                      # needs sage.rings.number_field
+            sage: X = P.subscheme([x^2 - y^2, z^2 - 2*w^2])                             # needs sage.rings.number_field
+            sage: sorted(X(P.base_ring()).points())                                     # needs sage.rings.number_field
             [(-1 : 1 , -v : 1), (-1 : 1 , v : 1), (1 : 1 , -v : 1), (1 : 1 , v : 1)]
 
         ::
 
             sage: u = QQ['u'].0
-            sage: K = NumberField(u^2 + 1, 'v')                                         # optional - sage.rings.number_field
-            sage: P.<x,y,z,w> = ProductProjectiveSpaces([1, 1], K)                      # optional - sage.rings.number_field
-            sage: P(K).points(bound=1)                                                  # optional - sage.rings.number_field
+            sage: K = NumberField(u^2 + 1, 'v')                                         # needs sage.rings.number_field
+            sage: P.<x,y,z,w> = ProductProjectiveSpaces([1, 1], K)                      # needs sage.rings.number_field
+            sage: P(K).points(bound=1)                                                  # needs sage.rings.number_field
             [(-1 : 1 , -1 : 1), (-1 : 1 , -v : 1), (-1 : 1 , 0 : 1), (-1 : 1 , v : 1),
              (-1 : 1 , 1 : 0), (-1 : 1 , 1 : 1), (-v : 1 , -1 : 1), (-v : 1 , -v : 1),
              (-v : 1 , 0 : 1), (-v : 1 , v : 1), (-v : 1 , 1 : 0), (-v : 1 , 1 : 1),
@@ -134,8 +134,8 @@ class SchemeHomset_points_product_projective_spaces_field(SchemeHomset_points_pr
 
         ::
 
-            sage: P.<x,y,z,u,v> = ProductProjectiveSpaces([2, 1], GF(3))                # optional - sage.rings.finite_rings
-            sage: P(P.base_ring()).points()                                             # optional - sage.rings.finite_rings
+            sage: P.<x,y,z,u,v> = ProductProjectiveSpaces([2, 1], GF(3))                # needs sage.rings.finite_rings
+            sage: P(P.base_ring()).points()                                             # needs sage.rings.finite_rings
             [(0 : 0 : 1 , 0 : 1), (0 : 0 : 1 , 1 : 0), (0 : 0 : 1 , 1 : 1), (0 : 0 : 1 , 2 : 1),
              (0 : 1 : 0 , 0 : 1), (0 : 1 : 0 , 1 : 0), (0 : 1 : 0 , 1 : 1), (0 : 1 : 0 , 2 : 1),
              (0 : 1 : 1 , 0 : 1), (0 : 1 : 1 , 1 : 0), (0 : 1 : 1 , 1 : 1), (0 : 1 : 1 , 2 : 1),

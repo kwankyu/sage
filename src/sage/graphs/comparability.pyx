@@ -642,7 +642,7 @@ def is_permutation(g, algorithm="greedy", certificate=False, check=True,
         sage: p1 = Permutation([nn+1 for nn in perm[0]])
         sage: p2 = Permutation([nn+1 for nn in perm[1]])
         sage: p = p2 * p1.inverse()
-        sage: p.show(representation="braid")                                            # optional - sage.plot
+        sage: p.show(representation="braid")                                            # needs sage.plot
 
     TESTS:
 
@@ -745,15 +745,15 @@ def is_transitive(g, certificate=False):
         (0, 2)
         sage: digraphs.RandomDirectedGNP(30,.2).is_transitive()
         False
-        sage: D = digraphs.DeBruijn(5, 2)                                               # optional - sage.combinat
-        sage: D.is_transitive()                                                         # optional - sage.combinat
+        sage: D = digraphs.DeBruijn(5, 2)                                               # needs sage.combinat
+        sage: D.is_transitive()                                                         # needs sage.combinat
         False
-        sage: cert = D.is_transitive(certificate=True)                                  # optional - sage.combinat
-        sage: D.has_edge(*cert)                                                         # optional - sage.combinat
+        sage: cert = D.is_transitive(certificate=True)                                  # needs sage.combinat
+        sage: D.has_edge(*cert)                                                         # needs sage.combinat
         False
-        sage: bool(D.shortest_path(*cert))                                              # optional - sage.combinat
+        sage: bool(D.shortest_path(*cert))                                              # needs sage.combinat
         True
-        sage: digraphs.RandomDirectedGNP(20,.2).transitive_closure().is_transitive()    # optional - networkx
+        sage: digraphs.RandomDirectedGNP(20,.2).transitive_closure().is_transitive()    # needs networkx
         True
     """
     cdef int n = g.order()

@@ -1068,18 +1068,19 @@ class SkewPartition(CombinatorialElement):
 
         EXAMPLES::
 
-            sage: dag = SkewPartition([[3, 3, 1], [1, 1]]).to_dag()                     # optional - sage.graphs
-            sage: dag.edges(sort=True)                                                  # optional - sage.graphs
+            sage: # needs sage.graphs
+            sage: dag = SkewPartition([[3, 3, 1], [1, 1]]).to_dag()
+            sage: dag.edges(sort=True)
             [('0,1', '0,2', None),
             ('0,1', '1,1', None),
             ('0,2', '1,2', None),
             ('1,1', '1,2', None)]
-            sage: dag.vertices(sort=True)                                               # optional - sage.graphs
+            sage: dag.vertices(sort=True)
             ['0,1', '0,2', '1,1', '1,2', '2,0']
-            sage: dag = SkewPartition([[3, 2, 1], [1, 1]]).to_dag(format="tuple")       # optional - sage.graphs
-            sage: dag.edges(sort=True)                                                  # optional - sage.graphs
+            sage: dag = SkewPartition([[3, 2, 1], [1, 1]]).to_dag(format="tuple")
+            sage: dag.edges(sort=True)
             [((0, 1), (0, 2), None), ((0, 1), (1, 1), None)]
-            sage: dag.vertices(sort=True)                                               # optional - sage.graphs
+            sage: dag.vertices(sort=True)
             [(0, 1), (0, 2), (1, 1), (2, 0)]
         """
         outer = list(self.outer())
