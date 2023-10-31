@@ -413,29 +413,6 @@ from sage.structure.richcmp cimport (richcmp, rich_to_bool)
 from sage.misc.cachefunc import cached_method
 
 
-def is_RingHomomorphism(phi):
-    """
-    Return ``True`` if ``phi`` is of type :class:`RingHomomorphism`.
-
-    EXAMPLES::
-
-        sage: f = Zmod(8).cover()
-        sage: sage.rings.morphism.is_RingHomomorphism(f)
-        doctest:warning
-        ...
-        DeprecationWarning: is_RingHomomorphism() should not be used anymore. Check whether the category_for() your morphism is a subcategory of Rings() instead.
-        See https://github.com/sagemath/sage/issues/23204 for details.
-        True
-        sage: sage.rings.morphism.is_RingHomomorphism(2/3)
-        False
-    """
-    sage.misc.superseded.deprecation(23204, "is_RingHomomorphism() should not be used anymore. Check whether the category_for() your morphism is a subcategory of Rings() instead.")
-    # We use the category framework to determine whether something is a ring homomorphism.
-    from sage.categories.map import Map
-    from sage.categories.rings import Rings
-    return isinstance(phi, Map) and phi.category_for().is_subcategory(Rings())
-
-
 cdef class RingMap(Morphism):
     """
     Set-theoretic map between rings.
@@ -537,7 +514,7 @@ cdef class RingMap_lift(RingMap):
         H = R.Hom(S, Sets())
         RingMap.__init__(self, H)
 
-    cdef _update_slots(self, dict _slots):
+    cdef _update_slots(self, dict _slots) noexcept:
         """
         Helper for copying and pickling.
 
@@ -556,7 +533,7 @@ cdef class RingMap_lift(RingMap):
         self.to_S = _slots['to_S']
         Morphism._update_slots(self, _slots)
 
-    cdef dict _extra_slots(self):
+    cdef dict _extra_slots(self) noexcept:
         """
         Helper for copying and pickling.
 
@@ -572,7 +549,7 @@ cdef class RingMap_lift(RingMap):
         slots['to_S'] = self.to_S
         return slots
 
-    cpdef _richcmp_(self, other, int op):
+    cpdef _richcmp_(self, other, int op) noexcept:
         """
         Compare a ring lifting maps ``self`` to ``other``.
 
@@ -636,7 +613,7 @@ cdef class RingMap_lift(RingMap):
         """
         return "Choice of lifting map"
 
-    cpdef Element _call_(self, x):
+    cpdef Element _call_(self, x) noexcept:
         """
         Evaluate this function at ``x``.
 
@@ -723,7 +700,7 @@ cdef class RingHomomorphism(RingMap):
             raise TypeError("lift must have correct codomain")
         self._lift = lift
 
-    cdef _update_slots(self, dict _slots):
+    cdef _update_slots(self, dict _slots) noexcept:
         """
         Helper for copying and pickling.
 
@@ -742,7 +719,7 @@ cdef class RingHomomorphism(RingMap):
             self._lift = _slots['_lift']
         Morphism._update_slots(self, _slots)
 
-    cdef dict _extra_slots(self):
+    cdef dict _extra_slots(self) noexcept:
         """
         Helper for copying and pickling.
 
@@ -1682,120 +1659,6 @@ cdef class RingHomomorphism(RingMap):
         return self.is_injective() and self.is_surjective()
 
 
-cdef class RingHomomorphism_coercion(RingHomomorphism):
-    r"""
-    A ring homomorphism that is a coercion.
-
-    .. WARNING::
-
-        This class is obsolete. Set the category of your morphism to a
-        subcategory of ``Rings`` instead.
-
-    TESTS:
-
-        sage: from sage.rings.morphism import RingHomomorphism_coercion
-        sage: parent = Hom(ZZ,ZZ)
-        sage: f = parent.__make_element_class__(RingHomomorphism_coercion)(parent)
-        doctest:warning
-        ...
-        DeprecationWarning: Set the category of your morphism to a subcategory of Rings instead.
-        See https://github.com/sagemath/sage/issues/23204 for details.
-        sage: TestSuite(f).run()
-
-    """
-    def __init__(self, parent, check=True):
-        r"""
-        TESTS:
-
-            sage: from sage.rings.morphism import RingHomomorphism_coercion
-            sage: parent = Hom(ZZ,ZZ)
-            sage: f = parent.__make_element_class__(RingHomomorphism_coercion)(parent)
-            doctest:warning
-            ...
-            DeprecationWarning: Set the category of your morphism to a subcategory of Rings instead.
-            See https://github.com/sagemath/sage/issues/23204 for details.
-            sage: isinstance(f, RingHomomorphism_coercion)
-            True
-
-        """
-        sage.misc.superseded.deprecation(23204, "Set the category of your morphism to a subcategory of Rings instead.")
-
-        RingHomomorphism.__init__(self, parent)
-        # putting in check allows us to define subclasses of RingHomomorphism_coercion that implement _coerce_map_from
-        if check and not self.codomain().has_coerce_map_from(self.domain()):
-            raise TypeError("Natural coercion morphism from %s to %s not defined."%(self.domain(), self.codomain()))
-
-    def _repr_type(self):
-        """
-        Used internally when printing this.
-
-        EXAMPLES::
-
-            sage: from sage.rings.morphism import RingHomomorphism_coercion
-            sage: parent = Hom(ZZ,ZZ)
-            sage: f = parent.__make_element_class__(RingHomomorphism_coercion)(parent)
-            sage: f._repr_type()
-            'Ring Coercion'
-
-        """
-        return "Ring Coercion"
-
-    cpdef _richcmp_(self, other, int op):
-        """
-        Compare a ring coercion morphism ``self`` to ``other``.
-
-        Ring coercion morphisms never compare equal to any other data type. If
-        other is a ring coercion morphism, the parents of ``self`` and
-        ``other`` are compared.
-
-        EXAMPLES::
-
-            sage: from sage.rings.morphism import RingHomomorphism_coercion
-            sage: parent = Hom(ZZ,ZZ)
-            sage: f = parent.__make_element_class__(RingHomomorphism_coercion)(parent)
-            sage: f == f
-            True
-            sage: f != f
-            False
-        """
-        if not isinstance(other, RingHomomorphism_coercion):
-            # Generic comparison
-            return RingMap._richcmp_(self, other, op)
-        # Two coercion maps with the same parent must be equal
-        return rich_to_bool(op, 0)
-
-    def __hash__(self):
-        """
-        Return the hash of this morphism.
-
-        TESTS::
-
-            sage: from sage.rings.morphism import RingHomomorphism_coercion
-            sage: parent = Hom(ZZ,ZZ)
-            sage: f = parent.__make_element_class__(RingHomomorphism_coercion)(parent)
-            sage: g = parent.__make_element_class__(RingHomomorphism_coercion)(parent)
-            sage: hash(f) == hash(g)
-            True
-
-        """
-        return hash((self.domain(), self.codomain()))
-
-    cpdef Element _call_(self, x):
-        """
-        Evaluate this coercion morphism at ``x``.
-
-        EXAMPLES::
-
-            sage: from sage.rings.morphism import RingHomomorphism_coercion
-            sage: parent = Hom(ZZ,ZZ)
-            sage: f = parent.__make_element_class__(RingHomomorphism_coercion)(parent)
-            sage: f(0)
-            0
-
-        """
-        return self.codomain().coerce(x)
-
-
 cdef class RingHomomorphism_im_gens(RingHomomorphism):
     """
     A ring homomorphism determined by the images of generators.
@@ -1946,7 +1809,7 @@ cdef class RingHomomorphism_im_gens(RingHomomorphism):
         """
         return self._base_map
 
-    cdef _update_slots(self, dict _slots):
+    cdef _update_slots(self, dict _slots) noexcept:
         """
         Helper for copying and pickling.
 
@@ -1966,7 +1829,7 @@ cdef class RingHomomorphism_im_gens(RingHomomorphism):
         self._base_map = _slots.get('_base_map')
         RingHomomorphism._update_slots(self, _slots)
 
-    cdef dict _extra_slots(self):
+    cdef dict _extra_slots(self) noexcept:
         """
         Helper for copying and pickling.
 
@@ -1987,7 +1850,7 @@ cdef class RingHomomorphism_im_gens(RingHomomorphism):
         slots['_base_map'] = self._base_map
         return slots
 
-    cpdef _richcmp_(self, other, int op):
+    cpdef _richcmp_(self, other, int op) noexcept:
         r"""
         EXAMPLES:
 
@@ -2094,7 +1957,7 @@ cdef class RingHomomorphism_im_gens(RingHomomorphism):
             s += '\nwith map of base ring'
         return s
 
-    cpdef Element _call_(self, x):
+    cpdef Element _call_(self, x) noexcept:
         """
         Evaluate this homomorphism at ``x``.
 
@@ -2258,7 +2121,7 @@ cdef class RingHomomorphism_from_base(RingHomomorphism):
         """
         return self._underlying
 
-    cdef _update_slots(self, dict _slots):
+    cdef _update_slots(self, dict _slots) noexcept:
         """
         Helper for copying and pickling.
 
@@ -2288,7 +2151,7 @@ cdef class RingHomomorphism_from_base(RingHomomorphism):
         self._underlying = _slots['__underlying'] # double underscore for legacy pickles
         RingHomomorphism._update_slots(self, _slots)
 
-    cdef dict _extra_slots(self):
+    cdef dict _extra_slots(self) noexcept:
         """
         Helper for copying and pickling.
 
@@ -2319,7 +2182,7 @@ cdef class RingHomomorphism_from_base(RingHomomorphism):
         slots['__underlying'] = self._underlying
         return slots
 
-    cpdef _richcmp_(self, other, int op):
+    cpdef _richcmp_(self, other, int op) noexcept:
         r"""
         EXAMPLES:
 
@@ -2403,7 +2266,7 @@ cdef class RingHomomorphism_from_base(RingHomomorphism):
         U = repr(self._underlying).split('\n')
         return 'Induced from base ring by\n'+'\n'.join(U)
 
-    cpdef Element _call_(self, x):
+    cpdef Element _call_(self, x) noexcept:
         """
         Evaluate this homomorphism at ``x``.
 
@@ -2507,7 +2370,7 @@ cdef class RingHomomorphism_from_fraction_field(RingHomomorphism):
         """
         return self._morphism._repr_defn()
 
-    cpdef Element _call_(self, x):
+    cpdef Element _call_(self, x) noexcept:
         r"""
         Return the value of this morphism at ``x``.
 
@@ -2526,7 +2389,7 @@ cdef class RingHomomorphism_from_fraction_field(RingHomomorphism):
         """
         return self._morphism(x.numerator()) / self._morphism(x.denominator())
 
-    cdef _update_slots(self, dict _slots):
+    cdef _update_slots(self, dict _slots) noexcept:
         """
         Helper function for copying and pickling.
 
@@ -2545,7 +2408,7 @@ cdef class RingHomomorphism_from_fraction_field(RingHomomorphism):
         self._morphism = _slots['_morphism']
         RingHomomorphism._update_slots(self, _slots)
 
-    cdef dict _extra_slots(self):
+    cdef dict _extra_slots(self) noexcept:
         """
         Helper function for copying and pickling.
 
@@ -2612,7 +2475,7 @@ cdef class RingHomomorphism_cover(RingHomomorphism):
         """
         RingHomomorphism.__init__(self, parent)
 
-    cpdef Element _call_(self, x):
+    cpdef Element _call_(self, x) noexcept:
         """
         Evaluate this covering homomorphism at ``x``, which just involves
         coercing ``x`` into the domain, then codomain.
@@ -2629,7 +2492,7 @@ cdef class RingHomomorphism_cover(RingHomomorphism):
 
         We verify that calling directly raises the expected error
         (just coercing into the codomain), but calling with __call__
-        (the second call below) gives a TypeError since 1/2 can't be
+        (the second call below) gives a :class:`TypeError` since 1/2 cannot be
         coerced into the domain. ::
 
             sage: f._call_(1/2)
@@ -2671,7 +2534,7 @@ cdef class RingHomomorphism_cover(RingHomomorphism):
         """
         return self.codomain().defining_ideal()
 
-    cpdef _richcmp_(self, other, int op):
+    cpdef _richcmp_(self, other, int op) noexcept:
         """
         Compare ``self`` to ``other``.
 
@@ -2822,7 +2685,7 @@ cdef class RingHomomorphism_from_quotient(RingHomomorphism):
         self._lift = pi.lift()
         self.phi = phi
 
-    cdef _update_slots(self, dict _slots):
+    cdef _update_slots(self, dict _slots) noexcept:
         """
         Helper for copying and pickling.
 
@@ -2851,7 +2714,7 @@ cdef class RingHomomorphism_from_quotient(RingHomomorphism):
         self.phi = _slots['phi']
         RingHomomorphism._update_slots(self, _slots)
 
-    cdef dict _extra_slots(self):
+    cdef dict _extra_slots(self) noexcept:
         """
         Helper for copying and pickling.
 
@@ -2915,7 +2778,7 @@ cdef class RingHomomorphism_from_quotient(RingHomomorphism):
         """
         return self.phi
 
-    cpdef _richcmp_(self, other, int op):
+    cpdef _richcmp_(self, other, int op) noexcept:
         """
         Compare ``self`` to ``other``.
 
@@ -2976,7 +2839,7 @@ cdef class RingHomomorphism_from_quotient(RingHomomorphism):
         return '\n'.join('{} |--> {}'.format(D.gen(i), ig[i])
                          for i in range(D.ngens()))
 
-    cpdef Element _call_(self, x):
+    cpdef Element _call_(self, x) noexcept:
         """
         Evaluate this function at ``x``.
 
@@ -3035,7 +2898,7 @@ cdef class FrobeniusEndomorphism_generic(RingHomomorphism):
         self._q = self._p ** self._power
         RingHomomorphism.__init__(self, Hom(domain, domain))
 
-    cdef _update_slots(self, dict _slots):
+    cdef _update_slots(self, dict _slots) noexcept:
         """
         Update information with the given slots.
 
@@ -3055,7 +2918,7 @@ cdef class FrobeniusEndomorphism_generic(RingHomomorphism):
         self._q = self._p ** self._power
         RingHomomorphism._update_slots(self, _slots)
 
-    cdef dict _extra_slots(self):
+    cdef dict _extra_slots(self) noexcept:
         """
         Return additional information about this morphism
         as a dictionary.
@@ -3145,7 +3008,7 @@ cdef class FrobeniusEndomorphism_generic(RingHomomorphism):
             s = '\\verb"Frob"^{%s}' % self._power
         return s
 
-    cpdef Element _call_ (self, x):
+    cpdef Element _call_ (self, x) noexcept:
         """
         TESTS::
 
