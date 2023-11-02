@@ -196,3 +196,30 @@ jobs:
         with:
           name: docs
           path: docs.zip
+
+      - name: Build live doc
+        id: livedoc
+        if: always() && steps.copy.outcome == 'success' && github.ref == 'refs/heads/develop'
+        run: |
+          set -ex
+          export SAGE_USE_CDNS=yes
+          export SAGE_LIVE_DOC=yes
+          export SAGE_JUPYTER_SERVER=binder:sagemath/sage-binder-env/dev
+          make doc-clean doc-uninstall
+          ./config.status && make sagemath_doc_html-no-deps
+          mkdir -p ./livedoc
+          cp -r -L /sage/local/share/doc/sage/html ./livedoc
+          cp  /sage/local/share/doc/sage/index.html ./livedoc
+          zip -r livedoc.zip livedoc
+        working-directory: ./worktree-image
+        env:
+          MAKE: make -j2 --output-sync=recurse
+          SAGE_NUM_THREADS: 2
+
+      - name: Upload live doc
+        if: always() && steps.livedoc.outcome == 'success'
+        uses: actions/upload-artifact@v3
+        with:
+          name: livedoc
+          path: livedoc.zip
+
