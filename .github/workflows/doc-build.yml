@@ -176,19 +176,20 @@ jobs:
                 file_path = os.path.join('/sage/local/share/doc/sage', path)
                 with open(file_path, 'r') as file:
                   content = file.read().splitlines()
-                  count = 1
+                  count = 0
                   for line in block.splitlines():
                     if line.startswith('@@ -'):
                       line_number = int(re.search(r'@@ -(\d+)', line).group(1))
-                        for i in range(line_number, -1, -1):
-                          if content[i].startswith('<'):
-                            content[i] = f'<span id="hunk{count}" style="visibility: hidden;"></span>' + content[i]
-                            count += 1
-                            break
+                      for i in range(line_number, -1, -1):
+                        if content[i].startswith('<'):
+                          count += 1
+                          content[i] = f'<span id="hunk{count}" style="visibility: hidden;"></span>' + content[i]
+                          break
                 with open(file_path, 'w') as file:
                   file.writelines(content)
-                out_blocks.append(f'<p class="diff"><a href="{path}#hunk1">{path}</a>&emsp;{count} hunks&emsp;</p>\n'
-                                  + '<pre><code class="language-diff">'
+                hunks = '&nbsp;'.join(f'<a href="{path}#hunk{i+1}" target="_blank">#{i+1}</a>' for i in range(count))
+                out_blocks.append(f'<p class="diff"><a href="{path}">{path}</a>&emsp;</p>' + '&emsp;hunks: ' + hunks
+                                  + '\n<pre><code class="language-diff">'
                                   + html.escape(block).strip() + '</code></pre>')
             output_text = '\n'.join(out_blocks)
           with open('./docs/diff.html', 'w') as f:
