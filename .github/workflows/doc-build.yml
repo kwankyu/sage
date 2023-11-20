@@ -164,19 +164,35 @@ jobs:
           echo '<body>' >> ./docs/CHANGES.html
           (cd /sage/local/share/doc/sage/html && git diff HEAD^ -- *.html; rm -rf .git) > ./docs/diff.txt
           /sage/sage -python - << EOF
-          import re, html
+          import os, re, html
           with open('./docs/diff.txt', 'r') as f:
-              diff_text = f.read()
-              diff_blocks = re.split(r'^(?=diff --git)', diff_text, flags=re.MULTILINE)
-              out_blocks = []
-              for block in diff_blocks:
-                  match = re.search(r'^diff --git a/(.*) b/\1', block, flags=re.MULTILINE)
-                  if match:
-                      path = 'html/' + match.group(1)
-                      out_blocks.append(f'<p class="diff"><a href="{path}">{path}</a>&emsp;</p>\n<pre><code class="language-diff">' + html.escape(block).strip() + '</code></pre>')
-              output_text = '\n'.join(out_blocks)
+            diff_text = f.read()
+            diff_blocks = re.split(r'^(?=diff --git)', diff_text, flags=re.MULTILINE)
+            out_blocks = []
+            for block in diff_blocks:
+              match = re.search(r'^diff --git a/(.*) b/\1', block, flags=re.MULTILINE)
+              if match:
+                path = 'html/' + match.group(1)
+                file_path = os.path.join('/sage/local/share/doc/sage', path)
+                with open(file_path, 'r') as file:
+                  content = file.read().splitlines()
+                  count = 1
+                  for line in block.splitlines():
+                    if line.startswith('@@ -'):
+                      line_number = int(re.search(r'@@ -(\d+)', line).group(1))
+                        for i in range(line_number, -1, -1):
+                          if content[i].startswith('<'):
+                            content[i] = f'<span id="hunk{count}" style="visibility: hidden;"></span>' + content[i]
+                            count += 1
+                            break
+                with open(file_path, 'w') as file:
+                  file.writelines(content)
+                out_blocks.append(f'<p class="diff"><a href="{path}#hunk1">{path}</a>&emsp;{count} hunks&emsp;</p>\n'
+                                  + '<pre><code class="language-diff">'
+                                  + html.escape(block).strip() + '</code></pre>')
+            output_text = '\n'.join(out_blocks)
           with open('./docs/diff.html', 'w') as f:
-              f.write(output_text)
+            f.write(output_text)
           EOF
           cat ./docs/diff.html >> ./docs/CHANGES.html
           echo '</body>' >> ./docs/CHANGES.html
