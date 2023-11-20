@@ -144,18 +144,31 @@ jobs:
           cat >> ./docs/CHANGES.html << EOF
           <script>
           document.addEventListener('DOMContentLoaded', () => {
-            const diffSite = 'https://pianomister.github.io/diffsite/'
-            const baseDocURL = 'https://sagemath-tobias.netlify.app/'
+            const diffSite = 'https://pianomister.github.io/diffsite'
+            const baseDocURL = 'https://sagemath-tobias.netlify.app'
             const diffParagraphs = document.querySelectorAll('p.diff');
             diffParagraphs.forEach(paragraph => {
-              const rootURL = window.location.origin + '/';
+              const rootURL = window.location.origin;
               const docAnchor = paragraph.querySelector('a');
-              const path = docAnchor.textContent; // .href doesn't work
+              const url = new URL(docAnchor.href)
+              const path = url.pathname;
               const anchor = document.createElement('a');
-              anchor.href = diffSite + '?url1=' + rootURL + path + '&url2=' + baseDocURL + path;
+              anchor.href = diffSite + '/?url1=' + rootURL + path + '&url2=' + baseDocURL + path;
               anchor.textContent = 'compare with the base';
               anchor.setAttribute('target', '_blank');
               paragraph.appendChild(anchor);
+              paragraph.innerHTML += '&nbsp;';
+              const hunkAnchors = paragraph.querySelectorAll('a.hunk');
+              hunkAnchors.forEach(hunkAnchor => {
+                const url = new URL(hunkAnchor.href);
+                const path = url.pathname;
+                const anchor = document.createElement('a');
+                anchor.href = diffSite + '/?url1=' + rootURL + path + '&url2=' + baseDocURL + path.split('#')[0];
+                anchor.textContent = hunkAnchor.textContent;
+                anchor.setAttribute('target', '_blank');
+                paragraph.appendChild(anchor);
+                paragraph.innerHTML += '&nbsp;';
+              });
             });
           });
           </script>
@@ -187,8 +200,8 @@ jobs:
                           break
                 with open(file_path, 'w') as file:
                   file.writelines(content)
-                hunks = '&nbsp;'.join(f'<a href="{path}#hunk{i+1}" target="_blank">#{i+1}</a>' for i in range(count))
-                out_blocks.append(f'<p class="diff"><a href="{path}">{path}</a>&emsp;' + 'hunks: ' + hunks + '&emsp;</p>'
+                hunks = '&nbsp;'.join(f'<a href="{path}#hunk{i+1}" class="hunk" target="_blank">#{i+1}</a>' for i in range(count))
+                out_blocks.append(f'<p class="diff"><a href="{path}">{path}</a>&nbsp;' + hunks + '&emsp;</p>'
                                   + '\n<pre><code class="language-diff">'
                                   + html.escape(block).strip() + '</code></pre>')
             output_text = '\n'.join(out_blocks)
