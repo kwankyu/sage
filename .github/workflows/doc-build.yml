@@ -162,7 +162,7 @@ jobs:
               hunkAnchors.forEach(hunkAnchor => {
                 const url = new URL(hunkAnchor.href);
                 const path = url.pathname;
-                const pathHash = path + url.hash;
+                const pathHash = url.pathname + url.hash.replace('#', '%23');
                 const anchor = document.createElement('a');
                 anchor.href = diffSite + '/?url1=' + rootURL + pathHash + '&url2=' + baseDocURL + path;
                 anchor.textContent = hunkAnchor.textContent;
