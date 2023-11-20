@@ -162,8 +162,9 @@ jobs:
               hunkAnchors.forEach(hunkAnchor => {
                 const url = new URL(hunkAnchor.href);
                 const path = url.pathname;
+                const pathHash = path + url.hash;
                 const anchor = document.createElement('a');
-                anchor.href = diffSite + '/?url1=' + rootURL + path + '&url2=' + baseDocURL + path.split('#')[0];
+                anchor.href = diffSite + '/?url1=' + rootURL + pathHash + '&url2=' + baseDocURL + path;
                 anchor.textContent = hunkAnchor.textContent;
                 anchor.setAttribute('target', '_blank');
                 paragraph.appendChild(anchor);
