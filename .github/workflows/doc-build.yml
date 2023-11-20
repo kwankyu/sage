@@ -175,7 +175,7 @@ jobs:
                 path = 'html/' + match.group(1)
                 file_path = os.path.join('/sage/local/share/doc/sage', path)
                 with open(file_path, 'r') as file:
-                  content = file.read().splitlines()
+                  content = file.readlines()
                   count = 0
                   for line in block.splitlines():
                     if line.startswith('@@ -'):
