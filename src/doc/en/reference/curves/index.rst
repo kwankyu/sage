@@ -16,6 +16,7 @@ Curves
    sage/schemes/curves/projective_curve
    sage/schemes/curves/point
    sage/schemes/curves/closed_point
+   sage/schemes/curves/zariski_vankampen
 
 Plane conics
 ------------
