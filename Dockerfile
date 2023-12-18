@@ -18,12 +18,12 @@ RUN apt-get install -y sudo
 RUN apt-get install -y python3-pip
 
 # Recommended system packages for latex
-# RUN apt-get install -y texlive
-# RUN apt-get install -y texlive-luatex
-# RUN apt-get install -y preview-latex-style
-# RUN apt-get install -y fonts-freefont-otf
-# RUN apt-get install -y xindy
-# RUN apt-get install -y imagemagick
+RUN apt-get install -y texlive
+RUN apt-get install -y texlive-luatex
+RUN apt-get install -y preview-latex-style
+RUN apt-get install -y fonts-freefont-otf
+RUN apt-get install -y xindy
+RUN apt-get install -y imagemagick
 
 # Install jupyterlab
 RUN python3 -m pip install --no-warn-script-location jupyterlab
