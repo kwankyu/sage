@@ -39,7 +39,7 @@ Getting Started
 
 Those who are impatient may use prebuilt Sage available online from any of
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/sagemath/sage-binder-env/master
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/kwankyu/sage/use-xelatex-by-default-binder
 ) &nbsp; [![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/sagemath/sage/tree/master
 ) &nbsp; [![Open in GitHub Codespaces](https://img.shields.io/badge/Open_in_GitHub_Codespaces-black?logo=github)](https://codespaces.new/sagemath/sage/tree/master)
 
