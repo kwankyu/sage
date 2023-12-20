@@ -28,7 +28,7 @@ import os
 import random
 import re
 import shutil
-from subprocess import call, run, PIPE
+from subprocess import call, run, Popen, PIPE
 from tempfile import TemporaryDirectory
 
 from sage.misc.cachefunc import cached_function, cached_method
@@ -1683,7 +1683,9 @@ def _latex_file_(objects, title='SAGE', debug=False,
     s = LATEX_HEADER + '\n' + MACROS + s + '\n\\end{document}'
 
     if debug:
+        print('----')
         print(s)
+        print('----')
 
     return s
 
@@ -1827,7 +1829,6 @@ def view(objects, title='Sage', debug=False, sep='', tiny=False,
         ...
         ValueError: Unsupported LaTeX engine.
     """
-
     if tightpage:
         if margin is None:
             margin_str = ""
@@ -1870,27 +1871,96 @@ def view(objects, title='Sage', debug=False, sep='', tiny=False,
         tmp.cleanup()
         return
     output_file = os.path.join(tmp.name, "sage." + suffix)
+
     # this should get changed if we switch the stuff in misc.viewer to
     # producing lists
     if debug:
-        print('viewer: "{}"'.format(viewer))
+        print(f'viewer: "{viewer}"')
 
-    # Return immediately but only clean up the temporary file after
-    # the viewer has closed. This function is synchronous and waits
-    # for the process to complete...
-    def run_viewer():
-        run([viewer, output_file], capture_output=True)
-        tmp.cleanup()
+    # return immediately but only clean up the temporary file after the viewer
+    # is open
+    process = Popen([viewer, output_file], stdout=PIPE, stderr=PIPE)
 
-    # ...but we execute it asynchronously so that view() completes
-    # immediately. The "daemon" flag is important because, without it,
-    # sage won't quit until the viewer does.
+    def cleanup_temp_file():
+        process.wait()
+        if tmp:
+            import time
+            time.sleep(5)
+            tmp.cleanup()
+
     from threading import Thread
-    t = Thread(target=run_viewer)
-    t.daemon = True
+    t = Thread(target=cleanup_temp_file)
     t.start()
 
-    return
+
+def pdf(x, filename, tiny=False, engine=None, tightpage=True, margin=None, debug=False):
+    """
+    Create a pdf image from the latex representation of ``x`` and save it as a
+    file with the given filename.
+
+    INPUT:
+
+    - ``x`` -- a Sage object
+
+    - ``filename`` -- the filename in which to save the image
+
+    - ``tiny`` -- boolean (default: ``False``); if ``True``, use a tiny font
+
+    - ``tightpage`` -- boolean (default: ``True``); use the LaTeX package
+       ``preview`` with the 'tightpage' option
+
+    - ``engine`` -- (default: ``None``) ``'latex'``, ``'pdflatex'``,
+      ``'xelatex'`` or ``'lualatex'``
+
+    - ``debug`` -- boolean (default: ``False``); if ``True``, print verbose output
+
+    EXAMPLES::
+
+        sage: # optional - latex
+        sage: from sage.misc.latex import pdf
+        sage: import tempfile
+        sage: with tempfile.NamedTemporaryFile(suffix=".pdf") as f:  # random
+        ....:     pdf(ZZ[x], f.name)
+    """
+    from sage.plot.graphics import Graphics
+    if isinstance(x, Graphics):
+        x.save(filename)
+        return
+
+    if tightpage:
+        if margin is None:
+            margin_str = ""
+        else:
+            margin_str = '\n\\setlength\\PreviewBorder{%fmm}' % margin
+        latex_options = {'extra_preamble':
+                         '\\usepackage[tightpage,active]{preview}\n' +
+                         '\\PreviewEnvironment{page}%s' % margin_str,
+                         'math_left': '\\begin{page}$',
+                         'math_right': '$\\end{page}'}
+        title = None
+    else:
+        latex_options = {}
+
+    # create a string of latex code to write in a file
+    s = _latex_file_([x], title='', tiny=tiny, debug=debug, **latex_options)
+    if engine is None:
+        engine = _Latex_prefs._option["engine"]
+    # path name for permanent png output
+    abs_path_to_pdf = os.path.abspath(filename)
+    # temporary directory to store stuff
+    with TemporaryDirectory() as tmp:
+        tex_file = os.path.join(tmp, "sage.tex")
+        pdf_file = os.path.join(tmp, "sage.pdf")
+        # write latex string to file
+        with open(tex_file, 'w') as file:
+            file.write(s)
+        # run latex on the file
+        e = _run_latex_(tex_file, debug=debug, engine=engine)
+        if e == 'pdf':
+            # if no errors, copy pdf_file to the appropriate place
+            shutil.copy(pdf_file, abs_path_to_pdf)
+        else:
+            print("Latex error or no pdf was generated.")
 
 
 def png(x, filename, density=150, debug=False,
