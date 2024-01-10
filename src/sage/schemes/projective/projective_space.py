@@ -2266,6 +2266,9 @@ class ProjectiveSpace_field(ProjectiveSpace_ring):
         m = matrix(3, list(self.gens()) + list(p) + list(q))
         return Curve([f for f in m.minors(3) if f])
 
+    def structure_sheaf(self):
+        from sage.schemes.projective.sheaf.on_projective_space import SheafOnProjectiveSpace
+
 
 class ProjectiveSpace_finite_field(ProjectiveSpace_field):
     def _point(self, *args, **kwds):
