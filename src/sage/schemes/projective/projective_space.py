@@ -2267,7 +2267,17 @@ class ProjectiveSpace_field(ProjectiveSpace_ring):
         return Curve([f for f in m.minors(3) if f])
 
     def structure_sheaf(self):
-        from sage.schemes.projective.sheaf.on_projective_space import SheafOnProjectiveSpace
+        """
+        EXAMPLES::
+
+            sage: P = ProjectiveSpace(QQ, 2, 'x')
+            sage: sheaf = P.structure_sheaf()
+            sage: sheaf
+            Sheaf on Projective Space of dimension 2 over Rational Field
+        """
+        from sage.schemes.sheaf.on_projective_space import Sheaf
+        from sage.modules.free_module import FreeModule
+        return Sheaf(self, FreeModule(self.coordinate_ring(), 1))
 
 
 class ProjectiveSpace_finite_field(ProjectiveSpace_field):
