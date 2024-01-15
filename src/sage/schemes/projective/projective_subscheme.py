@@ -1520,3 +1520,25 @@ class AlgebraicScheme_subscheme_projective_field(AlgebraicScheme_subscheme_proje
             4.61512051684126
         """
         return self.Chow_form().local_height_arch(i, prec)
+
+    def coherent_sheaf(self, module):
+        from sage.schemes.sheaf.on_projective_subscheme import Sheaf
+        return Sheaf(self, module)
+
+    def structure_sheaf(self):
+        """
+        EXAMPLES::
+
+            sage: P3.<x0,x1,x2,x3> = ProjectiveSpace(QQ, 3)
+            sage: X = P3.subscheme(x0^3+x1^3+x2^3+x3^3)
+            sage: X.structure_sheaf()
+        """
+        from sage.modules.free_module import FreeModule
+        S = self.ambient_space().coordinate_ring()
+        A = FreeModule(S, rank=1)
+        N = A.submodule(A([f]) for f in self.defining_polynomials())
+        M = A.quotient(N)
+        return self.coherent_sheaf(M)
+
+
+
