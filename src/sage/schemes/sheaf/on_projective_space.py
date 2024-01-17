@@ -52,6 +52,6 @@ class Sheaf(SageObject):
         M = self._module
         I = M.relations()
         c = Complex(I.graded_free_resolution())
-        return M, c
+        return c
 
 

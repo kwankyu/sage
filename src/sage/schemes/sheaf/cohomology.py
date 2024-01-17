@@ -14,38 +14,44 @@ We define the Fermat cubic surface in P^3::
     sage: P3.<x,y,z,w> = ProjectiveSpace(QQ, 3)
     sage: X = P3.subscheme([y*w - z^2, -x*w + y*z, x*z - y^2])
     sage: sh = X.structure_sheaf().image_to_ambient_space()
+
+    sage: P2.<x,y,z> = ProjectiveSpace(QQ, 2)
+    sage: X = P2.subscheme([x^4 + y^4 + z^4])
+    sage: sh = X.structure_sheaf().image_to_ambient_space()
 """
 
 from sage.misc.flatten import flatten
 from sage.combinat.integer_lists.invlex import IntegerListsLex
 from sage.modules.free_module import VectorSpace
+from sage.modules.free_module_element import vector
 
 class Module:
     """
     Top cohomology module of the twisted structure sheaf of a projective space.
     """
     def __init__(self, S, shifts):
-        self._graded_ring = S
-        self._shifts = shifts
+        self.graded_ring = S
+        self.shifts = shifts
 
         n = S.ngens()
 
         basis = []
         summands_basis = []
         summands_index = []
-        index = 0
-        for m in self._shifts:
+        rank = 0
+        for m in self.shifts:
             # list of integer vectors whose entries are all negative integers and sum to -m
             l = [-vector(e) for e in IntegerListsLex(length=n, min_sum=m, max_sum=m, min_part=1)]
             basis += l
             summands_basis.append(l)
-            summands_index.append(index)
-            index += len(l)
+            summands_index.append(rank)
+            rank += len(l)
 
-        self._summands_basis = summands_basis
-        self._summands_index = summands_index
-        self._basis = basis
-        self._vector_space = VectorSpace(S.base_ring(), len(self._basis))
+        self.summands_basis = summands_basis
+        self.summands_index = summands_index
+        self.basis = basis
+        self.vector_space = VectorSpace(S.base_ring(), rank)
+        self.rank = rank
 
     def __repr__(self):
         return 'H^r(O_{P_r}()'
@@ -53,20 +59,79 @@ class Module:
 
 class Complex:
     def __init__(self, resolution):
-        self._resolution = resolution
-        self._base_ring = resolution.target().base_ring()
+        self.resolution = resolution
+        self.base_ring = resolution.target().base_ring()
+        self.coefficient_field = self.base_ring.base_ring()
+        self.projective_space_dimension = self.base_ring.ngens() - 1
 
     def __repr__(self):
         return 'Complex'
 
     def module(self, i):
-        S = self._base_ring
-        shifts = self._resolution.shifts(i)
+        S = self.base_ring
+        shifts = self.resolution.shifts(i)
         return Module(S, shifts)
 
-    def differential(self, i):
-        G1 = self.module(i)
-        G0 = self.module(i - 1)
+    def differential(self, t):
+        """
+        EXAMPLES::
+
+            sage: P2.<x,y,z> = ProjectiveSpace(QQ, 2)
+            sage: X = P2.subscheme([x^4 + y^4 + z^4])
+            sage: sh = X.structure_sheaf().image_to_ambient_space()
+            sage: c = sh.cohomology()
+        """
+        H1 = self.module(t)
+        H0 = self.module(t - 1)
+        M = self.resolution.differential(t).matrix()
+        K = self.coefficient_field
+        zero = K.zero()
+
+        assert M.ncols() == len(H1.summands_basis)
+        assert M.nrows() == len(H0.summands_basis)
+
+        A = []
+        for i in range(M.ncols()):
+            basis = H1.summands_basis[i]
+            for v in basis:
+                image = [zero for e in range(H0.rank)]
+                for j in range(M.nrows()):
+                    f = M[i,j]
+                    basis = H0.summands_basis[j]
+                    for c, m in zip(f.coefficients(), f.exponents()):
+                        u = v + vector(m)
+                        assert(sum(u) == -H0.shifts[j])
+                        if any(e >= 0 for e in u):
+                            continue
+                        k = H0.summands_index[j] + basis.index(u)
+                        image[k] += c
+                A.append(vector(K, image))
+
+        return H1.vector_space.hom(A, codomain=H0.vector_space, side='right')
+
+    def H(self, t):
+        if t == self.projective_space_dimension:
+            return self.module(0).vector_space.quotient(self.differential(1).image())
+        if t == 0:
+            pass
+        if 0 <= t and t < self.projective_space_dimension:
+            return self.differential(t).kernel().quotient(self.differential(t + 1).image())
+
+    def h(self, t):
+        return self.H(t).dimension()
+
+    def H_basis(self, t):
+        return self.module(t).basis
+
+
+
+
+
+
+
+
+
+
 
 
 

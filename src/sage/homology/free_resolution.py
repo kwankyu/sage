@@ -487,11 +487,11 @@ class FiniteFreeResolution(FreeResolution):
         elif i == self._length + 1:
             s = FreeModule(self._base_ring, 0)
             t = FreeModule(self._base_ring, self._maps[i - 2].ncols())
-            m = s.hom(0, t)
+            m = s.hom(0, t, side='right')
         elif i > self._length + 1:
             s = FreeModule(self._base_ring, 0)
             t = FreeModule(self._base_ring, 0)
-            m = s.hom(0, t)
+            m = s.hom(0, t, side='right')
         else:
             s = FreeModule(self._base_ring, self._maps[i - 1].ncols())
             t = FreeModule(self._base_ring, self._maps[i - 1].nrows())
