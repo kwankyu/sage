@@ -58,11 +58,11 @@ class Module:
 
 
 class Complex:
-    def __init__(self, resolution):
-        self.resolution = resolution
-        self.base_ring = resolution.target().base_ring()
+    def __init__(self, M):
+        self.resolution = M.relations().graded_free_resolution()
+        self.base_ring = self.resolution.target().base_ring()
         self.coefficient_field = self.base_ring.base_ring()
-        self.projective_space_dimension = self.base_ring.ngens() - 1
+        self.space_dimension = self.base_ring.ngens() - 1
 
     def __repr__(self):
         return 'Complex'
@@ -110,29 +110,14 @@ class Complex:
         return H1.vector_space.hom(A, codomain=H0.vector_space, side='right')
 
     def H(self, t):
-        if t == self.projective_space_dimension:
+        r = self.space_dimension
+        if t == r:
             return self.module(0).vector_space.quotient(self.differential(1).image())
+        if 1 <= t and t < r:
+            return self.differential(r - t).kernel().quotient(self.differential(r - t + 1).image())
         if t == 0:
             pass
-        if 0 <= t and t < self.projective_space_dimension:
-            return self.differential(t).kernel().quotient(self.differential(t + 1).image())
 
     def h(self, t):
         return self.H(t).dimension()
-
-    def H_basis(self, t):
-        return self.module(t).basis
-
-
-
-
-
-
-
-
-
-
-
-
-
 

@@ -49,9 +49,7 @@ class Sheaf(SageObject):
             sage: sheaf.cohomology()
         """
         from sage.schemes.sheaf.cohomology import Complex
-        M = self._module
-        I = M.relations()
-        c = Complex(I.graded_free_resolution())
+        c = Complex(self._module)
         return c
 
 
