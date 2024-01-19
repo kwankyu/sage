@@ -1522,7 +1522,7 @@ class AlgebraicScheme_subscheme_projective_field(AlgebraicScheme_subscheme_proje
         return self.Chow_form().local_height_arch(i, prec)
 
     def coherent_sheaf(self, module):
-        from sage.schemes.sheaf.on_projective_subscheme import Sheaf
+        from sage.schemes.sheaves.on_projective_subscheme import Sheaf
         return Sheaf(self, module)
 
     def structure_sheaf(self):

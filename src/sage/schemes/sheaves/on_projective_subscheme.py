@@ -14,21 +14,12 @@ EXAMPLES::
 
 """
 
-from sage.structure.sage_object import SageObject
+from sage.schemes.sheaves.sheaf import Sheaf as _Sheaf
 
-class Sheaf(SageObject):
-    def __init__(self, X, module):
-        self._base_scheme = X
-        self._module = module
+class Sheaf(_Sheaf):
 
-    def _repr_(self):
-        return f'Sheaf on {self._base_scheme}'
-
-    def base_scheme(self):
-        return self._base_scheme
-
-    def cohomology(self, r):
-        pass
+    def _cohomology(self):
+        return self.image_to_ambient_space()._cohomology()
 
     def image_to_ambient_space(self):
         """

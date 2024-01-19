@@ -2268,7 +2268,7 @@ class ProjectiveSpace_field(ProjectiveSpace_ring):
 
     def structure_sheaf(self):
 
-        from sage.schemes.sheaf.on_projective_space import Sheaf
+        from sage.schemes.sheaves.on_projective_space import Sheaf
         from sage.modules.free_module import FreeModule
         return Sheaf(self, FreeModule(self.coordinate_ring(), 1))
 
@@ -2281,7 +2281,7 @@ class ProjectiveSpace_field(ProjectiveSpace_ring):
             sage: sheaf
             Sheaf on Projective Space of dimension 2 over Rational Field
         """
-        from sage.schemes.sheaf.on_projective_space import Sheaf
+        from sage.schemes.sheaves.on_projective_space import Sheaf
         return Sheaf(self, module)
 
     def structure_sheaf(self):

@@ -28,16 +28,15 @@ from sage.structure.sage_object import SageObject
 
 class Sheaf(SageObject):
 
-    def __init__(self, base, module):
-        self._base = base
+    def __init__(self, scheme, module):
+        self._base_scheme = scheme
         self._module = module
-        self._cohomology = None
 
     def _repr_(self):
-        return f'Sheaf on {self._base}'
+        return f'Sheaf on {self._base_scheme}'
 
     def base_scheme(self):
-        return self._base
+        return self._base_scheme
 
     def cohomology(self, r=0):
         """
@@ -46,14 +45,8 @@ class Sheaf(SageObject):
             sage: P3 = ProjectiveSpace(QQ, 3, 'x')
             sage: P3.inject_variables()
             sage: X = P3.subscheme(x0^3+x1^3+x2^3+x3^3)
-            sage: sheaf = X.structure_sheaf().image_to_ambient_sapce()
+            sage: sheaf = X.structure_sheaf().image_to_ambient_space()
             sage: sheaf.cohomology()
         """
-        from sage.schemes.sheaf.cohomology import Complex
-        if self._cohomology:
-            c = self._cohomology
-        else:
-            c = Complex(self._module)
-        return c.h(r)
-
+        return self._cohomology().h(r)
 
