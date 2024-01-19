@@ -31,6 +31,7 @@ class Sheaf(SageObject):
     def __init__(self, base, module):
         self._base = base
         self._module = module
+        self._cohomology = None
 
     def _repr_(self):
         return f'Sheaf on {self._base}'
@@ -49,7 +50,10 @@ class Sheaf(SageObject):
             sage: sheaf.cohomology()
         """
         from sage.schemes.sheaf.cohomology import Complex
-        c = Complex(self._module)
-        return c
+        if self._cohomology:
+            c = self._cohomology
+        else:
+            c = Complex(self._module)
+        return c.h(r)
 
 
