@@ -2266,13 +2266,13 @@ class ProjectiveSpace_field(ProjectiveSpace_ring):
         m = matrix(3, list(self.gens()) + list(p) + list(q))
         return Curve([f for f in m.minors(3) if f])
 
-    def structure_sheaf(self):
+    def structure_sheaf(self, twist=0):
 
         from sage.schemes.sheaves.on_projective_space import Sheaf
         from sage.modules.free_module import FreeModule
-        return Sheaf(self, FreeModule(self.coordinate_ring(), 1))
+        return Sheaf(self, FreeModule(self.coordinate_ring(), 1), twist=twist)
 
-    def coherent_sheaf(self, module):
+    def coherent_sheaf(self, module, twist=0):
         """
         EXAMPLES::
 
@@ -2282,9 +2282,9 @@ class ProjectiveSpace_field(ProjectiveSpace_ring):
             Sheaf on Projective Space of dimension 2 over Rational Field
         """
         from sage.schemes.sheaves.on_projective_space import Sheaf
-        return Sheaf(self, module)
+        return Sheaf(self, module, twist=twist)
 
-    def structure_sheaf(self):
+    def structure_sheaf(self, twist=0):
         """
         EXAMPLES::
 
@@ -2295,7 +2295,7 @@ class ProjectiveSpace_field(ProjectiveSpace_ring):
         from sage.modules.free_module import FreeModule
         S = self.coordinate_ring()
         M = FreeModule(S, rank=1)
-        return self.coherent_sheaf(M)
+        return self.coherent_sheaf(M, twist=twist)
 
 
 class ProjectiveSpace_finite_field(ProjectiveSpace_field):

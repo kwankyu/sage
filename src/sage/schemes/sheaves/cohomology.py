@@ -90,8 +90,9 @@ class HomologySpaceTop:
 
 
 class Complex:
-    def __init__(self, M):
-        self.resolution = M.relations().graded_free_resolution()
+    def __init__(self, M, twist=0):
+        shifts = [-twist for i in range(M.cover().degree())]
+        self.resolution = M.relations().graded_free_resolution(shifts=shifts)
         self.base_ring = self.resolution.target().base_ring()
         self.coefficient_field = self.base_ring.base_ring()
         self.projective_space_dimension = self.base_ring.ngens() - 1
@@ -137,7 +138,7 @@ class Complex:
                     basis = H0.summands_basis[j]
                     for c, m in zip(f.coefficients(), f.exponents()):
                         u = v + vector(m)
-                        assert(sum(u) == H0.shifts[j])
+                        assert(sum(u) == -H0.shifts[j])
                         if any(e < 0 for e in u):
                             continue
                         k = H0.summands_index[j] + basis.index(u)

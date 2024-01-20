@@ -33,10 +33,10 @@ from sage.schemes.sheaves.sheaf import Sheaf as _
 
 class Sheaf(_):
 
-    def __init__(self, scheme, module):
-        super().__init__(scheme, module)
+    def __init__(self, scheme, module, twist=0):
+        super().__init__(scheme, module, twist)
         from sage.schemes.sheaves.cohomology import Complex
-        self._cohomology = Complex(self._module)
+        self._cohomology = Complex(self._module, twist=self._twist)
 
 
 

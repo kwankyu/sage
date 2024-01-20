@@ -18,8 +18,8 @@ from sage.schemes.sheaves.sheaf import Sheaf as _
 
 class Sheaf(_):
 
-    def __init__(self, scheme, module):
-        super().__init__(scheme, module)
+    def __init__(self, scheme, module, twist=0):
+        super().__init__(scheme, module, twist)
         self._cohomology = self.image_to_ambient_space()._cohomology
 
     def image_to_ambient_space(self):
@@ -33,5 +33,5 @@ class Sheaf(_):
         A = X.ambient_space()
         S = A.coordinate_ring()
         M = self._module.change_ring(S)
-        return A.coherent_sheaf(M)
+        return A.coherent_sheaf(M, twist=self._twist)
 

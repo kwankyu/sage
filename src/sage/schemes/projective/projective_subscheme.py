@@ -1521,11 +1521,11 @@ class AlgebraicScheme_subscheme_projective_field(AlgebraicScheme_subscheme_proje
         """
         return self.Chow_form().local_height_arch(i, prec)
 
-    def coherent_sheaf(self, module):
+    def coherent_sheaf(self, module, twist=0):
         from sage.schemes.sheaves.on_projective_subscheme import Sheaf
-        return Sheaf(self, module)
+        return Sheaf(self, module, twist=twist)
 
-    def structure_sheaf(self):
+    def structure_sheaf(self, twist=0):
         """
         EXAMPLES::
 
@@ -1538,7 +1538,5 @@ class AlgebraicScheme_subscheme_projective_field(AlgebraicScheme_subscheme_proje
         A = FreeModule(S, rank=1)
         N = A.submodule(A([f]) for f in self.defining_polynomials())
         M = A.quotient(N)
-        return self.coherent_sheaf(M)
-
-
+        return self.coherent_sheaf(M, twist=twist)
 

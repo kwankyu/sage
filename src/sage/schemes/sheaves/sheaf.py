@@ -28,9 +28,10 @@ from sage.structure.sage_object import SageObject
 
 class Sheaf(SageObject):
 
-    def __init__(self, scheme, module):
+    def __init__(self, scheme, module, twist=0):
         self._base_scheme = scheme
         self._module = module
+        self._twist = twist
         self._cohomology = None
 
     def _repr_(self):
