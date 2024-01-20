@@ -31,6 +31,7 @@ class Sheaf(SageObject):
     def __init__(self, scheme, module):
         self._base_scheme = scheme
         self._module = module
+        self._cohomology = None
 
     def _repr_(self):
         return f'Sheaf on {self._base_scheme}'
@@ -48,5 +49,5 @@ class Sheaf(SageObject):
             sage: sheaf = X.structure_sheaf().image_to_ambient_space()
             sage: sheaf.cohomology()
         """
-        return self._cohomology().h(r)
+        return self._cohomology.h(r)
 

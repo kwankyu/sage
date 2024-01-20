@@ -29,13 +29,14 @@ We define the Fermat cubic surface in P^3::
     sage: sheaf.cohomology()
 """
 
-from sage.schemes.sheaves.sheaf import Sheaf as _Sheaf
+from sage.schemes.sheaves.sheaf import Sheaf as _
 
-class Sheaf(_Sheaf):
+class Sheaf(_):
 
-    def _cohomology(self):
+    def __init__(self, scheme, module):
+        super().__init__(scheme, module)
         from sage.schemes.sheaves.cohomology import Complex
-        return Complex(self._module)
+        self._cohomology = Complex(self._module)
 
 
 

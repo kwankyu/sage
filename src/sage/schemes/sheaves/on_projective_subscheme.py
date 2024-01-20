@@ -14,12 +14,13 @@ EXAMPLES::
 
 """
 
-from sage.schemes.sheaves.sheaf import Sheaf as _Sheaf
+from sage.schemes.sheaves.sheaf import Sheaf as _
 
-class Sheaf(_Sheaf):
+class Sheaf(_):
 
-    def _cohomology(self):
-        return self.image_to_ambient_space()._cohomology()
+    def __init__(self, scheme, module):
+        super().__init__(scheme, module)
+        self._cohomology = self.image_to_ambient_space()._cohomology
 
     def image_to_ambient_space(self):
         """
