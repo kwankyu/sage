@@ -177,7 +177,8 @@ latex_macros = [r"\newcommand{\SL}{\mathrm{SL}}",
                 r"\newcommand{\lcm}{\mathop{\operatorname{lcm}}}",
                 r"\newcommand{\dist}{\mathrm{dist}}",
                 r"\newcommand{\PP}{\mathbf{P}}",
-                r"\newcommand{\OO}{\mathcal{O}}"]
+                r"\newcommand{\OO}{\mathcal{O}}",
+                ]
 
 # The following is to allow customization of typesetting of rings:
 # mathbf vs mathbb.  See latex.py for more information.

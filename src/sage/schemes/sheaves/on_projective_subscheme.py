@@ -13,13 +13,15 @@ EXAMPLES::
 
 """
 
+from functools import cached_property
+from sage.modules.free_module import FreeModule
 from sage.schemes.sheaves.sheaf import Sheaf as _
 
 class Sheaf(_):
 
-    def __init__(self, scheme, module, twist=0):
-        super().__init__(scheme, module, twist)
-        self._cohomology = self.image_to_ambient_space()._cohomology
+    @cached_property
+    def _cohomology(self):
+        return self.image_to_ambient_space()._cohomology
 
     def image_to_ambient_space(self):
         """
@@ -27,10 +29,28 @@ class Sheaf(_):
 
         The image is with respect to the inclusion morphism from the base
         scheme into the projective Space.
+
+        INPUT:
+
+        - ``twist`` -- (default: `0`) an integer
+
+        EXAMPLES::
+
+            sage: P2.<x,y,z> = ProjectiveSpace(QQ, 2)
+            sage: X = P3.subscheme(x^4 + y^4 + z^4)
+            sage: X.structure_sheaf()
+            Sheaf on Closed subscheme of Projective Space of dimension 3 over
+            Rational Field defined by: x0^3 + x1^3 + x2^3 + x3^3
         """
         X = self._base_scheme
         A = X.ambient_space()
         S = A.coordinate_ring()
-        M = self._module.change_ring(S)
-        return A.coherent_sheaf(M, twist=self._twist)
+
+        d = self._module.degree()
+        M = FreeModule(S, d)
+        I = X.defining_polynomials()
+        J = self._module.relations().gens()
+        G = [f * M.gen(i) for i in range(d) for f in I] + [v.change_ring(S) for v in J]
+        N = M.submodule(G)
+        return A.coherent_sheaf(M.quotient(N), twist=self._twist)
 

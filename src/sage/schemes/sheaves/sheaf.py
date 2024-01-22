@@ -27,6 +27,7 @@ AUTHORS:
 
 """
 
+from functools import cached_property
 from sage.structure.sage_object import SageObject
 
 class Sheaf(SageObject):
@@ -41,7 +42,10 @@ class Sheaf(SageObject):
         self._base_scheme = scheme
         self._module = module
         self._twist = twist
-        self._cohomology = None
+
+    @cached_property
+    def _cohomology(self):
+         raise NotImplementedError('_cohomology is not implemented')
 
     def _repr_(self):
         if self._twist != 0:
