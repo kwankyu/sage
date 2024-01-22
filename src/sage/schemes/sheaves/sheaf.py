@@ -1,8 +1,7 @@
 r"""
-Sheaf on projective space
+Coherent sheaves
 
-
-EXAMPLES::
+EXAMPLES:
 
 We define the Fermat cubic surface in P^3::
 
@@ -22,6 +21,10 @@ We define the Fermat cubic surface in P^3::
       y*z - x*w,
       -y^2 + x*z
 
+AUTHORS:
+
+- Kwankyu Lee (2024-01-22): initial version
+
 """
 
 from sage.structure.sage_object import SageObject
@@ -29,16 +32,32 @@ from sage.structure.sage_object import SageObject
 class Sheaf(SageObject):
 
     def __init__(self, scheme, module, twist=0):
+        try:
+            if module.is_ambient():
+                module = module.quotient(module.zero_submodule())
+        except AttributeError:
+            pass
+
         self._base_scheme = scheme
         self._module = module
         self._twist = twist
         self._cohomology = None
 
     def _repr_(self):
-        return f'Sheaf on {self._base_scheme}'
+        if self._twist != 0:
+            obj = 'Twisted Sheaf'
+        else:
+            obj = 'Sheaf'
+        return f'{obj} on {self._base_scheme}'
 
     def base_scheme(self):
         return self._base_scheme
+
+    def twist(self):
+        return self._twist
+
+    def defining_module(self):
+        return self._module
 
     def cohomology(self, r=0):
         """

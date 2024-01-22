@@ -1,5 +1,5 @@
 r"""
-Projective `n` space over a ring
+Projective `n`-space over a ring
 
 EXAMPLES:
 
@@ -110,6 +110,7 @@ from sage.combinat.tuple import Tuples
 from sage.combinat.tuple import UnorderedTuples
 from sage.combinat.subset import Subsets
 from sage.matrix.constructor import matrix
+from sage.modules.free_module import FreeModule
 from sage.modules.free_module_element import prepare
 from sage.schemes.generic.ambient_space import AmbientSpace
 from sage.schemes.projective.projective_homset import (SchemeHomset_points_projective_ring,
@@ -2266,35 +2267,48 @@ class ProjectiveSpace_field(ProjectiveSpace_ring):
         m = matrix(3, list(self.gens()) + list(p) + list(q))
         return Curve([f for f in m.minors(3) if f])
 
-    def structure_sheaf(self, twist=0):
-
-        from sage.schemes.sheaves.on_projective_space import Sheaf
-        from sage.modules.free_module import FreeModule
-        return Sheaf(self, FreeModule(self.coordinate_ring(), 1), twist=twist)
-
     def coherent_sheaf(self, module, twist=0):
-        """
+        r"""
+        Return the sheaf defined by the graded ``module``.
+
+        If ``twist`` is a non-zero integer `n`, the sheaf twisted by
+        `\OO_{\PP^r}(n)` is returned.
+
+        INPUT:
+
+        - ``twist`` -- (default: `0`) an integer
+
         EXAMPLES::
 
-            sage: P = ProjectiveSpace(QQ, 2, 'x')
-            sage: sheaf = P.structure_sheaf()
-            sage: sheaf
-            Sheaf on Projective Space of dimension 2 over Rational Field
+            sage: P2 = ProjectiveSpace(QQ, 2, 'x')
+            sage: S = P2.coordinate_ring()
+            sage: SS = FreeModule(S, 2)
+            sage: P2.coherent_sheaf(SS, twist=2)
+            Twisted Sheaf on Projective Space of dimension 2 over Rational Field
         """
         from sage.schemes.sheaves.on_projective_space import Sheaf
         return Sheaf(self, module, twist=twist)
 
     def structure_sheaf(self, twist=0):
-        """
+        r"""
+        Return the structure sheaf `\OO_{\PP^r}` of this projective space.
+
+        If ``twist`` is a non-zero integer `n`, the sheaf twisted by
+        `\OO_{\PP^r}(n)` is returned.
+
+        INPUT:
+
+        - ``twist`` -- (default: `0`) an integer
+
         EXAMPLES::
 
             sage: P3.<x0,x1,x2,x3> = ProjectiveSpace(QQ, 3)
-            sage: X = P3.subscheme(x0^3+x1^3+x2^3+x3^3)
+            sage: X = P3.subscheme(x0^3 + x1^3 + x2^3 + x3^3)
             sage: X.structure_sheaf()
+            Sheaf on Closed subscheme of Projective Space of dimension 3 over
+            Rational Field defined by: x0^3 + x1^3 + x2^3 + x3^3
         """
-        from sage.modules.free_module import FreeModule
-        S = self.coordinate_ring()
-        M = FreeModule(S, rank=1)
+        M = FreeModule(self.coordinate_ring(), rank=1)
         return self.coherent_sheaf(M, twist=twist)
 
 

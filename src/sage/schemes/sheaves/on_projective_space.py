@@ -1,8 +1,7 @@
 r"""
-Sheaf on projective space
+Coherent sheaves on projective spaces
 
-
-EXAMPLES::
+EXAMPLES:
 
 We define the Fermat cubic surface in P^3::
 

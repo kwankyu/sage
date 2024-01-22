@@ -1,6 +1,5 @@
 r"""
-Sheaf on subschemes of projective spaces
-
+Coherent sheaves on projective subschemes
 
 EXAMPLES::
 

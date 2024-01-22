@@ -1,7 +1,9 @@
 """
-EXAMPLES::
+Cohomology of coherent sheaves
 
-We define the Fermat cubic surface in P^3::
+EXAMPLES:
+
+We define the Fermat cubic surface in `P^3`::
 
     sage: P3 = ProjectiveSpace(QQ, 3, 'x')
     sage: P3.inject_variables()
