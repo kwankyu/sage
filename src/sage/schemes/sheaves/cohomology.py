@@ -59,6 +59,7 @@ class HomologySpaceBottom:
     def __repr__(self):
         return 'H^r(O_{P_r}()'
 
+
 class HomologySpaceTop:
     """
     Top cohomology module of the twisted structure sheaf of a projective space.
@@ -91,7 +92,7 @@ class HomologySpaceTop:
         return 'H^r(O_{P_r}()'
 
 
-class Complex:
+class MaruyamaComplex:
     def __init__(self, M, twist=0):
         shifts = [-twist for i in range(M.cover().degree())]
         self.resolution = M.relations().graded_free_resolution(shifts=shifts)
@@ -100,7 +101,7 @@ class Complex:
         self.projective_space_dimension = self.base_ring.ngens() - 1
 
     def __repr__(self):
-        return 'Complex'
+        return 'Maruyama Complex'
 
     def homology_space_bottom(self, i):
         S = self.base_ring

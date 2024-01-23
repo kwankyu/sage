@@ -37,7 +37,7 @@ class Sheaf(_):
         EXAMPLES::
 
             sage: P2.<x,y,z> = ProjectiveSpace(QQ, 2)
-            sage: X = P3.subscheme(x^4 + y^4 + z^4)
+            sage: X = P2.subscheme(x^4 + y^4 + z^4)
             sage: X.structure_sheaf()
             Sheaf on Closed subscheme of Projective Space of dimension 3 over
             Rational Field defined by: x0^3 + x1^3 + x2^3 + x3^3

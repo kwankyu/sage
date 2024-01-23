@@ -35,8 +35,8 @@ class Sheaf(_):
 
     @cached_property
     def _cohomology(self):
-        from sage.schemes.sheaves.cohomology import Complex
-        return Complex(self._module, twist=self._twist)
+        from sage.schemes.sheaves.cohomology import MaruyamaComplex
+        return MaruyamaComplex(self._module, twist=self._twist)
 
 
 
