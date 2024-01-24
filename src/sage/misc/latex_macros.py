@@ -176,6 +176,8 @@ latex_macros = [r"\newcommand{\SL}{\mathrm{SL}}",
                 r"\newcommand{\PSL}{\mathrm{PSL}}",
                 r"\newcommand{\lcm}{\mathop{\operatorname{lcm}}}",
                 r"\newcommand{\dist}{\mathrm{dist}}",
+                r"\newcommand{\im}{\mathop{\operatorname{im}}}",
+                r"\newcommand{\rank}{\mathop{\operatorname{rank}}}",
                 r"\newcommand{\PP}{\mathbf{P}}",
                 r"\newcommand{\OO}{\mathcal{O}}",
                 ]

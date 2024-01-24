@@ -1,5 +1,58 @@
-"""
+r"""
 Cohomology of coherent sheaves
+
+This modules implements Maruyama's method for computing cohomology of coherent
+sheaves on a projective space.
+
+Let `M` be a module finitely generated over the coordinate ring `S` of the
+projective `r`-space over a field `k`. Let `S=k[x_0,x_2,\dots,x_r]`. Then `M`
+is a quotient of the free module `\bigoplus_{i=1}^{t}S` by a submodule. Let
+
+.. MATH::
+
+    0\to\bigoplus_{j=1}^{t_{r+1}}S(-m^{(r+1)}_j)\overset{f_{r+1}}{\longrightarrow}\dots
+    \overset{f_1}{\longrightarrow}\bigoplus_{j=1}^{t_0}S(-m^{(0)}_j)\overset{f_0}{\longrightarrow}M\to 0
+
+be a minimal free resolution of `M`. Then it induces a complex of (top) homology groups
+
+.. MATH::
+
+    \bigoplus_{j=1}^{t_{i+1}}H^r(\OO_{\PP^r}(-m^{(i+1)}_j))\overset{H^r(f_{i+1})}{\longrightarrow}
+    \bigoplus_{j=1}^{t_i}H^r(\OO_{\PP^r}(-m^{(i)}_j))\overset{H^r(f_{i})}{\longrightarrow}
+    \bigoplus_{j=1}^{t_{i-1}}H^r(\OO_{\PP^r}(-m^{(i-1)}_j))
+
+where `i` runs from `1` to `r`. Now it holds that
+
+.. MATH::
+
+    H^q(\tilde M)\cong \ker H^r(f_{r-q})/\im H^r(f_{r-q+1})
+
+for `1\le q\le r - 1` and
+
+.. MATH::
+
+    H^r(\tilde M)\cong \bigoplus_{j=1}^{t_0}H^r(\OO_{\PP^r}(-m^{(0)}_j))/\im H^r(f_1)
+
+and `\dim H^0(\tilde M)` can be computed by the formula
+
+.. MATH::
+
+    \begin{split}
+    &\dim \bigoplus_{j=1}^{t_{0}}H^0(\OO_{\PP^r}(-m^{(0)}_j))
+    -\dim \bigoplus_{j=1}^{t_{r+1}}H^r(\OO_{\PP^r}(-m^{(r+1)}_j))
+    +\dim \bigoplus_{j=1}^{t_{r}}H^r(\OO_{\PP^r}(-m^{(r)}_j)) \\
+    &\quad -\rank H^0(f_1)-\rank H^r(f_r)
+    \end{split}
+
+in which the complex of (bottom) homology groups
+
+.. MATH::
+
+    \bigoplus_{j=1}^{t_{i+1}}H^0(\OO_{\PP^r}(-m^{(i+1)}_j))\overset{H^0(f_{i+1})}{\longrightarrow}
+    \bigoplus_{j=1}^{t_i}H^0(\OO_{\PP^r}(-m^{(i)}_j))\overset{H^0(f_{i})}{\longrightarrow}
+    \bigoplus_{j=1}^{t_{i-1}}H^0(\OO_{\PP^r}(-m^{(i-1)}_j))
+
+is used.
 
 EXAMPLES:
 
@@ -28,9 +81,9 @@ from sage.modules.free_module import VectorSpace
 from sage.modules.free_module_element import vector
 
 
-class HomologySpaceBottom:
+class HomologyGroupBottom:
     """
-    Top cohomology module of the twisted structure sheaf of a projective space.
+    Top cohomology group of the twisted structure sheaf of a projective space.
     """
     def __init__(self, S, shifts):
         self.graded_ring = S
@@ -60,9 +113,9 @@ class HomologySpaceBottom:
         return 'H^r(O_{P_r}()'
 
 
-class HomologySpaceTop:
+class HomologyGroupTop:
     """
-    Top cohomology module of the twisted structure sheaf of a projective space.
+    Top cohomology group of the twisted structure sheaf of a projective space.
     """
     def __init__(self, S, shifts):
         self.graded_ring = S
@@ -103,15 +156,15 @@ class MaruyamaComplex:
     def __repr__(self):
         return 'Maruyama Complex'
 
-    def homology_space_bottom(self, i):
+    def homology_group_bottom(self, i):
         S = self.base_ring
         shifts = self.resolution.shifts(i)
-        return HomologySpaceBottom(S, shifts)
+        return HomologyGroupBottom(S, shifts)
 
-    def homology_space_top(self, i):
+    def homology_group_top(self, i):
         S = self.base_ring
         shifts = self.resolution.shifts(i)
-        return HomologySpaceTop(S, shifts)
+        return HomologyGroupTop(S, shifts)
 
     def differential_bottom(self, t):
         """
@@ -122,8 +175,8 @@ class MaruyamaComplex:
             sage: sh = X.structure_sheaf().image_to_ambient_space()
             sage: c = sh.cohomology()
         """
-        H1 = self.homology_space_bottom(t)
-        H0 = self.homology_space_bottom(t - 1)
+        H1 = self.homology_group_bottom(t)
+        H0 = self.homology_group_bottom(t - 1)
         M = self.resolution.differential(t).matrix()
         K = self.coefficient_field
         zero = K.zero()
@@ -159,8 +212,8 @@ class MaruyamaComplex:
             sage: sh = X.structure_sheaf().image_to_ambient_space()
             sage: c = sh.cohomology()
         """
-        H1 = self.homology_space_top(t)
-        H0 = self.homology_space_top(t - 1)
+        H1 = self.homology_group_top(t)
+        H0 = self.homology_group_top(t - 1)
         M = self.resolution.differential(t).matrix()
         K = self.coefficient_field
         zero = K.zero()
@@ -190,7 +243,7 @@ class MaruyamaComplex:
     def H(self, t):
         r = self.projective_space_dimension
         if t == r:
-            return self.homology_space_top(0).vector_space.quotient(self.differential_top(1).image())
+            return self.homology_group_top(0).vector_space.quotient(self.differential_top(1).image())
         if 1 <= t and t < r:
             return self.differential_top(r - t).kernel().quotient(self.differential_top(r - t + 1).image())
         if t == 0:
@@ -199,7 +252,7 @@ class MaruyamaComplex:
     def h(self, t):
         r = self.projective_space_dimension
         if t == 0:
-            a = self.homology_space_bottom(0).rank + self.homology_space_top(r).rank - self.homology_space_top(r + 1).rank
+            a = self.homology_group_bottom(0).rank - self.homology_group_top(r + 1).rank + self.homology_group_top(r).rank
             b = self.differential_bottom(1).rank() + self.differential_top(r).rank()
             return a - b
         return self.H(t).dimension()
