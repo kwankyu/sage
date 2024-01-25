@@ -38,6 +38,3 @@ class Sheaf(_):
         from sage.schemes.sheaves.cohomology import MaruyamaComplex
         return MaruyamaComplex(self._module, twist=self._twist)
 
-
-
-
