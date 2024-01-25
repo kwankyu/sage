@@ -2,7 +2,8 @@ r"""
 Cohomology of coherent sheaves
 
 This module implements Maruyama's method for computing cohomology of coherent
-sheaves on a projective space.
+sheaves on a projective space. The method is explained and proved in detail in
+[Kudo2017]_.
 
 Let `M` be a graded module finitely generated over the homogeneous coordinate
 ring `S` of the projective `r`-space over a field `k`. We aim for computing the
@@ -62,23 +63,48 @@ graded module `M(-n)` with shift `n`.
 
 EXAMPLES:
 
-We define the Fermat cubic surface in `P^3`::
-
-    sage: P3 = ProjectiveSpace(QQ, 3, 'x')
-    sage: P3.inject_variables()
-    Defining x0, x1, x2, x3
-    sage: X = P3.subscheme(x0^3+x1^3+x2^3+x3^3)
-    sage: X
-    Closed subscheme of Projective Space of dimension 3 over Rational Field defined by:
-      x0^3 + x1^3 + x2^3 + x3^3
-
-    sage: P3.<x,y,z,w> = ProjectiveSpace(QQ, 3)
-    sage: X = P3.subscheme([y*w - z^2, -x*w + y*z, x*z - y^2])
-    sage: sh = X.structure_sheaf().image_to_ambient_space()
+We define the Fermat cubic surface in `\PP^3` and compute its cohomology groups::
 
     sage: P2.<x,y,z> = ProjectiveSpace(QQ, 2)
     sage: X = P2.subscheme([x^4 + y^4 + z^4])
-    sage: sh = X.structure_sheaf().image_to_ambient_space()
+    sage: sh = X.structure_sheaf()
+    sage: sh.cohomology(1)
+    3
+    sage: sh.cohomology_group(1)
+    Vector space quotient V/W of dimension 3 over Rational Field where
+    V: Vector space of degree 3 and dimension 3 over Rational Field
+    Basis matrix:
+    [1 0 0]
+    [0 1 0]
+    [0 0 1]
+    W: Vector space of degree 3 and dimension 0 over Rational Field
+    Basis matrix:
+    []
+    sage: sh.cohomology_group(1).dimension()
+    3
+    sage: sh.cohomology(2)
+    0
+    sage: sh.cohomology_group(2)
+    Vector space quotient V/W of dimension 0 over Rational Field where
+    V: Vector space of dimension 0 over Rational Field
+    W: Vector space of degree 0 and dimension 0 over Rational Field
+    Basis matrix:
+    []
+    sage: sh.cohomology_group(2).dimension()
+    0
+
+Unlike other cohomology groups, it is not clear how to realize `H^0(\tilde M)`
+in terms of twisted structure sheaves on the projective space with the data
+from the free resolution. Hence it is merely created as a vector space over `k`
+with the correct dimension::
+
+    sage: P2.<x,y,z> = ProjectiveSpace(QQ, 2)
+    sage: X = P2.subscheme([x^4 + y^4 + z^4])
+    sage: sh = X.structure_sheaf()
+    sage: sh.cohomology(0)
+    1
+    sage: sh.cohomology_group(0)
+    Vector space of dimension 1 over Rational Field
 """
 
 from sage.misc.flatten import flatten
@@ -403,7 +429,10 @@ class MaruyamaComplex:
         elif 1 <= t and t < r:
             return self.differential_top(r - t).kernel().quotient(self.differential_top(r - t + 1).image())
         elif t == 0:
-            raise ValueError('not implemented')
+            # 0th cohomology group of (global sections) is not realized in
+            # terms of cohomology groups and differential maps of twisted
+            # structure sheaves on the projective space.
+            return VectorSpace(self.coefficient_field, self.h(0))
         elif t > r:
             return VectorSpace(self.coefficient_field, 0)
         raise IndexError('index must be non-negative')
