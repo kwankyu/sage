@@ -29,9 +29,9 @@ where `i` runs from `1` to `r`. Now it holds that
 
 .. MATH::
 
-    H^t(\tilde M)\cong \ker H^r(f_{r-t})/\im H^r(f_{r-t+1})
+    H^q(\tilde M)\cong \ker H^r(f_{r-q})/\im H^r(f_{r-q+1})
 
-for `1\le t\le r - 1` and
+for `1\le q\le r - 1` and
 
 .. MATH::
 
@@ -56,14 +56,14 @@ in which the complex of (bottom) cohomology groups
     \bigoplus_{j=1}^{t_i}H^0(\OO_{\PP^r}(-m^{(i)}_j))\overset{H^0(f_{i})}{\longrightarrow}
     \bigoplus_{j=1}^{t_{i-1}}H^0(\OO_{\PP^r}(-m^{(i-1)}_j))
 
-where `i` runs from `1` to `r`, is used.
+where `i` runs from `1` to `r` is used.
 
-The implemented algorithm works for twisted coherent sheaf and accepts shifted
-graded module `M(-n)` with shift `n`.
+The implemented algorithm works more generally for twisted coherent sheaf and
+accepts shifted graded module `M(-n)` with shift `n`.
 
 EXAMPLES:
 
-We define the Fermat cubic surface in `\PP^3` and compute its cohomology groups::
+We define the Fermat cubic surface (a curve in `\PP^2`) and compute its cohomology groups::
 
     sage: P2.<x,y,z> = ProjectiveSpace(QQ, 2)
     sage: X = P2.subscheme([x^4 + y^4 + z^4])
@@ -93,10 +93,14 @@ We define the Fermat cubic surface in `\PP^3` and compute its cohomology groups:
     sage: sh.cohomology_group(2).dimension()
     0
 
-Unlike other cohomology groups, it is not clear how to realize `H^0(\tilde M)`
-in terms of twisted structure sheaves on the projective space with the data
-from the free resolution. Hence it is merely created as a vector space over `k`
-with the correct dimension::
+
+The rather complicated form (as a quotient of vector spaces) of the cohomology
+group reflects the relationship of the cohomology group with those of the
+twisted structure sheaves of the projective space.
+
+On the other hand, it is not clear how to realize `H^0(\tilde M)`
+in terms of twisted structure sheaves of the projective space. Hence it is
+merely created as a vector space over `k` with the correct dimension::
 
     sage: P2.<x,y,z> = ProjectiveSpace(QQ, 2)
     sage: X = P2.subscheme([x^4 + y^4 + z^4])
@@ -130,12 +134,20 @@ class CohomologyGroupBottom:
         sage: P2.<x,y,z> = ProjectiveSpace(QQ, 2)
         sage: X = P2.subscheme([x^4 + y^4 + z^4])
         sage: c = X.structure_sheaf()._cohomology
-        sage: c.cohomology_group_bottom(1)
-        Bottom Cohomology Group of dimension 0
+        sage: c.cohomology_group_bottom(0)
+        Bottom Cohomology Group of dimension 1
     """
     def __init__(self, S, shifts):
         """
         Initialize.
+
+        TESTS::
+
+            sage: P2.<x,y,z> = ProjectiveSpace(QQ, 2)
+            sage: X = P2.subscheme([x^4 + y^4 + z^4])
+            sage: c = X.structure_sheaf(twist=1)._cohomology
+            sage: c.cohomology_group_bottom(0)
+            Bottom Cohomology Group of dimension 3
         """
         self.graded_ring = S
         self.shifts = shifts
@@ -162,7 +174,7 @@ class CohomologyGroupBottom:
 
     def __repr__(self):
         r"""
-        Return the string representation.
+        Return the string representation of ``self``.
 
         EXAMPLES::
 
@@ -196,6 +208,17 @@ class CohomologyGroupTop:
         Top Cohomology Group of dimension 0
     """
     def __init__(self, S, shifts):
+        """
+        Initialize.
+
+        TESTS::
+
+            sage: P2.<x,y,z> = ProjectiveSpace(QQ, 2)
+            sage: X = P2.subscheme([x^4 + y^4 + z^4])
+            sage: c = X.structure_sheaf(twist=1)._cohomology
+            sage: c.cohomology_group_top(1)
+            Top Cohomology Group of dimension 1
+        """
         self.graded_ring = S
         self.shifts = shifts
 
@@ -256,7 +279,7 @@ class MaruyamaComplex:
         sage: X = P2.subscheme([x^4 + y^4 + z^4])
         sage: sh = X.structure_sheaf(1)  # twisted sheaf
         sage: sh._cohomology
-        Maruyama Complex defined by S(1) <-- S(-3) <-- 0
+        Maruyama Complex induced from S(1) <-- S(-3) <-- 0
     """
     def __init__(self, M, twist=0):
         """
@@ -277,9 +300,9 @@ class MaruyamaComplex:
             sage: P2.<x,y,z> = ProjectiveSpace(QQ, 2)
             sage: X = P2.subscheme([x^4 + y^4 + z^4])
             sage: X.structure_sheaf()._cohomology
-            Maruyama Complex defined by S(0) <-- S(-4) <-- 0
+            Maruyama Complex induced from S(0) <-- S(-4) <-- 0
         """
-        return f'Maruyama Complex defined by {self.resolution}'
+        return f'Maruyama Complex induced from {self.resolution}'
 
     def cohomology_group_bottom(self, i):
         r"""
@@ -315,7 +338,7 @@ class MaruyamaComplex:
 
     def differential_bottom(self, i):
         r"""
-        Return `i`-th bottom differential map `H^0(f_i)`.
+        Return the `i`-th bottom differential map `H^0(f_i)`.
 
         EXAMPLES::
 
@@ -358,7 +381,7 @@ class MaruyamaComplex:
 
     def differential_top(self, i):
         r"""
-        Return `i`-th top differential map `H^r(f_i)`.
+        Return the `i`-th top differential map `H^r(f_i)`.
 
         EXAMPLES::
 
@@ -399,13 +422,13 @@ class MaruyamaComplex:
 
         return H1.vector_space.hom(A, codomain=H0.vector_space, side='right')
 
-    def H(self, t):
+    def H(self, q):
         r"""
-        Return the `t`-th cohomology group `H^t(\tilde M)`.
+        Return the `q`-th cohomology group `H^q(\tilde M)`.
 
         INPUT:
 
-        - ``t`` -- non-negative integer
+        - ``q`` -- non-negative integer
 
         EXAMPLES::
 
@@ -424,26 +447,26 @@ class MaruyamaComplex:
             []
         """
         r = self.projective_space_dimension
-        if t == r:
+        if q == r:
             return self.cohomology_group_top(0).vector_space.quotient(self.differential_top(1).image())
-        elif 1 <= t and t < r:
-            return self.differential_top(r - t).kernel().quotient(self.differential_top(r - t + 1).image())
-        elif t == 0:
+        elif 1 <= q and q < r:
+            return self.differential_top(r - q).kernel().quotient(self.differential_top(r - q + 1).image())
+        elif q == 0:
             # 0th cohomology group of (global sections) is not realized in
             # terms of cohomology groups and differential maps of twisted
-            # structure sheaves on the projective space.
+            # structure sheaves of the projective space.
             return VectorSpace(self.coefficient_field, self.h(0))
-        elif t > r:
+        elif q > r:
             return VectorSpace(self.coefficient_field, 0)
         raise IndexError('index must be non-negative')
 
-    def h(self, t):
+    def h(self, q):
         r"""
-        Return the dimension `h^t(\tilde M)` of the `t`-th cohomology group `H^t(\tilde M)`.
+        Return the dimension `h^q(\tilde M)` of the `q`-th cohomology group `H^q(\tilde M)`.
 
         INPUT:
 
-        - ``t`` -- non-negative integer
+        - ``q`` -- non-negative integer
 
         EXAMPLES::
 
@@ -454,16 +477,16 @@ class MaruyamaComplex:
             3
         """
         r = self.projective_space_dimension
-        if t == r:
+        if q == r:
             return self.cohomology_group_top(0).rank - self.differential_top(1).rank()
-        elif 1 <= t and t < r:
-            return self.differential_top(r - t).kernel().dimension() - self.differential_top(r - t + 1).rank()
-        elif t == 0:
+        elif 1 <= q and q < r:
+            return self.differential_top(r - q).kernel().dimension() - self.differential_top(r - q + 1).rank()
+        elif q == 0:
             a = (self.cohomology_group_bottom(0).rank - self.cohomology_group_top(r + 1).rank
                  + self.cohomology_group_top(r).rank)
             b = self.differential_bottom(1).rank() + self.differential_top(r).rank()
             return a - b
-        elif t > r:
+        elif q > r:
             return 0
         raise IndexError('index must be non-negative')
 

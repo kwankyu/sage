@@ -25,8 +25,9 @@ We define the Fermat cubic surface in P^3::
     sage: P3.inject_variables()
     Defining x0, x1, x2, x3
     sage: X = P3.subscheme(x0^3+x1^3+x2^3+x3^3)
-    sage: sheaf = X.structure_sheaf().image_to_ambient_sapce()
+    sage: sheaf = X.structure_sheaf().image_to_ambient_space()
     sage: sheaf.cohomology()
+    1
 
 AUTHORS:
 
@@ -167,11 +168,11 @@ class Sheaf(SageObject):
             sage: P2.<x,y,z> = ProjectiveSpace(QQ, 2)
             sage: X = P2.subscheme(x^4 + y^4 + z^4)
             sage: sheaf = X.structure_sheaf()
-            sage: s.cohomology(0)
+            sage: sheaf.cohomology(0)
             1
-            sage: s.cohomology(1)
+            sage: sheaf.cohomology(1)
             3
-            sage: s.cohomology(2)
+            sage: sheaf.cohomology(2)
             0
         """
         return self._cohomology.h(r)
@@ -189,6 +190,16 @@ class Sheaf_on_projective_subscheme(Sheaf):
 
     @cached_property
     def _cohomology(self):
+        """
+        This property keeps the cohomology object for this sheaf.
+
+        EXAMPLES::
+
+            sage: P2.<x,y,z> = ProjectiveSpace(QQ, 2)
+            sage: X = P2.subscheme(x^4 + y^4 + z^4)
+            sage: X.structure_sheaf()._cohomology
+            Maruyama Complex induced from S(0) <-- S(-4) <-- 0
+        """
         return self.image_to_ambient_space()._cohomology
 
     def image_to_ambient_space(self):
@@ -206,9 +217,8 @@ class Sheaf_on_projective_subscheme(Sheaf):
 
             sage: P2.<x,y,z> = ProjectiveSpace(QQ, 2)
             sage: X = P2.subscheme(x^4 + y^4 + z^4)
-            sage: X.structure_sheaf()
-            Sheaf on Closed subscheme of Projective Space of dimension 3 over
-            Rational Field defined by: x0^3 + x1^3 + x2^3 + x3^3
+            sage: X.structure_sheaf().image_to_ambient_space()
+            Sheaf on Projective Space of dimension 2 over Rational Field
         """
         X = self._base_scheme
         A = X.ambient_space()
