@@ -23,6 +23,7 @@ We define the Fermat cubic surface in P^3::
 
     sage: P3 = ProjectiveSpace(QQ, 3, 'x')
     sage: P3.inject_variables()
+    Defining x0, x1, x2, x3
     sage: X = P3.subscheme(x0^3+x1^3+x2^3+x3^3)
     sage: sheaf = X.structure_sheaf().image_to_ambient_sapce()
     sage: sheaf.cohomology()
