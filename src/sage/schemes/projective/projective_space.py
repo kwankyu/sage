@@ -2286,8 +2286,8 @@ class ProjectiveSpace_field(ProjectiveSpace_ring):
             sage: P2.coherent_sheaf(SS, twist=2)
             Twisted Sheaf on Projective Space of dimension 2 over Rational Field
         """
-        from sage.schemes.sheaves.on_projective_space import Sheaf
-        return Sheaf(self, module, twist=twist)
+        from sage.schemes.sheaves.sheaf import Sheaf_on_projective_space
+        return Sheaf_on_projective_space(self, module, twist=twist)
 
     def structure_sheaf(self, twist=0):
         r"""

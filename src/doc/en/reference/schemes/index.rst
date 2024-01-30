@@ -53,8 +53,6 @@ Coherent Sheaves
    :maxdepth: 1
 
    sage/schemes/sheaves/sheaf
-   sage/schemes/sheaves/on_projective_space
-   sage/schemes/sheaves/on_projective_subscheme
    sage/schemes/sheaves/cohomology
 
 Products of Projective Spaces

@@ -1541,8 +1541,8 @@ class AlgebraicScheme_subscheme_projective_field(AlgebraicScheme_subscheme_proje
             sage: X.coherent_sheaf(SS, twist=2)
             Twisted Sheaf on Projective Space of dimension 2 over Rational Field
         """
-        from sage.schemes.sheaves.on_projective_subscheme import Sheaf
-        return Sheaf(self, module, twist=twist)
+        from sage.schemes.sheaves.sheaf import Sheaf_on_projective_subscheme
+        return Sheaf_on_projective_subscheme(self, module, twist=twist)
 
     def structure_sheaf(self, twist=0):
         r"""

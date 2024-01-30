@@ -21,6 +21,12 @@ We define the Fermat cubic surface in P^3::
       y*z - x*w,
       -y^2 + x*z
 
+    sage: P3 = ProjectiveSpace(QQ, 3, 'x')
+    sage: P3.inject_variables()
+    sage: X = P3.subscheme(x0^3+x1^3+x2^3+x3^3)
+    sage: sheaf = X.structure_sheaf().image_to_ambient_sapce()
+    sage: sheaf.cohomology()
+
 AUTHORS:
 
 - Kwankyu Lee (2024-01-22): initial version
@@ -29,6 +35,8 @@ AUTHORS:
 
 from functools import cached_property
 from sage.structure.sage_object import SageObject
+from sage.modules.free_module import FreeModule
+
 
 class Sheaf(SageObject):
     r"""
@@ -168,3 +176,47 @@ class Sheaf(SageObject):
         return self._cohomology.h(r)
 
 
+class Sheaf_on_projective_space(Sheaf):
+
+    @cached_property
+    def _cohomology(self):
+        from sage.schemes.sheaves.cohomology import MaruyamaComplex
+        return MaruyamaComplex(self._module, twist=self._twist)
+
+
+class Sheaf_on_projective_subscheme(Sheaf):
+
+    @cached_property
+    def _cohomology(self):
+        return self.image_to_ambient_space()._cohomology
+
+    def image_to_ambient_space(self):
+        """
+        Return the direct image of this sheaf to the ambient space.
+
+        The image is with respect to the inclusion morphism from the base
+        scheme into the projective Space.
+
+        INPUT:
+
+        - ``twist`` -- (default: `0`) an integer
+
+        EXAMPLES::
+
+            sage: P2.<x,y,z> = ProjectiveSpace(QQ, 2)
+            sage: X = P2.subscheme(x^4 + y^4 + z^4)
+            sage: X.structure_sheaf()
+            Sheaf on Closed subscheme of Projective Space of dimension 3 over
+            Rational Field defined by: x0^3 + x1^3 + x2^3 + x3^3
+        """
+        X = self._base_scheme
+        A = X.ambient_space()
+        S = A.coordinate_ring()
+
+        d = self._module.degree()
+        M = FreeModule(S, d)
+        I = X.defining_polynomials()
+        J = self._module.relations().gens()
+        G = [f * M.gen(i) for i in range(d) for f in I] + [v.change_ring(S) for v in J]
+        N = M.submodule(G)
+        return A.coherent_sheaf(M.quotient(N), twist=self._twist)
