@@ -3,31 +3,11 @@ Coherent sheaves
 
 EXAMPLES:
 
-We define the Fermat cubic surface in P^3::
+We define the Fermat cubic surface in \PP^2::
 
-    sage: P3 = ProjectiveSpace(QQ, 3, 'x')
-    sage: P3.inject_variables()
-    Defining x0, x1, x2, x3
-    sage: X = P3.subscheme(x0^3+x1^3+x2^3+x3^3)
-    sage: X
-    Closed subscheme of Projective Space of dimension 3 over Rational Field defined by:
-      x0^3 + x1^3 + x2^3 + x3^3
-
-    sage: P3.<x,y,z,w> = ProjectiveSpace(QQ, 3)
-    sage: X = P3.subscheme([y*w - z^2, -x*w + y*z, x*z - y^2])
-    sage: X
-    Closed subscheme of Projective Space of dimension 3 over Rational Field defined by:
-      -z^2 + y*w,
-      y*z - x*w,
-      -y^2 + x*z
-
-    sage: P3 = ProjectiveSpace(QQ, 3, 'x')
-    sage: P3.inject_variables()
-    Defining x0, x1, x2, x3
-    sage: X = P3.subscheme(x0^3+x1^3+x2^3+x3^3)
-    sage: sheaf = X.structure_sheaf().image_to_ambient_space()
-    sage: sheaf.cohomology()
-    1
+    sage: P2.<x,y,z> = ProjectiveSpace(QQ, 2)
+    sage: X = P2.subscheme(x^4 + y^4 + z^4)
+    sage: sh = X.structure_sheaf()
 
 AUTHORS:
 
@@ -177,11 +157,57 @@ class Sheaf(SageObject):
         """
         return self._cohomology.h(r)
 
+    def twist(self, t=0):
+        r"""
+        Return the twisted sheaf `F(n)` of this sheaf `F`.
+
+        EXAMPLES::
+
+            sage: P2.<x,y,z> = ProjectiveSpace(QQ, 2)
+            sage: X = P2.subscheme(x^4 + y^4 + z^4)
+            sage: sh = X.structure_sheaf()
+            sage: sh.twist(1).euler_characteristic()
+            2
+            sage: sh.twist(2).euler_characteristic()
+            6
+        """
+        return type(self)(self._base_scheme, self._module, self._twist + t)
+
+    def euler_characteristic(self):
+        """
+        Return the Euler characteristic of this coherent sheaf.
+
+        EXAMPLES::
+
+            sage: P2.<x,y,z> = ProjectiveSpace(QQ, 2)
+            sage: X = P2.subscheme(x^4 + y^4 + z^4)
+            sage: sh = X.structure_sheaf()
+            sage: sh.euler_characteristic()
+            -2
+        """
+        d = self._base_scheme.dimension()
+        chi = 0
+        for r in range(d + 1):  # for Grothendieck's vanishing theorem
+            d = self.cohomology(r)
+            if r % 2:
+                chi = chi - d
+            else:
+                chi = chi + d
+        return chi
 
 class Sheaf_on_projective_space(Sheaf):
 
     @cached_property
     def _cohomology(self):
+       """
+        This property keeps the cohomology object for this sheaf.
+
+        EXAMPLES::
+
+            sage: P2.<x,y,z> = ProjectiveSpace(QQ, 2)
+            sage: P2.structure_sheaf()._cohomology
+            Maruyama Complex induced from S(0) <-- 0
+        """
         from sage.schemes.sheaves.cohomology import MaruyamaComplex
         return MaruyamaComplex(self._module, twist=self._twist)
 
