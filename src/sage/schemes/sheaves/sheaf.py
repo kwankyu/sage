@@ -3,7 +3,7 @@ Coherent sheaves
 
 EXAMPLES:
 
-We define the Fermat cubic surface in \PP^2::
+We define the Fermat cubic surface in \PP^2 and construct its structure sheaf::
 
     sage: P2.<x,y,z> = ProjectiveSpace(QQ, 2)
     sage: X = P2.subscheme(x^4 + y^4 + z^4)

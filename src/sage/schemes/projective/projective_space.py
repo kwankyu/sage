@@ -2276,6 +2276,9 @@ class ProjectiveSpace_field(ProjectiveSpace_ring):
 
         INPUT:
 
+
+        - ``module`` -- a free module or a quotient module
+
         - ``twist`` -- (default: `0`) an integer
 
         EXAMPLES::

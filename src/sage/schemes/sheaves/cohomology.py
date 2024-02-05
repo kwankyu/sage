@@ -58,8 +58,8 @@ in which the complex of (bottom) cohomology groups
 
 where `i` runs from `1` to `r` is used.
 
-The implemented algorithm works more generally for twisted coherent sheaf and
-accepts shifted graded module `M(-n)` with shift `n`.
+The implemented algorithm works more generally for twisted coherent sheaves and
+accepts as input shifted graded module `M(-n)` with shift `n`.
 
 EXAMPLES:
 
