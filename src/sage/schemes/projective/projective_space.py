@@ -2276,8 +2276,8 @@ class ProjectiveSpace_field(ProjectiveSpace_ring):
 
         INPUT:
 
-
-        - ``module`` -- a free module or a quotient module
+        - ``module`` -- a free module or a quotient module over the coordinate
+          ring of this space
 
         - ``twist`` -- (default: `0`) an integer
 
@@ -2306,13 +2306,31 @@ class ProjectiveSpace_field(ProjectiveSpace_ring):
         EXAMPLES::
 
             sage: P3.<x0,x1,x2,x3> = ProjectiveSpace(QQ, 3)
-            sage: X = P3.subscheme(x0^3 + x1^3 + x2^3 + x3^3)
-            sage: X.structure_sheaf()
-            Sheaf on Closed subscheme of Projective Space of dimension 3 over
-            Rational Field defined by: x0^3 + x1^3 + x2^3 + x3^3
+            sage: P3.structure_sheaf()
+            Sheaf on Projective Space of dimension 3 over Rational Field
         """
         M = FreeModule(self.coordinate_ring(), rank=1)
         return self.coherent_sheaf(M, twist=twist)
+
+    def arithmetic_genus(self):
+        r"""
+        Return the arithmetic genus of this projective space.
+
+        This is known to be zero. This method simply checks the fact.
+
+        EXAMPLES::
+
+            sage: P1 = ProjectiveSpace(QQ, 1)
+            sage: P1.arithmetic_genus()
+            0
+            sage: P2 = ProjectiveSpace(QQ, 2)
+            sage: P2.arithmetic_genus()
+            0
+        """
+        p = self.structure_sheaf().euler_characteristic() - 1
+        if self.dimension() % 2:
+            p = -p
+        return p
 
 
 class ProjectiveSpace_finite_field(ProjectiveSpace_field):

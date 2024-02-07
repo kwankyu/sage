@@ -1536,7 +1536,8 @@ class AlgebraicScheme_subscheme_projective_field(AlgebraicScheme_subscheme_proje
             sage: S = X.coordinate_ring()
             sage: SS = FreeModule(S, 2)
             sage: X.coherent_sheaf(SS, twist=2)
-            Twisted Sheaf on Projective Space of dimension 2 over Rational Field
+            Twisted Sheaf on Closed subscheme of Projective Space of dimension 3 over
+             Rational Field defined by: x0^3 + x1^3 + x2^3 + x3^3
         """
         from sage.schemes.sheaves.sheaf import Sheaf_on_projective_subscheme
         return Sheaf_on_projective_subscheme(self, module, twist=twist)
@@ -1563,4 +1564,28 @@ class AlgebraicScheme_subscheme_projective_field(AlgebraicScheme_subscheme_proje
         from sage.modules.free_module import FreeModule
         M = FreeModule(self.coordinate_ring(), rank=1)
         return self.coherent_sheaf(M, twist=twist)
+
+    def arithmetic_genus(self):
+        r"""
+        Return the arithmetic genus of this subscheme of a projective space.
+
+        EXAMPLES:
+
+        This is an example of a curve whose arithmetic genus is smaller than
+        geometric genus due to a singular point::
+
+            sage: A2.<x,y> = AffineSpace(QQ,2)
+            sage: C = Curve(x^4 - 5*x^2 - y^2 + 4, A2)
+            sage: X = C.projective_closure()
+            sage: X.arithmetic_genus()
+            3
+            sage: X.geometric_genus()
+            1
+            sage: X.is_singular()
+            True
+        """
+        p = self.structure_sheaf().euler_characteristic() - 1
+        if self.dimension() % 2:
+            p = -p
+        return p
 

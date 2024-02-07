@@ -366,7 +366,7 @@ class MaruyamaComplex:
             for v in basis:
                 image = [zero for e in range(H0.rank)]
                 for j in range(M.nrows()):
-                    f = M[i,j]
+                    f = M[j,i]
                     basis = H0.summands_basis[j]
                     for c, m in zip(f.coefficients(), f.exponents()):
                         u = v + vector(m)
@@ -409,7 +409,7 @@ class MaruyamaComplex:
             for v in basis:
                 image = [zero for e in range(H0.rank)]
                 for j in range(M.nrows()):
-                    f = M[i,j]
+                    f = M[j,i]
                     basis = H0.summands_basis[j]
                     for c, m in zip(f.coefficients(), f.exponents()):
                         u = v + vector(m)

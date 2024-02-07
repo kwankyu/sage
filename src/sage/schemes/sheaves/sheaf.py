@@ -195,11 +195,12 @@ class Sheaf(SageObject):
                 chi = chi + d
         return chi
 
+
 class Sheaf_on_projective_space(Sheaf):
 
     @cached_property
     def _cohomology(self):
-       """
+        """
         This property keeps the cohomology object for this sheaf.
 
         EXAMPLES::

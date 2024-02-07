@@ -1394,6 +1394,27 @@ class SchemeMorphism_point_projective_field(SchemeMorphism_point_projective_ring
             raise TypeError("this point must be a point on a projective subscheme")
         return self.codomain().multiplicity(self)
 
+    def as_subscheme(self):
+        r"""
+        .. raw:: latex
+
+            \setlength{\parindent}{0pt}
+        """
+        P = self.codomain().ambient_space()
+        g = P.gens()
+        v = self._coords
+        n = len(v)
+        assert n == len(g), 'not a point of the ambient space'
+        for i in range(n - 1, -1, -1):
+            if v[i]:
+                break
+        else:
+            raise ValueError('invalid homogeneous coordinates')
+        a = v[i]
+        x = g[i]
+        return P.subscheme([a*g[j] - v[j]*x for j in range(n) if j != i])
+
+
 class SchemeMorphism_point_projective_finite_field(SchemeMorphism_point_projective_field):
 
     def __hash__(self):
