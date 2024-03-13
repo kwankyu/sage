@@ -594,9 +594,9 @@ cdef class FinitePolyExtElement(FiniteRingElement):
 
         - ``algorithm`` -- string (default: ``'pari'``)
 
-          - ``'pari'`` -- use pari's charpoly
+        - ``'pari'`` -- use pari's charpoly
 
-          - ``'matrix'`` -- return the charpoly computed from the matrix of
+        - ``'matrix'`` -- return the charpoly computed from the matrix of
             left multiplication by ``self``
 
         The result is not cached.
