@@ -20,6 +20,7 @@ from sage.misc.sagedoc_conf import *
 
 import sys
 import os
+import re
 import importlib
 import dateutil.parser
 import sphinx
@@ -441,8 +442,18 @@ html_theme_options = {
 }
 
 if not version.split('.')[-1].isnumeric():  # develop version
+    ver = version
+    github_ref = os.environ.get('GITHUB_REF', '')
+    if github_ref:
+        match = re.search(r'refs/pull/(\d+)/merge', github_ref)
+        if match:
+            # As this doc is built for a GitHub PR, we plant a link
+            # to the PR in the announcement banner.
+            pr_number = match.group(1)
+            pr_url = f'https://github.com/sagemath/sage/pull/{pr_number}'
+            ver = f'{version} with GitHub PR <a href="{pr_url}">#{pr_number}</a>'
     html_theme_options.update({
-        "announcement": f'This is documentation for Sage development version {version}. '
+        "announcement": f'This is documentation for Sage development version {ver}. '
                          'The documentation for the latest stable version is available '
                          '<a href="https://doc.sagemath.org/html/en/index.html">here</a>.'
 })
