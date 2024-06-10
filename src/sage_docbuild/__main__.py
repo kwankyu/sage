@@ -508,22 +508,24 @@ def main():
 
     build_options.ABORT_ON_ERROR = not args.keep_going
 
+    # Set up Intersphinx cache
+    _ = IntersphinxCache()
+
+    builder = get_builder(name)
+
     if not args.no_prune_empty_dirs:
         # Delete empty directories. This is needed in particular for empty
         # directories due to "git checkout" which never deletes empty
         # directories it leaves behind. See Issue #20010.
         # Issue #31948: This is not parallelization-safe; use the option
         # --no-prune-empty-dirs to turn it off
-        for dirpath, dirnames, filenames in os.walk(SAGE_DOC_SRC, topdown=False):
+        for dirpath, dirnames, filenames in os.walk(builder.dir, topdown=False):
             if not dirnames + filenames:
                 logger.warning('Deleting empty directory {0}'.format(dirpath))
                 os.rmdir(dirpath)
 
-    # Set up Intersphinx cache
-    _ = IntersphinxCache()
-
-    builder = getattr(get_builder(name), typ)
-    builder()
+    build = getattr(builder, typ)
+    build()
 
 
 if __name__ == '__main__':

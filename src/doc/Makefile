@@ -39,25 +39,19 @@ else
 doc-inventory-reference: doc-src
 	$(eval DOCS = $(shell sage --docbuild --all-documents reference))
 	@if [ -z "$(DOCS)" ]; then echo "Error: 'sage --docbuild --all-documents' failed"; exit 1; fi
-	$(eval BIBLIO = $(firstword $(DOCS)))
-	$(eval OTHER_DOCS = $(wordlist 2, 100, $(DOCS)))
-	$(MAKE) doc-inventory--$(subst /,-,$(BIBLIO))
-	$(MAKE) SAGE_DOCBUILD_OPTS="$(SAGE_DOCBUILD_OPTS) --no-prune-empty-dirs" $(foreach doc, $(OTHER_DOCS), doc-inventory--$(subst /,-,$(doc)))
-	$(MAKE) SAGE_DOCBUILD_OPTS="$(SAGE_DOCBUILD_OPTS) --no-prune-empty-dirs" doc-inventory--reference_top
+	$(MAKE) SAGE_DOCBUILD_OPTS=$(SAGE_DOCBUILD_OPTS) $(foreach doc, $(DOCS), doc-inventory--$(subst /,-,$(doc)))
+	$(MAKE) SAGE_DOCBUILD_OPTS=$(SAGE_DOCBUILD_OPTS) doc-inventory--reference_top
 endif
 
 # sub docs of reference manual, html
 doc-html-reference-sub: doc-inventory-reference
 	$(eval DOCS = $(shell sage --docbuild --all-documents reference))
 	@if [ -z "$(DOCS)" ]; then echo "Error: 'sage --docbuild --all-documents' failed"; exit 1; fi
-	$(eval BIBLIO = $(firstword $(DOCS)))
-	$(eval OTHER_DOCS = $(wordlist 2, 100, $(DOCS)))
-	$(MAKE) SAGE_DOCBUILD_OPTS="$(SAGE_DOCBUILD_OPTS) --no-prune-empty-dirs" doc-html--$(subst /,-,$(BIBLIO))
-	$(MAKE) SAGE_DOCBUILD_OPTS="$(SAGE_DOCBUILD_OPTS) --no-prune-empty-dirs" $(foreach doc, $(OTHER_DOCS), doc-html--$(subst /,-,$(doc)))
+	$(MAKE) SAGE_DOCBUILD_OPTS=$(SAGE_DOCBUILD_OPTS) $(foreach doc, $(DOCS), doc-html--$(subst /,-,$(doc)))
 
 # reference manual, html; reference_top is built after sub docs
 doc-html-reference: doc-html-reference-sub
-	$(MAKE) SAGE_DOCBUILD_OPTS="$(SAGE_DOCBUILD_OPTS) --no-prune-empty-dirs" doc-html--reference_top
+	$(MAKE) SAGE_DOCBUILD_OPTS=$(SAGE_DOCBUILD_OPTS) doc-html--reference_top
 
 # other documentation, html
 doc-html-other: doc-html-reference
