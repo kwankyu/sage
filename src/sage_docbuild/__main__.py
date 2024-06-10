@@ -46,7 +46,7 @@ Standard options::
                         option: nitpicky)
   --check-nested        check picklability of nested classes in DOCUMENT 'reference'
   --no-prune-empty-dirs
-                        do not prune empty directories in the documentation sources
+                        do not prune empty directories in the documentation source
   --use-cdns            assume internet connection and use CDNs; in particular,
                         use MathJax CDN
   -N, --no-colors       do not color output; does not affect children
@@ -325,7 +325,7 @@ def setup_parser():
                           help="check picklability of nested classes in DOCUMENT 'reference'")
     standard.add_argument("--no-prune-empty-dirs", dest="no_prune_empty_dirs",
                           action="store_true",
-                          help="do not prune empty directories in the documentation sources")
+                          help="do not prune empty directories in the documentation source")
     standard.add_argument("--use-cdns", dest="use_cdns", default=False,
                           action="store_true",
                           help="assume internet connection and use CDNs; in particular, use MathJax CDN")
