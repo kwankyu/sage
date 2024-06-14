@@ -60,8 +60,8 @@ jobs:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
           NETLIFY_PRODUCTION: ${{ github.ref == 'refs/heads/develop' }}
-          NETLIFY_MESSAGE: ${{ steps.source-run-info.outputs.pullRequestNumber }}
-          NETLIFY_ALIAS: preview-${{ steps.source-run-info.outputs.pullRequestNumber }}
+          NETLIFY_MESSAGE: ${{ github.ref == 'refs/heads/develop' && 'release' || steps.source-run-info.outputs.pullRequestNumber }}
+          NETLIFY_ALIAS: preview-${{ github.ref == 'refs/heads/develop' && 'release' || steps.source-run-info.outputs.pullRequestNumber }}
 
       # Add deployment as status check, PR comment and annotation
       # we could use the nwtgck/actions-netlify action for that, except for that it is not (yet) working in workflow_run context: https://github.com/nwtgck/actions-netlify/issues/545
@@ -129,7 +129,7 @@ jobs:
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-          NETLIFY_MESSAGE: Deployed live doc
+          NETLIFY_MESSAGE: livedoc
           NETLIFY_ALIAS: livedoc
 
       - name: Report deployment url

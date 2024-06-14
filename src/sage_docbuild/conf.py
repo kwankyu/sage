@@ -442,7 +442,9 @@ html_theme_options = {
 }
 
 if not version.split('.')[-1].isnumeric():  # develop version
-    ver = f'<a href="https://livedoc--sagemath.netlify.app/html/en/index.html">{version}</a>'
+    # This URL is hardcoded in the file .github/workflows/doc-publish.yml.
+    # See NETLIFY_ALIAS of the "Deploy to Netlify" step.
+    ver = f'<a href="https://preview-release--sagemath.netlify.app/html/en/index.html">{version}</a>'
     github_ref = os.environ.get('GITHUB_REF', '')
     if github_ref:
         match = re.search(r'refs/pull/(\d+)/merge', github_ref)
