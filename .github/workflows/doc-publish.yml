@@ -60,7 +60,7 @@ jobs:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
           NETLIFY_PRODUCTION: ${{ github.ref == 'refs/heads/develop' }}
-          NETLIFY_MESSAGE: ${{ github.ref == 'refs/heads/develop' && 'release' || steps.source-run-info.outputs.pullRequestNumber }}
+          NETLIFY_MESSAGE: preview-${{ github.ref == 'refs/heads/develop' && 'release' || steps.source-run-info.outputs.pullRequestNumber }}
           NETLIFY_ALIAS: preview-${{ github.ref == 'refs/heads/develop' && 'release' || steps.source-run-info.outputs.pullRequestNumber }}
 
       # Add deployment as status check, PR comment and annotation

@@ -354,7 +354,7 @@ def set_intersphinx_mappings(app, config):
     for directory in os.listdir(os.path.join(invpath)):
         if directory == 'jupyter_execute':
             # This directory is created by jupyter-sphinx extension for
-            # internal use and should be ignored here. See trac #33507.
+            # internal use and should be ignored here. See Issue #33507.
             continue
         if os.path.isdir(os.path.join(invpath, directory)):
             src = os.path.join(refpath, directory)
@@ -633,7 +633,7 @@ latex_elements['preamble'] = r"""
 \let\textLaTeX\LaTeX
 \AtBeginDocument{\renewcommand*{\LaTeX}{\hbox{\textLaTeX}}}
 
-% Workaround for a LaTeX bug -- see trac #31397 and
+% Workaround for a LaTeX bug -- see Issue #31397 and
 % https://tex.stackexchange.com/questions/583391/mactex-2020-error-with-report-hyperref-mathbf-in-chapter.
 \makeatletter
 \pdfstringdefDisableCommands{%
