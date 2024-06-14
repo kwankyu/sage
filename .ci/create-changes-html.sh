@@ -19,7 +19,7 @@ echo '<script>hljs.highlightAll();</script>' >> CHANGES.html
 cat >> CHANGES.html << EOF
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-const baseDocURL = 'https://preview-release--sagemath.netlify.app'
+const baseDocURL = 'https://preview-release--sagemath-test.netlify.app'
 const diffSite = 'https://pianomister.github.io/diffsite'
 const diffParagraphs = document.querySelectorAll('p.diff');
 diffParagraphs.forEach(paragraph => {
