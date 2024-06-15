@@ -55,11 +55,10 @@ jobs:
         id: deploy-netlify
         uses: netlify/actions/cli@master
         with:
-          args: deploy --dir=docs/docs/docs ${NETLIFY_PRODUCTION:+"--prod"} --message ${NETLIFY_MESSAGE} --alias ${NETLIFY_ALIAS}
+          args: deploy --dir=docs/docs/docs --message ${NETLIFY_MESSAGE} --alias ${NETLIFY_ALIAS}
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-          NETLIFY_PRODUCTION: ${{ github.ref == 'refs/heads/develop' }}
           NETLIFY_MESSAGE: preview-${{ github.ref == 'refs/heads/develop' && 'release' || steps.source-run-info.outputs.pullRequestNumber }}
           NETLIFY_ALIAS: preview-${{ github.ref == 'refs/heads/develop' && 'release' || steps.source-run-info.outputs.pullRequestNumber }}
 
