@@ -120,9 +120,9 @@ jobs:
       - name: Extract live doc
         run: unzip livedoc.zip -d doc && unzip doc/livedoc.zip -d doc/doc
 
-      - name: Get REF_NAME
+      - name: Get Tag
         run: |
-          echo "REF_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+          echo "REF_TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
 
       - name: Deploy to Netlify
         id: deploy-netlify
@@ -132,8 +132,8 @@ jobs:
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-          NETLIFY_MESSAGE: doc-${{ env.REF_NAME }}
-          NETLIFY_ALIAS: doc-${{ env.REF_NAME }}
+          NETLIFY_MESSAGE: doc-${{ env.REF_TAG }}
+          NETLIFY_ALIAS: doc-${{ env.REF_TAG }}
 
       - name: Report deployment url
         run: |
