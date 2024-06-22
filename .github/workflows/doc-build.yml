@@ -191,15 +191,6 @@ jobs:
           name: doc
           path: doc.zip
 
-      - name: Save space
-        id: savespace
-        if: (success() || failure()) && steps.upload.outcome == 'success'
-        run: |
-          set -ex
-          # Save space on runner device before we start to build livedoc
-          rm -rf doc/
-          rm -f doc.zip
-
       #
       # On release tags: live doc and wheels
       #
