@@ -110,7 +110,9 @@ jobs:
                      --workdir $(pwd) \
                      ${{ env.BUILD_IMAGE }} /bin/sh
 
-      # Doc
+      #
+      # On PRs and pushes to branches
+      #
 
       - name: Update system packages
         id: packages

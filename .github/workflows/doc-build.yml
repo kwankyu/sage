@@ -123,7 +123,7 @@ jobs:
                      ${{ env.BUILD_IMAGE }} /bin/sh
 
       #
-      # On PRs and pushes to branches master/develop
+      # On PRs and pushes to master or develop
       #
 
       - name: Store old doc
@@ -177,9 +177,8 @@ jobs:
           docker cp --follow-link BUILD:/sage/local/share/doc/sage/index.html doc
           (cd doc && git commit -a -m 'new')
           .ci/create-changes-html.sh $(cd doc && git rev-parse HEAD^) doc
-          # Previous "rm -rf .git" sometimes errors out because of some hidden diehard files.
-          # Hence we simply move it out of doc directory
-          (cd doc && mv .git ../git)
+          # Sometimes rm -rf .git errors out because of some diehard hidden files
+          (cd doc && rm -rf .git 2>/dev/null && rm .gitattributes 2>/dev/null)
           mv CHANGES.html doc
           # Zip everything for increased performance
           zip -r doc.zip doc

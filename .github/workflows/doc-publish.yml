@@ -90,7 +90,7 @@ jobs:
           run-id: ${{ github.event.workflow_run.id }}
 
       - name: Extract live doc
-        run: unzip livedoc.zip -d doc
+        run: unzip livedoc.zip -d livedoc
 
       - name: Get Tag
         run: |
@@ -100,7 +100,7 @@ jobs:
         id: deploy-netlify
         uses: netlify/actions/cli@master
         with:
-          args: deploy --dir=doc/livedoc --message ${NETLIFY_MESSAGE} --alias ${NETLIFY_ALIAS}
+          args: deploy --dir=livedoc/livedoc --message ${NETLIFY_MESSAGE} --alias ${NETLIFY_ALIAS}
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
