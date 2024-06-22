@@ -182,8 +182,6 @@ jobs:
           mv CHANGES.html doc
           # Zip everything for increased performance
           zip -r doc.zip doc
-          # We move .git back into doc directory
-          mv git doc/.git
 
       - name: Upload doc
         id: upload
