@@ -173,15 +173,13 @@ jobs:
         run: |
           set -ex
           # We copy everything to a local folder
-          docker cp BUILD:/sage/local/share/doc/sage/html docs
-          docker cp BUILD:/sage/local/share/doc/sage/index.html docs
+          docker cp --follow-link BUILD:/sage/local/share/doc/sage/html docs
+          docker cp --follow-link BUILD:/sage/local/share/doc/sage/index.html docs
           (cd docs && git commit -a -m 'new')
           .ci/create-changes-html.sh $(cd docs && git rev-parse HEAD^) docs
-          (cd docs && rm -rf .git)
+          # "rm -rf .git" may error out because of some hidden diehard files; hence we just move it out of docs
+          (cd docs && mv .git ../git)
           mv CHANGES.html docs
-          # We also need to replace the symlinks because netlify is not following them
-          # CHECK IF STILL NEEDED
-          #cp -r -L $DOC_DIR ./docs
           # Zip everything for increased performance
           zip -r docs.zip docs
 
