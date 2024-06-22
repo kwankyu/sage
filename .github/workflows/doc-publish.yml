@@ -13,10 +13,13 @@ permissions:
   checks: write
   pull-requests: write
 
+env:
+  CAN_DEPLOY: ${{ secrets.NETLIFY_AUTH_TOKEN != '' &&  secrets.NETLIFY_SITE_ID != '' }}
+
 jobs:
   upload-doc:
     runs-on: ubuntu-latest
-    if: github.event.workflow_run.conclusion == 'success' && !startsWith(github.ref, 'refs/tags/')
+    if: github.event.workflow_run.conclusion == 'success' && env.CAN_DEPLOY == 'true' && !startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Get information about workflow origin
         uses: potiuk/get-workflow-origin@v1_5
@@ -79,7 +82,7 @@ jobs:
 
   publish-live-doc:
     runs-on: ubuntu-latest
-    if: github.event.workflow_run.conclusion == 'success' && startsWith(github.ref, 'refs/tags/')
+    if: github.event.workflow_run.conclusion == 'success' && env.CAN_DEPLOY == 'true' && startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Download live doc
         uses: actions/download-artifact@v4
