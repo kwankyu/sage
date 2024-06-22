@@ -30,8 +30,8 @@ jobs:
         with:
           name: docs
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          repository: ${{ context.repo }}
-          run-id: ${{github.event.workflow_run.id }}
+          repository: ${{ github.repository }}
+          run-id: ${{ github.event.workflow_run.id }}
 
       - name: Extract docs
         run: unzip docs.zip -d docs && unzip docs/docs.zip -d docs/docs
@@ -86,8 +86,8 @@ jobs:
         with:
           name: livedoc
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          repository: ${{ context.repo }}
-          run-id: ${{github.event.workflow_run.id }}
+          repository: ${{ github.repository }}
+          run-id: ${{ github.event.workflow_run.id }}
 
       - name: Extract live doc
         run: unzip livedoc.zip -d doc && unzip doc/livedoc.zip -d doc/doc
