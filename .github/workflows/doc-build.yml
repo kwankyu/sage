@@ -143,7 +143,7 @@ jobs:
           # Wipe out chronic diffs between old doc and new doc
           (cd doc && \
            find . -name "*.html" | xargs sed -i -e '/class="sidebar-brand-text"/ s/Sage [0-9a-z.]* /Sage '"$new_version"' /' \
-                                                -e '/This is documentation for/ s/ built with GitHub PR [^.]*././' \
+                                                -e '/<link rel="stylesheet"/ s/?v=[0-9a-f]*"/"/' \
                                                 -e 's;'"$mathjax_path_from"';'"$mathjax_path_to"';' \
                                                 -e '\;<script type="application/vnd\.jupyter\.widget-state+json">;,\;</script>; d')
           # Create git repo from old doc
@@ -176,7 +176,13 @@ jobs:
           docker cp --follow-link BUILD:/sage/local/share/doc/sage/html doc
           docker cp --follow-link BUILD:/sage/local/share/doc/sage/index.html doc
           (cd doc && git commit -a -m 'new')
+          # Wipe out chronic diffs of new doc against old doc
+          (cd doc && \
+           find . -name "*.html" | xargs sed -i -e '/This is documentation for/ s/ built with GitHub PR .*. Doc/. Doc/' \
+                                                -e '/<link rel="stylesheet"/ s/?v=[0-9a-f]*"/"/')
           .ci/create-changes-html.sh $(cd doc && git rev-parse HEAD^) doc
+          # Restore the new doc from changes by "wipe out"
+          (cd doc && git checkout -f)
           # Sometimes rm -rf .git errors out because of some diehard hidden files
           (cd doc && rm -rf .git 2>/dev/null && rm .gitattributes 2>/dev/null)
           mv CHANGES.html doc
