@@ -19,6 +19,8 @@ echo '<script>hljs.highlightAll();</script>' >> CHANGES.html
 cat >> CHANGES.html << EOF
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+// This URL is hardcoded in the file .github/workflows/doc-publish.yml.
+// See NETLIFY_ALIAS of the "Deploy to Netlify" step.
 const baseDocURL = 'https://doc-develop--sagemath.netlify.app'
 const diffSite = 'https://pianomister.github.io/diffsite'
 const diffParagraphs = document.querySelectorAll('p.diff');
