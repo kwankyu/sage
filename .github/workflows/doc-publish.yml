@@ -16,7 +16,7 @@ permissions:
 jobs:
   upload-doc:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' && secrets.NETLIFY_AUTH_TOKEN != '' &&  secrets.NETLIFY_SITE_ID != '' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success'
     steps:
       - name: Get information about workflow origin
         uses: potiuk/get-workflow-origin@v1_5
@@ -28,6 +28,7 @@ jobs:
       - name: Download doc
         id: download-doc
         uses: actions/download-artifact@v4
+        if: secrets.NETLIFY_AUTH_TOKEN != '' &&  secrets.NETLIFY_SITE_ID != ''
         with:
           name: doc
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -82,11 +83,12 @@ jobs:
 
   publish-live-doc:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' && secrets.NETLIFY_AUTH_TOKEN != '' &&  secrets.NETLIFY_SITE_ID != '' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success'
     steps:
       - name: Download live doc
         id: download-doc
         uses: actions/download-artifact@v4
+        if: secrets.NETLIFY_AUTH_TOKEN != '' &&  secrets.NETLIFY_SITE_ID != ''
         with:
           name: livedoc
           github-token: ${{ secrets.GITHUB_TOKEN }}
