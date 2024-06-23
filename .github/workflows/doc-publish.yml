@@ -21,7 +21,7 @@ jobs:
       CAN_DEPLOY: ${{ secrets.NETLIFY_AUTH_TOKEN != '' &&  secrets.NETLIFY_SITE_ID != '' }}
     steps:
       - name: Get information about workflow origin
-        uses: potiuk/get-workflow-origin@v1_6
+        uses: potiuk/get-workflow-origin@v1_5
         id: source-run-info
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -36,7 +36,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
           run-id: ${{ github.event.workflow_run.id }}
-        if: ${{ steps.source-run-info.outputs.sourceEvent == 'pull_request' || steps.source-run-info.outputs.sourceEvent == 'push' && steps.source-run-info.outputs.targetBranch == 'develop' }}
+        if: steps.source-run-info.outputs.sourceEvent == 'pull_request' || (steps.source-run-info.outputs.sourceEvent == 'push' && steps.source-run-info.outputs.targetBranch == 'develop')
 
       - name: Extract doc
         run: unzip doc.zip -d doc
@@ -91,7 +91,7 @@ jobs:
       CAN_DEPLOY: ${{ secrets.NETLIFY_AUTH_TOKEN != '' &&  secrets.NETLIFY_SITE_ID != '' }}
     steps:
       - name: Get information about workflow origin
-        uses: potiuk/get-workflow-origin@v1_6
+        uses: potiuk/get-workflow-origin@v1_5
         id: source-run-info
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -106,7 +106,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
           run-id: ${{ github.event.workflow_run.id }}
-        if: ${{ steps.source-run-info.outputs.sourceEvent == 'push' || steps.source-run-info.outputs.targetBranch != 'develop' }}
+        if: steps.source-run-info.outputs.sourceEvent == 'push' || steps.source-run-info.outputs.targetBranch != 'develop'
 
       - name: Extract live doc
         run: unzip livedoc.zip -d livedoc
