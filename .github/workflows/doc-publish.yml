@@ -16,7 +16,7 @@ permissions:
 jobs:
   upload-doc:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success'
+    if: github.event.workflow_run.conclusion == 'success'
     steps:
       - name: Get information about workflow origin
         uses: potiuk/get-workflow-origin@v1_5
@@ -28,7 +28,6 @@ jobs:
       - name: Download doc
         id: download-doc
         uses: actions/download-artifact@v4
-        if: secrets.NETLIFY_AUTH_TOKEN != '' &&  secrets.NETLIFY_SITE_ID != ''
         with:
           name: doc
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -43,6 +42,7 @@ jobs:
       - name: Deploy to Netlify
         id: deploy-netlify
         uses: netlify/actions/cli@master
+        if: secrets.NETLIFY_AUTH_TOKEN != '' &&  secrets.NETLIFY_SITE_ID != ''
         with:
           args: deploy --dir=doc/doc --message ${NETLIFY_MESSAGE} --alias ${NETLIFY_ALIAS}
         env:
@@ -83,12 +83,11 @@ jobs:
 
   publish-live-doc:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success'
+    if: github.event.workflow_run.conclusion == 'success'
     steps:
       - name: Download live doc
         id: download-doc
         uses: actions/download-artifact@v4
-        if: secrets.NETLIFY_AUTH_TOKEN != '' &&  secrets.NETLIFY_SITE_ID != ''
         with:
           name: livedoc
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -107,6 +106,7 @@ jobs:
       - name: Deploy to Netlify
         id: deploy-netlify
         uses: netlify/actions/cli@master
+        if: secrets.NETLIFY_AUTH_TOKEN != '' &&  secrets.NETLIFY_SITE_ID != ''
         with:
           args: deploy --dir=livedoc/livedoc --message ${NETLIFY_MESSAGE} --alias ${NETLIFY_ALIAS}
         env:
