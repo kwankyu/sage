@@ -106,7 +106,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
           run-id: ${{ github.event.workflow_run.id }}
-        if: steps.source-run-info.outputs.sourceEvent == 'push' || steps.source-run-info.outputs.targetBranch != 'develop'
+        if: steps.source-run-info.outputs.sourceEvent == 'push' && steps.source-run-info.outputs.targetBranch != 'develop'
 
       - name: Extract live doc
         run: unzip livedoc.zip -d livedoc
