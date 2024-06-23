@@ -28,11 +28,6 @@ jobs:
           sourceRunId: ${{ github.event.workflow_run.id }}
         if: env.CAN_DEPLOY == 'true'
 
-      - name: Check secrets
-        env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-
       - name: Download doc
         id: download-doc
         uses: actions/download-artifact@v4
