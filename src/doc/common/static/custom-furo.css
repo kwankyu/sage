@@ -35,3 +35,22 @@ a.pdf:hover {
     color: white;
     text-decoration: none;
 }
+
+/* Style for the floating dropdown menu */
+
+#versionsMenu {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    padding: 5px;
+    font-size: 16px;
+    opacity: 1;
+}
+
+.sidebar-drawer {
+    z-index: 100;
+}
+
+#versionsMenu:hover {
+    opacity: 1
+}
