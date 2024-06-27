@@ -92,7 +92,7 @@ async function fetchVersions() {
 
     if (Object.keys(versionMap).length > 0) {
         // Populate the versions menu
-        let dropdown = document.getElementById("versionsMenu");
+        let dropdown = document.getElementById("versions-menu");
         Object.keys(versionMap).forEach(ver => {
             let option = document.createElement("option");
             option.value = ver;
@@ -100,7 +100,7 @@ async function fetchVersions() {
             dropdown.add(option);
         });
     } else {
-        document.getElementById('versionsMenu').style.display = 'none';
+        document.getElementById('versions-menu').style.display = 'none';
     }
 
     let urlParams = new URLSearchParams(window.location.search);
@@ -118,7 +118,7 @@ fetchVersions()
 
 // Function to change the version based on versions menu selection
 function changeVersion() {
-    let selectedVersion = document.getElementById("versionsMenu").value;
+    let selectedVersion = document.getElementById("versions-menu").value;
     if (selectedVersion) {
        // Check if the version exists in the map and redirect
         if (selectedVersion in versionMap) {
@@ -129,7 +129,6 @@ function changeVersion() {
         }
     }
 }
-
 
 
 // Listen to the kernel status changes
