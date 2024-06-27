@@ -174,7 +174,6 @@ jobs:
           # We copy everything to a local folder
           docker cp --follow-link BUILD:/sage/local/share/doc/sage/html doc
           docker cp --follow-link BUILD:/sage/local/share/doc/sage/index.html doc
-          docker cp --follow-link BUILD:/sage/local/share/doc/sage/versions.txt doc
           (cd doc && git commit -a -m 'new')
           # Wipe out chronic diffs of new doc against old doc before creating CHANGES.html
           (cd doc && \
@@ -230,7 +229,6 @@ jobs:
           docker cp --follow-link BUILD:/sage/local/share/doc/sage/html livedoc
           docker cp --follow-link BUILD:/sage/local/share/doc/sage/pdf livedoc
           docker cp --follow-link BUILD:/sage/local/share/doc/sage/index.html livedoc
-          docker cp --follow-link BUILD:/sage/local/share/doc/sage/versions.txt livedoc
           zip -r livedoc.zip livedoc
 
       - name: Upload live doc
