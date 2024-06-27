@@ -112,6 +112,23 @@ export SAGE_VERSION
 export SAGE_RELEASE_DATE
 envsubst <"$SAGE_ROOT/CITATION.cff.in" >"$SAGE_ROOT/CITATION.cff"
 
+# Update versions.txt file storing URLs to the docs of the most recent stable releases
+file_path="$SAGE_ROOT/src/doc/versions.txt"
+# Extract the most recent version line from versions.txt; the first line is a comment
+line_number=$(grep -n '^[0-9]' "$file_path" | head -n 1 | cut -d: -f1)
+version_line=$(sed -n "${line_number}p" "$file_path")
+domain=${version_line#*--}
+version=${SAGE_VERSION//./-}
+# For the origin of this format, see .github/workflows/doc-publish.yml
+url="doc-$version--$domain"
+# Add new line to versions.txt
+sed -i "${line_number}i $SAGE_VERSION $url" "$file_path"
+# If the number of version lines is more than 5, remove the last line
+line_count=$(grep -c '^[0-9]' "$file_path")
+if [ "$line_count" -gt 5 ]; then
+  sed -i '$ d' "$file_path"
+fi
+
 # Commit auto-generated changes
 git commit -m "Updated SageMath version to $SAGE_VERSION" -- \
     "$SAGE_ROOT/VERSION.txt" \
@@ -124,6 +141,7 @@ git commit -m "Updated SageMath version to $SAGE_VERSION" -- \
     "$SAGE_ROOT/build/pkgs/*/version_requirements.txt" \
     "$SAGE_ROOT"/pkgs/*/VERSION.txt \
     "$SAGE_ROOT/.upstream.d/20-github.com-sagemath-sage-releases" \
+    "$SAGE_ROOT/src/doc/versions.txt" \
     || die "Error committing to the repository."
 
 git tag -a "$SAGE_VERSION" -m "$SAGE_VERSION_BANNER" \
