@@ -76,7 +76,7 @@ import warnings
 import sage.all
 from sage.misc.cachefunc import cached_method
 # Do not import SAGE_DOC globally as it interferes with doctesting with a random replacement
-from sage.env import SAGE_DOC_SRC, SAGE_SRC, DOT_SAGE
+from sage.env import SAGE_DOC, SAGE_DOC_SRC, SAGE_SRC, DOT_SAGE
 from . import build_options
 from .utils import build_many as _build_many
 
@@ -214,7 +214,6 @@ class DocBuilder():
             sage: b._output_dir('html')         # optional - sagemath_doc_html
             '.../html/en/tutorial'
         """
-        from sage.env import SAGE_DOC
         d = os.path.join(SAGE_DOC, type, self.lang, self.name)
         os.makedirs(d, exist_ok=True)
         return d
