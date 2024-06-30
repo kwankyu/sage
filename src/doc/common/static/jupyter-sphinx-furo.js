@@ -74,6 +74,7 @@ async function fetchVersions() {
         let text = await response.text();
         let lines = text.split('\n');
 
+        // Add the current version by default
         let url = window.location.origin;
         let start_index = url.indexOf('doc-') + 4;
         let end_index = url.indexOf('--');

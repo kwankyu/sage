@@ -43,10 +43,6 @@ a.pdf:hover {
 }
 
 #versions-menu {
-  position: fixed;
-  bottom: 10px;
-  right: 10px;
-  padding: 5px;
   font-size: small;
   opacity: 1;
   background-color: white;
