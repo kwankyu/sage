@@ -74,20 +74,21 @@ async function fetchVersions() {
         let text = await response.text();
         let lines = text.split('\n');
 
-        const url = window.location.origin;
-        const start_index = url.indexOf('doc-') + 4;
-        const end_index = url.indexOf('--');
-        const version_string = url.substring(start_index, end_index);
+        let url = window.location.origin;
+        let start_index = url.indexOf('doc-') + 4;
+        let end_index = url.indexOf('--');
+        let version_string = url.substring(start_index, end_index);
+        let current_version
 
         // Consult the comment in .github/workflows/doc-publish.yml
         if (/^pr-\d+$/.test(version_string)) {
-            const current_version = version_string.replace(/-/g, ' ');
+            current_version = version_string.replace(/-/g, ' ');
         } else if (version_string === 'release') {
-            const current_version = 'latest';
+            current_version = 'latest';
         } else if (version_string === 'develop') {
-            const current_version = 'develop';
+            current_version = 'develop';
         } else {
-            const current_version = version_string.replace(/-/g, '.');
+            current_version = version_string.replace(/-/g, '.');
         }
         versionMap[current_version] = url
 
