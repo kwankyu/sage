@@ -66,7 +66,7 @@ var versionMap = {};
 
 async function fetchVersions() {
     try {
-        let versions_file = "https://raw.githubusercontent.com/sagemath/sage/develop/src/doc/versions.txt"
+        let versions_file = "https://raw.githubusercontent.com/kwankyu/sage/develop/src/doc/versions.txt"
         let response = await fetch(versions_file);
         if (!response.ok) {
             throw new Error('Network response was not ok');
