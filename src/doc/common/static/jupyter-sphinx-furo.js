@@ -74,6 +74,23 @@ async function fetchVersions() {
         let text = await response.text();
         let lines = text.split('\n');
 
+        const url = window.location.origin;
+        const start_index = url.indexOf('doc-') + 4;
+        const end_index = url.indexOf('--');
+        const version_string = url.substring(start_index, end_index);
+
+        // Consult the comment in .github/workflows/doc-publish.yml
+        if (/^pr-\d+$/.test(version_string)) {
+            const current_version = version_string.replace(/-/g, ' ');
+        } else if (version_string === 'release') {
+            const current_version = 'latest';
+        } else if (version_string === 'develop') {
+            const current_version = 'develop';
+        } else {
+            const current_version = version_string.replace(/-/g, '.');
+        }
+        versionMap[current_version] = url
+
         // Parse the versions.txt file
         lines.forEach(line => {
             if (!line.startsWith('#')) { // Ignore the comment line
