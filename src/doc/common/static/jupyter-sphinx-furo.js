@@ -66,13 +66,31 @@ var versionMap = {};
 
 async function fetchVersions() {
     try {
-        let versions_file = "https://raw.githubusercontent.com/sagemath/sage/develop/src/doc/versions.txt"
+        let versions_file = "https://raw.githubusercontent.com/kwankyu/sage/develop/src/doc/versions.txt"
         let response = await fetch(versions_file);
         if (!response.ok) {
             throw new Error('Network response was not ok');
         }
         let text = await response.text();
         let lines = text.split('\n');
+
+        let url = window.location.origin;
+        let start_index = url.indexOf('doc-') + 4;
+        let end_index = url.indexOf('--');
+        let version_string = url.substring(start_index, end_index);
+        let current_version
+
+        // Consult the comment in .github/workflows/doc-publish.yml
+        if (/^pr-\d+$/.test(version_string)) {
+            current_version = version_string.replace(/-/g, ' ');
+        } else if (version_string === 'release') {
+            current_version = 'latest';
+        } else if (version_string === 'develop') {
+            current_version = 'develop';
+        } else {
+            current_version = version_string.replace(/-/g, '.');
+        }
+        versionMap[current_version] = url
 
         // Parse the versions.txt file
         lines.forEach(line => {
