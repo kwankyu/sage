@@ -43,10 +43,26 @@ a.pdf:hover {
 }
 
 #versions-menu {
+  position: fixed;
+  bottom: 10px;
+  right: -calc(100% - 10pt); /* Calculate the right position based on the full width minus 10pt */
+  padding-left: 10pt; /* Left padding of 10pt */
+  width: 200px; /* Set the width of your menu */
+  padding: 5px;
+  padding-left: 10pt; /* Ensure left padding is 10pt */
   font-size: small;
   opacity: 1;
-  background-color: white;
-  color: blue;
+  background-color: #fff;
+  color: #00f;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  transition: right 0.3s ease-in-out; /* Smooth transition */
+}
+
+#versions-menu:hover {
+  right: 0; /* Bring the menu fully into view */
+  padding-left: 5px;
 }
 
 body[data-theme="dark"] {
