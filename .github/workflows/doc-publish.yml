@@ -129,13 +129,9 @@ jobs:
         run: unzip livedoc.zip -d livedoc
         if: steps.download-doc.outcome == 'success'
 
-      - name: Extract live doc
-        run: unzip livedoc.zip -d livedoc
-        if: steps.download-doc.outcome == 'success'
-
-      - name: Create _headers file
+      - name: Create _headers file for permissive CORS
         run: |
-          cat <<EOF > livedoc/_headers
+          cat <<EOF > livedoc/livedoc/_headers
           /*
             Access-Control-Allow-Origin: *
             Access-Control-Allow-Methods: GET
