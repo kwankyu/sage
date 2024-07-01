@@ -471,9 +471,9 @@ pygments_dark_style = "monokai"
 # Add siderbar/home.html to the default sidebar.
 html_sidebars = {
     "**": [
-        "sidebar/version-selector.html",
         "sidebar/scroll-start.html",
         "sidebar/brand.html",
+        "sidebar/version-selector.html",
         "sidebar/search.html",
         "sidebar/home.html",
         "sidebar/navigation.html",
