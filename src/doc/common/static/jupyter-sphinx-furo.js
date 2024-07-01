@@ -67,7 +67,7 @@ var versionMap = {};
 async function fetchVersions() {
     try {
         // For the origin of this site, see .github/workflows/doc-publish.yml
-        let versions_file = "https://doc-pr-47--sagemath-test.netlify.app/html/en/versions.txt"
+        let versions_file = "https://doc-release--sagemath-test.netlify.app/html/en/versions.txt";
         let response = await fetch(versions_file);
         if (!response.ok) {
             throw new Error('Network response was not ok');
