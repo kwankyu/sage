@@ -67,7 +67,7 @@ var versionMap = {};
 async function fetchVersions() {
     try {
         // For the origin of this site, see .github/workflows/doc-publish.yml
-        let versions_file = "https://doc-release--sagemath.netlify.app/versions.txt"
+        let versions_file = "https://doc-release--sagemath.netlify.app/html/en/versions.txt"
         let response = await fetch(versions_file);
         if (!response.ok) {
             throw new Error('Network response was not ok');
@@ -109,17 +109,18 @@ async function fetchVersions() {
         console.error("Failed to fetch versions.txt file:", error);
     }
 
+    let menu = document.getElementById("versions-menu");
+
     if (Object.keys(versionMap).length > 0) {
-        // Populate the versions menu
-        let dropdown = document.getElementById("versions-menu");
         Object.keys(versionMap).forEach(ver => {
             let option = document.createElement("option");
             option.value = ver;
             option.text = ver;
-            dropdown.add(option);
+            menu.add(option);
         });
+        menu.style.display = 'block';
     } else {
-        document.getElementById('versions-menu').style.display = 'none';
+        menu.style.display = 'none';
     }
 
     let urlParams = new URLSearchParams(window.location.search);
