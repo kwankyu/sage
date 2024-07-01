@@ -43,7 +43,7 @@ a.pdf:hover {
 }
 
 #versions-menu {
-  display: none;
+  display: block;
   position: fixed;
   bottom: 10px;
   right: calc(10px - 100px);
@@ -55,7 +55,6 @@ a.pdf:hover {
   color: var(--color-link);
   background-color: white;
   border-radius: 5px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   transition: right 0.3s ease-in-out;
 }
 
