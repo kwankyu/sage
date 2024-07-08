@@ -1895,19 +1895,19 @@ def view(objects, title='Sage', debug=False, sep='', tiny=False,
 
 def pdf(x, filename, tiny=False, engine=None, tightpage=True, margin=None, debug=False):
     """
-    Create a pdf image from the latex representation of ``x`` and save it as a
+    Create an image from the latex representation of ``x`` and save it as a pdf
     file with the given filename.
 
     INPUT:
 
     - ``x`` -- a Sage object
 
-    - ``filename`` -- the filename in which to save the image
+    - ``filename`` -- the filename with which to save the image
 
     - ``tiny`` -- boolean (default: ``False``); if ``True``, use a tiny font
 
     - ``tightpage`` -- boolean (default: ``True``); use the LaTeX package
-       ``preview`` with the 'tightpage' option
+      ``preview`` with the 'tightpage' option
 
     - ``engine`` -- (default: ``None``) ``'latex'``, ``'pdflatex'``,
       ``'xelatex'`` or ``'lualatex'``
