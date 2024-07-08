@@ -28,6 +28,7 @@ import os
 import random
 import re
 import shutil
+import time
 from subprocess import call, run, Popen, PIPE
 from tempfile import TemporaryDirectory
 
@@ -1872,20 +1873,19 @@ def view(objects, title='Sage', debug=False, sep='', tiny=False,
         return
     output_file = os.path.join(tmp.name, "sage." + suffix)
 
-    # this should get changed if we switch the stuff in misc.viewer to
-    # producing lists
     if debug:
+        print(f'temporary file: "{output_file}"')
         print(f'viewer: "{viewer}"')
 
-    # return immediately but only clean up the temporary file after the viewer
-    # is open
+    # We return immediately but the temporary file is cleaned up after the viewer
+    # opens the file, hopefully.
+
     process = Popen([viewer, output_file], stdout=PIPE, stderr=PIPE)
 
     def cleanup_temp_file():
         process.wait()
+        time.sleep(5)
         if tmp:
-            import time
-            time.sleep(5)
             tmp.cleanup()
 
     from threading import Thread
@@ -1893,7 +1893,7 @@ def view(objects, title='Sage', debug=False, sep='', tiny=False,
     t.start()
 
 
-def pdf(x, filename, tiny=False, engine=None, tightpage=True, margin=None, debug=False):
+def pdf(x, filename, tiny=False, tightpage=True, margin=None, engine=None, debug=False):
     """
     Create an image from the latex representation of ``x`` and save it as a pdf
     file with the given filename.
@@ -1908,6 +1908,9 @@ def pdf(x, filename, tiny=False, engine=None, tightpage=True, margin=None, debug
 
     - ``tightpage`` -- boolean (default: ``True``); use the LaTeX package
       ``preview`` with the 'tightpage' option
+
+    - ``margin`` -- float (default: no margin); width of border, only effective
+      with 'tight page'
 
     - ``engine`` -- (default: ``None``) ``'latex'``, ``'pdflatex'``,
       ``'xelatex'`` or ``'lualatex'``
@@ -1937,7 +1940,6 @@ def pdf(x, filename, tiny=False, engine=None, tightpage=True, margin=None, debug
                          '\\PreviewEnvironment{page}%s' % margin_str,
                          'math_left': '\\begin{page}$',
                          'math_right': '$\\end{page}'}
-        title = None
     else:
         latex_options = {}
 
@@ -1945,7 +1947,7 @@ def pdf(x, filename, tiny=False, engine=None, tightpage=True, margin=None, debug
     s = _latex_file_([x], title='', tiny=tiny, debug=debug, **latex_options)
     if engine is None:
         engine = _Latex_prefs._option["engine"]
-    # path name for permanent png output
+    # path name for permanent pdf output
     abs_path_to_pdf = os.path.abspath(filename)
     # temporary directory to store stuff
     with TemporaryDirectory() as tmp:
