@@ -1,5 +1,5 @@
 r"""
-Ring `\ZZ` of Integers
+Ring `\ZZ` of Integer
 
 The :class:`IntegerRing_class` represents the ring `\ZZ` of (arbitrary
 precision) integers. Each integer is an instance of :class:`Integer`,
