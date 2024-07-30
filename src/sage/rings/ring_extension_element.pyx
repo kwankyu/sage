@@ -330,7 +330,7 @@ cdef class RingExtensionElement(CommutativeAlgebraElement):
             sage: g.parent()
             Finite Field in z2 of size 5^2
 
-        TESTS::
+        TESTS:
 
         We check the case of a tower of extensions::
 
