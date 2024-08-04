@@ -1,12 +1,11 @@
 #!/bin/sh
 if [ $# != 2 ]; then
-    echo >&2 "usage: $0 BASE_DOC_COMMIT DOC_REPO"
+    echo >&2 "usage: $0 DIFF_TEXT"
     echo >&2 "creates CHANGES.html in the current directory"
-    echo >&2 "for the diffs of DOC_REPO against BASE_DOC_COMMIT"
+    echo >&2 "for the diffs in the file DIFF_TEXT"
     exit 1
 fi
-BASE_DOC_COMMIT="$1"
-DOC_REPOSITORY="$2"
+DIFF_TEXT="$1"
 
 # Create CHANGES.html
 echo '<html>' > CHANGES.html
@@ -52,11 +51,10 @@ diffParagraphs.forEach(paragraph => {
 EOF
 echo '</head>' >> CHANGES.html
 echo '<body>' >> CHANGES.html
-(cd $DOC_REPOSITORY && git diff $BASE_DOC_COMMIT -- "*.html") > diff.txt
 python3 - << EOF
 import os, re, html
 from itertools import chain
-with open('diff.txt', 'r') as f:
+with open('$DIFF_TEXT', 'r') as f:
     diff_text = f.read()
 diff_blocks = re.split(r'^(?=diff --git)', diff_text, flags=re.MULTILINE)
 out_blocks = []
@@ -113,4 +111,4 @@ EOF
 cat diff.html >> CHANGES.html
 echo '</body>' >> CHANGES.html
 echo '</html>' >> CHANGES.html
-rm diff.txt diff.html
+rm diff.html
