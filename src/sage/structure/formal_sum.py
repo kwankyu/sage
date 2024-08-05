@@ -2,7 +2,7 @@
 """
 Formal sums
 
-AUTHORS:
+This module provides the following functions:
 
  - David Harvey (2006-09-20): changed FormalSum not to derive from
    "list" anymore, because that breaks new Element interface
@@ -49,6 +49,19 @@ TESTS::
     2/3 + -5/7
     sage: loads(dumps(a)) == a
     True
+
+AUTHORS:
+
+- David Harvey (2006-09-20): changed FormalSum not to derive from
+  "list" anymore, because that breaks new Element interface
+
+- Nick Alexander (2006-12-06): added test cases
+
+- William Stein (2006, 2009): wrote the first version in 2006, documented it in 2009
+
+- Volker Braun (2010-07-19): new-style coercions, documentation
+  added. FormalSums now derives from UniqueRepresentation
+
 """
 
 # ****************************************************************************
