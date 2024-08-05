@@ -1877,19 +1877,19 @@ def view(objects, title='Sage', debug=False, sep='', tiny=False,
         print(f'temporary file: "{output_file}"')
         print(f'viewer: "{viewer}"')
 
-    # We return immediately but the temporary file is cleaned up after the viewer
-    # opens the file, hopefully.
+    # Return immediately but only clean up the temporary file after
+    # the viewer has closed. This function is synchronous and waits
+    # for the process to complete...
+    def run_viewer():
+        run([viewer, output_file], capture_output=True)
+        tmp.cleanup()
 
-    process = Popen([viewer, output_file], stdout=PIPE, stderr=PIPE)
-
-    def cleanup_temp_file():
-        process.wait()
-        time.sleep(5)
-        if tmp:
-            tmp.cleanup()
-
+    # ...but we execute it asynchronously so that view() completes
+    # immediately. The "daemon" flag is important because, without it,
+    # sage won't quit until the viewer does.
     from threading import Thread
-    t = Thread(target=cleanup_temp_file)
+    t = Thread(target=run_viewer)
+    t.daemon = True
     t.start()
 
 
