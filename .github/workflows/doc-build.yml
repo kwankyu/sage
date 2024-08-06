@@ -125,14 +125,20 @@ jobs:
       # On PRs and pushes to develop
       #
 
+      - name: Download old doc
+        id: download
+        if: (success() || failure()) && steps.container.outcome == 'success' && !startsWith(github.ref, 'refs/tags/')
+        uses: actions/download-artifact@v3
+        with:
+          name: doc-develop
+
       - name: Store old doc
         id: worktree
-        if: (success() || failure()) && steps.container.outcome == 'success' && !startsWith(github.ref, 'refs/tags/')
+        if: (success() || failure()) && steps.container.download == 'success'
         run: |
           git config --global --add safe.directory $(pwd)
           git config --global user.email "ci-sage@example.com"
           git config --global user.name "Build documentation workflow"
-          mkdir -p doc
           # Check if we are on PR
           PR_NUMBER=""
           if [[ -n "$GITHUB_REF" ]]; then
@@ -147,7 +153,6 @@ jobs:
             # mathjax path in new doc
             mathjax_path_to=$(docker exec -e SAGE_USE_CDNS=yes BUILD /sage/sage -python -c "from sage_docbuild.conf import mathjax_path; print(mathjax_path)")
             new_version=$(docker exec BUILD cat src/VERSION.txt)
-            docker cp BUILD:/sage/local/share/doc/sage/html doc/
             # Wipe out chronic diffs between old doc and new doc
             (cd doc && \
              find . -name "*.html" | xargs sed -i -e '/class="sidebar-brand-text"/ s/Sage [0-9a-z.]* /Sage '"$new_version"' /' \
@@ -217,12 +222,20 @@ jobs:
           # Zip everything for increased performance
           zip -r doc.zip doc
 
-      - name: Upload doc
-        id: upload
-        if: (success() || failure()) && steps.copy.outcome == 'success'
+      - name: Upload doc for push event
+        id: upload-push
+        if: (success() || failure()) && steps.copy.outcome == 'success' && github.event_name == 'push'
         uses: actions/upload-artifact@v4
         with:
-          name: doc
+          name: doc-${{ github.ref_name }}
+          path: doc.zip
+
+      - name: Upload doc for pull request event
+        id: upload-pr
+        if: (success() || failure()) && steps.copy.outcome == 'success' && github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: doc-pr-${{ github.event.pull_request.number }}
           path: doc.zip
 
       #
