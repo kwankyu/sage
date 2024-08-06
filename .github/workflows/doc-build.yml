@@ -130,14 +130,14 @@ jobs:
 
       - name: Download old doc for pull request
         id: download
-        if: (success() || failure()) && steps.container.outcome == 'success' && !startsWith(github.ref, 'refs/tags/') && github.event_name == 'pull_request'
-        uses: actions/download-artifact@v3
+        if: steps.container.outcome == 'success' && !startsWith(github.ref, 'refs/tags/') && github.event_name == 'pull_request'
+        uses: actions/download-artifact@v4
         with:
           name: doc-develop
 
       - name: Store old doc
         id: worktree
-        if: (success() || failure()) && steps.container.outcome == 'success' && !startsWith(github.ref, 'refs/tags/')
+        if: steps.container.outcome == 'success' && !startsWith(github.ref, 'refs/tags/')
         run: |
           git config --global --add safe.directory $(pwd)
           git config --global user.email "ci-sage@example.com"
