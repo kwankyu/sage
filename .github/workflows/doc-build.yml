@@ -154,6 +154,8 @@ jobs:
           git config --global user.name "Build documentation workflow"
           if [ -f "doc.zip" ]; then
             unzip doc.zip
+            cd doc
+            ls -l
           else
             mkdir -p doc
           fi
