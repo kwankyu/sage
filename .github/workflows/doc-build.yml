@@ -122,19 +122,19 @@ jobs:
                      ${{ env.BUILD_IMAGE }} /bin/sh
 
       #
-      # On PRs and pushes to develop
+      # On pull request and push to develop
       #
 
-      - name: Download old doc
+      - name: Download old doc for pull request
         id: download
-        if: (success() || failure()) && steps.container.outcome == 'success' && !startsWith(github.ref, 'refs/tags/')
+        if: (success() || failure()) && steps.container.outcome == 'success' && !startsWith(github.ref, 'refs/tags/') && github.event_name == 'pull_request'
         uses: actions/download-artifact@v3
         with:
           name: doc-develop
 
       - name: Store old doc
         id: worktree
-        if: (success() || failure()) && steps.container.download == 'success'
+        if: (success() || failure()) && steps.container.outcome == 'success' && !startsWith(github.ref, 'refs/tags/')
         run: |
           git config --global --add safe.directory $(pwd)
           git config --global user.email "ci-sage@example.com"
@@ -222,20 +222,12 @@ jobs:
           # Zip everything for increased performance
           zip -r doc.zip doc
 
-      - name: Upload doc for push event
-        id: upload-push
-        if: (success() || failure()) && steps.copy.outcome == 'success' && github.event_name == 'push'
+      - name: Upload doc
+        id: upload
+        if: (success() || failure()) && steps.copy.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
-          name: doc-${{ github.ref_name }}
-          path: doc.zip
-
-      - name: Upload doc for pull request event
-        id: upload-pr
-        if: (success() || failure()) && steps.copy.outcome == 'success' && github.event_name == 'pull_request'
-        uses: actions/upload-artifact@v4
-        with:
-          name: doc-pr-${{ github.event.pull_request.number }}
+          name: doc
           path: doc.zip
 
       - name: Upload doc for push event
@@ -247,7 +239,7 @@ jobs:
           path: doc.zip
 
       #
-      # On release tags: live doc and wheels
+      # On release tag: live doc and wheels
       #
 
       - name: Build live doc
