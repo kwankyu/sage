@@ -128,14 +128,31 @@ jobs:
       # On pull request and push to develop
       #
 
+      - name: Get Run ID for a specific event
+        id: get_run_id
+        if: steps.container.outcome == 'success' && !startsWith(github.ref, 'refs/tags/') && github.event_name == 'pull_request'
+        run: |
+          # Replace these variables with your specific values
+          REPO_OWNER="sagemath"
+          REPO_NAME="sage"
+          EVENT_TYPE="push"  # Event type to search for
+          BRANCH_NAME="develop"
+          # Use GitHub API to list workflow runs
+          RESPONSE=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                          "https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/actions/runs")
+          # Parse JSON response to find the run ID for the push event to the develop branch
+          RUN_ID=$(echo "$RESPONSE" | jq -r --arg event "$EVENT_TYPE" --arg branch "$BRANCH_NAME" \
+            '.workflow_runs[] | select(.event == $event and .head_branch == $branch) | .id' | head -n 1)
+          echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
+
       - name: Download old doc for pull request
         id: download
-        if: steps.container.outcome == 'success' && !startsWith(github.ref, 'refs/tags/') && github.event_name == 'pull_request'
         uses: actions/download-artifact@v4
         with:
           name: doc-develop
           github-token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
+          run-id: ${{ RUN_ID }}
 
       - name: Store old doc
         id: worktree
