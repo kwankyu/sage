@@ -28,8 +28,7 @@ import os
 import random
 import re
 import shutil
-import time
-from subprocess import call, run, Popen, PIPE
+from subprocess import call, run, PIPE
 from tempfile import TemporaryDirectory
 
 from sage.misc.cachefunc import cached_function, cached_method
