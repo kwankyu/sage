@@ -147,6 +147,7 @@ jobs:
 
       - name: Download old doc for pull request
         id: download
+        if: steps.container.get_run_id == 'success'
         uses: actions/download-artifact@v4
         with:
           name: doc-develop
