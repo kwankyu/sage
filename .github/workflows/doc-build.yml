@@ -210,10 +210,8 @@ jobs:
         run: |
           set -ex
           # We copy everything to a local folder
-          mkdir -p doc-temp
-          docker cp BUILD:/sage/local/share/doc/sage/html doc-temp
-          docker cp BUILD:/sage/local/share/doc/sage/index.html doc-temp
-          cp -r -L doc-temp/ doc/
+          docker cp BUILD:/sage/local/share/doc/sage/html doc
+          docker cp BUILD:/sage/local/share/doc/sage/index.html doc
           # Check if we are on PR
           PR_NUMBER=""
           if [[ -n "$GITHUB_REF" ]]; then
