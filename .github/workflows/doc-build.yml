@@ -26,6 +26,9 @@ on:
         required: true
         default: 'dev'
 
+permissions:
+  actions: read
+
 concurrency:
   # Cancel previous runs of this workflow for the same branch
   group: ${{ github.workflow }}-${{ github.ref }}
