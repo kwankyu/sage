@@ -132,7 +132,7 @@ jobs:
           RESPONSE=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
                           "https://api.github.com/repos/${{ github.repository }}/actions/runs")
           RUN_ID=$(echo "$RESPONSE" | jq -r --arg name "${{ github.workflow }}" --arg event "push" --arg branch "develop" --arg status "completed" \
-            '.workflow_runs[] | select(.name == $name and .event == $event and .head_branch == $branch .status == $status) | .id' | head -n 1)
+            '.workflow_runs[] | select(.name == $name and .event == $event and .head_branch == $branch and .status == $status) | .id' | head -n 1)
           echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
 
       - name: Download old doc for pull request
