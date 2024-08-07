@@ -39,8 +39,6 @@ env:
   FROM_DOCKER_TARGET:     "with-targets"
   FROM_DOCKER_TAG:        ${{ github.event.inputs.docker_tag || 'dev'}}
   EXTRA_CONFIGURE_ARGS:   --enable-fat-binary
-  ACTIONS_RUNNER_DEBUG:   true
-  ACTIONS_STEP_DEBUG:     true
 
 jobs:
   build-doc:
@@ -124,20 +122,22 @@ jobs:
                      ${{ env.BUILD_IMAGE }} /bin/sh
 
       #
-      # On pull request and push to develop
+      # On pull request and push to develop events
       #
 
-      - name: Get Run ID of this workflow for push to develop event
+      - name: Get run-id of previous workflow run for pull request event
         id: get_run_id
         if: steps.container.outcome == 'success' && !startsWith(github.ref, 'refs/tags/') && github.event_name == 'pull_request'
         run: |
-          RESPONSE=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-                     "https://api.github.com/repos/${{ github.repository }}/actions/runs?event=push&branch=develop&status=completed")
-          RUN_ID=$(echo "$RESPONSE" | jq -r --arg name "${{ github.workflow }}" --arg branch "develop" --arg conclusion "success" \
-            '.workflow_runs[] | select(.name == $name and .head_branch == $branch and .conclusion == $conclusion) | .id' | head -n 1)
+          RESPONSE=$(curl -s -L \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/runs?event=push&branch=develop&status=completed")
+          RUN_ID=$(echo "$RESPONSE" | jq -r --arg name "${{ github.workflow }}" --arg conclusion "success" \
+            '.workflow_runs[] | select(.name == $name and .conclusion == $conclusion) | .id' | head -n 1)
           echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
 
-      - name: Download old doc for pull request
+      - name: Download old doc from the workflow run
         id: download-doc
         if: steps.get_run_id.outcome == 'success'
         uses: actions/download-artifact@v4
@@ -147,7 +147,7 @@ jobs:
           repository: ${{ github.repository }}
           run-id: ${{ env.RUN_ID }}
 
-      - name: Store old doc
+      - name: Store old doc for pull request event
         id: worktree
         if: steps.container.outcome == 'success' && !startsWith(github.ref, 'refs/tags/')
         run: |
@@ -156,11 +156,10 @@ jobs:
           git config --global user.name "Build documentation workflow"
           if [ -f "doc.zip" ]; then
             unzip doc.zip
-            rm doc.zip
           else
             mkdir -p doc
           fi
-          # Check if we are on PR
+          # Check if we are on pull request event
           PR_NUMBER=""
           if [[ -n "$GITHUB_REF" ]]; then
             if [[ "$GITHUB_REF" =~ refs/pull/([0-9]+)/merge ]]; then
@@ -185,7 +184,7 @@ jobs:
             # Create git repo from old doc
             (cd doc && \
              git init && \
-             (echo "*.svg binary"; echo "*.pdf binary") >> .gitattributes && \
+             (echo "*.svg binary"; echo "*.pdf binary") > .gitattributes && \
              (echo ".buildinfo"; echo '*.inv'; echo '.git*'; echo '*.svg'; echo '*.pdf'; echo '*.png'; echo 'searchindex.js') > .gitignore && \
              git add -A && git commit --quiet -m 'old')
           fi
@@ -210,7 +209,7 @@ jobs:
         if: (success() || failure()) && steps.docbuild.outcome == 'success'
         run: |
           set -ex
-          # We copy everything to a local folder
+          # Simpler "docker cp --follow-link ... doc" does not work
           mkdir -p temp
           docker cp --follow-link BUILD:/sage/local/share/doc/sage/html temp
           docker cp --follow-link BUILD:/sage/local/share/doc/sage/index.html temp
@@ -224,7 +223,6 @@ jobs:
           fi
           # If so, then create CHANGES.html
           if [[ -n "$PR_NUMBER" ]]; then
-            (cd doc && git status)
             (cd doc && git commit -a -m 'new')
             # Wipe out chronic diffs of new doc against old doc before creating CHANGES.html
             (cd doc && \
@@ -263,7 +261,7 @@ jobs:
           path: doc.zip
 
       #
-      # On release tag: live doc and wheels
+      # On release tag event
       #
 
       - name: Build live doc
