@@ -114,7 +114,6 @@ jobs:
       - name: Start container
         id: container
         # Try to continue when "exporting to GitHub Actions Cache" failed with timeout
-        if: (success() || failure())
         run: |
           docker run --name BUILD -dit \
                      --mount type=bind,src=$(pwd),dst=$(pwd) \
@@ -122,18 +121,44 @@ jobs:
                      ${{ env.BUILD_IMAGE }} /bin/sh
 
       #
-      # On PRs and pushes to develop
+      # On pull request and push to develop events
       #
 
-      - name: Store old doc
+      - name: Get workflow run-id on pull request event
+        id: get_run_id
+        if: steps.container.outcome == 'success' && !startsWith(github.ref, 'refs/tags/') && github.event_name == 'pull_request'
+        run: |
+          RESPONSE=$(curl -s -L \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/runs?event=push&branch=develop&status=completed")
+          RUN_ID=$(echo "$RESPONSE" | jq -r --arg name "${{ github.workflow }}" --arg conclusion "success" \
+            '.workflow_runs[] | select(.name == $name and .conclusion == $conclusion) | .id' | head -n 1)
+          echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
+
+      - name: Download old doc from the workflow run
+        id: download-doc
+        if: steps.get_run_id.outcome == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: doc-develop
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.RUN_ID }}
+
+      - name: Store old doc for pull request event
         id: worktree
-        if: (success() || failure()) && steps.container.outcome == 'success' && !startsWith(github.ref, 'refs/tags/')
+        if: steps.container.outcome == 'success' && !startsWith(github.ref, 'refs/tags/')
         run: |
           git config --global --add safe.directory $(pwd)
           git config --global user.email "ci-sage@example.com"
           git config --global user.name "Build documentation workflow"
-          mkdir -p doc
-          # Check if we are on PR
+          if [ -f "doc.zip" ]; then
+            unzip doc.zip
+          else
+            mkdir -p doc
+          fi
+          # Check if we are on pull request event
           PR_NUMBER=""
           if [[ -n "$GITHUB_REF" ]]; then
             if [[ "$GITHUB_REF" =~ refs/pull/([0-9]+)/merge ]]; then
@@ -147,7 +172,6 @@ jobs:
             # mathjax path in new doc
             mathjax_path_to=$(docker exec -e SAGE_USE_CDNS=yes BUILD /sage/sage -python -c "from sage_docbuild.conf import mathjax_path; print(mathjax_path)")
             new_version=$(docker exec BUILD cat src/VERSION.txt)
-            docker cp BUILD:/sage/local/share/doc/sage/html doc/
             # Wipe out chronic diffs between old doc and new doc
             (cd doc && \
              find . -name "*.html" | xargs sed -i -e '/class="sidebar-brand-text"/ s/Sage [0-9a-z.]* /Sage '"$new_version"' /' \
@@ -159,14 +183,14 @@ jobs:
             # Create git repo from old doc
             (cd doc && \
              git init && \
-             (echo "*.svg binary"; echo "*.pdf binary") >> .gitattributes && \
-             (echo ".buildinfo"; echo '*.inv'; echo '.git*'; echo '*.svg'; echo '*.pdf'; echo '*.png'; echo 'searchindex.js') > .gitignore; \
+             (echo "*.svg binary"; echo "*.pdf binary") > .gitattributes && \
+             (echo ".buildinfo"; echo '*.inv'; echo '.git*'; echo '*.svg'; echo '*.pdf'; echo '*.png'; echo 'searchindex.js') > .gitignore && \
              git add -A && git commit --quiet -m 'old')
           fi
 
       - name: Build doc
         id: docbuild
-        if: (success() || failure()) && steps.worktree.outcome == 'success' && !startsWith(github.ref, 'refs/tags/')
+        if: steps.worktree.outcome == 'success' && !startsWith(github.ref, 'refs/tags/')
         # Always non-incremental because of the concern that
         # incremental docbuild may introduce broken links (inter-file references) though build succeeds
         run: |
@@ -175,18 +199,21 @@ jobs:
           export MAKE="make -j5 --output-sync=recurse" SAGE_NUM_THREADS=5
           make doc-clean doc-uninstall
           export SAGE_USE_CDNS=yes
+          export SAGE_DOCBUILD_OPTS="--no-preparsed-examples --include-tests-blocks"
           ./config.status && make sagemath_doc_html-no-deps
         shell: sh .ci/docker-exec-script.sh BUILD /sage {0}
 
       - name: Copy doc
         id: copy
-        if: (success() || failure()) && steps.docbuild.outcome == 'success'
+        if: steps.docbuild.outcome == 'success'
         run: |
           set -ex
-          # We copy everything to a local folder
-          docker cp --follow-link BUILD:/sage/local/share/doc/sage/html doc
-          docker cp --follow-link BUILD:/sage/local/share/doc/sage/index.html doc
-          # Check if we are on PR
+          # Simpler "docker cp --follow-link ... doc" does not work
+          mkdir -p temp
+          docker cp --follow-link BUILD:/sage/local/share/doc/sage/html temp
+          docker cp --follow-link BUILD:/sage/local/share/doc/sage/index.html temp
+          cp -r -L temp/* doc/
+          # Check if we are on pull request event
           PR_NUMBER=""
           if [[ -n "$GITHUB_REF" ]]; then
             if [[ "$GITHUB_REF" =~ refs/pull/([0-9]+)/merge ]]; then
@@ -218,19 +245,28 @@ jobs:
 
       - name: Upload doc
         id: upload
-        if: (success() || failure()) && steps.copy.outcome == 'success'
+        if: steps.copy.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: doc
           path: doc.zip
 
+      - name: Upload doc-develop for push event
+        # artifact doc-develop is used for doc build on pull request event
+        id: upload-push
+        if: steps.copy.outcome == 'success' && github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: doc-${{ github.ref_name }}
+          path: doc.zip
+
       #
-      # On release tags: live doc and wheels
+      # On release tag event
       #
 
       - name: Build live doc
         id: buildlivedoc
-        if: (success() || failure()) && startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/')
         run: |
           export MAKE="make -j5 --output-sync=recurse" SAGE_NUM_THREADS=5
           export PATH="build/bin:$PATH"
@@ -246,7 +282,7 @@ jobs:
 
       - name: Copy live doc
         id: copylivedoc
-        if: (success() || failure()) && steps.buildlivedoc.outcome == 'success'
+        if: steps.buildlivedoc.outcome == 'success'
         run: |
           mkdir -p ./livedoc
           # We copy everything to a local folder
@@ -256,7 +292,7 @@ jobs:
           zip -r livedoc.zip livedoc
 
       - name: Upload live doc
-        if: (success() || failure()) && steps.copylivedoc.outcome == 'success'
+        if: steps.copylivedoc.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: livedoc
