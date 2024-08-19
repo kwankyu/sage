@@ -1,6 +1,6 @@
 # nodoctest
-# Numerical Sage documentation build configuration file, created by
-# sphinx-quickstart on Sat Dec  6 11:08:04 2008.
+# Sage documentation build configuration file, based on that created by
+# sphinx-quickstart on Thu Aug 21 20:15:55 2008.
 #
 # This file is execfile()d with the current directory set to its containing dir.
 #
@@ -10,7 +10,7 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-from sage_docbuild.conf import release
+from sage_docbuild.conf import release, latex_elements
 from sage_docbuild.conf import *  # NOQA
 
 # Add any paths that contain custom static files (such as style sheets),
@@ -20,10 +20,29 @@ from sage_docbuild.conf import *  # NOQA
 # contains common paths.
 html_static_path = [] + html_common_static_path
 
+# Add small view/edit buttons.
+html_theme_options.update({
+  'source_view_link': os.path.join(source_repository, 'blob/develop/src/doc/ja/a_tour_of_sage', '{filename}'),
+  'source_edit_link': os.path.join(source_repository, 'edit/develop/src/doc/ja/a_tour_of_sage', '{filename}'),
+})
+
 # General information about the project.
 project = 'تور Sage'
 name = 'a_tour_of_sage'
-language = 'fa'
+
+# The LaTeX engine to build the docs in Persian.
+#
+latex_engine = 'xelatex'
+
+latex_elements['preamble'] += r'''\usepackage{polyglossia}
+\setdefaultlanguage{english}
+\setotherlanguage{farsi}
+\newfontfamily\englishfont{Times New Roman} % Example of an English font
+\newfontfamily\englishsans[Context=Sans]{Arial}
+\newfontfamily\arabicfont[Script=Arabic]{Noto Sans Arabic}
+\newfontfamily\persianfont[Script=Arabic]{Noto Sans Arabic}
+\newfontfamily\arabicfontsf[Script=Arabic]{Noto Sans Arabic}
+'''
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -39,5 +58,3 @@ latex_documents = [
   ('index', name+'.tex', 'تور Sage',
    'The Sage Development Team', 'manual'),
 ]
-
-latex_elements['babel'] = ''

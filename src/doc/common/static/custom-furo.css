@@ -74,3 +74,9 @@ body[data-theme="dark"] {
   }
 }
 
+/* Style for Persian (Farsi) */
+
+:lang(fa) h1, h2, h3, h4, h5, h6, p, a, ul, ol, li {
+    direction: rtl;
+}
+
