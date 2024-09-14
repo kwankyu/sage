@@ -175,6 +175,9 @@ jobs:
           export MAKE="make -j5 --output-sync=recurse" SAGE_NUM_THREADS=5
           make doc-clean doc-uninstall
           export SAGE_USE_CDNS=yes
+          if [ -f "src/doc/en/installation/linux.rst" ]; then
+              exit 1
+          fi
           ./config.status && make sagemath_doc_html-no-deps
         shell: sh .ci/docker-exec-script.sh BUILD /sage {0}
 
