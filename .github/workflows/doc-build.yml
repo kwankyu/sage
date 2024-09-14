@@ -116,7 +116,7 @@ jobs:
         # Try to continue when "exporting to GitHub Actions Cache" failed with timeout
         if: (success() || failure())
         run: |
-          if [ -f "src/doc/en/installation/linux.rst" ]; then
+          if [ -f "sage/src/doc/en/installation/linux.rst" ]; then
               exit 1
           fi
           docker run --name BUILD -dit \
