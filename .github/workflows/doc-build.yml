@@ -116,7 +116,7 @@ jobs:
         # Try to continue when "exporting to GitHub Actions Cache" failed with timeout
         if: (success() || failure())
         run: |
-          if [ -f "sage/src/doc/en/installation/linux.rst" ]; then
+          if [ -f "/sage/src/doc/en/installation/linux.rst" ]; then
               exit 1
           fi
           docker run --name BUILD -dit \
@@ -143,7 +143,7 @@ jobs:
               PR_NUMBER="${BASH_REMATCH[1]}"
             fi
           fi
-          if [ -f "src/doc/en/installation/linux.rst" ]; then
+          if [ -f "/sage/src/doc/en/installation/linux.rst" ]; then
               exit 1
           fi
           # If so, then prepare to create CHANGES.html
@@ -169,7 +169,7 @@ jobs:
              (echo ".buildinfo"; echo '*.inv'; echo '.git*'; echo '*.svg'; echo '*.pdf'; echo '*.png'; echo 'searchindex.js') > .gitignore; \
              git add -A && git commit --quiet -m 'old')
           fi
-          if [ -f "src/doc/en/installation/linux.rst" ]; then
+          if [ -f "/sage/src/doc/en/installation/linux.rst" ]; then
               exit 1
           fi
 
