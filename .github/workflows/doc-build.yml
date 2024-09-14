@@ -116,6 +116,9 @@ jobs:
         # Try to continue when "exporting to GitHub Actions Cache" failed with timeout
         if: (success() || failure())
         run: |
+          if [ -f "sage/src/doc/en/installation/linux.rst" ]; then
+              exit 1
+          fi
           docker run --name BUILD -dit \
                      --mount type=bind,src=$(pwd),dst=$(pwd) \
                      --workdir $(pwd) \
@@ -140,6 +143,9 @@ jobs:
               PR_NUMBER="${BASH_REMATCH[1]}"
             fi
           fi
+          if [ -f "src/doc/en/installation/linux.rst" ]; then
+              exit 1
+          fi
           # If so, then prepare to create CHANGES.html
           if [[ -n "$PR_NUMBER" ]]; then
             # mathjax path in old doc (regex)
@@ -163,6 +169,9 @@ jobs:
              (echo ".buildinfo"; echo '*.inv'; echo '.git*'; echo '*.svg'; echo '*.pdf'; echo '*.png'; echo 'searchindex.js') > .gitignore; \
              git add -A && git commit --quiet -m 'old')
           fi
+          if [ -f "src/doc/en/installation/linux.rst" ]; then
+              exit 1
+          fi
 
       - name: Build doc
         id: docbuild
@@ -170,11 +179,17 @@ jobs:
         # Always non-incremental because of the concern that
         # incremental docbuild may introduce broken links (inter-file references) though build succeeds
         run: |
+          if [ -f "src/doc/en/installation/linux.rst" ]; then
+              exit 1
+          fi
           export GITHUB_REF=${{ github.ref }}
           export PR_SHA=${{ github.event.pull_request.head.sha }}
           export MAKE="make -j5 --output-sync=recurse" SAGE_NUM_THREADS=5
           make doc-clean doc-uninstall
           export SAGE_USE_CDNS=yes
+          if [ -f "src/doc/en/installation/linux.rst" ]; then
+              exit 1
+          fi
           ./config.status && make sagemath_doc_html-no-deps
         shell: sh .ci/docker-exec-script.sh BUILD /sage {0}
 
