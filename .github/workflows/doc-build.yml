@@ -116,10 +116,17 @@ jobs:
         # Try to continue when "exporting to GitHub Actions Cache" failed with timeout
         if: (success() || failure())
         run: |
+          pwd
+          if [ -f "sage/src/doc/en/installation/linux.rst" ]; then
+              exit 1
+          fi
           docker run --name BUILD -dit \
                      --mount type=bind,src=$(pwd),dst=$(pwd) \
                      --workdir $(pwd) \
                      ${{ env.BUILD_IMAGE }} /bin/sh
+          if [ -f "src/doc/en/installation/linux.rst" ]; then
+              exit 1
+          fi
 
       #
       # On PRs and pushes to develop
