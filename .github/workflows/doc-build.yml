@@ -212,6 +212,7 @@ jobs:
           # Remove previous doc build
           rm -rf builddir/src/doc
           meson compile -C builddir doc-html -j1
+          meson compile -C builddir doc-pdf
         env:
           SAGE_USE_CDNS: yes
           SAGE_LIVE_DOC: yes
@@ -223,6 +224,7 @@ jobs:
           mkdir -p ./livedoc
           # We copy everything to a local folder
           cp -r builddir/src/doc/html livedoc/
+          cp -r builddir/src/doc/pdf livedoc/
           cp builddir/src/doc/index.html livedoc/
           zip -r livedoc.zip livedoc
 
