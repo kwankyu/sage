@@ -209,9 +209,15 @@ jobs:
         if: github.event_name != 'pull_request'
         shell: bash -l {0}
         run: |
-          # Remove previous doc build
-          rm -rf builddir/src/doc
-          meson compile -C builddir doc-html -j1
+          # Avoid running out of disk space
+          rm -rf upstream
+          export MAKE="make -j5 --output-sync=recurse" SAGE_NUM_THREADS=5
+          export PATH="build/bin:$PATH"
+          eval $(sage-print-system-package-command auto update)
+          eval $(sage-print-system-package-command auto --yes --no-install-recommends install zip)
+          eval $(sage-print-system-package-command auto --spkg --yes --no-install-recommends install git texlive texlive_luatex free_fonts xindy)
+          make doc-clean doc-uninstall
+          ./config.status && make sagemath_doc_html-no-deps sagemath_doc_pdf-no-deps
         env:
           SAGE_USE_CDNS: yes
           SAGE_LIVE_DOC: yes
@@ -222,8 +228,9 @@ jobs:
         run: |
           mkdir -p ./livedoc
           # We copy everything to a local folder
-          cp -r builddir/src/doc/html livedoc/
-          cp builddir/src/doc/index.html livedoc/
+          cp -R local/share/doc/sage/html livedoc
+          cp -R local/share/doc/sage/pdf livedoc
+          cp local/share/doc/sage/index.html livedoc
           zip -r livedoc.zip livedoc
 
       - name: Upload live doc
