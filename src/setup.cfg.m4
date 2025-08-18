@@ -82,6 +82,7 @@ scripts =
     bin/sage-notebook
     bin/sage-num-threads.py
     bin/sage-preparse
+    bin/sage-python
     bin/sage-run
     bin/sage-run-cython
     bin/sage-startuptime.py
