@@ -4,14 +4,6 @@ on:
   pull_request:
   merge_group:
   push:
-    tags:
-      # Match all release tags including beta, rc
-      - '[0-9]+.[0-9]+'
-      - '[0-9]+.[0-9]+.[0-9]+'
-      - '[0-9]+.[0-9]+.beta[0-9]+'
-      - '[0-9]+.[0-9]+.[0-9]+.beta[0-9]+'
-      - '[0-9]+.[0-9]+.rc[0-9]+'
-      - '[0-9]+.[0-9]+.[0-9]+.rc[0-9]+'
     branches:
       - develop
   workflow_dispatch:
@@ -93,32 +85,3 @@ jobs:
         with:
           name: doc-pdf
           path: doc-pdf.zip
-
-      #
-      # On release events
-      #
-
-      - name: Build live doc
-        if: github.event_name == 'push' && github.ref_type == 'tag'
-        run: |
-          meson compile -C builddir doc-html
-        env:
-          SAGE_USE_CDNS: yes
-          SAGE_LIVE_DOC: yes
-          SAGE_JUPYTER_SERVER: "binder:sagemath/sage-binder-env/dev"
-
-      - name: Copy live doc
-        if: github.event_name == 'push' && github.ref_type == 'tag'
-        run: |
-          # Reuse doc created previously, which contains pdfs
-          mv doc livedoc
-          # We copy everything to a local folder
-          cp -rL builddir/src/doc/* livedoc/
-          zip -r livedoc.zip livedoc
-
-      - name: Upload live doc
-        if: github.event_name == 'push' && github.ref_type == 'tag'
-        uses: actions/upload-artifact@v4
-        with:
-          name: livedoc
-          path: livedoc.zip
