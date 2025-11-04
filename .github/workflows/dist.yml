@@ -157,7 +157,7 @@ jobs:
           files: |
             dist/*
             upstream/*
-          token: ${{ secrets.RELEASE_CREATION_TOKEN }}
+          token: ${{ secrets.RELEASE_CREATION_TOKEN_TEST }}
           body_path: release_notes
           prerelease: ${{ contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') }}
 
