@@ -88,14 +88,13 @@ no_processing = [
   'logic',
   'manifolds',
   'parallel',
-  'repl',
   'sandpiles',
   'tensor',
   'topology',
   'typeset',
 ]
 foreach package : no_processing
-  install_subdir(package, install_dir: sage_install_dir, exclude_files: ['meson.build'])
+  install_subdir(package, install_dir: sage_install_dir)
 endforeach
 
 py.install_sources(
@@ -153,7 +152,7 @@ subdir('sat')
 # meson-python maps 'datadir' currently the python prefix, see
 # https://github.com/mesonbuild/meson-python/issues/517
 kernel_dir = get_option('datadir') / 'share/jupyter/kernels/sagemath'
-subdir('repl/ipython_kernel/kernel_spec')
+subdir('repl')
 
 # Record what build-time features (e.g. external package support) were
 # enabled or disabled, and whether or not we should defer detection to

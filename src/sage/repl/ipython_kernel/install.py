@@ -209,10 +209,11 @@ class SageKernelSpec:
         """
         path = os.path.join(os.path.dirname(__file__), 'kernel_spec')
         for filename in os.listdir(path):
-            self.symlink(
-                os.path.join(path, filename),
-                os.path.join(self.kernel_dir, filename)
-            )
+            if filename.startswith('logo'):
+                self.symlink(
+                    os.path.join(path, filename),
+                    os.path.join(self.kernel_dir, filename)
+                )
         self.symlink(
             SAGE_DOC,
             os.path.join(self.kernel_dir, 'doc')

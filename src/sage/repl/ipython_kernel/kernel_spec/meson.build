@@ -24,3 +24,9 @@ configure_file(
   install_dir: kernel_dir,
   install: true,
 )
+
+install_data(
+  'logo.svg',
+  'logo-64x64.png',
+  install_dir: sage_install_dir / 'repl/ipython_kernel/kernel_spec',
+)
